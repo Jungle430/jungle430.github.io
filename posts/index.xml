@@ -4,7 +4,354 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 22 Feb 2023 15:23:14 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>《C&#43;&#43; Primer》 字符串，向量和数组</title>
+    <link>https://Jungle430.github.io/posts/cpp-primer/chapter3/</link>
+    <pubDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cpp-primer/chapter3/</guid>
+    <description><![CDATA[<h1 id="c-primer">C++ Primer</h1>
+<h2 id="字符串向量和数组">字符串，向量和数组</h2>
+<h3 id="标准库类型string">标准库类型string</h3>
+<ul>
+<li>标准库类型<code>string</code>表示可变长的字符序列，使用<code>string</code>类型必须先包含头文件，<code>string</code>定义在命名空间<code>std</code>中</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">using</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>定义和初始化<code>string</code>对象</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">初始化string对象的方式</td>
+	</tr>
+	<tr>
+		<td>string s1</td>
+		<td>默认初始化，s1是一个空串</td>
+	</tr>
+	<tr>
+		<td>string s2(s1)</td>
+        <td>s2是s1的副本</td>
+	</tr>
+	<tr>
+		<td>string s2 = s1</td>
+		<td>等价于s2(s1),s2是s1的副本</td>
+	</tr>
+	<tr>
+		<td>string s3("value")</td>
+		<td>s3是字面值"value"的副本，除了字面值最后的那个空字符外</td>
+	</tr>
+	<tr>
+		<td>string s3 = "value"</td>
+		<td>等价于s3("value"),s3是字面值"value"的副本
+	</tr>
+	<tr>
+		<td>string s4(n, 'c')</td>
+		<td>把s4初始化为由连续n个字符c组成的串</td>
+	</tr>
+</table>
+<ul>
+<li>
+<p>直接初始化和拷贝初始化</p>
+<ul>
+<li>使用等号(=) $\rightarrow$ <strong>拷贝初始化</strong>(copy initialization),编译器把等号右侧的初始值拷贝到新创建的对象中去</li>
+<li>不使用等号，执行的是<strong>直接初始化</strong>(direct initialization)</li>
+</ul>
+</li>
+<li>
+<p>如何使用</p>
+<ul>
+<li>初始化需要一个值：拷贝初始化和直接初始化都行</li>
+<li>初始化需要多个值
+<ul>
+<li>尽量用直接初始化</li>
+<li>拷贝初始化需要显式地创建一个（临时）对象来进行拷贝：<code>string s8 = string(10, 'c');</code>（可读性差，也没有任何补偿优势）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>string</code>对象上的操作</p>
+</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">string的操作</td>
+	</tr>
+	<tr>
+		<td>os << s</td>
+		<td>将s写到输出流os当中，返回os</td>
+	</tr>
+	<tr>
+		<td>is >> s</td>
+		<td>从is中读取字符串赋给s，字符串以空白分隔，返回is</td>
+	</tr>
+	<tr>
+		<td>getline(is, s)</td>
+		<td>从is中读取一行赋给s，返回is(换行符也被读了进来,但是不会存入读入的字符串中去)</td>
+	</tr>
+	<tr>
+		<td>s.empty()</td>
+		<td>s为空返回true，否则返回false</td>
+	</tr>
+	<tr>
+		<td>s.size()</td>
+		<td>返回s中字符的个数</td>
+	</tr>
+	<tr>
+		<td>s[n]</td>
+		<td>返回s中第n个字符的<b>引用</b></td>
+	</tr>
+    <tr>
+        <td>s1 + s2</td>
+        <td>返回s1和s2连接后的结果</td>
+    </tr>
+    <tr>
+        <td>s1 = s2</td>
+        <td>用s2的副本替代s1中原来的字符</td>
+    </tr>
+    <tr>
+    	<td>s1 == s2</td>
+        <td>如果s1个s2中所含的字符完全一样，则返回true,否则返回false</td>
+    </tr>
+    <tr>
+    	<td>s1 != s2</td>
+        <td>等性判断对字母的大小写敏感</td>
+    </tr>
+    <tr>
+        <td><, <=, >, >=</td>
+        <td>利用字典序进行比较，对字母大小写敏感</td>
+    </tr>
+</table>    
+<ul>
+<li>技巧:读取未知数量的string对象</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">word</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">word</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">word</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>原理：<u>CTRL+Z/读到文件末尾 -&gt; 引发异常 -&gt; 记录异常 -&gt; fail() 返回true-&gt; operator void*() 返回 0 -&gt; while结束</u>，参考文章:<a href="https://www.zhangjiee.com/blog/2013/deep-into-while-cin.html" target="_blank" rel="noopener noreffer">C++ 深入探究 while(cin)</a></p>
+<ul>
+<li>如果是按行读</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="n">stdLLcout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>string::size_type类型</p>
+<ul>
+<li>
+<p>string类的size函数返回的是是一个string::size_type类型的值，无符号类型，足以存放下任何<code>string</code>对象的大小</p>
+</li>
+<li>
+<p>string类以及其他大多数标准库类型都定义了几种配套的类型。<u>这些配套类型体现了标准库类型与机器无关的特性，类型<b>size_type</b>即是其中的一种</u>。标准库会根据运行的机器型号分配适当的类型，我们不需过多关心，如果要看类型在C++11以后可以借助<code>auto</code>和<code>decltype</code>来推断变量类型</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">len</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>由于string::size_type是一个无符号类型，所以我们在对字符串进行有关size的相关操作时，尽量避免int与unsigned混用，否则会由于反补码机制出现意想不到的一些bug，正确做法</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">line</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="k">decltype</span><span class="p">(</span><span class="n">str</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">str</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">............</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p>字典序相关比较机制</p>
+</li>
+</ul>
+<ol>
+<li>较短的string对象小于较长的string对象(前面的内容都完全相同)</li>
+<li>如果两个string对象在某些对应的位置上不一致，则string对象比较的结果其实是string对象中第一对相异字符比较的结果</li>
+</ol>
+<ul>
+<li>
+<p>字面值和string对象相加</p>
+<ul>
+<li>
+<p>通过重载+和+=运算符实现，使用时一定要注意返回值的问题，不要两边类型不匹配（例如两个字面值相加）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s3</span> <span class="o">=</span> <span class="n">s1</span> <span class="o">+</span> <span class="s">&#34;, &#34;</span> <span class="o">+</span> <span class="n">s2</span> <span class="o">+</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>防止上述问题：<b>必须确保每个加法运算符(+)的两侧运算对象至少有一个是string</b></p>
+</li>
+</ul>
+</li>
+<li>
+<p>处理string对象中的字符</p>
+<ul>
+<li>主要利用到了头文件<code>&lt;cctype&gt;</code></li>
+</ul>
+</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">&ltccytpe&gt中的常用函数</td>
+	</tr>
+    <tr>
+        <td>isdigit(c)</td>
+        <td>当c是数字的时候为真</td>
+    </tr>
+    <tr>
+        <td>islower(c)</td>
+        <td>c是小写字母的时候为真</td>
+    </tr>
+    <tr>
+        <td>isupper(c)</td>
+        <td>c是大写字母的时候为真</td>
+    </tr>
+    <tr>
+        <td>isspace(c)</td>
+        <td>c是空格的时候为真</td>
+    </tr>
+    <tr>
+        <td>tolower(c)</td>
+        <td>如果c是大写字母，则输出对应的小写字母，否则原样输出c</td>
+    </tr>
+    <tr>
+        <td>toupper(c)</td>
+        <td>如果c是小写字母，则输出对应的大写字母，否则原样输出c</td>
+    </tr>
+</table> 
+<blockquote>
+<p>为了向后兼容C，C++保留了C的标准库，但是为了更好地符合C++的要求，C++自己又开发出了一套新的标准库，去掉C库中的.h,前面加上c，即&lt;name.h&gt; $\rightarrow$ <cname>，上面<cctype>就是由C中的&lt;ctype.h&gt;衍生过来的，C++库中的函数为了防止与C标准库中的内容发生命名冲突，都在std命名空间中</p>
+</blockquote>
+<ul>
+<li>基于范围的for语句
+<ul>
+<li>C++11的新特性</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="nl">declaration</span> <span class="p">:</span> <span class="n">expression</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">statement</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//example    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">str</span><span class="p">(</span><span class="s">&#34;Some string&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">c</span> <span class="p">:</span> <span class="n">str</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>重载的下标运算符
+<ul>
+<li>operator[] -&gt; 接收输入是std::string::size_type类型的值，返回string对应位置字符的引用</li>
+<li>超出范围下标将引发不可预知的结果（内存非法越界访问或者访问到<code>nullptr</code> $\rightarrow$ 空字符串，C++为了性能并不会像Java那样在下标访问时进行检查，会有很大风险）</li>
+</ul>
+</li>
+</ul>
+<h3 id="标准库类型vector">标准库类型vector</h3>
+<ul>
+<li>
+<p>vector本质是一种变长数组</p>
+</li>
+<li>
+<p>vector也是一种容器(container)</p>
+</li>
+<li>
+<p>vector包含于头文件<vector>中，定义在std命名空间下</p>
+</li>
+<li>
+<p>vector是类模板，使用时必须声明其类型（其实在Modern C++中编译器也能自己推导一部分了），编译器根据模板创建类或函数函数的过程称为<b>实例化</b>(instantiation),由于C++的分离式编译，<b>自己写模板的时候一定要将声明与实现都写在.h里，不要将实现分离到.cpp中，否则会导致编译失败</b></p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-1.jpg" title="/img/C&#43;&#43; Primer/chapter3-1.jpg" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-1.jpg" data-sub-html="<h2>由于模板的声明与实现分离导致编译失败</h2>">
+        
+    </a><figcaption class="image-caption"><code>由于模板的声明与实现分离导致编译失败</code></figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-2.jpg" title="/img/C&#43;&#43; Primer/chapter3-2.jpg" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-2.jpg" data-sub-html="<h2>全部写入头文件后编译成功</h2>">
+        
+    </a><figcaption class="image-caption"><code>全部写入头文件后编译成功</code></figcaption>
+    </figure>
+<ul>
+<li>vector能容纳绝大多数类型的对象作为其元素，但是因为<u>引用不是对象，所以不存在包含引用的vector</u></li>
+</ul>
+<hr>
+<ul>
+<li>定义和初始化vector对象</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #01: Course Overview &amp; Relational Model</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/</link>
     <pubDate>Wed, 22 Feb 2023 15:23:14 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/</guid>
@@ -634,7 +981,7 @@ $$</p>
 </ul>
 <h4 id="observation">OBSERVATION</h4>
 <blockquote>
-<p>Relational algebra is a procedural language because it defines the high level-steps of how to compute a query. For example, $\sigma_{b_id=102}(R\bowtie S)$ is saying to first do the join of R and S and then do the select,whereas $(R \bowtie (\sigma_{b_id=102}(S)))$ will do the select on S first, and then do the join. These two statements will actually produce the same answer, but if there is only 1 tuple in S with b_id=102 out of a billion tuples, then$(R \bowtie (\sigma_{b_id=102}(S)))$ will be significantly faster than $\sigma_{b_id=102}(R\bowtie S)\newline$😂</p>
+<p>Relational algebra is a procedural language because it defines the high level-steps of how to compute a query. For example, $\sigma_{b_id=102}(R\bowtie S)$ is saying to first do the join of R and S and then do the select,whereas $(R \bowtie (\sigma_{b_id=102}(S)))$ will do the select on S first, and then do the join. These two statements will actually produce the same answer, but if there is only 1 tuple in S with b_id=102 out of a billion tuples, then$(R \bowtie (\sigma_{b_id=102}(S)))$ will be significantly faster than $\sigma_{b_id=102}(R\bowtie S)$😂</p>
 </blockquote>
 <blockquote>
 <p>A better approach is to say the result you want (state $\rightarrow$<u>retrieve the joined tuples from R and S where b_id equals 102</u>), and let the DBMS decide the steps it wants to take to compute the query. SQL will do exactly this,and it is the de facto standard for writing queries on relational model databases🐮</p>
@@ -11476,1304 +11823,6 @@ Normalize\ result \rightarrow result=1.100011 \times 2^8\newline
 Round \rightarrow 1.100011 \times 2^8\approx 1.100 \times 2^8\newline
 \end{gather}
 $$</p>
-]]></description>
-</item>
-<item>
-    <title>Computer Organization and Architecture Operating System</title>
-    <link>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/</link>
-    <pubDate>Sun, 22 Jan 2023 17:47:46 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/</guid>
-    <description><![CDATA[<h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
-<h2 id="operating-system-support">Operating System Support</h2>
-<h3 id="outline">Outline</h3>
-<ul>
-<li>
-<p>Operating System Overview</p>
-</li>
-<li>
-<p>Scheduling</p>
-</li>
-<li>
-<p>Memory Management</p>
-</li>
-</ul>
-<h3 id="operating-system-overview">Operating System Overview</h3>
-<ul>
-<li>什么是操作系统</li>
-</ul>
-<blockquote>
-<p>操作系统是一组主管并控制计算机操作、运用和运行硬件、软件资源和提供公共服务来组织用户交互的相互关联的系统软件程序。根据运行的环境，操作系统可以分为桌面操作系统，手机操作系统，服务器操作系统，嵌入式操作系统等</p>
-</blockquote>
-<ul>
-<li>有哪些常用的操作系统
-<ul>
-<li>DOS</li>
-<li>windows</li>
-<li>UNIX</li>
-<li>Linux</li>
-<li>OS/2</li>
-<li>IOS,Android</li>
-<li>Mac OS</li>
-</ul>
-</li>
-</ul>
-<h4 id="operating-system-objectives-and-functions">Operating System Objectives and Functions</h4>
-<ul>
-<li>
-<p><strong>Operating system, or OS for short, is a computer program that manages computer hardware and software resources</strong></p>
-</li>
-<li>
-<p>The operating system deals with such basic matters as</p>
-<ul>
-<li>
-<p><strong>managing and configuring memory</strong></p>
-</li>
-<li>
-<p><strong>determining the priority of system resource supply and demand</strong></p>
-</li>
-<li>
-<p><strong>controlling input devices and output devices</strong></p>
-</li>
-<li>
-<p><strong>operating networks and managing file systems</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>The operating system also provides an operation interface for users to interact with the system</strong></p>
-</li>
-</ul>
-<h5 id="objectives-and-functions">Objectives and Functions</h5>
-<ul>
-<li>
-<p>A system program developed to improve resource utilization and enhance computer system performance</p>
-</li>
-<li>
-<p>Convenience</p>
-<ul>
-<li>
-<p>Shields the details of computer hardware</p>
-</li>
-<li>
-<p>Provides convenient interfaces for users</p>
-</li>
-<li>
-<p>Making the computer easier to use</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Efficiency</p>
-<ul>
-<li>
-<p>Process scheduling</p>
-</li>
-<li>
-<p>Memory management</p>
-</li>
-<li>
-<p>Fully exploit the power of computer</p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="characteristic">Characteristic</h5>
-<ul>
-<li>
-<p>The most fundamental system program is the operating system</p>
-<ul>
-<li>
-<p>Provides an interface between the user and the computer</p>
-</li>
-<li>
-<p>Manages the computer resources</p>
-</li>
-<li>
-<p>Provides an environment for the application program execution</p>
-</li>
-<li>
-<p>Improves the efficiency and stability of program execution</p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="layers-of-a-computer-system">Layers of a Computer System</h5>
-<ul>
-<li>
-<p>系统软件是指控制和协调计算机及外部设备,支持应用软件开发和运行的系统，主要功能是调度，监控和维护计算机系统</p>
-</li>
-<li>
-<p>系统软件包括操作系统和一系列基本的工具，比如编译器，数据库管理，存储器格式化，文件系统管理等，支持计算机系统正常运行并实现用户操作</p>
-</li>
-<li>
-<p>操作系统是最重要的系统软件，位于硬件和工具之间</p>
-</li>
-<li>
-<p>使得上层方便地访问和使用计算机系统提供的资源和服务</p>
-</li>
-</ul>
-<h5 id="operating-system-services">Operating system services</h5>
-<ul>
-<li>
-<p>Program creation</p>
-</li>
-<li>
-<p>Program execution</p>
-</li>
-<li>
-<p>Access to I/O devices</p>
-</li>
-<li>
-<p>Controlled access to files</p>
-</li>
-<li>
-<p>System access</p>
-</li>
-<li>
-<p>Error detection and response</p>
-</li>
-<li>
-<p>Accounting</p>
-</li>
-</ul>
-<h5 id="os-as-a-resource-management">OS as a resource management</h5>
-<ul>
-<li>
-<p>操作系统是一个计算机程序，执行也是由处理器来进行，通过给处理器提供一系列指令，来执行操作系统程序</p>
-</li>
-<li>
-<p><strong>操作系统不能一直占用了处理器，而是需要放弃对处理器的控制，让处理器去执行应用程序</strong>。之后，它再次获得控制权，为下一个应用程序的执行进行准备(System Call)</p>
-</li>
-<li>
-<p><strong>操作系统有一部分驻留在内存中，称为操作系统内核</strong></p>
-</li>
-<li>
-<p>操作系统还要对I/O的使用进行分配</p>
-</li>
-</ul>
-<h4 id="types-of-operating-systems">Types of Operating Systems</h4>
-<p><strong>Operating system support batch processing or not?</strong></p>
-<ul>
-<li>
-<p>Interactive</p>
-<ul>
-<li>
-<p>User usually interacts with the computer by keyboard or display</p>
-</li>
-<li>
-<p>Request to execute jobs or process transactions</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Batch</p>
-<ul>
-<li>
-<p>Multiple user programs are packaged and submits to the computer in batches for processing</p>
-</li>
-<li>
-<p>After processing, print the results</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Support multiple programs or not?</strong></p>
-<ul>
-<li>
-<p>Single program (<code>Uni</code>-programming)</p>
-<ul>
-<li>Processor can only process one program at a time</li>
-</ul>
-</li>
-<li>
-<p>Multi-programming (Multi-tasking)</p>
-<ul>
-<li>
-<p>Processor can process multiple programs at one time</p>
-</li>
-<li>
-<p>Multiple programs loaded into memory at the same time</p>
-</li>
-<li>
-<p>processor switches between programs and processes</p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="memory-layout-for-resident-monitor">Memory layout for resident monitor</h5>
-<ul>
-<li>
-<p>多程序批量处理系统中，内存划分为监控程序和用户程序两个区域</p>
-<ul>
-<li>
-<p>监控程序包括：中断处理，设备驱动程序，作业排序，控制语言解释器</p>
-</li>
-<li>
-<p>通过监控程序，实现了作业的调度</p>
-</li>
-</ul>
-</li>
-<li>
-<p>用户程序提交之后，就可以按照顺序处理，不会浪费处理器</p>
-</li>
-</ul>
-<h5 id="required-hardware-support">Required hardware support</h5>
-<ul>
-<li>
-<p>Memory protection</p>
-<ul>
-<li>To protect the Monitor</li>
-</ul>
-</li>
-<li>
-<p>Timer</p>
-<ul>
-<li>To prevent a job monopolizing the system</li>
-</ul>
-</li>
-<li>
-<p>Privileged instructions</p>
-<ul>
-<li>Only executed by Monitor</li>
-<li>e.g. I/O</li>
-</ul>
-</li>
-<li>
-<p>Interrupts</p>
-<ul>
-<li>Allows operation system for relinquishing and regaining control</li>
-</ul>
-</li>
-</ul>
-<h5 id="multi-programmed-batch-system">Multi-programmed batch system</h5>
-<ul>
-<li>
-<p>Batch system performs monitoring and user programs <strong>in turn</strong>, which improves the utilization of the whole system</p>
-</li>
-<li>
-<p>I/O devices very slow</p>
-</li>
-<li>
-<p>Processors are also often idle</p>
-</li>
-<li>
-<p><strong>Multi-programmed batch systems</strong></p>
-<ul>
-<li>
-<p><strong>Memory load multiple user programs</strong></p>
-</li>
-<li>
-<p><strong>When one program is waiting for I/O, another can use the CPU</strong></p>
-</li>
-<li>
-<p><strong>CPU keeps working</strong></p>
-</li>
-<li>
-<p><strong>Core idea of modern operation system</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<p><strong>Single program</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png" title="/img/Computer Organization and Architecture/chapter8-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-1.png">
-        
-    </a>
-<p><strong>Multi-Programming with two programs</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-2.png" title="/img/Computer Organization and Architecture/chapter8-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-2.png">
-        
-    </a>
-<p><strong>Multi-Programming with three programs</strong></p>
-<ul>
-<li>
-<p>同时有三个程序处于执行状态</p>
-</li>
-<li>
-<p>CPU等待状态的时间更少</p>
-</li>
-<li>
-<p>CPU效率更高</p>
-</li>
-</ul>
-<p><strong>Utilization</strong></p>
-<ul>
-<li>
-<p>单个程序逐个执行，总共需要30个时间单位</p>
-</li>
-<li>
-<p>多道程序同时执行，只需要15个时间单位</p>
-</li>
-<li>
-<p>节省了一半时间</p>
-</li>
-</ul>
-<h5 id="time-sharing-systems">Time sharing systems</h5>
-<ul>
-<li>
-<p><strong>Multi-programmed batch system</strong></p>
-<ul>
-<li>
-<p><strong>Improve the efficiency of system operation</strong></p>
-</li>
-<li>
-<p><strong>Disadvantage is that the response to users is not timely</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>For multiple interactive job scenarios, a time-sharing system is proposed</strong></p>
-<ul>
-<li>
-<p><strong>Multiple users to share processor time and interact with the processor</strong></p>
-</li>
-<li>
-<p><strong>Operating system responds to each user&rsquo;s request in time slices computer</strong></p>
-</li>
-<li>
-<p><strong>For each user, he thinks the processor only serves him</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="scheduling">Scheduling</h3>
-<ul>
-<li>
-<p><strong>Key to multi-programming</strong></p>
-</li>
-<li>
-<p><strong>Determines the efficiency of multiprogramming</strong></p>
-</li>
-<li>
-<p>Includes long term, medium term, short term</p>
-<ul>
-<li>
-<p><strong>Long term: determines the number of processes added to the pending process pool</strong></p>
-</li>
-<li>
-<p><strong>Medium term: determines the number of processes added to main memory</strong></p>
-</li>
-<li>
-<p><strong>Short term: decide which process the processor will execute</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="five-state-process-model">Five state process model</h4>
-<div class="mermaid" id="id-1"></div>
-<ul>
-<li>
-<p>新建状态：调度程序提交一个程序，操作系统为这个程序创建一个进程，并将进程移入就绪状态</p>
-</li>
-<li>
-<p>就绪状态：进程已经准备就绪，等待处理器的执行</p>
-</li>
-<li>
-<p>运行状态：进程正在由处理器执行</p>
-</li>
-<li>
-<p>等待状态：进程在等待资源，处于挂起状态</p>
-</li>
-<li>
-<p>终止状态：进程运行结束</p>
-</li>
-</ul>
-<h4 id="what-is-process---">What is process? ! ! !</h4>
-<ul>
-<li>
-<p><strong>A program in execution</strong></p>
-<ul>
-<li>
-<p><strong>An instance of a program running on a computer</strong></p>
-</li>
-<li>
-<p><strong>The entity that can be assigned to and executed on a processor</strong></p>
-</li>
-<li>
-<p><strong>A unit of activity characterized by the execution of a sequence of instructions, a current state, and an associated set of system instructions</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="process-elements">Process elements</h4>
-<ul>
-<li>
-<p>A process is comprised of</p>
-<ul>
-<li>
-<p><strong>Program code (possibly shared)</strong></p>
-</li>
-<li>
-<p><strong>A set of data</strong></p>
-</li>
-<li>
-<p><strong>A number of attributes describing the state of the process</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Process elements</p>
-<ul>
-<li>
-<p><strong>Identifier</strong></p>
-</li>
-<li>
-<p><strong>State</strong></p>
-</li>
-<li>
-<p><strong>Priority</strong></p>
-</li>
-<li>
-<p><strong>Program counter</strong></p>
-</li>
-<li>
-<p><strong>Memory pointers</strong></p>
-</li>
-<li>
-<p><strong>Context data</strong></p>
-</li>
-<li>
-<p><strong>I/O status information</strong></p>
-</li>
-<li>
-<p><strong>Accounting information</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="process-control-block">Process control block</h4>
-<ul>
-<li>
-<p><strong>Contains the process elements</strong></p>
-</li>
-<li>
-<p><strong>Created and manage by the operating system</strong></p>
-</li>
-<li>
-<p><strong>Allows support for multiple processes</strong></p>
-</li>
-</ul>
-<div class="mermaid" id="id-2"></div>
-<h4 id="trace-of-the-process">Trace of the process</h4>
-<ul>
-<li>
-<p>The behavior of an individual process is shown by listing the sequence of instructions that are executed</p>
-<ul>
-<li><strong>This list is called a Trace</strong></li>
-</ul>
-</li>
-<li>
-<p>Processor needs to execute multiple processes one by one</p>
-<ul>
-<li>
-<p><strong>Dispatcher is responsible for scheduling the process</strong></p>
-</li>
-<li>
-<p><strong>Dispatcher is a small program which switches the processor from one process to another</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-3.png" title="/img/Computer Organization and Architecture/chapter8-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-3.png" data-sub-html="<h2>trace</h2>">
-        
-    </a><figcaption class="image-caption"><code>trace</code></figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-4.png" title="/img/Computer Organization and Architecture/chapter8-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-4.png" data-sub-html="<h2>trace</h2>">
-        
-    </a><figcaption class="image-caption"><code>trace</code></figcaption>
-    </figure>
-<h4 id="virtual-memory">Virtual memory</h4>
-<ul>
-<li>
-<p>虚拟存储器是内存管理的一种技术，允许程序从逻辑的角度对内存进行寻址，而不考虑物理上可用的内存空间</p>
-</li>
-<li>
-<p><strong>本质上是一种内存扩充技术，不会使内存的物理空间大小发生改变，但是能够使程序访问内存的方式更灵活</strong></p>
-</li>
-<li>
-<p><strong>由于虚拟内存的存在，所以程序中可以只将其中的一部分加载到物理内存中。只有当需要的程序段不在内存中的时候，才通过换页的方式将它加载到内存中</strong></p>
-</li>
-</ul>
-<h4 id="execution-of-a-process">Execution of a process</h4>
-<ul>
-<li>
-<p><strong>Entire program does not need to be loaded to memory</strong></p>
-<ul>
-<li>
-<p><strong>Operating system brings into main memory a few pieces of the program</strong></p>
-</li>
-<li>
-<p><strong>Resident set - portion of process that is in main memory</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>An interrupt is generated when an address is needed that is not in main memory</strong></p>
-<ul>
-<li><strong>Operating system places the process in a blocking state</strong></li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Piece of process that contains the logical address is brought into main memory</strong></p>
-<ul>
-<li>
-<p><strong>Operating system issues a disk I/O Read request</strong></p>
-</li>
-<li>
-<p><strong>Another process is dispatched to run while the disk I/O takes place</strong></p>
-</li>
-<li>
-<p><strong>An interrupt is issued when disk I/O complete which causes the operating system to place the affected process in the Ready state</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="implications-of-this-new-strategy">Implications of this new strategy</h4>
-<ul>
-<li>
-<p>More processes may be maintained in main memory</p>
-<ul>
-<li>
-<p>Only load in some of the pieces of each process</p>
-</li>
-<li>
-<p>With so many processes in main memory, it is very likely a process will be in the Ready state at any particular time</p>
-</li>
-</ul>
-</li>
-<li>
-<p>A process may be larger than all of main memory</p>
-</li>
-</ul>
-<h4 id="wording-mode-of-os">Wording mode of OS</h4>
-<ul>
-<li>
-<p><strong>操作系统中维护一个长期队列和一个短期队列</strong></p>
-</li>
-<li>
-<p><strong>长期队列是等待系统资源的作业列表，短期队列包含所有就绪状态的进程</strong></p>
-</li>
-<li>
-<p><strong>中断发生时，操作系统接管处理器的控制权，执行中断处理程序</strong></p>
-</li>
-<li>
-<p><strong>进程调用服务时，操作系统执行服务调用处理程序</strong></p>
-</li>
-<li>
-<p><strong>中断或服务调用程序处理完成后，短期调度会调度某个进程进入到运行状态</strong></p>
-</li>
-<li>
-<p><strong>每个I/O设备有一个I/O队列</strong></p>
-</li>
-</ul>
-<h5 id="process-scheduling---">Process scheduling ！ ！ ！</h5>
-<ul>
-<li>
-<p><strong>进程请求进入长期队列</strong></p>
-</li>
-<li>
-<p><strong>进程的请求满足后，进程进入就绪状态并进入短期队列</strong></p>
-</li>
-<li>
-<p><strong>如果进程请求I/O，则进入I/O队列</strong></p>
-</li>
-<li>
-<p><strong>I/O完成后，继续进入短期队列，完成进程的执行</strong></p>
-</li>
-</ul>
-<h3 id="memory-management">Memory Management</h3>
-<ul>
-<li>
-<p><strong><code>Uni</code>-program</strong></p>
-<ul>
-<li>
-<p><strong>Memory split into two</strong></p>
-</li>
-<li>
-<p><strong>One for Operating System (monitor)</strong></p>
-</li>
-<li>
-<p><strong>One for currently executing program</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong><code>Multi</code>-program</strong></p>
-<ul>
-<li><strong>“User” part is sub-divided and shared among active processes</strong></li>
-</ul>
-</li>
-<li>
-<p>Memory management</p>
-<ul>
-<li>
-<p>Make full use of the memory space</p>
-</li>
-<li>
-<p>keep the CPU busy</p>
-</li>
-<li>
-<p>avoid idle CPU due to IO waiting</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="methods-of-memory-management">Methods of memory management</h4>
-<ul>
-<li>
-<p>Swapping</p>
-</li>
-<li>
-<p>Partitioning</p>
-</li>
-<li>
-<p>Paging</p>
-</li>
-<li>
-<p>Virtual Memory</p>
-</li>
-<li>
-<p>Translation Lookaside Buffer</p>
-</li>
-<li>
-<p>Segmentation</p>
-</li>
-</ul>
-<h5 id="swapping">Swapping</h5>
-<ul>
-<li>
-<p>Problem</p>
-<ul>
-<li>
-<p><strong>I/O is so slow compared with CPU</strong></p>
-</li>
-<li>
-<p>Even in multi-programming system，CPU is idle most of the time</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Solutions</p>
-<ul>
-<li>
-<p>Increase main memory，more process in memory</p>
-<ul>
-<li>
-<p>Expensive</p>
-</li>
-<li>
-<p>Leads to larger programs</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Swapping</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<p><strong>What is swapping?</strong></p>
-<ul>
-<li>
-<p>Long term queue of processes stored on disk</p>
-<ul>
-<li>
-<p>Processes “swapped” in as space becomes available</p>
-</li>
-<li>
-<p>As a process completes it is moved out of main memory</p>
-</li>
-</ul>
-</li>
-<li>
-<p>If none of the processes in memory are ready (i.e. all I/O blocked)</p>
-<ul>
-<li>
-<p>Swap out a blocked process to intermediate queue</p>
-</li>
-<li>
-<p>Swap in a ready process or a new process</p>
-</li>
-<li>
-<p><strong>Swapping is an I/O process</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<p><strong>Use of swapping</strong></p>
-<ul>
-<li>
-<p><strong>简单的进程调度中，磁盘维护一个长周期队列。当内存中有作业完成了，会将它从内存中去掉，同时将长周期队列中的一个作业放到内存中</strong></p>
-</li>
-<li>
-<p><strong>交换调度中，磁盘中维护了一个中间队列。阻塞进程将会被“交换”到中间队列中，并从中间队列中调入一个已经就绪的进程。如果中间队列没有就绪的进程，就从长期队列中调度一个新的进程到内存中</strong></p>
-</li>
-<li>
-<p><strong>通过中间队列，可以在进程均处于阻塞的时候进行进程的有效调度，提高CPU效率</strong></p>
-</li>
-</ul>
-<h5 id="partitioning">Partitioning</h5>
-<ul>
-<li>
-<p>Swapping does not explain how memory is managed</p>
-</li>
-<li>
-<p><strong>Memory management mode</strong></p>
-<ul>
-<li>
-<p>Partitioning</p>
-</li>
-<li>
-<p>Paging</p>
-</li>
-<li>
-<p>Segmentation</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Partitioning: Splitting memory into sections to allocate to processes (including Operating System)</strong></p>
-</li>
-</ul>
-<p><strong>Fixed partitioning</strong></p>
-<ul>
-<li>
-<p><strong>分区大小固定，但不一定都是一样大</strong></p>
-</li>
-<li>
-<p>进程分配内存时，分配到<strong>能容纳它的最小分区</strong></p>
-</li>
-<li>
-<p><strong>存在内存浪费的现象</strong></p>
-</li>
-<li>
-<p>采取非固定大小分区可能会更好</p>
-</li>
-</ul>
-<h6 id="variable-sized-partitions">Variable sized partitions</h6>
-<ul>
-<li>
-<p>Allocate exactly the required memory to a process</p>
-</li>
-<li>
-<p>This leads to a hole at the end of memory, too small to use</p>
-<ul>
-<li>Only one small hole - less waste</li>
-</ul>
-</li>
-<li>
-<p><strong>When all processes are blocked, swap out a process and bring in another process，leads to another hole</strong></p>
-</li>
-<li>
-<p><strong>A process is completed and swapped out，new process is swapped in. May leads to a hole</strong></p>
-</li>
-<li>
-<p>Eventually have lots of holes (called fragmentation)</p>
-</li>
-<li>
-<p>Solutions</p>
-<ul>
-<li>
-<p><strong>Coalesce - Join adjacent holes into one large hole</strong></p>
-</li>
-<li>
-<p><strong>Compaction- From time to time go through memory and move all hole into one free block</strong> (like $\rightarrow$ <code>disk de-fragmentation</code>)</p>
-</li>
-</ul>
-</li>
-</ul>
-<h6 id="effect-of-dynamic-partitioning">Effect of Dynamic Partitioning</h6>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-5.png" title="/img/Computer Organization and Architecture/chapter8-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-5.png" data-sub-html="<h2>Dynamic Partitioning</h2>">
-        
-    </a><figcaption class="image-caption"><code>Dynamic Partitioning</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>分配进程1~3的时候，按需求分配，剩下$4M$的空间</p>
-</li>
-<li>
-<p>进程2交换出去了，进程4进来了。进程4只有$8M$，在进程4和进程3之间，形成了一个$6M$的空块</p>
-</li>
-<li>
-<p>进程1交换出去了，进程2进来。进程1有$20M$，进程2只有$14M$，在进程2和进程4之间，又形成了一个$6M$的空块</p>
-</li>
-<li>
-<p>有2个$6M$空块和1个$4M$空块</p>
-</li>
-</ul>
-<h6 id="problem-about-relocation">Problem about relocation</h6>
-<ul>
-<li>
-<p>No guarantee that process will load into the same place in memory</p>
-</li>
-<li>
-<p>Instructions contain addresses information</p>
-<ul>
-<li>
-<p>Locations of data</p>
-</li>
-<li>
-<p>Addresses for instructions (e.g. branching)</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>If a fixed address is used, memory address of process changes after the process is swapped out and then swapped in</strong></p>
-</li>
-<li>
-<p><strong>Data and instructions cannot be addressed</strong></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Using logical address and physical address</p>
-<ul>
-<li>
-<p>Logical address - relative to beginning of program</p>
-</li>
-<li>
-<p>Physical address - actual location in memory (this time)</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Starting unit address of the current process is set as the base address</p>
-</li>
-<li>
-<p>Addressing data and instructions using logical addresses in programs</p>
-</li>
-</ul>
-<h5 id="paging">Paging</h5>
-<ul>
-<li>
-<p>Partitioning will lead to waste of memory</p>
-</li>
-<li>
-<p><strong>Paging Management</strong></p>
-<ul>
-<li>
-<p><strong>Split memory into equal sized, small chunks -page frames</strong></p>
-</li>
-<li>
-<p><strong>Split programs (processes) into equal sized small chunks – pages</strong></p>
-</li>
-<li>
-<p><strong>Allocate the required number page frames to a process</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Operating System completes paging management</p>
-<ul>
-<li>
-<p><strong>A process does not require contiguous page frames</strong></p>
-</li>
-<li>
-<p><strong>Use page table to keep track</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Each process has its own page table</p>
-</li>
-<li>
-<p><strong>Each page table entry contains the frame number of the corresponding page in main memory</strong></p>
-</li>
-<li>
-<p><strong>Two extra bits are needed to indicate</strong></p>
-<ul>
-<li>
-<p><strong>whether the page is in main memory or not</strong></p>
-</li>
-<li>
-<p><strong>Whether the contents of the page has been altered since it was last loaded</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h6 id="paging-table">Paging table</h6>
-<ul>
-<li>
-<p><strong>寻址的虚拟地址为“页号+偏移量”</strong></p>
-</li>
-<li>
-<p>页表中指明了这个页对应的内存的帧序号</p>
-</li>
-<li>
-<p><strong>通过[页</strong>$\rightarrow$<strong>帧]的转换，以及页内的偏移量，就可以得到逻辑地址在内存中的实际地址</strong></p>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-6.png" title="/img/Computer Organization and Architecture/chapter8-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-6.png">
-        
-    </a>
-<h6 id="allocation-of-free-frames">Allocation of free frames</h6>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-7.png" title="/img/Computer Organization and Architecture/chapter8-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-7.png">
-        
-    </a>
-<ul>
-<li>
-<p>内存中帧13-15是空闲的，分配给了进程A地第1-3页</p>
-</li>
-<li>
-<p>帧16、17其他进程占用</p>
-</li>
-<li>
-<p>帧18分配给进程A的0页</p>
-</li>
-<li>
-<p><strong>分配帧的时候，既不要求是连续的，也不要求前后顺序</strong></p>
-</li>
-</ul>
-<h6 id="real-and-virtual-memory">Real and virtual memory</h6>
-<ul>
-<li>
-<p>On the basis of logical address, expand the memory, which leads to the concept of virtual memory</p>
-</li>
-<li>
-<p><strong>Real memory</strong></p>
-<ul>
-<li><strong>Main memory, the actual RAM</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>Virtual memory</strong></p>
-<ul>
-<li><strong>Memory on disk</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>Allows for effective multiprogramming and relieves the user of tight constraints of main memory</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Support deeded for virtual memory</strong></p>
-<ul>
-<li>
-<p><strong>Hardware must support paging and segmentation</strong></p>
-</li>
-<li>
-<p><strong>Operating system must be able to manage the movement of pages and/or segments between secondary memory and main memory</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Virtual memory</strong></p>
-<ul>
-<li>
-<p>Page load-demand paging</p>
-<ul>
-<li>
-<p>Do not require all pages of a process in memory</p>
-</li>
-<li>
-<p>Bring in pages as required</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Page fault</p>
-<ul>
-<li>
-<p>Required page is not in memory</p>
-</li>
-<li>
-<p>Operating System must swap in required page</p>
-</li>
-<li>
-<p>May need to swap out a page to make space</p>
-</li>
-<li>
-<p>Select page to throw out based on recent history</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Thrashing</strong></p>
-<ul>
-<li>
-<p>Too many processes in too little memory</p>
-</li>
-<li>
-<p><strong>Operating System spends all its time swapping</strong></p>
-</li>
-<li>
-<p>Little or no real work is done</p>
-</li>
-<li>
-<p>Disk light is on all the time</p>
-</li>
-<li>
-<p><strong>Solutions</strong></p>
-<ul>
-<li>
-<p><strong>Good page replacement algorithms</strong></p>
-</li>
-<li>
-<p><strong>Reduce number of processes running</strong></p>
-</li>
-<li>
-<p><strong>Fit more memory</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Advantage of virtual memory</strong></p>
-<ul>
-<li>
-<p>Do not need all of a process in memory for it to run</p>
-</li>
-<li>
-<p>Swap in pages as required</p>
-</li>
-<li>
-<p><strong>So can now run processes that are bigger than total memory available!</strong></p>
-</li>
-<li>
-<p><strong>Main memory is called real memory</strong></p>
-</li>
-<li>
-<p><strong>User/programmer sees much bigger memory - virtual memory</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Page tables</strong></p>
-<ul>
-<li>
-<p>Each process must have a page table to convert logical address or virtual address to physical address</p>
-</li>
-<li>
-<p>Some processes are very large, and their page tables themselves are very large</p>
-<ul>
-<li>
-<p><strong>Page tables are also stored in virtual memory</strong></p>
-</li>
-<li>
-<p><strong>When a process is running, part of its page table is in main memory</strong></p>
-</li>
-<li>
-<p><strong>Load the required page table through exchange</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png" title="/img/Computer Organization and Architecture/chapter8-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-1.png" data-sub-html="<h2>Two-Level Hierarchical Page Table</h2>">
-        
-    </a><figcaption class="image-caption"><code>Two-Level Hierarchical Page Table</code></figcaption>
-    </figure>
-<p><strong>Address Translation for Hierarchical page table</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-9.png" title="/img/Computer Organization and Architecture/chapter8-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-9.png">
-        
-    </a>
-<ul>
-<li>
-<p>虚拟地址包括根页表段、用户页表段和页内偏移量</p>
-</li>
-<li>
-<p>根据根页表指针和根页表段，得到用户页表段的基准地址</p>
-</li>
-<li>
-<p>加上用户页表段地址，得到用户页表地址</p>
-</li>
-<li>
-<p>再加上页内偏移量，得到在实际内存中的地址</p>
-</li>
-</ul>
-<hr>
-<p><strong>Problem about page tables</strong></p>
-<ul>
-<li>
-<p>A drawback of the type of page tables is that their size is proportional to that of the virtual address space</p>
-<ul>
-<li>
-<p>Each virtual space page needs a row in the page table</p>
-</li>
-<li>
-<p>If the virtual space of the user program is large, the page table will also be very large</p>
-</li>
-</ul>
-</li>
-<li>
-<p>An alternative is Inverted Page Tables</p>
-</li>
-</ul>
-<h6 id="inverted-page-table">Inverted page table</h6>
-<ul>
-<li>
-<p>Used on <code>PowerPC</code>, <code>UltraSPARC</code>, and <code>IA-64 architecture</code></p>
-</li>
-<li>
-<p><strong>Page number portion of a virtual address is mapped into a hash value</strong></p>
-</li>
-<li>
-<p><strong>Hash value points to inverted page table</strong></p>
-</li>
-<li>
-<p>Fixed proportion of real memory is required for the tables regardless of the number of processes</p>
-</li>
-<li>
-<p><strong>反向页表的行数是物理内存的帧数，和进程数无关</strong></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Each entry in the page table includes</p>
-<ul>
-<li>
-<p>Page number</p>
-</li>
-<li>
-<p>Process identifier</p>
-<ul>
-<li>The process that owns this page</li>
-</ul>
-</li>
-<li>
-<p>Control bits</p>
-<ul>
-<li>includes flags, such as valid, referenced, etc</li>
-</ul>
-</li>
-<li>
-<p><strong>Chain pointer</strong></p>
-<ul>
-<li><strong>the index value of the next entry in the chain</strong></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Use of inverted page table</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-10.png" title="/img/Computer Organization and Architecture/chapter8-10.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-10.png">
-        
-    </a>
-<ul>
-<li>
-<p>虚拟地址中的页号通过散列函数，形成一个散列值，映射到反向页表</p>
-</li>
-<li>
-<p>通过页号的散列值和进程ID，确定虚拟地址的页是否在内存中</p>
-</li>
-<li>
-<p>通过链技术来提高查找的速度</p>
-</li>
-</ul>
-<h6 id="translation-lookaside-buffer">Translation lookaside buffer</h6>
-<ul>
-<li>
-<p>Every virtual memory reference causes two physical memory access</p>
-<ul>
-<li>
-<p>Fetch page table entry</p>
-</li>
-<li>
-<p>Fetch data</p>
-</li>
-</ul>
-</li>
-<li>
-<p>To overcome this problem a high-speed cache is set up for page table entries</p>
-<ul>
-<li>
-<p>Called a Translation Lookaside Buffer (<code>TLB</code>)</p>
-</li>
-<li>
-<p>Contains page table entries that have been most recently used</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong><code>TLB</code> operation</strong></p>
-<ul>
-<li>
-<p>根据虚拟地址中的页地址，去快表中查找是否有页帧地址</p>
-</li>
-<li>
-<p>如果有，接就可以生成物理地址</p>
-</li>
-<li>
-<p>如果没有，就去看内存中的页表中是否有这个页</p>
-</li>
-<li>
-<p>如果在内存中的话，就先更新快表，然后生成物理地址</p>
-</li>
-<li>
-<p>如果也没有，就要去读取I/O，然后更新内存页表</p>
-</li>
-</ul>
-<h5 id="segmentation">Segmentation</h5>
-<ul>
-<li>
-<p>Paging is not (usually) visible to the programmer</p>
-</li>
-<li>
-<p>Segmentation is visible to the programmer</p>
-</li>
-<li>
-<p>Usually different segments allocated to program and data</p>
-</li>
-<li>
-<p>May be a number of program and data segments</p>
-</li>
-</ul>
-<hr>
-<p><strong>Advantage of segmentation</strong></p>
-<ul>
-<li>
-<p>Simplified management</p>
-<ul>
-<li>
-<p>Programmers need not know how much space data needs</p>
-</li>
-<li>
-<p>Data can be allocated to its own segment and can be dynamically expanded</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Allows programs to be altered and recompiled independently</p>
-</li>
-<li>
-<p>The segment can be shared among multiple processes</p>
-</li>
-<li>
-<p>Protections from assigning access privileges</p>
-</li>
-</ul>
-<hr>
-<p><strong>Segment tables</strong></p>
-<ul>
-<li>
-<p>Corresponding segment in main memory</p>
-</li>
-<li>
-<p>段需要有段表来实现地址转换</p>
-</li>
-<li>
-<p>虚拟地址中包含段号，从段表中找到该段号对应的段基址，就可以根据偏移量到内存中得到这个虚拟地址对应的物理地址</p>
-</li>
-</ul>
-<hr>
-<p><strong>Combined segmentation and paging</strong></p>
-<ul>
-<li>
-<p>程序员将进程分为若干个段</p>
-</li>
-<li>
-<p>系统将每个段分为多个页</p>
-</li>
-<li>
-<p>在进行地址转换的时候，根据段号，到段表中找到段基址，根据页号，到页表中找到对应的帧号，然后段基址和帧号结合，可以得到实际的物理地址</p>
-</li>
-</ul>
 ]]></description>
 </item>
 </channel>

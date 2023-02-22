@@ -634,7 +634,7 @@ $$</p>
 </ul>
 <h4 id="observation">OBSERVATION</h4>
 <blockquote>
-<p>Relational algebra is a procedural language because it defines the high level-steps of how to compute a query. For example, $\sigma_{b_id=102}(R\bowtie S)$ is saying to first do the join of R and S and then do the select,whereas $(R \bowtie (\sigma_{b_id=102}(S)))$ will do the select on S first, and then do the join. These two statements will actually produce the same answer, but if there is only 1 tuple in S with b_id=102 out of a billion tuples, then$(R \bowtie (\sigma_{b_id=102}(S)))$ will be significantly faster than $\sigma_{b_id=102}(R\bowtie S)\newline$😂</p>
+<p>Relational algebra is a procedural language because it defines the high level-steps of how to compute a query. For example, $\sigma_{b_id=102}(R\bowtie S)$ is saying to first do the join of R and S and then do the select,whereas $(R \bowtie (\sigma_{b_id=102}(S)))$ will do the select on S first, and then do the join. These two statements will actually produce the same answer, but if there is only 1 tuple in S with b_id=102 out of a billion tuples, then$(R \bowtie (\sigma_{b_id=102}(S)))$ will be significantly faster than $\sigma_{b_id=102}(R\bowtie S)$😂</p>
 </blockquote>
 <blockquote>
 <p>A better approach is to say the result you want (state $\rightarrow$<u>retrieve the joined tuples from R and S where b_id equals 102</u>), and let the DBMS decide the steps it wants to take to compute the query. SQL will do exactly this,and it is the de facto standard for writing queries on relational model databases🐮</p>

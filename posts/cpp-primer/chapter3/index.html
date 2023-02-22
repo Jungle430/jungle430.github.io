@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>《C&#43;&#43; Primer》 字符串，向量和数组 - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="《C&#43;&#43; Primer》 字符串，向量和数组" />
+<meta property="og:description" content="C&#43;&#43; Primer 字符串，向量和数组 标准库类型string 标准库类型string表示可变长的字符序列，使用string类型必须先包含头文件，string定" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cpp-primer/chapter3/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-02-22T22:31:49+08:00" />
+<meta property="article:modified_time" content="2023-02-22T22:31:49+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="《C&#43;&#43; Primer》 字符串，向量和数组"/>
+<meta name="twitter:description" content="C&#43;&#43; Primer 字符串，向量和数组 标准库类型string 标准库类型string表示可变长的字符序列，使用string类型必须先包含头文件，string定"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cpp-primer/chapter3/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "《C++ Primer》 字符串，向量和数组",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cpp-primer\/chapter3\/"
+        },"genre": "posts","keywords": "C\u002b\u002b, C\u002b\u002b Primer","wordcount":  2231 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cpp-primer\/chapter3\/","datePublished": "2023-02-22T22:31:49+08:00","dateModified": "2023-02-22T22:31:49+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">《C&#43;&#43; Primer》 字符串，向量和数组</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/c++-primer/"><i class="far fa-folder fa-fw"></i>C++ Primer</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-02-22">2023-02-22</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2231 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#字符串向量和数组">字符串，向量和数组</a>
+      <ul>
+        <li><a href="#标准库类型string">标准库类型string</a></li>
+        <li><a href="#标准库类型vector">标准库类型vector</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="c-primer">C++ Primer</h1>
+<h2 id="字符串向量和数组">字符串，向量和数组</h2>
+<h3 id="标准库类型string">标准库类型string</h3>
+<ul>
+<li>标准库类型<code>string</code>表示可变长的字符序列，使用<code>string</code>类型必须先包含头文件，<code>string</code>定义在命名空间<code>std</code>中</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">using</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>定义和初始化<code>string</code>对象</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">初始化string对象的方式</td>
+	</tr>
+	<tr>
+		<td>string s1</td>
+		<td>默认初始化，s1是一个空串</td>
+	</tr>
+	<tr>
+		<td>string s2(s1)</td>
+        <td>s2是s1的副本</td>
+	</tr>
+	<tr>
+		<td>string s2 = s1</td>
+		<td>等价于s2(s1),s2是s1的副本</td>
+	</tr>
+	<tr>
+		<td>string s3("value")</td>
+		<td>s3是字面值"value"的副本，除了字面值最后的那个空字符外</td>
+	</tr>
+	<tr>
+		<td>string s3 = "value"</td>
+		<td>等价于s3("value"),s3是字面值"value"的副本
+	</tr>
+	<tr>
+		<td>string s4(n, 'c')</td>
+		<td>把s4初始化为由连续n个字符c组成的串</td>
+	</tr>
+</table>
+<ul>
+<li>
+<p>直接初始化和拷贝初始化</p>
+<ul>
+<li>使用等号(=) $\rightarrow$ <strong>拷贝初始化</strong>(copy initialization),编译器把等号右侧的初始值拷贝到新创建的对象中去</li>
+<li>不使用等号，执行的是<strong>直接初始化</strong>(direct initialization)</li>
+</ul>
+</li>
+<li>
+<p>如何使用</p>
+<ul>
+<li>初始化需要一个值：拷贝初始化和直接初始化都行</li>
+<li>初始化需要多个值
+<ul>
+<li>尽量用直接初始化</li>
+<li>拷贝初始化需要显式地创建一个（临时）对象来进行拷贝：<code>string s8 = string(10, 'c');</code>（可读性差，也没有任何补偿优势）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>string</code>对象上的操作</p>
+</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">string的操作</td>
+	</tr>
+	<tr>
+		<td>os << s</td>
+		<td>将s写到输出流os当中，返回os</td>
+	</tr>
+	<tr>
+		<td>is >> s</td>
+		<td>从is中读取字符串赋给s，字符串以空白分隔，返回is</td>
+	</tr>
+	<tr>
+		<td>getline(is, s)</td>
+		<td>从is中读取一行赋给s，返回is(换行符也被读了进来,但是不会存入读入的字符串中去)</td>
+	</tr>
+	<tr>
+		<td>s.empty()</td>
+		<td>s为空返回true，否则返回false</td>
+	</tr>
+	<tr>
+		<td>s.size()</td>
+		<td>返回s中字符的个数</td>
+	</tr>
+	<tr>
+		<td>s[n]</td>
+		<td>返回s中第n个字符的<b>引用</b></td>
+	</tr>
+    <tr>
+        <td>s1 + s2</td>
+        <td>返回s1和s2连接后的结果</td>
+    </tr>
+    <tr>
+        <td>s1 = s2</td>
+        <td>用s2的副本替代s1中原来的字符</td>
+    </tr>
+    <tr>
+    	<td>s1 == s2</td>
+        <td>如果s1个s2中所含的字符完全一样，则返回true,否则返回false</td>
+    </tr>
+    <tr>
+    	<td>s1 != s2</td>
+        <td>等性判断对字母的大小写敏感</td>
+    </tr>
+    <tr>
+        <td><, <=, >, >=</td>
+        <td>利用字典序进行比较，对字母大小写敏感</td>
+    </tr>
+</table>    
+<ul>
+<li>技巧:读取未知数量的string对象</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">word</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">word</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">word</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>原理：<u>CTRL+Z/读到文件末尾 -&gt; 引发异常 -&gt; 记录异常 -&gt; fail() 返回true-&gt; operator void*() 返回 0 -&gt; while结束</u>，参考文章:<a href="https://www.zhangjiee.com/blog/2013/deep-into-while-cin.html" target="_blank" rel="noopener noreffer">C++ 深入探究 while(cin)</a></p>
+<ul>
+<li>如果是按行读</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="n">stdLLcout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>string::size_type类型</p>
+<ul>
+<li>
+<p>string类的size函数返回的是是一个string::size_type类型的值，无符号类型，足以存放下任何<code>string</code>对象的大小</p>
+</li>
+<li>
+<p>string类以及其他大多数标准库类型都定义了几种配套的类型。<u>这些配套类型体现了标准库类型与机器无关的特性，类型<b>size_type</b>即是其中的一种</u>。标准库会根据运行的机器型号分配适当的类型，我们不需过多关心，如果要看类型在C++11以后可以借助<code>auto</code>和<code>decltype</code>来推断变量类型</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">len</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>由于string::size_type是一个无符号类型，所以我们在对字符串进行有关size的相关操作时，尽量避免int与unsigned混用，否则会由于反补码机制出现意想不到的一些bug，正确做法</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">line</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="k">decltype</span><span class="p">(</span><span class="n">str</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">str</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">............</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p>字典序相关比较机制</p>
+</li>
+</ul>
+<ol>
+<li>较短的string对象小于较长的string对象(前面的内容都完全相同)</li>
+<li>如果两个string对象在某些对应的位置上不一致，则string对象比较的结果其实是string对象中第一对相异字符比较的结果</li>
+</ol>
+<ul>
+<li>
+<p>字面值和string对象相加</p>
+<ul>
+<li>
+<p>通过重载+和+=运算符实现，使用时一定要注意返回值的问题，不要两边类型不匹配（例如两个字面值相加）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s3</span> <span class="o">=</span> <span class="n">s1</span> <span class="o">+</span> <span class="s">&#34;, &#34;</span> <span class="o">+</span> <span class="n">s2</span> <span class="o">+</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>防止上述问题：<b>必须确保每个加法运算符(+)的两侧运算对象至少有一个是string</b></p>
+</li>
+</ul>
+</li>
+<li>
+<p>处理string对象中的字符</p>
+<ul>
+<li>主要利用到了头文件<code>&lt;cctype&gt;</code></li>
+</ul>
+</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">&ltccytpe&gt中的常用函数</td>
+	</tr>
+    <tr>
+        <td>isdigit(c)</td>
+        <td>当c是数字的时候为真</td>
+    </tr>
+    <tr>
+        <td>islower(c)</td>
+        <td>c是小写字母的时候为真</td>
+    </tr>
+    <tr>
+        <td>isupper(c)</td>
+        <td>c是大写字母的时候为真</td>
+    </tr>
+    <tr>
+        <td>isspace(c)</td>
+        <td>c是空格的时候为真</td>
+    </tr>
+    <tr>
+        <td>tolower(c)</td>
+        <td>如果c是大写字母，则输出对应的小写字母，否则原样输出c</td>
+    </tr>
+    <tr>
+        <td>toupper(c)</td>
+        <td>如果c是小写字母，则输出对应的大写字母，否则原样输出c</td>
+    </tr>
+</table> 
+<blockquote>
+<p>为了向后兼容C，C++保留了C的标准库，但是为了更好地符合C++的要求，C++自己又开发出了一套新的标准库，去掉C库中的.h,前面加上c，即&lt;name.h&gt; $\rightarrow$ <cname>，上面<cctype>就是由C中的&lt;ctype.h&gt;衍生过来的，C++库中的函数为了防止与C标准库中的内容发生命名冲突，都在std命名空间中</p>
+</blockquote>
+<ul>
+<li>基于范围的for语句
+<ul>
+<li>C++11的新特性</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="nl">declaration</span> <span class="p">:</span> <span class="n">expression</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">statement</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//example    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">str</span><span class="p">(</span><span class="s">&#34;Some string&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">c</span> <span class="p">:</span> <span class="n">str</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>重载的下标运算符
+<ul>
+<li>operator[] -&gt; 接收输入是std::string::size_type类型的值，返回string对应位置字符的引用</li>
+<li>超出范围下标将引发不可预知的结果（内存非法越界访问或者访问到<code>nullptr</code> $\rightarrow$ 空字符串，C++为了性能并不会像Java那样在下标访问时进行检查，会有很大风险）</li>
+</ul>
+</li>
+</ul>
+<h3 id="标准库类型vector">标准库类型vector</h3>
+<ul>
+<li>
+<p>vector本质是一种变长数组</p>
+</li>
+<li>
+<p>vector也是一种容器(container)</p>
+</li>
+<li>
+<p>vector包含于头文件<vector>中，定义在std命名空间下</p>
+</li>
+<li>
+<p>vector是类模板，使用时必须声明其类型（其实在Modern C++中编译器也能自己推导一部分了），编译器根据模板创建类或函数函数的过程称为<b>实例化</b>(instantiation),由于C++的分离式编译，<b>自己写模板的时候一定要将声明与实现都写在.h里，不要将实现分离到.cpp中，否则会导致编译失败</b></p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-1.jpg" title="/img/C&#43;&#43; Primer/chapter3-1.jpg" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-1.jpg" data-sub-html="<h2>由于模板的声明与实现分离导致编译失败</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/C&#43;&#43;%20Primer/chapter3-1.jpg"
+            data-srcset="/img/C&#43;&#43;%20Primer/chapter3-1.jpg, /img/C&#43;&#43;%20Primer/chapter3-1.jpg 1.5x, /img/C&#43;&#43;%20Primer/chapter3-1.jpg 2x"
+            data-sizes="auto"
+            alt="/img/C&#43;&#43; Primer/chapter3-1.jpg" />
+    </a><figcaption class="image-caption"><code>由于模板的声明与实现分离导致编译失败</code></figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-2.jpg" title="/img/C&#43;&#43; Primer/chapter3-2.jpg" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-2.jpg" data-sub-html="<h2>全部写入头文件后编译成功</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/C&#43;&#43;%20Primer/chapter3-2.jpg"
+            data-srcset="/img/C&#43;&#43;%20Primer/chapter3-2.jpg, /img/C&#43;&#43;%20Primer/chapter3-2.jpg 1.5x, /img/C&#43;&#43;%20Primer/chapter3-2.jpg 2x"
+            data-sizes="auto"
+            alt="/img/C&#43;&#43; Primer/chapter3-2.jpg" />
+    </a><figcaption class="image-caption"><code>全部写入头文件后编译成功</code></figcaption>
+    </figure>
+<ul>
+<li>vector能容纳绝大多数类型的对象作为其元素，但是因为<u>引用不是对象，所以不存在包含引用的vector</u></li>
+</ul>
+<hr>
+<ul>
+<li>定义和初始化vector对象</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+                </span><span><a href="/tags/c&#43;&#43;-primer/">C&#43;&#43; Primer</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-02-22</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组" data-hashtags="C&#43;&#43;,C&#43;&#43; Primer"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-hashtag="C&#43;&#43;"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cpp-primer/chapter3/" data-title="《C&#43;&#43; Primer》 字符串，向量和数组"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter1/" class="prev" rel="prev" title="CMU 15-445 Lecture #01: Course Overview &amp; Relational Model"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
