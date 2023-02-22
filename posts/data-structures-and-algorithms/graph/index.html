@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Graph - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Graph" />
+<meta property="og:description" content="Data Structure Graph Definition: A graph G consists of two sets
+a finite, nonempty set of vertices V(G)
+a finite, possible empty set of edges E(G)
+G(V,E) represents a graph
+The number of vertices is written $|V|(n)$, and the number of edges is written $|E|(e)$
+General graphs differ from trees
+need not have a root node no implicit parent-child relationship may be several (or no) paths from one vertex to another Definition For a Directed graph $if\ u, v\ are\ two\ vertices,then\ &lt;u, v&gt; is\ an\ arc(edge), u\ is\ called\ as\ tail, v\ is\ called\ head$" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-11T19:53:36+08:00" />
+<meta property="article:modified_time" content="2022-11-11T19:53:36+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Graph"/>
+<meta name="twitter:description" content="Data Structure Graph Definition: A graph G consists of two sets
+a finite, nonempty set of vertices V(G)
+a finite, possible empty set of edges E(G)
+G(V,E) represents a graph
+The number of vertices is written $|V|(n)$, and the number of edges is written $|E|(e)$
+General graphs differ from trees
+need not have a root node no implicit parent-child relationship may be several (or no) paths from one vertex to another Definition For a Directed graph $if\ u, v\ are\ two\ vertices,then\ &lt;u, v&gt; is\ an\ arc(edge), u\ is\ called\ as\ tail, v\ is\ called\ head$"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" /><link rel="prev" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/dynamic-programming/" /><link rel="next" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Graph",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/graph\/"
+        },"genre": "posts","keywords": "Data Structure","wordcount":  4342 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/graph\/","datePublished": "2022-11-11T19:53:36+08:00","dateModified": "2022-11-11T19:53:36+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Graph</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/data-structure/"><i class="far fa-folder fa-fw"></i>Data Structure</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-11-11">2022-11-11</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4342 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 21 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#graph">Graph</a>
+      <ul>
+        <li><a href="#definition">Definition</a>
+          <ul>
+            <li><a href="#for-a-directed-graph">For a Directed graph</a></li>
+            <li><a href="#for-an-undirected-graph">For an undirected graph</a></li>
+            <li><a href="#complete-graph">Complete graph</a></li>
+            <li><a href="#sparse-graph-and-dense-graph">Sparse Graph and Dense Graph</a></li>
+            <li><a href="#examples-for-graph">Examples for Graph</a>
+              <ul>
+                <li><a href="#undirected-graph">Undirected graph</a></li>
+                <li><a href="#directed-graph">Directed graph</a></li>
+              </ul>
+            </li>
+            <li><a href="#adjacent-and-incident">Adjacent and Incident</a></li>
+            <li><a href="#weighted-graphnetwork">Weighted graph(network)</a></li>
+            <li><a href="#subgraph">Subgraph</a></li>
+            <li><a href="#degree">Degree</a>
+              <ul>
+                <li><a href="#in-degree-and-out-degreefor-a-directed-graph">In-degree and Out-degree(for a directed graph)</a></li>
+                <li><a href="#conclusion">Conclusion:</a></li>
+                <li><a href="#examples-for-degree">Examples for degree</a></li>
+              </ul>
+            </li>
+            <li><a href="#path">Path</a>
+              <ul>
+                <li><a href="#definition-1">Definition</a></li>
+                <li><a href="#length-of-a-path">Length of a path</a></li>
+                <li><a href="#simple-path">Simple path</a></li>
+                <li><a href="#simple-circle">Simple Circle</a></li>
+              </ul>
+            </li>
+            <li><a href="#example-of-graph">Example of Graph</a>
+              <ul>
+                <li><a href="#traffic-flow-can-be-modeled-by-a-graph">Traffic flow can be modeled by a graph</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#adt">ADT</a></li>
+        <li><a href="#graph-implementation">Graph Implementation</a>
+          <ul>
+            <li><a href="#adjacency-matrix-array">Adjacency Matrix (<strong>Array</strong>)</a>
+              <ul>
+                <li><a href="#definition-2">Definition</a></li>
+                <li><a href="#example">Example</a></li>
+                <li><a href="#notice">Notice</a></li>
+                <li><a href="#merits-of-adjacency-matrix">Merits of Adjacency Matrix</a></li>
+                <li><a href="#code">Code</a></li>
+              </ul>
+            </li>
+            <li><a href="#adjacency-list">Adjacency List</a>
+              <ul>
+                <li><a href="#description-of-adjacency-list">Description of Adjacency List</a></li>
+                <li><a href="#example-1">Example:</a></li>
+                <li><a href="#merits-and-demerits-of-adjacency-list">Merits and Demerits of Adjacency List</a></li>
+                <li><a href="#inverse-adjacency-list">Inverse adjacency list</a></li>
+                <li><a href="#code-1">code</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#traversing-graph">Traversing Graph</a>
+          <ul>
+            <li><a href="#depth-first-searchdfs">Depth-First Search(DFS)</a>
+              <ul>
+                <li><a href="#basic-idea">Basic idea</a></li>
+                <li><a href="#example-2">Example</a></li>
+                <li><a href="#algorithm">Algorithm</a></li>
+                <li><a href="#code-2">Code</a></li>
+                <li><a href="#algorithm-analysis">Algorithm Analysis</a></li>
+              </ul>
+            </li>
+            <li><a href="#bread-first-searchbfs">Bread-First Search(BFS)</a>
+              <ul>
+                <li><a href="#basic-idea-1">Basic idea</a></li>
+                <li><a href="#example-3">Example</a></li>
+                <li><a href="#algorithm-1">Algorithm</a></li>
+                <li><a href="#code-3">Code</a></li>
+                <li><a href="#algorithm-analysis-1">Algorithm Analysis</a></li>
+              </ul>
+            </li>
+            <li><a href="#for-adjacency-matrix-unweighted-directed-graph-in-c">For adjacency matrix unweighted directed Graph in C++</a>
+              <ul>
+                <li><a href="#graph-1">Graph</a></li>
+                <li><a href="#dfs">DFS</a></li>
+                <li><a href="#bfs">BFS</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#connectivity">Connectivity</a>
+          <ul>
+            <li><a href="#definition-3">Definition</a></li>
+            <li><a href="#minimal-cost-spanning-trees">Minimal Cost Spanning Trees</a>
+              <ul>
+                <li><a href="#spanning-trees">Spanning Trees</a>
+                  <ul>
+                    <li><a href="#definition-4">Definition</a></li>
+                    <li><a href="#example-4">Example</a></li>
+                    <li><a href="#dfs-and-bfs">DFS and BFS</a></li>
+                    <li><a href="#nontree-edge">Nontree edge</a></li>
+                  </ul>
+                </li>
+                <li><a href="#minimal-cost-spanning-trees-1">Minimal Cost Spanning Trees</a>
+                  <ul>
+                    <li><a href="#definition-5">Definition</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#algorithm-for-minimal-cost-spanning-tree">Algorithm for Minimal Cost Spanning Tree</a>
+              <ul>
+                <li><a href="#prim-algorithm">Prim algorithm</a></li>
+                <li><a href="#kruskal-algorithm">Kruskal algorithm</a></li>
+                <li><a href="#time-complexity-analysis">Time Complexity Analysis</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#application-of-graph">Application of Graph</a>
+          <ul>
+            <li><a href="#topological-sort">Topological Sort</a>
+              <ul>
+                <li><a href="#definition-6">Definition</a></li>
+                <li><a href="#example-5">Example</a></li>
+                <li><a href="#activity-on-vertexaovnetwork">Activity on Vertex(AOV)—Network</a></li>
+                <li><a href="#notice-1">Notice</a></li>
+                <li><a href="#a-simple-algorithm">A simple algorithm</a>
+                  <ul>
+                    <li><a href="#steps">steps</a></li>
+                    <li><a href="#time-complexity-analysis-1">Time Complexity Analysis</a></li>
+                    <li><a href="#code-4">code</a></li>
+                  </ul>
+                </li>
+                <li><a href="#an-improved-algorithm">An improved algorithm</a>
+                  <ul>
+                    <li><a href="#steps-1">steps</a></li>
+                    <li><a href="#time-complexity-analysis-2">Time Complexity Analysis</a></li>
+                    <li><a href="#code-5">code</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#critical-path">Critical Path</a>
+              <ul>
+                <li>
+                  <ul>
+                    <li><a href="#aoe-activity-on-edge-network">AOE (Activity on Edge) Network</a></li>
+                    <li><a href="#questions">Questions</a></li>
+                    <li><a href="#elements">Elements</a></li>
+                    <li><a href="#calculate">Calculate</a></li>
+                    <li><a href="#time-complexity-analysis-3">Time Complexity Analysis</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#shortest-paths-problems">Shortest Paths Problems</a>
+              <ul>
+                <li><a href="#dijkstra-idea">Dijkstra idea</a>
+                  <ul>
+                    <li><a href="#step">step</a></li>
+                    <li><a href="#algorithm-2">algorithm</a></li>
+                    <li><a href="#code-6">code</a></li>
+                    <li><a href="#time-complexity-analysis-4">Time Complexity Analysis</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="data-structure">Data Structure</h1>
+<h2 id="graph">Graph</h2>
+<p>Definition: A graph G consists of two sets</p>
+<blockquote>
+<p>a finite, nonempty set of vertices V(G)</p>
+<p>a finite, possible empty set of edges E(G)</p>
+<p>G(V,E) represents a graph</p>
+<p>The number of vertices is written $|V|(n)$, and the number of edges is written $|E|(e)$</p>
+</blockquote>
+<p>General graphs differ from trees</p>
+<ol>
+<li>need not have a root node</li>
+<li>no implicit parent-child relationship</li>
+<li>may be several (or no) paths from one vertex to another</li>
+</ol>
+<h3 id="definition">Definition</h3>
+<h4 id="for-a-directed-graph">For a Directed graph</h4>
+<p>$if\ u, v\ are\ two\ vertices,then\ &lt;u, v&gt; is\ an\ arc(edge), u\ is\ called\ as\ tail, v\ is\ called\ head$</p>
+<p>$Example:$</p>
+<p>$[u]\rightarrow[v]\ is\ called &lt;u, v&gt;, and\ [v]\rightarrow[u] is\ called &lt;v, u&gt;$</p>
+<p>$$
+[u]\rightarrow[v]
+$$</p>
+<div class="mermaid" id="id-1"></div>
+<p>$$
+[v]\rightarrow[u]
+$$</p>
+<div class="mermaid" id="id-2"></div>
+<p>A directed graph is one in which each edge is a directed pair of vertices, $&lt; u,v &gt; \neq &lt; v,u &gt;$</p>
+<h4 id="for-an-undirected-graph">For an undirected graph</h4>
+<p>An undirected graph is one in which the pair of vertices in an edge is unordered, $（u,v）= （v,u）$
+$$
+(u, v)=(v, u)
+$$</p>
+<div class="mermaid" id="id-3"></div>
+<h4 id="complete-graph">Complete graph</h4>
+<p>A complete graph is a graph that has the $maximum\ number\ of\ edges$; A complete graph is a graph in which $there\ is\ an\ edge\ between\ every\ pair\ of\ vertices$.</p>
+<blockquote>
+<p>for a $undirected\ graph$ with $n\ vertices$, the maximum number of edges is $\frac {n(n-1)}{2}(C_n^2)$</p>
+</blockquote>
+<blockquote>
+<p>for a $directed\ graph$ with n vertices, the maximum number of edges is $n(n-1)$</p>
+</blockquote>
+<h4 id="sparse-graph-and-dense-graph">Sparse Graph and Dense Graph</h4>
+<p>If the edges of a graph is $e&lt;n\log n$, the graph is called <strong>Sparse Graph</strong> ,otherwise, it is called as <strong>Dense Graph</strong></p>
+<h4 id="examples-for-graph">Examples for Graph</h4>
+<h5 id="undirected-graph">Undirected graph</h5>
+<p>$$
+V(G_1)={0,1,2,3}\
+and\ E(G_1)={(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)}
+$$</p>
+<p>$$
+Graph \rightarrow G_1
+$$</p>
+<div class="mermaid" id="id-4"></div>
+<h5 id="directed-graph">Directed graph</h5>
+<p>$$
+V(G_2)={0,1,2}\
+and\ E(G_2)={&lt;0, 1&gt;,&lt;1, 0&gt;,&lt;1, 2&gt;}
+$$</p>
+<p>$$
+Graph\rightarrow G_2
+$$</p>
+<div class="mermaid" id="id-5"></div>
+<h4 id="adjacent-and-incident">Adjacent and Incident</h4>
+<p>If $(v_0 ,v_1 )$ is an edge in an $undirected\ graph$</p>
+<blockquote>
+<p>$v_0$ and $v_1$ are $adjacent$</p>
+<p>The edge $(v_0 , v_1)$ is $incident$ on vertices $v_0\ and\ v_1$</p>
+</blockquote>
+<p>If $&lt;v_0 , v_1&gt;$ is an edge in a $directed\ graph$</p>
+<blockquote>
+<p>$v_0$ is $adjacent\ to$ $v_1$ , and $v_1$ is $adjacent\ from$ $v_0$ .</p>
+<p>The edge $&lt;v_0 , v_1&gt;$ is $incident$ on $v_0$ and $v_1$</p>
+</blockquote>
+<h4 id="weighted-graphnetwork">Weighted graph(network)</h4>
+<p>There is some <strong>cost</strong> or <strong>weight</strong> associated with each edge</p>
+<h4 id="subgraph">Subgraph</h4>
+<p>A subgraph of $G$ is a graph $G&rsquo;$ such that $V(G’)$ is a subset of $V(G)$ and $E(G’)$ is a subset of $E(G)$
+$$
+V(G)\supseteq V(G&rsquo;)
+$$</p>
+<p>$$
+E(G)\supseteq E(G&rsquo;)
+$$</p>
+<h4 id="degree">Degree</h4>
+<p>The degree of a vertex (TD: Total Degree) is the number of edges incident to that vertex</p>
+<h5 id="in-degree-and-out-degreefor-a-directed-graph">In-degree and Out-degree(for a directed graph)</h5>
+<p>The <strong>in-degree</strong> of a vertex v (ID) is the number of edges that have <em>v</em> as the <strong>head</strong></p>
+<p>The <strong>out-degree</strong> of a vertex v (OD) is the number of edges that have <em>v</em> as the <strong>tail</strong></p>
+<h5 id="conclusion">Conclusion:</h5>
+<p>if $d_i$ is the degree of a vertex $i$ in a graph $G$ with $n$ vertices and $e$ edges, the number of edges is
+$$
+e=\frac{\sum_{i=1}^n d_i}{2}
+$$</p>
+<h5 id="examples-for-degree">Examples for degree</h5>
+<p>directed graph:</p>
+<div class="mermaid" id="id-6"></div>
+<p>$$
+0\rightarrow in=1\ and\ out=1
+$$</p>
+<p>$$
+1\rightarrow in=1\ and\ out=2
+$$</p>
+<p>$$
+2\rightarrow in=1\ and\ out=0
+$$</p>
+<p>Undirected graph:</p>
+<div class="mermaid" id="id-7"></div>
+<p>$$
+0\rightarrow 2
+$$</p>
+<p>$$
+[1,2]\rightarrow 3
+$$</p>
+<p>$$
+[3, 4, 5, 6] \rightarrow 1
+$$</p>
+<h4 id="path">Path</h4>
+<h5 id="definition-1">Definition</h5>
+<p>$A\ path\ from\ vertex\ v_p\ to\ v_q\ in\ a\ graph\ G\ is\ a\ sequence\ of\ vertices,$</p>
+<p>$\rightarrow v_p , v_{i_1} , v_{i_2} , &hellip;, v_{i_n}, v_{q}\ such\ that (v_p , v_{i_1}), (v_{i_1} ,v_{i_2} ), &hellip;, (v_{i_n}, v_q) are\ edges\ in\ a\ graph$</p>
+<h5 id="length-of-a-path">Length of a path</h5>
+<p>The length of a path is <strong>the number of edges</strong> on it</p>
+<h5 id="simple-path">Simple path</h5>
+<p>A simple path is a path in which all vertices are <strong>distinct</strong></p>
+<h5 id="simple-circle">Simple Circle</h5>
+<p>A simple cycle is a path in which all vertices,<strong>except the first and the last</strong>, are distinct. <strong>The first and the last vertices are the same</strong></p>
+<h4 id="example-of-graph">Example of Graph</h4>
+<h5 id="traffic-flow-can-be-modeled-by-a-graph">Traffic flow can be modeled by a graph</h5>
+<blockquote>
+<p>Each street intersection represents a vertex, each street is an edge</p>
+<p>Edge costs could represent, among other things, a <strong>speed limit or capacity</strong></p>
+<p>We could ask for <strong>the shortest route</strong> or use this information to find the most likely location for <strong>bottleneck</strong></p>
+</blockquote>
+<h3 id="adt">ADT</h3>
+<p>Graph</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">Objects: a nonempty set of vertices and a set of edges
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Functions: for all graph in Graph, v, v1 and v2 in Vertices
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Graph Create(): return an empty graph
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Graph DeleteEdge(graph, v1, v2): return a graph in which the edge (v1, v2) is removed
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">......
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="graph-implementation">Graph Implementation</h3>
+<h4 id="adjacency-matrix-array">Adjacency Matrix (<strong>Array</strong>)</h4>
+<h5 id="definition-2">Definition</h5>
+<p>The adjacency matrix of G is a two-dimensional n by n array, say $A[n] [n]$
+$$
+A[i][j]=\begin{cases}
+1\ if\ &lt;V_i,V_j&gt; \in E\ or\ (V_i,V_j)\in E\newline
+0\ otherwise
+\end{cases}
+$$</p>
+<p>For a <strong>weighted graph</strong></p>
+<p>$$
+A[i][j]=\begin{cases}
+W(i, j)\ when\ i\neq j\ and\ &lt;V_i,V_j&gt; \in E\ or\ (V_i,V_j)\in E\newline
+\infty\ otherwise
+\end{cases}
+$$</p>
+<h5 id="example">Example</h5>
+<p>For a graph</p>
+<div class="mermaid" id="id-8"></div>
+<p>$$
+\begin{pmatrix}
+0&amp; 1&amp; 0\newline
+1&amp; 0&amp; 1\newline
+0&amp; 0&amp; 0
+\end{pmatrix}
+$$</p>
+<p>For a weight graph</p>
+<p>The weight of the edge from vertex i to vertex j is used instead of 1 in the adjacency matrix
+$$
+\begin{pmatrix}
+\infty&amp; 1&amp; \infty&amp; 4\newline
+\infty&amp; \infty&amp; 9&amp; 2\newline
+3&amp; 5&amp; \infty&amp; 8\newline
+\infty&amp; \infty&amp; 6&amp; \infty
+\end{pmatrix}
+$$</p>
+<h5 id="notice">Notice</h5>
+<p>The adjacency matrix for an <strong>undirected graph</strong> is <strong>symmetric</strong></p>
+<p>The adjacency matrix for a <strong>digraph need not be symmetric</strong></p>
+<h5 id="merits-of-adjacency-matrix">Merits of Adjacency Matrix</h5>
+<p>From the adjacency matrix, to determine the connection of vertices is easy</p>
+<p><strong>For a undirected graph, the degree of a vertex i is</strong> $\sum_{j=1}^n A[i][j]$</p>
+<p>For a <strong>directed graph</strong></p>
+<p>The sum of 1 in row i of the adjacency matrix is yields the out-degree of the $i^{th}$ vertex
+$$
+\begin{bmatrix}
+a_1&amp;a_2&amp;a_3&amp;\dots&amp;a_n
+\end{bmatrix}
+$$
+The sum of the entries in the $i^{th}$ column is its in degree
+$$
+\begin{bmatrix}
+a_1\newline
+a_2\newline
+a_3\newline
+\vdots\newline
+a_n
+\end{bmatrix}
+$$</p>
+<h5 id="code">Code</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">MaxVNum</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="n">XXX</span> <span class="n">VertexType</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">ArcCell</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/*Type of vertex relationship. For unauthorized graph, use 1 or 0 to indicate adjacent no;
+</span></span></span><span class="line"><span class="cl"><span class="cm">	*For weighted graphs, is the weight value
+</span></span></span><span class="line"><span class="cl"><span class="cm">	*/</span>
+</span></span><span class="line"><span class="cl">    <span class="n">VRType</span> <span class="n">adj</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">InfoType</span> <span class="o">*</span><span class="n">Info</span><span class="p">;</span><span class="c1">//Pointer to the arc related information (may not be available)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="n">ArcCell</span><span class="p">,</span> <span class="n">AdjMatrix</span><span class="p">[</span><span class="n">MaxVNum</span><span class="p">][</span><span class="n">MaxVNum</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">VertexType</span> <span class="n">vexs</span><span class="p">[</span><span class="n">MaxVNum</span><span class="p">];</span> <span class="cm">/* Vertex table */</span>
+</span></span><span class="line"><span class="cl">	<span class="n">AdjMatrix</span> <span class="n">arcs</span><span class="p">;</span> <span class="cm">/* The adjacency matrix, i.e. the edge table */</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">vexnum</span><span class="p">,</span> <span class="n">arcnum</span><span class="p">;</span> <span class="cm">/* The number of vertices and edges in the graph */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Mgraph</span><span class="p">;</span> <span class="cm">/* Mgraph is a graph stored in an adjacency matrix */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Create a graph</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">CreateGraph</span> <span class="p">(</span><span class="n">Mgraph</span> <span class="o">&amp;</span><span class="n">ga</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="kt">float</span> <span class="n">w</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">ga</span><span class="p">.</span><span class="n">vexnum</span> <span class="o">&gt;&gt;</span> <span class="n">ga</span><span class="p">.</span><span class="n">arcnum</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ga</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="n">ga</span><span class="o">-&gt;</span><span class="n">vexs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="err">＝</span> <span class="n">getchar</span><span class="p">();</span> <span class="cm">/*Read into the vertex information and establish the vertex table*/</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ga</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">ga</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="n">ga</span><span class="o">-&gt;</span><span class="n">arcs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="err">＝</span> <span class="err">∝</span><span class="p">;</span> <span class="cm">/*The Adjacency matrix is initialized*/</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">(</span><span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">ga</span><span class="p">.</span><span class="n">arcnum</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">v1</span> <span class="o">&gt;&gt;</span> <span class="n">v2</span> <span class="o">&gt;&gt;</span> <span class="n">w</span><span class="p">;</span> <span class="cm">/*Read in the vertices and weights of an edge*/</span>
+</span></span><span class="line"><span class="cl">		<span class="n">i</span> <span class="o">=</span> <span class="n">LocateVex</span><span class="p">(</span><span class="n">ga</span><span class="p">,</span><span class="n">v1</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">j</span> <span class="o">=</span> <span class="n">LocateVex</span><span class="p">(</span><span class="n">ga</span><span class="p">,</span><span class="n">v2</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">		<span class="n">ga</span><span class="p">.</span><span class="n">arcs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">].</span><span class="n">adj</span> <span class="err">＝</span> <span class="n">w</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">ga</span><span class="p">.</span><span class="n">arcs</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">].</span><span class="n">adj</span> <span class="err">＝</span> <span class="n">w</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="adjacency-list">Adjacency List</h4>
+<p>If a graph does not have many edges, the adjacency matrix will be sparse</p>
+<blockquote>
+<p>such representation is a waste of space</p>
+<p>use an array of pointers to linked row-lists</p>
+<p>adjacency-list representation for graphs</p>
+</blockquote>
+<h5 id="description-of-adjacency-list">Description of Adjacency List</h5>
+<p>Each row in adjacency matrix is represented as an adjacency list</p>
+<blockquote>
+<p>The graph is represented by an array or vector <em>v</em>[1],<em>v</em>[2],&hellip;,<em>v</em>[n], one element for each vertex in the graph</p>
+</blockquote>
+<blockquote>
+<p>Each <em>v</em>[i] stores the data stored in vertex i together with a linked list of the numbers of all vertices adjacent from vertex i</p>
+</blockquote>
+<div class="mermaid" id="id-9"></div>
+<div class="mermaid" id="id-10"></div>
+<h5 id="example-1">Example:</h5>
+<div class="mermaid" id="id-11"></div>
+<div class="mermaid" id="id-12"></div>
+<h5 id="merits-and-demerits-of-adjacency-list">Merits and Demerits of Adjacency List</h5>
+<p>degree of a vertex in an undirected graph – # of nodes in adjacency list</p>
+<p>out-degree of a vertex in a directed graph – # of nodes in its adjacency list</p>
+<p>in-degree of a vertex in a directed graph – traverse the whole data structure</p>
+<h5 id="inverse-adjacency-list">Inverse adjacency list</h5>
+<p>Linked table is entry edge</p>
+<div class="mermaid" id="id-13"></div>
+<div class="mermaid" id="id-14"></div>
+<div class="mermaid" id="id-15"></div>
+<h5 id="code-1">code</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">MaxVerNum</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span> <span class="cm">/*Maximum verx 100*/</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*Adjacent table edge junction type*/</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">ArcNode</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">adjvex</span><span class="p">;</span> <span class="cm">/*Neighborhood domain*/</span>
+</span></span><span class="line"><span class="cl">	<span class="n">InfoType</span> <span class="o">*</span><span class="n">Info</span><span class="p">;</span> <span class="cm">/*Domain info, for edge information*/</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="nc">ArcNode</span> <span class="o">*</span> <span class="n">next</span><span class="p">;</span> <span class="cm">/*Pointer domain to the next neighbor*/</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="n">ArcNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*Table header node type*/</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">Vnode</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">VertexType</span> <span class="n">vertex</span><span class="p">;</span> <span class="cm">/*Vertex Domains*/</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ArcNode</span> <span class="o">*</span><span class="n">firstedge</span><span class="p">;</span> <span class="cm">/*Side table head pointer*/</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="n">Vnode</span><span class="p">,</span> <span class="n">AdjList</span> <span class="p">[</span><span class="n">MaxVertexNum</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*The type of figure*/</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">AdjList</span> <span class="n">vertices</span><span class="p">;</span> <span class="cm">/*adjacency list*/</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">vexnum</span><span class="p">,</span> <span class="n">arcnum</span><span class="p">;</span> <span class="cm">/*Vertices and edges*/</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">ALGraph</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="traversing-graph">Traversing Graph</h3>
+<p>Some applications require visiting every vertex in a graph exactly once.</p>
+<p>The application may require that vertices should be visited <strong>in some special order</strong> based on graph topology</p>
+<blockquote>
+<p>DFS: Depth-First Search</p>
+<p>BFS: Breadth-First Search</p>
+</blockquote>
+<h4 id="depth-first-searchdfs">Depth-First Search(DFS)</h4>
+<h5 id="basic-idea">Basic idea</h5>
+<ol>
+<li>
+<p>Start from a given vertex <em>v</em> and visit it.</p>
+</li>
+<li>
+<p>Visit the first neighbor <em>w</em> of <em>v</em>. Then visit the first neighbor of <em>w</em> that has not already been visited, etc.</p>
+</li>
+<li>
+<p>If a node with no unexamined neighbors, then backup to the last visited node and examine its remaining neighbors.</p>
+</li>
+<li>
+<p>The search continues until all nodes of the graph have been examined.</p>
+</li>
+</ol>
+<h5 id="example-2">Example</h5>
+<div class="mermaid" id="id-16"></div>
+<p>$$
+\begin{bmatrix}
+V1 &amp;V2 &amp;V4 &amp;V8 &amp;V3 &amp;V6 &amp;V7 &amp;V5
+\end{bmatrix}
+$$</p>
+<h5 id="algorithm">Algorithm</h5>
+<p>Difficulties：</p>
+<ol>
+<li>
+<p>How to determine whether <em>v</em> has been visited?</p>
+</li>
+<li>
+<p>How to search the neighbor of <em>v</em>？</p>
+</li>
+</ol>
+<p>Solutions：</p>
+<ol>
+<li>
+<p>Using an array visited[n]. When <em>i</em> <em>th</em> vertex has been visited, visited[i]=TRUE.</p>
+</li>
+<li>
+<p>Varying by different data structure:</p>
+</li>
+</ol>
+<blockquote>
+<p>• <strong>Adjacency Matrix</strong></p>
+<p>• <strong>Adjacency List</strong></p>
+</blockquote>
+<p>DFS uses backtracking. <strong>Recursion</strong> is a natural technique for such problems</p>
+<blockquote>
+<p>a <strong>stack</strong> is automatically maintained to make backtracking possible</p>
+</blockquote>
+<p>DFS</p>
+<ol>
+<li>
+<p>Visit the start vertex <em>v</em>.</p>
+</li>
+<li>
+<p>For each vertex <em>w</em> adjacent to <em>v</em> do:</p>
+</li>
+</ol>
+<blockquote>
+<p>• If <em>w</em> has not been visited, apply the Depth-First Search (DFS) algorithm with <em>w</em> as the start vertex.</p>
+</blockquote>
+<h5 id="code-2">Code</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="k">auto</span> <span class="n">MAX</span><span class="p">{</span> <span class="mi">500</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span><span class="n">MAX</span><span class="o">&gt;</span> <span class="n">visited</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">DFSTraverse</span><span class="p">(</span><span class="n">Graph</span> <span class="n">G</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">visited</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">visited</span><span class="p">[</span> <span class="n">k</span> <span class="p">])</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">DFS</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">k</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">DFS</span><span class="p">(</span><span class="n">Graph</span> <span class="n">G</span><span class="p">,</span> <span class="kt">int</span> <span class="n">v</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">visited</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">TRUE</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">	<span class="n">VISIT</span><span class="p">(</span><span class="n">v</span><span class="p">);</span> <span class="c1">// access to the v_th vertex in graph G
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="n">FirstAdjVex</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">v</span><span class="p">);</span> <span class="n">w</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">w</span> <span class="o">=</span> <span class="n">NextAdjVex</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">visited</span><span class="p">[</span><span class="n">w</span><span class="p">])</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">DFS</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">w</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">FirstAdjVex</span><span class="p">(</span><span class="n">ALGraph</span> <span class="n">G</span><span class="p">,</span> <span class="kt">int</span> <span class="n">v</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="cm">/*
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *returns the serial number of the first neighbor of the v th vertex in G. 
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *If v has no neighbors, it returns 0
+</span></span></span><span class="line"><span class="cl"><span class="cm">    */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">G</span><span class="p">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">v</span><span class="p">].</span><span class="n">firstarc</span> <span class="o">?</span> <span class="n">G</span><span class="p">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">v</span><span class="p">].</span><span class="n">firstarc</span><span class="o">-&gt;</span><span class="nl">adjvex</span> <span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">NextAdjVex</span><span class="p">(</span><span class="n">ALGraph</span> <span class="n">G</span><span class="p">,</span> <span class="kt">int</span> <span class="n">v</span><span class="p">,</span> <span class="kt">int</span> <span class="n">w</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="cm">/*
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *returns the serial number of the next neighbor of the v th vertex in G relative to the vertex w.
+</span></span></span><span class="line"><span class="cl"><span class="cm">    *Returns 0 if v has no next neighbor relative to the vertex w
+</span></span></span><span class="line"><span class="cl"><span class="cm">    */</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ArcNode</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">p</span> <span class="o">=</span> <span class="n">G</span><span class="p">.</span><span class="n">vetrices</span><span class="p">[</span><span class="n">v</span><span class="p">].</span><span class="n">firstarc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">while</span><span class="p">(</span><span class="n">p</span> <span class="o">&amp;&amp;</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">adjvex</span> <span class="o">!=</span> <span class="n">w</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">nextarc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">adjvex</span> <span class="o">==</span> <span class="n">w</span> <span class="o">&amp;&amp;</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">nextarc</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">nextarc</span><span class="o">-&gt;</span><span class="n">adjvex</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">else</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="algorithm-analysis">Algorithm Analysis</h5>
+<p>Let G=(V,E) be a graph with <em>n</em> vertices and <em>e</em> edges</p>
+<p>$Adjacency\ list:\ O(n+e)$</p>
+<p>$Adjacency\ matrix:\ O(n^2)$</p>
+<h4 id="bread-first-searchbfs">Bread-First Search(BFS)</h4>
+<h5 id="basic-idea-1">Basic idea</h5>
+<ol>
+<li>
+<p>Start from a given vertex <em>v</em> and visit it.</p>
+</li>
+<li>
+<p>Visit all neighbors of <em>v</em>.</p>
+</li>
+<li>
+<p>Then visit all neighbors of first neighbor <em>w</em> of <em>v</em>.</p>
+</li>
+<li>
+<p>Then visit all neighbors of second neighbor <em>x</em> of <em>v</em>, etc</p>
+</li>
+</ol>
+<h5 id="example-3">Example</h5>
+<div class="mermaid" id="id-17"></div>
+<p>$$
+\begin{bmatrix}
+V1 &amp;V2 &amp;V3 &amp;V4 &amp;V6 &amp;V7 &amp;V8 &amp;V5
+\end{bmatrix}
+$$</p>
+<h5 id="algorithm-1">Algorithm</h5>
+<blockquote>
+<p>BFS visits nodes level by level</p>
+</blockquote>
+<p>While visiting each node on a given level</p>
+<blockquote>
+<p>store it</p>
+<p>so that, we can return to it after completing this level</p>
+<p>so that nodes adjacent from it can be visited</p>
+</blockquote>
+<p>Because the first node visited on a given level should be the first one to which we return, a <strong>queue</strong> is an appropriate data structure for storing the nodes</p>
+<p>BFS</p>
+<ol>
+<li>
+<p>Visit the start vertex <em>v</em>.</p>
+</li>
+<li>
+<p>Initialize a queue to contain only the start vertex.</p>
+</li>
+<li>
+<p>While the queue is not empty do:</p>
+</li>
+</ol>
+<blockquote>
+<p>• Remove a vertex <em>v</em> from the queue.</p>
+</blockquote>
+<blockquote>
+<p>• For all vertices <em>w</em> adjacent to <em>v</em> do:</p>
+</blockquote>
+<blockquote>
+<p>– If w has not been visited then</p>
+<blockquote>
+<p>i. Visit <em>w</em>.
+ii. Add <em>w</em> to the queue.</p>
+</blockquote>
+</blockquote>
+<h5 id="code-3">Code</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">BFSTraverse</span><span class="p">(</span><span class="n">Graph</span> <span class="n">G</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">v</span><span class="o">++</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">visited</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">InitQueue</span><span class="p">(</span><span class="n">Q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">v</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">visited</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">visited</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">VISIT</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">EnQueue</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">v</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">EmptyQueue</span><span class="p">(</span><span class="n">Q</span><span class="p">))</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">                <span class="n">DeQueue</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span><span class="n">u</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">				<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="n">FirstAdjVex</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">u</span><span class="p">);</span> <span class="n">w</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">;</span> <span class="n">w</span> <span class="o">=</span> <span class="n">NextAdjVex</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">					<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">visited</span><span class="p">[</span><span class="n">w</span><span class="p">])</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">                        <span class="n">visited</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">                        <span class="n">VISIT</span><span class="p">(</span><span class="n">w</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">                        <span class="n">EnQueue</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">w</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span> <span class="c1">// end while
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="p">}</span> <span class="c1">// end if
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="algorithm-analysis-1">Algorithm Analysis</h5>
+<p>Let G=(V,E) be a graph with <em>n</em> vertices and <em>e</em> edges</p>
+<p>$Adjacency\ list:\ O(n+e)$</p>
+<p>$Adjacency\ matrix:\ O(n^2)$</p>
+<h4 id="for-adjacency-matrix-unweighted-directed-graph-in-c">For adjacency matrix unweighted directed Graph in C++</h4>
+<p>$$
+A[i][j]=\begin{cases}
+1\ if\ &lt;V_i,V_j&gt; \in E\ or\ (V_i,V_j)\in E\newline
+0\ otherwise
+\end{cases}
+$$</p>
+<h5 id="graph-1">Graph</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#pragma once
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;exception&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Graph</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">protected</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="o">*</span><span class="n">_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="o">**</span><span class="n">matrix</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Graph</span><span class="p">()</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Graph</span><span class="p">(</span><span class="n">T</span> <span class="n">data</span><span class="p">[],</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">setConnect</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="o">**</span><span class="n">args</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="na">[[nodiscard]]</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">size</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="o">&amp;</span><span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="o">*</span><span class="n">getOutDegree</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">~</span><span class="n">Graph</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">Graph</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="o">:</span><span class="n">_data</span><span class="p">{</span><span class="k">new</span> <span class="n">T</span><span class="p">[</span><span class="n">size</span><span class="p">]{}},</span> <span class="n">_size</span><span class="p">{</span><span class="n">size</span><span class="p">}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span> <span class="o">=</span> <span class="k">new</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="o">*</span><span class="p">[</span><span class="n">_size</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="p">[</span><span class="n">_size</span><span class="p">]{};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">setConnect</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="o">**</span><span class="n">args</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">!=</span> <span class="n">_size</span><span class="p">)</span> <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">size</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">T</span> <span class="o">&amp;</span><span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="k">operator</span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">_data</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="o">*</span><span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">getOutDegree</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">matrix</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::~</span><span class="n">Graph</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span><span class="p">[]</span> <span class="n">_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">delete</span><span class="p">[]</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span><span class="p">[]</span> <span class="n">matrix</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="dfs">DFS</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">VST</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">DFS</span><span class="p">(</span><span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">graph</span><span class="p">,</span> <span class="n">VST</span> <span class="o">&amp;</span><span class="n">visit</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="o">*</span><span class="n">statue</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">bool</span><span class="p">[</span><span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">()];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">statue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="n">stack</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">index</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">            <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">x</span> <span class="o">=</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">visit</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="n">x</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="n">graph</span><span class="p">.</span><span class="n">getOutDegree</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">j</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">            <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">x</span> <span class="o">=</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">visit</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="n">x</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="n">graph</span><span class="p">.</span><span class="n">getOutDegree</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">j</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span><span class="p">[]</span> <span class="n">statue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="bfs">BFS</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">VST</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BFS</span><span class="p">(</span><span class="n">Graph</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">graph</span><span class="p">,</span> <span class="n">VST</span> <span class="o">&amp;</span><span class="n">visit</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="o">*</span><span class="n">statue</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">bool</span><span class="p">[</span><span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">()];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">statue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="n">queue</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">index</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">            <span class="n">queue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">queue</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">x</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="n">front</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">queue</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">visit</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="n">x</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="n">graph</span><span class="p">.</span><span class="n">getOutDegree</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">queue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">j</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">            <span class="n">queue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">queue</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">x</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="n">front</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">queue</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">visit</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="n">x</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">statue</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">graph</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="n">graph</span><span class="p">.</span><span class="n">getOutDegree</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">statue</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">queue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">j</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span><span class="p">[]</span> <span class="n">statue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="connectivity">Connectivity</h3>
+<h4 id="definition-3">Definition</h4>
+<p>Connected</p>
+<blockquote>
+<p>An <strong>undirected graph</strong> is <strong>connected</strong> if there is a path <strong>from every vertex to every other vertex</strong></p>
+</blockquote>
+<p>Strongly connected</p>
+<blockquote>
+<p>A <strong>directed graph</strong> with this property is called <strong>strongly connected</strong></p>
+</blockquote>
+<p>Weakly connected</p>
+<blockquote>
+<p>If <strong>a directed graph is not strongly connected</strong>, but the <strong>underlying graph</strong>(without direction to the arcs)is <strong>connected</strong>, then the graph is said to be <strong>weakly connected</strong>.</p>
+</blockquote>
+<h4 id="minimal-cost-spanning-trees">Minimal Cost Spanning Trees</h4>
+<h5 id="spanning-trees">Spanning Trees</h5>
+<h6 id="definition-4">Definition</h6>
+<p>A spanning tree is any tree that consists solely of edges in G and that includes all the vertices(Contains all the vertices in the graph, but only enough n-1 edges to form a tree)</p>
+<p>$$
+E(G):T(tree\ edges)+N(nontree\ edges)\newline
+T:set\ of\ edges\ used\ during\ search\newline
+N:set\ of\ remaining\ edges\newline
+$$
+A spanning tree is a <strong>minimal connected subgraph</strong>, G’, of G such that <strong>V(G’)=V(G)</strong> and <strong>G’ is connected</strong></p>
+<h6 id="example-4">Example</h6>
+<div class="mermaid" id="id-18"></div>
+<p>Possible spanning trees</p>
+<div class="mermaid" id="id-19"></div>
+<div class="mermaid" id="id-20"></div>
+<div class="mermaid" id="id-21"></div>
+<h6 id="dfs-and-bfs">DFS and BFS</h6>
+<blockquote>
+<p>Either DFS or BFS can be used to create a spanning tree</p>
+</blockquote>
+<p>When <strong>DFS</strong> is used, the resulting spanning tree is known as a <strong>depth first spanning tree</strong></p>
+<p>When <strong>BFS</strong> is used, the resulting spanning tree is known as a <strong>breadth first spanning tree</strong></p>
+<h6 id="nontree-edge">Nontree edge</h6>
+<p>While adding a nontree edge into any spanning tree, this will create a <strong>cycle</strong></p>
+<h5 id="minimal-cost-spanning-trees-1">Minimal Cost Spanning Trees</h5>
+<h6 id="definition-5">Definition</h6>
+<p>The <strong>cost of a spanning tree</strong> of a <strong>weighted undirected graph</strong> is the sum of the costs of the edges in the spanning tree</p>
+<p>A <strong>Minimal Cost Spanning Tree (MST)</strong> is a spanning tree of <strong>least</strong> cost</p>
+<h4 id="algorithm-for-minimal-cost-spanning-tree">Algorithm for Minimal Cost Spanning Tree</h4>
+<blockquote>
+<p>$Prim$</p>
+<p>$Kruskal$</p>
+</blockquote>
+<h5 id="prim-algorithm">Prim algorithm</h5>
+<p>Let Graph $G = {V, E}$, the minimum cost spanning tree be $T={U, T_E }$ and $U=V, T_E\subseteq E\newline$.</p>
+<p>$Initially\rightarrow U={u_0 }, T_E=\empty$</p>
+<p>Adding edges and vertices to T one at a time</p>
+<ol>
+<li>
+<p><strong>Select the least cost edge</strong> $(u,v)$ that $u\in U\ and\ v\notin U$. Adding $v\ to\ U\ and\ (u,v)\ to\ T_E$</p>
+</li>
+<li>
+<p>It continues, until n-1 edges have been selected and U=V</p>
+</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">The</span> <span class="n">minimum</span> <span class="n">cost</span> <span class="n">spanning</span> <span class="n">tree</span> <span class="n">T</span> <span class="o">=</span> <span class="p">{</span><span class="n">U</span><span class="p">,</span><span class="n">TE</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="n">U</span> <span class="o">=</span> <span class="p">{</span><span class="n">u0</span><span class="p">};</span> 
+</span></span><span class="line"><span class="cl"><span class="n">TE</span> <span class="o">=</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="n">T</span> <span class="n">contains</span> <span class="n">fewer</span> <span class="n">than</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="n">edges</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">let</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="n">be</span> <span class="n">a</span> <span class="n">least</span> <span class="n">cost</span> <span class="n">edge</span> <span class="n">such</span> <span class="n">that</span> <span class="n">u</span> <span class="n">in</span> <span class="n">U</span> <span class="n">and</span> <span class="n">v</span> <span class="n">notin</span> <span class="n">U</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">there</span> <span class="n">is</span> <span class="n">no</span> <span class="n">such</span> <span class="n">edge</span> <span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">add</span> <span class="n">v</span> <span class="n">to</span> <span class="n">U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">add</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="n">to</span> <span class="n">TE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">T</span> <span class="n">contains</span> <span class="n">fewer</span> <span class="n">than</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="n">edges</span><span class="p">)</span><span class="c1">//fail
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">printf</span><span class="p">(</span><span class="err">“</span><span class="n">No</span> <span class="n">spanning</span> <span class="n">tree</span><span class="err">\</span><span class="n">n</span><span class="err">”</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="kruskal-algorithm">Kruskal algorithm</h5>
+<p>Build a Minimum cost Spanning Tree (MST) T by <strong>adding edges to T one at a time</strong></p>
+<p>Select the edges for inclusion in T <strong>in non-decreasing order of the cost</strong></p>
+<p>An edge is added to T if it <strong>does not form a cycle</strong></p>
+<p>Since G is connected and has $n &gt; 0$ vertices, exactly n-1 edges will be selected</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">TE</span><span class="o">=</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">((</span><span class="n">T</span> <span class="n">contains</span> <span class="n">less</span> <span class="n">than</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="n">edges</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">E</span> <span class="n">is</span> <span class="n">not</span> <span class="n">empty</span><span class="p">))</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">choose</span> <span class="n">a</span> <span class="n">least</span> <span class="n">cost</span> <span class="nf">edge</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="n">from</span> <span class="n">E</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">delete</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="n">from</span> <span class="n">E</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">((</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="n">does</span> <span class="n">not</span> <span class="n">create</span> <span class="n">a</span> <span class="n">cycle</span> <span class="n">in</span> <span class="n">T</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="n">add</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="n">to</span> <span class="n">T</span>
+</span></span><span class="line"><span class="cl">	<span class="k">else</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">discard</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">T</span> <span class="n">contains</span> <span class="n">fewer</span> <span class="n">than</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="n">edges</span><span class="p">)</span><span class="c1">//fail
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">printf</span> <span class="p">(</span><span class="err">“</span><span class="n">No</span> <span class="n">spanning</span> <span class="n">tree</span><span class="err">\</span><span class="n">n</span><span class="err">”</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="time-complexity-analysis">Time Complexity Analysis</h5>
+<p>$Prim’s\ algorithm:O(n^2)\newline$</p>
+<blockquote>
+<p>Regardless of the <strong>number of edges</strong> in the graph, it is suitable to find the minimum spanning tree of <strong>dense nets</strong></p>
+</blockquote>
+<p>$Kruskal’s\ algorithm:O(e\log e)\ (Merge\ Sort\ for\ edges)\newline$</p>
+<blockquote>
+<p>Regardless of the <strong>number of vertices</strong> in the graph, it is suitable to find the minimum spanning tree of <strong>sparse nets</strong></p>
+</blockquote>
+<h3 id="application-of-graph">Application of Graph</h3>
+<p>Application of <strong>Directed Acyclic (Acycline) Graph</strong></p>
+<ol>
+<li>
+<p>Topological Sort</p>
+</li>
+<li>
+<p>Critical Path</p>
+</li>
+</ol>
+<p>Shortest-Path Algorithms</p>
+<h4 id="topological-sort">Topological Sort</h4>
+<h5 id="definition-6">Definition</h5>
+<p>An ordering of vertices in a Directed Acyclic Graph, such that if there is a path from $v_i$ to $v_j$ , then $v_j$ appears <strong>after</strong> $v_i$ in the ordering</p>
+<h5 id="example-5">Example</h5>
+<p>An advanced placement course in a college training program</p>
+<h5 id="activity-on-vertexaovnetwork">Activity on Vertex(AOV)—Network</h5>
+<p>Vertices represent activity, and arcs represent directed graphs of priority relations between activities</p>
+<h5 id="notice-1">Notice</h5>
+<p>Topological ordering is <strong>not possible</strong> if <strong>there is a cycle in the graph</strong></p>
+<h5 id="a-simple-algorithm">A simple algorithm</h5>
+<h6 id="steps">steps</h6>
+<ol>
+<li>
+<p>Compute the in-degree of all vertices from the adjacency information of the graph</p>
+</li>
+<li>
+<p>Find any vertex <strong>with no incoming edges</strong></p>
+</li>
+<li>
+<p>Print this vertex, and <strong>remove it and its edges</strong></p>
+</li>
+<li>
+<p>Apply this strategy to the rest of the graph</p>
+</li>
+</ol>
+<h6 id="time-complexity-analysis-1">Time Complexity Analysis</h6>
+<p>$O(n^2)$</p>
+<h6 id="code-4">code</h6>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Topsort</span> <span class="p">(</span><span class="n">Graph</span> <span class="n">G</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">Counter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">Vertex</span> <span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">	<span class="k">for</span><span class="p">(</span><span class="n">Counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">Counter</span> <span class="o">&lt;</span> <span class="n">NumVertex</span><span class="p">;</span> <span class="n">counter</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">V</span> <span class="o">=</span> <span class="n">FindNewVertexOfInDegreeZero</span> <span class="p">();</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">V</span> <span class="o">==</span> <span class="n">NotAVertex</span><span class="p">)</span> <span class="p">{</span><span class="c1">//exit a circle
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Graph has a cycle&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="n">TopNum</span> <span class="p">[</span><span class="n">V</span><span class="p">]</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">;</span><span class="c1">//The order of print
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">for</span> <span class="p">(</span><span class="n">each</span> <span class="n">W</span> <span class="n">adjacent</span> <span class="n">from</span> <span class="n">V</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="n">Indegree</span><span class="p">[</span><span class="n">W</span><span class="p">]</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="an-improved-algorithm">An improved algorithm</h5>
+<h6 id="steps-1">steps</h6>
+<ol>
+<li>
+<p>Keep all the unassigned vertices of indegree 0 in a <strong>queue</strong>.</p>
+</li>
+<li>
+<p>While <strong>queue</strong> is not empty</p>
+<blockquote>
+<p>• Remove a vertex in the <strong>queue</strong>.</p>
+<p>• Decrement the indegree of all adjacent vertices.</p>
+<p>• If the indegree of an adjacent vertex becomes 0, <strong>enqueue</strong> the vertex</p>
+</blockquote>
+</li>
+<li>
+<p>The topological ordering is the order in which the vertices <strong>dequeue</strong></p>
+</li>
+</ol>
+<h6 id="time-complexity-analysis-2">Time Complexity Analysis</h6>
+<p>$O(n+e)\newline$</p>
+<h6 id="code-5">code</h6>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Topsort</span> <span class="p">(</span><span class="n">Graph</span> <span class="n">G</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">Queue</span> <span class="n">Q</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">Counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">Vertex</span> <span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">Q</span> <span class="o">=</span> <span class="n">CreateQueue</span> <span class="p">(</span><span class="n">NumVertex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="n">MakeEmpty</span> <span class="p">(</span><span class="n">Q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="n">each</span> <span class="n">vertex</span> <span class="n">V</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="n">Indegree</span> <span class="p">[</span><span class="n">V</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Enqueue</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">Q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">IsEmpty</span><span class="p">(</span><span class="n">Q</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">V</span> <span class="o">=</span> <span class="n">Dequeue</span><span class="p">(</span><span class="n">Q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">TopNum</span><span class="p">[</span><span class="n">V</span><span class="p">]</span> <span class="o">=</span> <span class="o">++</span><span class="n">Counter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//The topological ordering is the order in which the vertices dequeue
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="n">each</span> <span class="n">W</span> <span class="n">adjacent</span> <span class="n">from</span> <span class="n">V</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="o">--</span><span class="n">Indegree</span><span class="p">[</span><span class="n">W</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Enqueue</span><span class="p">(</span><span class="n">W</span><span class="p">,</span><span class="n">Q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">Counter</span> <span class="o">!=</span> <span class="n">NumBertex</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Graph has a cycle</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span> <span class="c1">//fail
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">DisposeQueue</span><span class="p">(</span><span class="n">Q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="critical-path">Critical Path</h4>
+<h6 id="aoe-activity-on-edge-network">AOE (Activity on Edge) Network</h6>
+<blockquote>
+<p>Vertex: Represents an event or a status</p>
+<p>Edge: represents an activity. An edge (v, w) means that event v must be done before w may begin</p>
+<p>Weight: Duration time of an activity</p>
+</blockquote>
+<p>~There is only one vertex whose in-degree is 0, and only one vertex whose out-degree is 0</p>
+<p>~No cycle</p>
+<p>~This type of a graph could be (and frequently) used to model projects</p>
+<h6 id="questions">Questions</h6>
+<blockquote>
+<p>What is the earliest completion time for the project?</p>
+<p>$\rightarrow The\ longest\ path\newline$</p>
+</blockquote>
+<blockquote>
+<p>Which activities can be delayed, and by how long, without affecting the minimum completion time?</p>
+<p>$\rightarrow Not\ critical\ activities\newline$</p>
+</blockquote>
+<h6 id="elements">Elements</h6>
+<p>e(i): earliest start time of $a_i\newline$</p>
+<p>l(i): latest start time of $a_i$ (without affecting the minimum completion time)</p>
+<p>e(i)=l(i): $a_i$ <strong>is a critical activity</strong>, all the activities on the critical path are critical activities</p>
+<p>ve(j): the earliest occurring time of $v_j\newline$</p>
+<p>vl(j): the latest occurring time of $v_j$ (without affecting the minimum completion time)</p>
+<p>$$
+V_j\stackrel{a_i}{\longrightarrow}V_k\newline
+$$</p>
+<p>If $a_i$ is represented by $&lt;j,k&gt;$, its duration time is $dut(&lt;j,k&gt;)\newline$</p>
+<p>then $e(i) = ve(j), l(i) = vl(k) - dut(&lt;j,k&gt;)\newline$</p>
+<h6 id="calculate">Calculate</h6>
+<ol>
+<li>
+<p>$From\ ve(0)=0: ve(j) = max(ve(i) + dut(&lt;i,j&gt;))\newline$</p>
+</li>
+<li>
+<p>$vl(n-1)=ve(n-1), from\ the\ last\ one:vl(i) = min(vl(j) - dut(&lt;i,j&gt;))\newline$</p>
+</li>
+</ol>
+<h6 id="time-complexity-analysis-3">Time Complexity Analysis</h6>
+<p>Suppose there are n events and e activities in AOE</p>
+<p>$The\ Time\ Complexity\ of\ whole\ algorithm\ is\ O(n+e)\newline$</p>
+<h4 id="shortest-paths-problems">Shortest Paths Problems</h4>
+<p>Input: A graph with weights or costs associated with each edge</p>
+<p>Output: The list of edges forming the shortest path</p>
+<p>Sample problems:</p>
+<blockquote>
+<p>Find shortest path between two named vertices</p>
+<p>Find shortest path from S to all other vertices——Single-Source Shortest Paths</p>
+<p>Find shortest path between all pairs of vertices——All-Pairs Shortest Paths</p>
+</blockquote>
+<h5 id="dijkstra-idea">Dijkstra idea</h5>
+<h6 id="step">step</h6>
+<p>All vertexes are divided into 2 groups</p>
+<blockquote>
+<p>S : the vertexes that have found the shortest path from $V_0$ to them</p>
+<p>V-S=T: The vertexes that have not calculated the distances</p>
+</blockquote>
+<p>Adding vertex in T to S in non-decreasing order of distances</p>
+<blockquote>
+<p>The distances from $V_0$ to vertexes in S is not longer than the distances from $V_0$ to any vertexes in T</p>
+</blockquote>
+<h6 id="algorithm-2">algorithm</h6>
+<p>For G(V,E) is expressed in Adjacency Matrix</p>
+<ol>
+<li>
+<p>Initially, $S={v_0}$; An array D[n] to store the distance and D[i] is the shortest distance from $v_0\ to\ v_i$</p>
+<blockquote>
+<p>If exist an edge $(v_0,v_i),D[i] =  w(v_0 ,v_i)\newline$
+If there is no such edge, then D[i]= +$\infty\newline$</p>
+</blockquote>
+</li>
+<li>
+<p>Select the minimal D[j] from V-S, then vertex $v_j$ is the destination of the currently shortest path, and D[j] is the shortest distance</p>
+</li>
+<li>
+<p>Adding $v_j$ to S,and for all vertexes $v_k\in V-S\newline$</p>
+</li>
+</ol>
+<blockquote>
+<p>$if\ D[j]+arcs[j][k]&lt;D[k]\newline then\ D[k]=D[j]+arcs[j][k]\newline$</p>
+</blockquote>
+<ol start="4">
+<li>Repeat processing (2),(3), until all vertexes are added into S</li>
+</ol>
+<h6 id="code-6">code</h6>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">int</span> <span class="n">PathMatrix</span><span class="p">[</span><span class="n">MAX</span><span class="p">][</span><span class="n">MAX</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">int</span> <span class="n">ShortPathTable</span><span class="p">[</span><span class="n">MAX</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">ShortestPath</span><span class="p">(</span><span class="n">MGraph</span> <span class="n">G</span><span class="p">,</span> <span class="kt">int</span> <span class="n">v0</span><span class="p">,</span> <span class="n">PathMatrix</span> <span class="o">&amp;</span><span class="n">P</span><span class="p">,</span> <span class="n">ShortPathTable</span> <span class="o">&amp;</span><span class="n">D</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">v</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">final</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">D</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">G</span><span class="p">.</span><span class="n">Edge</span><span class="p">[</span><span class="n">v0</span><span class="p">][</span><span class="n">v</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">w</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="n">P</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">&lt;</span> <span class="err">∞</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="n">P</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="n">v0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">			<span class="n">P</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="n">D</span><span class="p">[</span><span class="n">v0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="k">final</span><span class="p">[</span><span class="n">v0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">min</span> <span class="o">=</span> <span class="err">∞</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">w</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">final</span><span class="p">[</span><span class="n">w</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">				<span class="k">if</span> <span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">min</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">					<span class="n">v</span> <span class="o">=</span> <span class="n">w</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">					<span class="n">min</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">w</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">				<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="k">final</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">w</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">final</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">min</span> <span class="o">+</span> <span class="n">G</span><span class="p">.</span><span class="n">Edge</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="n">w</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">D</span><span class="p">[</span><span class="n">w</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="n">D</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">min</span> <span class="o">+</span> <span class="n">G</span><span class="p">.</span><span class="n">Edge</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="n">w</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">				<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">G</span><span class="p">.</span><span class="n">vexnum</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">					<span class="n">P</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">				<span class="n">P</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h6 id="time-complexity-analysis-4">Time Complexity Analysis</h6>
+<p>For Dijkstra’s Algorithm, the Time complexity is $O(n^2)\newline$</p>
+<p>For every vertex $u, v\in V, calculate\ d(u, v)\newline$</p>
+<p>Time complexity is $O(n^3)\newline$</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/data-structure/">Data Structure</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-11-11</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph" data-hashtags="Data Structure"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-hashtag="Data Structure"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" data-title="Graph"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/data-structures-and-algorithms/dynamic-programming/" class="prev" rel="prev" title="Dynamic Programming"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/data-structures-and-algorithms/searching/" class="next" rel="next" title="Searching">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nU((U))\nV((V))\nU--\u003eV","id-10":"graph LR\nvertex(vertex)\nfirstedge(first edge)\nvertex----firstedge","id-11":"graph TB\nA((A))\nB((B))\nC((C))\nD((D))\nA----B\nA----C\nB----D","id-12":"graph LR\nA[A]\n1[1-\u003eB]\n2[2-\u003eC]\nnullptr[nullptr-\u003eend]\nA--\u003e1\n1--\u003e2\n2--\u003enullptr\nB[B]\n0[0-\u003eA]\n3[3-\u003eD]\nB--\u003e0--\u003e3--\u003eq[nullptr]\nC[C]\nK[0-\u003eA]\nC--\u003eK--\u003e_[nullptr]\nD[D]\nL[1-\u003eA]\nD--\u003eL--\u003eP[nullptr]","id-13":"graph TB\na((a))\nb((b))\nc((c))\nd((d))\na--\u003eb\na--\u003ec\nc--\u003ed\nd--\u003ea","id-14":"graph LR\nvecdata[vexdata]====firstArc[firstArc]--\u003eadjvex[adjvex]====next[next]--\u003em[.......]","id-15":"graph LR\na[a]--\u003eb[3-\u003ed]--\u003e1[nullptr]\nc[b]--\u003ed[0-\u003ea]--\u003e2[nullptr]\ne[c]--\u003ef[0-\u003ea]--\u003e3[nullptr]\ng[d]--\u003eh[2-\u003ec]--\u003e4[nullptr]","id-16":"graph TB\nV1((V1))\nV2((V2))\nV3((V3))\nV4((V4))\nV5((V5))\nV6((V6))\nV7((V7))\nV8((V8))\nV1--\u003eV2\nV1--\u003eV3\nV2--\u003eV4\nV4--\u003eV8\nV3--\u003eV6\nV3--\u003eV7\nV6--\u003eV7\nV5--\u003eV2\nV5--\u003eV8","id-17":"graph TB\nV1((V1))\nV2((V2))\nV3((V3))\nV4((V4))\nV5((V5))\nV6((V6))\nV7((V7))\nV8((V8))\nV1--\u003eV2\nV1--\u003eV3\nV2--\u003eV4\nV4--\u003eV8\nV3--\u003eV6\nV3--\u003eV7\nV6--\u003eV7\nV5--\u003eV2\nV5--\u003eV8","id-18":"graph RL\nA((0))\nB((1))\nC((2))\nD((3))\nA----B\nA----C\nA----D\nB----C\nB----D\nC----D","id-19":"graph TB\nA((0))----B((1))----C((3))\nA((0))----D((2))","id-2":"graph LR\nV((V))\nU((U))\nV--\u003eU","id-20":"graph TB\nA((0))----B((1))\nA((0))----C((2))\nA((0))----D((3))","id-21":"graph TB\nA((0))----B((1))\nA----C((2))\nC---D((3))","id-3":"graph RL\nU((U))\nV((V))\nU----V","id-4":"graph LR\nA((0))\nB((1))\nC((2))\nD((3))\nA----B\nA----C\nA----D\nB----C\nB----D\nC----D","id-5":"graph TB\nA((0))\nB((1))\nC((2))\nA--\u003eB\nB--\u003eA\nB--\u003eC","id-6":"graph TB\nA((0))\nB((1))\nC((2))\nA--\u003eB\nB--\u003eA\nB--\u003eC","id-7":"graph TB\n0((0))\n1((1))\n2((2))\n3((3))\n4((4))\n5((5))\n6((6))\n0----1\n0----2\n1----3\n1----4\n2----5\n2----6","id-8":"graph TB\nA((0))\nB((1))\nC((2))\nA--\u003eB\nB--\u003eA\nB--\u003eC","id-9":"graph LR\nadjvex(adjvex)\ninfo(info)\nnext(next)\nadjvex----info\ninfo----next"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

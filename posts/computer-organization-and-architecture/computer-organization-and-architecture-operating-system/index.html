@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Computer Organization and Architecture Operating System - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Computer Organization and Architecture Operating System" />
+<meta property="og:description" content="Computer Organization and Architecture Operating System Support Outline Operating System Overview Scheduling Memory Management Operating System Overview 什么是操作系统 操作系统是一组主管并控制计算机操作、运用和运行硬件、软件资源和提供公共服务来组织用户交互的相" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-01-22T17:47:46+08:00" />
+<meta property="article:modified_time" content="2023-01-22T17:47:46+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Computer Organization and Architecture Operating System"/>
+<meta name="twitter:description" content="Computer Organization and Architecture Operating System Support Outline Operating System Overview Scheduling Memory Management Operating System Overview 什么是操作系统 操作系统是一组主管并控制计算机操作、运用和运行硬件、软件资源和提供公共服务来组织用户交互的相"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" /><link rel="prev" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-input-output/" /><link rel="next" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-aritmetic/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Computer Organization and Architecture Operating System",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-operating-system\/"
+        },"genre": "posts","keywords": "Computer Organization and Architecture","wordcount":  4149 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-operating-system\/","datePublished": "2023-01-22T17:47:46+08:00","dateModified": "2023-01-22T17:47:46+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Computer Organization and Architecture Operating System</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/computer-organization-and-architecture/"><i class="far fa-folder fa-fw"></i>Computer Organization and Architecture</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-01-22">2023-01-22</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4149 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#operating-system-support">Operating System Support</a>
+      <ul>
+        <li><a href="#outline">Outline</a></li>
+        <li><a href="#operating-system-overview">Operating System Overview</a>
+          <ul>
+            <li><a href="#operating-system-objectives-and-functions">Operating System Objectives and Functions</a>
+              <ul>
+                <li><a href="#objectives-and-functions">Objectives and Functions</a></li>
+                <li><a href="#characteristic">Characteristic</a></li>
+                <li><a href="#layers-of-a-computer-system">Layers of a Computer System</a></li>
+                <li><a href="#operating-system-services">Operating system services</a></li>
+                <li><a href="#os-as-a-resource-management">OS as a resource management</a></li>
+              </ul>
+            </li>
+            <li><a href="#types-of-operating-systems">Types of Operating Systems</a>
+              <ul>
+                <li><a href="#memory-layout-for-resident-monitor">Memory layout for resident monitor</a></li>
+                <li><a href="#required-hardware-support">Required hardware support</a></li>
+                <li><a href="#multi-programmed-batch-system">Multi-programmed batch system</a></li>
+                <li><a href="#time-sharing-systems">Time sharing systems</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#scheduling">Scheduling</a>
+          <ul>
+            <li><a href="#five-state-process-model">Five state process model</a></li>
+            <li><a href="#what-is-process---">What is process? ! ! !</a></li>
+            <li><a href="#process-elements">Process elements</a></li>
+            <li><a href="#process-control-block">Process control block</a></li>
+            <li><a href="#trace-of-the-process">Trace of the process</a></li>
+            <li><a href="#virtual-memory">Virtual memory</a></li>
+            <li><a href="#execution-of-a-process">Execution of a process</a></li>
+            <li><a href="#implications-of-this-new-strategy">Implications of this new strategy</a></li>
+            <li><a href="#wording-mode-of-os">Wording mode of OS</a>
+              <ul>
+                <li><a href="#process-scheduling---">Process scheduling ！ ！ ！</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#memory-management">Memory Management</a>
+          <ul>
+            <li><a href="#methods-of-memory-management">Methods of memory management</a>
+              <ul>
+                <li><a href="#swapping">Swapping</a></li>
+                <li><a href="#partitioning">Partitioning</a>
+                  <ul>
+                    <li><a href="#variable-sized-partitions">Variable sized partitions</a></li>
+                    <li><a href="#effect-of-dynamic-partitioning">Effect of Dynamic Partitioning</a></li>
+                    <li><a href="#problem-about-relocation">Problem about relocation</a></li>
+                  </ul>
+                </li>
+                <li><a href="#paging">Paging</a>
+                  <ul>
+                    <li><a href="#paging-table">Paging table</a></li>
+                    <li><a href="#allocation-of-free-frames">Allocation of free frames</a></li>
+                    <li><a href="#real-and-virtual-memory">Real and virtual memory</a></li>
+                    <li><a href="#inverted-page-table">Inverted page table</a></li>
+                    <li><a href="#translation-lookaside-buffer">Translation lookaside buffer</a></li>
+                  </ul>
+                </li>
+                <li><a href="#segmentation">Segmentation</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
+<h2 id="operating-system-support">Operating System Support</h2>
+<h3 id="outline">Outline</h3>
+<ul>
+<li>
+<p>Operating System Overview</p>
+</li>
+<li>
+<p>Scheduling</p>
+</li>
+<li>
+<p>Memory Management</p>
+</li>
+</ul>
+<h3 id="operating-system-overview">Operating System Overview</h3>
+<ul>
+<li>什么是操作系统</li>
+</ul>
+<blockquote>
+<p>操作系统是一组主管并控制计算机操作、运用和运行硬件、软件资源和提供公共服务来组织用户交互的相互关联的系统软件程序。根据运行的环境，操作系统可以分为桌面操作系统，手机操作系统，服务器操作系统，嵌入式操作系统等</p>
+</blockquote>
+<ul>
+<li>有哪些常用的操作系统
+<ul>
+<li>DOS</li>
+<li>windows</li>
+<li>UNIX</li>
+<li>Linux</li>
+<li>OS/2</li>
+<li>IOS,Android</li>
+<li>Mac OS</li>
+</ul>
+</li>
+</ul>
+<h4 id="operating-system-objectives-and-functions">Operating System Objectives and Functions</h4>
+<ul>
+<li>
+<p><strong>Operating system, or OS for short, is a computer program that manages computer hardware and software resources</strong></p>
+</li>
+<li>
+<p>The operating system deals with such basic matters as</p>
+<ul>
+<li>
+<p><strong>managing and configuring memory</strong></p>
+</li>
+<li>
+<p><strong>determining the priority of system resource supply and demand</strong></p>
+</li>
+<li>
+<p><strong>controlling input devices and output devices</strong></p>
+</li>
+<li>
+<p><strong>operating networks and managing file systems</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>The operating system also provides an operation interface for users to interact with the system</strong></p>
+</li>
+</ul>
+<h5 id="objectives-and-functions">Objectives and Functions</h5>
+<ul>
+<li>
+<p>A system program developed to improve resource utilization and enhance computer system performance</p>
+</li>
+<li>
+<p>Convenience</p>
+<ul>
+<li>
+<p>Shields the details of computer hardware</p>
+</li>
+<li>
+<p>Provides convenient interfaces for users</p>
+</li>
+<li>
+<p>Making the computer easier to use</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Efficiency</p>
+<ul>
+<li>
+<p>Process scheduling</p>
+</li>
+<li>
+<p>Memory management</p>
+</li>
+<li>
+<p>Fully exploit the power of computer</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="characteristic">Characteristic</h5>
+<ul>
+<li>
+<p>The most fundamental system program is the operating system</p>
+<ul>
+<li>
+<p>Provides an interface between the user and the computer</p>
+</li>
+<li>
+<p>Manages the computer resources</p>
+</li>
+<li>
+<p>Provides an environment for the application program execution</p>
+</li>
+<li>
+<p>Improves the efficiency and stability of program execution</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="layers-of-a-computer-system">Layers of a Computer System</h5>
+<ul>
+<li>
+<p>系统软件是指控制和协调计算机及外部设备,支持应用软件开发和运行的系统，主要功能是调度，监控和维护计算机系统</p>
+</li>
+<li>
+<p>系统软件包括操作系统和一系列基本的工具，比如编译器，数据库管理，存储器格式化，文件系统管理等，支持计算机系统正常运行并实现用户操作</p>
+</li>
+<li>
+<p>操作系统是最重要的系统软件，位于硬件和工具之间</p>
+</li>
+<li>
+<p>使得上层方便地访问和使用计算机系统提供的资源和服务</p>
+</li>
+</ul>
+<h5 id="operating-system-services">Operating system services</h5>
+<ul>
+<li>
+<p>Program creation</p>
+</li>
+<li>
+<p>Program execution</p>
+</li>
+<li>
+<p>Access to I/O devices</p>
+</li>
+<li>
+<p>Controlled access to files</p>
+</li>
+<li>
+<p>System access</p>
+</li>
+<li>
+<p>Error detection and response</p>
+</li>
+<li>
+<p>Accounting</p>
+</li>
+</ul>
+<h5 id="os-as-a-resource-management">OS as a resource management</h5>
+<ul>
+<li>
+<p>操作系统是一个计算机程序，执行也是由处理器来进行，通过给处理器提供一系列指令，来执行操作系统程序</p>
+</li>
+<li>
+<p><strong>操作系统不能一直占用了处理器，而是需要放弃对处理器的控制，让处理器去执行应用程序</strong>。之后，它再次获得控制权，为下一个应用程序的执行进行准备(System Call)</p>
+</li>
+<li>
+<p><strong>操作系统有一部分驻留在内存中，称为操作系统内核</strong></p>
+</li>
+<li>
+<p>操作系统还要对I/O的使用进行分配</p>
+</li>
+</ul>
+<h4 id="types-of-operating-systems">Types of Operating Systems</h4>
+<p><strong>Operating system support batch processing or not?</strong></p>
+<ul>
+<li>
+<p>Interactive</p>
+<ul>
+<li>
+<p>User usually interacts with the computer by keyboard or display</p>
+</li>
+<li>
+<p>Request to execute jobs or process transactions</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Batch</p>
+<ul>
+<li>
+<p>Multiple user programs are packaged and submits to the computer in batches for processing</p>
+</li>
+<li>
+<p>After processing, print the results</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Support multiple programs or not?</strong></p>
+<ul>
+<li>
+<p>Single program (<code>Uni</code>-programming)</p>
+<ul>
+<li>Processor can only process one program at a time</li>
+</ul>
+</li>
+<li>
+<p>Multi-programming (Multi-tasking)</p>
+<ul>
+<li>
+<p>Processor can process multiple programs at one time</p>
+</li>
+<li>
+<p>Multiple programs loaded into memory at the same time</p>
+</li>
+<li>
+<p>processor switches between programs and processes</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="memory-layout-for-resident-monitor">Memory layout for resident monitor</h5>
+<ul>
+<li>
+<p>多程序批量处理系统中，内存划分为监控程序和用户程序两个区域</p>
+<ul>
+<li>
+<p>监控程序包括：中断处理，设备驱动程序，作业排序，控制语言解释器</p>
+</li>
+<li>
+<p>通过监控程序，实现了作业的调度</p>
+</li>
+</ul>
+</li>
+<li>
+<p>用户程序提交之后，就可以按照顺序处理，不会浪费处理器</p>
+</li>
+</ul>
+<h5 id="required-hardware-support">Required hardware support</h5>
+<ul>
+<li>
+<p>Memory protection</p>
+<ul>
+<li>To protect the Monitor</li>
+</ul>
+</li>
+<li>
+<p>Timer</p>
+<ul>
+<li>To prevent a job monopolizing the system</li>
+</ul>
+</li>
+<li>
+<p>Privileged instructions</p>
+<ul>
+<li>Only executed by Monitor</li>
+<li>e.g. I/O</li>
+</ul>
+</li>
+<li>
+<p>Interrupts</p>
+<ul>
+<li>Allows operation system for relinquishing and regaining control</li>
+</ul>
+</li>
+</ul>
+<h5 id="multi-programmed-batch-system">Multi-programmed batch system</h5>
+<ul>
+<li>
+<p>Batch system performs monitoring and user programs <strong>in turn</strong>, which improves the utilization of the whole system</p>
+</li>
+<li>
+<p>I/O devices very slow</p>
+</li>
+<li>
+<p>Processors are also often idle</p>
+</li>
+<li>
+<p><strong>Multi-programmed batch systems</strong></p>
+<ul>
+<li>
+<p><strong>Memory load multiple user programs</strong></p>
+</li>
+<li>
+<p><strong>When one program is waiting for I/O, another can use the CPU</strong></p>
+</li>
+<li>
+<p><strong>CPU keeps working</strong></p>
+</li>
+<li>
+<p><strong>Core idea of modern operation system</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Single program</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png" title="/img/Computer Organization and Architecture/chapter8-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-1.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png, /img/Computer%20Organization%20and%20Architecture/chapter8-1.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-1.png" />
+    </a>
+<p><strong>Multi-Programming with two programs</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-2.png" title="/img/Computer Organization and Architecture/chapter8-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-2.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-2.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-2.png, /img/Computer%20Organization%20and%20Architecture/chapter8-2.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-2.png" />
+    </a>
+<p><strong>Multi-Programming with three programs</strong></p>
+<ul>
+<li>
+<p>同时有三个程序处于执行状态</p>
+</li>
+<li>
+<p>CPU等待状态的时间更少</p>
+</li>
+<li>
+<p>CPU效率更高</p>
+</li>
+</ul>
+<p><strong>Utilization</strong></p>
+<ul>
+<li>
+<p>单个程序逐个执行，总共需要30个时间单位</p>
+</li>
+<li>
+<p>多道程序同时执行，只需要15个时间单位</p>
+</li>
+<li>
+<p>节省了一半时间</p>
+</li>
+</ul>
+<h5 id="time-sharing-systems">Time sharing systems</h5>
+<ul>
+<li>
+<p><strong>Multi-programmed batch system</strong></p>
+<ul>
+<li>
+<p><strong>Improve the efficiency of system operation</strong></p>
+</li>
+<li>
+<p><strong>Disadvantage is that the response to users is not timely</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>For multiple interactive job scenarios, a time-sharing system is proposed</strong></p>
+<ul>
+<li>
+<p><strong>Multiple users to share processor time and interact with the processor</strong></p>
+</li>
+<li>
+<p><strong>Operating system responds to each user&rsquo;s request in time slices computer</strong></p>
+</li>
+<li>
+<p><strong>For each user, he thinks the processor only serves him</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="scheduling">Scheduling</h3>
+<ul>
+<li>
+<p><strong>Key to multi-programming</strong></p>
+</li>
+<li>
+<p><strong>Determines the efficiency of multiprogramming</strong></p>
+</li>
+<li>
+<p>Includes long term, medium term, short term</p>
+<ul>
+<li>
+<p><strong>Long term: determines the number of processes added to the pending process pool</strong></p>
+</li>
+<li>
+<p><strong>Medium term: determines the number of processes added to main memory</strong></p>
+</li>
+<li>
+<p><strong>Short term: decide which process the processor will execute</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="five-state-process-model">Five state process model</h4>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>新建状态：调度程序提交一个程序，操作系统为这个程序创建一个进程，并将进程移入就绪状态</p>
+</li>
+<li>
+<p>就绪状态：进程已经准备就绪，等待处理器的执行</p>
+</li>
+<li>
+<p>运行状态：进程正在由处理器执行</p>
+</li>
+<li>
+<p>等待状态：进程在等待资源，处于挂起状态</p>
+</li>
+<li>
+<p>终止状态：进程运行结束</p>
+</li>
+</ul>
+<h4 id="what-is-process---">What is process? ! ! !</h4>
+<ul>
+<li>
+<p><strong>A program in execution</strong></p>
+<ul>
+<li>
+<p><strong>An instance of a program running on a computer</strong></p>
+</li>
+<li>
+<p><strong>The entity that can be assigned to and executed on a processor</strong></p>
+</li>
+<li>
+<p><strong>A unit of activity characterized by the execution of a sequence of instructions, a current state, and an associated set of system instructions</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="process-elements">Process elements</h4>
+<ul>
+<li>
+<p>A process is comprised of</p>
+<ul>
+<li>
+<p><strong>Program code (possibly shared)</strong></p>
+</li>
+<li>
+<p><strong>A set of data</strong></p>
+</li>
+<li>
+<p><strong>A number of attributes describing the state of the process</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Process elements</p>
+<ul>
+<li>
+<p><strong>Identifier</strong></p>
+</li>
+<li>
+<p><strong>State</strong></p>
+</li>
+<li>
+<p><strong>Priority</strong></p>
+</li>
+<li>
+<p><strong>Program counter</strong></p>
+</li>
+<li>
+<p><strong>Memory pointers</strong></p>
+</li>
+<li>
+<p><strong>Context data</strong></p>
+</li>
+<li>
+<p><strong>I/O status information</strong></p>
+</li>
+<li>
+<p><strong>Accounting information</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="process-control-block">Process control block</h4>
+<ul>
+<li>
+<p><strong>Contains the process elements</strong></p>
+</li>
+<li>
+<p><strong>Created and manage by the operating system</strong></p>
+</li>
+<li>
+<p><strong>Allows support for multiple processes</strong></p>
+</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<h4 id="trace-of-the-process">Trace of the process</h4>
+<ul>
+<li>
+<p>The behavior of an individual process is shown by listing the sequence of instructions that are executed</p>
+<ul>
+<li><strong>This list is called a Trace</strong></li>
+</ul>
+</li>
+<li>
+<p>Processor needs to execute multiple processes one by one</p>
+<ul>
+<li>
+<p><strong>Dispatcher is responsible for scheduling the process</strong></p>
+</li>
+<li>
+<p><strong>Dispatcher is a small program which switches the processor from one process to another</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-3.png" title="/img/Computer Organization and Architecture/chapter8-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-3.png" data-sub-html="<h2>trace</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-3.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-3.png, /img/Computer%20Organization%20and%20Architecture/chapter8-3.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-3.png" />
+    </a><figcaption class="image-caption"><code>trace</code></figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-4.png" title="/img/Computer Organization and Architecture/chapter8-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-4.png" data-sub-html="<h2>trace</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-4.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-4.png, /img/Computer%20Organization%20and%20Architecture/chapter8-4.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-4.png" />
+    </a><figcaption class="image-caption"><code>trace</code></figcaption>
+    </figure>
+<h4 id="virtual-memory">Virtual memory</h4>
+<ul>
+<li>
+<p>虚拟存储器是内存管理的一种技术，允许程序从逻辑的角度对内存进行寻址，而不考虑物理上可用的内存空间</p>
+</li>
+<li>
+<p><strong>本质上是一种内存扩充技术，不会使内存的物理空间大小发生改变，但是能够使程序访问内存的方式更灵活</strong></p>
+</li>
+<li>
+<p><strong>由于虚拟内存的存在，所以程序中可以只将其中的一部分加载到物理内存中。只有当需要的程序段不在内存中的时候，才通过换页的方式将它加载到内存中</strong></p>
+</li>
+</ul>
+<h4 id="execution-of-a-process">Execution of a process</h4>
+<ul>
+<li>
+<p><strong>Entire program does not need to be loaded to memory</strong></p>
+<ul>
+<li>
+<p><strong>Operating system brings into main memory a few pieces of the program</strong></p>
+</li>
+<li>
+<p><strong>Resident set - portion of process that is in main memory</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>An interrupt is generated when an address is needed that is not in main memory</strong></p>
+<ul>
+<li><strong>Operating system places the process in a blocking state</strong></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Piece of process that contains the logical address is brought into main memory</strong></p>
+<ul>
+<li>
+<p><strong>Operating system issues a disk I/O Read request</strong></p>
+</li>
+<li>
+<p><strong>Another process is dispatched to run while the disk I/O takes place</strong></p>
+</li>
+<li>
+<p><strong>An interrupt is issued when disk I/O complete which causes the operating system to place the affected process in the Ready state</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="implications-of-this-new-strategy">Implications of this new strategy</h4>
+<ul>
+<li>
+<p>More processes may be maintained in main memory</p>
+<ul>
+<li>
+<p>Only load in some of the pieces of each process</p>
+</li>
+<li>
+<p>With so many processes in main memory, it is very likely a process will be in the Ready state at any particular time</p>
+</li>
+</ul>
+</li>
+<li>
+<p>A process may be larger than all of main memory</p>
+</li>
+</ul>
+<h4 id="wording-mode-of-os">Wording mode of OS</h4>
+<ul>
+<li>
+<p><strong>操作系统中维护一个长期队列和一个短期队列</strong></p>
+</li>
+<li>
+<p><strong>长期队列是等待系统资源的作业列表，短期队列包含所有就绪状态的进程</strong></p>
+</li>
+<li>
+<p><strong>中断发生时，操作系统接管处理器的控制权，执行中断处理程序</strong></p>
+</li>
+<li>
+<p><strong>进程调用服务时，操作系统执行服务调用处理程序</strong></p>
+</li>
+<li>
+<p><strong>中断或服务调用程序处理完成后，短期调度会调度某个进程进入到运行状态</strong></p>
+</li>
+<li>
+<p><strong>每个I/O设备有一个I/O队列</strong></p>
+</li>
+</ul>
+<h5 id="process-scheduling---">Process scheduling ！ ！ ！</h5>
+<ul>
+<li>
+<p><strong>进程请求进入长期队列</strong></p>
+</li>
+<li>
+<p><strong>进程的请求满足后，进程进入就绪状态并进入短期队列</strong></p>
+</li>
+<li>
+<p><strong>如果进程请求I/O，则进入I/O队列</strong></p>
+</li>
+<li>
+<p><strong>I/O完成后，继续进入短期队列，完成进程的执行</strong></p>
+</li>
+</ul>
+<h3 id="memory-management">Memory Management</h3>
+<ul>
+<li>
+<p><strong><code>Uni</code>-program</strong></p>
+<ul>
+<li>
+<p><strong>Memory split into two</strong></p>
+</li>
+<li>
+<p><strong>One for Operating System (monitor)</strong></p>
+</li>
+<li>
+<p><strong>One for currently executing program</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong><code>Multi</code>-program</strong></p>
+<ul>
+<li><strong>“User” part is sub-divided and shared among active processes</strong></li>
+</ul>
+</li>
+<li>
+<p>Memory management</p>
+<ul>
+<li>
+<p>Make full use of the memory space</p>
+</li>
+<li>
+<p>keep the CPU busy</p>
+</li>
+<li>
+<p>avoid idle CPU due to IO waiting</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="methods-of-memory-management">Methods of memory management</h4>
+<ul>
+<li>
+<p>Swapping</p>
+</li>
+<li>
+<p>Partitioning</p>
+</li>
+<li>
+<p>Paging</p>
+</li>
+<li>
+<p>Virtual Memory</p>
+</li>
+<li>
+<p>Translation Lookaside Buffer</p>
+</li>
+<li>
+<p>Segmentation</p>
+</li>
+</ul>
+<h5 id="swapping">Swapping</h5>
+<ul>
+<li>
+<p>Problem</p>
+<ul>
+<li>
+<p><strong>I/O is so slow compared with CPU</strong></p>
+</li>
+<li>
+<p>Even in multi-programming system，CPU is idle most of the time</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Solutions</p>
+<ul>
+<li>
+<p>Increase main memory，more process in memory</p>
+<ul>
+<li>
+<p>Expensive</p>
+</li>
+<li>
+<p>Leads to larger programs</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Swapping</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>What is swapping?</strong></p>
+<ul>
+<li>
+<p>Long term queue of processes stored on disk</p>
+<ul>
+<li>
+<p>Processes “swapped” in as space becomes available</p>
+</li>
+<li>
+<p>As a process completes it is moved out of main memory</p>
+</li>
+</ul>
+</li>
+<li>
+<p>If none of the processes in memory are ready (i.e. all I/O blocked)</p>
+<ul>
+<li>
+<p>Swap out a blocked process to intermediate queue</p>
+</li>
+<li>
+<p>Swap in a ready process or a new process</p>
+</li>
+<li>
+<p><strong>Swapping is an I/O process</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Use of swapping</strong></p>
+<ul>
+<li>
+<p><strong>简单的进程调度中，磁盘维护一个长周期队列。当内存中有作业完成了，会将它从内存中去掉，同时将长周期队列中的一个作业放到内存中</strong></p>
+</li>
+<li>
+<p><strong>交换调度中，磁盘中维护了一个中间队列。阻塞进程将会被“交换”到中间队列中，并从中间队列中调入一个已经就绪的进程。如果中间队列没有就绪的进程，就从长期队列中调度一个新的进程到内存中</strong></p>
+</li>
+<li>
+<p><strong>通过中间队列，可以在进程均处于阻塞的时候进行进程的有效调度，提高CPU效率</strong></p>
+</li>
+</ul>
+<h5 id="partitioning">Partitioning</h5>
+<ul>
+<li>
+<p>Swapping does not explain how memory is managed</p>
+</li>
+<li>
+<p><strong>Memory management mode</strong></p>
+<ul>
+<li>
+<p>Partitioning</p>
+</li>
+<li>
+<p>Paging</p>
+</li>
+<li>
+<p>Segmentation</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Partitioning: Splitting memory into sections to allocate to processes (including Operating System)</strong></p>
+</li>
+</ul>
+<p><strong>Fixed partitioning</strong></p>
+<ul>
+<li>
+<p><strong>分区大小固定，但不一定都是一样大</strong></p>
+</li>
+<li>
+<p>进程分配内存时，分配到<strong>能容纳它的最小分区</strong></p>
+</li>
+<li>
+<p><strong>存在内存浪费的现象</strong></p>
+</li>
+<li>
+<p>采取非固定大小分区可能会更好</p>
+</li>
+</ul>
+<h6 id="variable-sized-partitions">Variable sized partitions</h6>
+<ul>
+<li>
+<p>Allocate exactly the required memory to a process</p>
+</li>
+<li>
+<p>This leads to a hole at the end of memory, too small to use</p>
+<ul>
+<li>Only one small hole - less waste</li>
+</ul>
+</li>
+<li>
+<p><strong>When all processes are blocked, swap out a process and bring in another process，leads to another hole</strong></p>
+</li>
+<li>
+<p><strong>A process is completed and swapped out，new process is swapped in. May leads to a hole</strong></p>
+</li>
+<li>
+<p>Eventually have lots of holes (called fragmentation)</p>
+</li>
+<li>
+<p>Solutions</p>
+<ul>
+<li>
+<p><strong>Coalesce - Join adjacent holes into one large hole</strong></p>
+</li>
+<li>
+<p><strong>Compaction- From time to time go through memory and move all hole into one free block</strong> (like $\rightarrow$ <code>disk de-fragmentation</code>)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h6 id="effect-of-dynamic-partitioning">Effect of Dynamic Partitioning</h6>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-5.png" title="/img/Computer Organization and Architecture/chapter8-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-5.png" data-sub-html="<h2>Dynamic Partitioning</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-5.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-5.png, /img/Computer%20Organization%20and%20Architecture/chapter8-5.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-5.png" />
+    </a><figcaption class="image-caption"><code>Dynamic Partitioning</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>分配进程1~3的时候，按需求分配，剩下$4M$的空间</p>
+</li>
+<li>
+<p>进程2交换出去了，进程4进来了。进程4只有$8M$，在进程4和进程3之间，形成了一个$6M$的空块</p>
+</li>
+<li>
+<p>进程1交换出去了，进程2进来。进程1有$20M$，进程2只有$14M$，在进程2和进程4之间，又形成了一个$6M$的空块</p>
+</li>
+<li>
+<p>有2个$6M$空块和1个$4M$空块</p>
+</li>
+</ul>
+<h6 id="problem-about-relocation">Problem about relocation</h6>
+<ul>
+<li>
+<p>No guarantee that process will load into the same place in memory</p>
+</li>
+<li>
+<p>Instructions contain addresses information</p>
+<ul>
+<li>
+<p>Locations of data</p>
+</li>
+<li>
+<p>Addresses for instructions (e.g. branching)</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>If a fixed address is used, memory address of process changes after the process is swapped out and then swapped in</strong></p>
+</li>
+<li>
+<p><strong>Data and instructions cannot be addressed</strong></p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Using logical address and physical address</p>
+<ul>
+<li>
+<p>Logical address - relative to beginning of program</p>
+</li>
+<li>
+<p>Physical address - actual location in memory (this time)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Starting unit address of the current process is set as the base address</p>
+</li>
+<li>
+<p>Addressing data and instructions using logical addresses in programs</p>
+</li>
+</ul>
+<h5 id="paging">Paging</h5>
+<ul>
+<li>
+<p>Partitioning will lead to waste of memory</p>
+</li>
+<li>
+<p><strong>Paging Management</strong></p>
+<ul>
+<li>
+<p><strong>Split memory into equal sized, small chunks -page frames</strong></p>
+</li>
+<li>
+<p><strong>Split programs (processes) into equal sized small chunks – pages</strong></p>
+</li>
+<li>
+<p><strong>Allocate the required number page frames to a process</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Operating System completes paging management</p>
+<ul>
+<li>
+<p><strong>A process does not require contiguous page frames</strong></p>
+</li>
+<li>
+<p><strong>Use page table to keep track</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Each process has its own page table</p>
+</li>
+<li>
+<p><strong>Each page table entry contains the frame number of the corresponding page in main memory</strong></p>
+</li>
+<li>
+<p><strong>Two extra bits are needed to indicate</strong></p>
+<ul>
+<li>
+<p><strong>whether the page is in main memory or not</strong></p>
+</li>
+<li>
+<p><strong>Whether the contents of the page has been altered since it was last loaded</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h6 id="paging-table">Paging table</h6>
+<ul>
+<li>
+<p><strong>寻址的虚拟地址为“页号+偏移量”</strong></p>
+</li>
+<li>
+<p>页表中指明了这个页对应的内存的帧序号</p>
+</li>
+<li>
+<p><strong>通过[页</strong>$\rightarrow$<strong>帧]的转换，以及页内的偏移量，就可以得到逻辑地址在内存中的实际地址</strong></p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-6.png" title="/img/Computer Organization and Architecture/chapter8-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-6.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-6.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-6.png, /img/Computer%20Organization%20and%20Architecture/chapter8-6.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-6.png" />
+    </a>
+<h6 id="allocation-of-free-frames">Allocation of free frames</h6>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-7.png" title="/img/Computer Organization and Architecture/chapter8-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-7.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-7.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-7.png, /img/Computer%20Organization%20and%20Architecture/chapter8-7.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-7.png" />
+    </a>
+<ul>
+<li>
+<p>内存中帧13-15是空闲的，分配给了进程A地第1-3页</p>
+</li>
+<li>
+<p>帧16、17其他进程占用</p>
+</li>
+<li>
+<p>帧18分配给进程A的0页</p>
+</li>
+<li>
+<p><strong>分配帧的时候，既不要求是连续的，也不要求前后顺序</strong></p>
+</li>
+</ul>
+<h6 id="real-and-virtual-memory">Real and virtual memory</h6>
+<ul>
+<li>
+<p>On the basis of logical address, expand the memory, which leads to the concept of virtual memory</p>
+</li>
+<li>
+<p><strong>Real memory</strong></p>
+<ul>
+<li><strong>Main memory, the actual RAM</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Virtual memory</strong></p>
+<ul>
+<li><strong>Memory on disk</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Allows for effective multiprogramming and relieves the user of tight constraints of main memory</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Support deeded for virtual memory</strong></p>
+<ul>
+<li>
+<p><strong>Hardware must support paging and segmentation</strong></p>
+</li>
+<li>
+<p><strong>Operating system must be able to manage the movement of pages and/or segments between secondary memory and main memory</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Virtual memory</strong></p>
+<ul>
+<li>
+<p>Page load-demand paging</p>
+<ul>
+<li>
+<p>Do not require all pages of a process in memory</p>
+</li>
+<li>
+<p>Bring in pages as required</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Page fault</p>
+<ul>
+<li>
+<p>Required page is not in memory</p>
+</li>
+<li>
+<p>Operating System must swap in required page</p>
+</li>
+<li>
+<p>May need to swap out a page to make space</p>
+</li>
+<li>
+<p>Select page to throw out based on recent history</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Thrashing</strong></p>
+<ul>
+<li>
+<p>Too many processes in too little memory</p>
+</li>
+<li>
+<p><strong>Operating System spends all its time swapping</strong></p>
+</li>
+<li>
+<p>Little or no real work is done</p>
+</li>
+<li>
+<p>Disk light is on all the time</p>
+</li>
+<li>
+<p><strong>Solutions</strong></p>
+<ul>
+<li>
+<p><strong>Good page replacement algorithms</strong></p>
+</li>
+<li>
+<p><strong>Reduce number of processes running</strong></p>
+</li>
+<li>
+<p><strong>Fit more memory</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Advantage of virtual memory</strong></p>
+<ul>
+<li>
+<p>Do not need all of a process in memory for it to run</p>
+</li>
+<li>
+<p>Swap in pages as required</p>
+</li>
+<li>
+<p><strong>So can now run processes that are bigger than total memory available!</strong></p>
+</li>
+<li>
+<p><strong>Main memory is called real memory</strong></p>
+</li>
+<li>
+<p><strong>User/programmer sees much bigger memory - virtual memory</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Page tables</strong></p>
+<ul>
+<li>
+<p>Each process must have a page table to convert logical address or virtual address to physical address</p>
+</li>
+<li>
+<p>Some processes are very large, and their page tables themselves are very large</p>
+<ul>
+<li>
+<p><strong>Page tables are also stored in virtual memory</strong></p>
+</li>
+<li>
+<p><strong>When a process is running, part of its page table is in main memory</strong></p>
+</li>
+<li>
+<p><strong>Load the required page table through exchange</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png" title="/img/Computer Organization and Architecture/chapter8-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-1.png" data-sub-html="<h2>Two-Level Hierarchical Page Table</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-1.png, /img/Computer%20Organization%20and%20Architecture/chapter8-1.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-1.png" />
+    </a><figcaption class="image-caption"><code>Two-Level Hierarchical Page Table</code></figcaption>
+    </figure>
+<p><strong>Address Translation for Hierarchical page table</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-9.png" title="/img/Computer Organization and Architecture/chapter8-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-9.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-9.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-9.png, /img/Computer%20Organization%20and%20Architecture/chapter8-9.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-9.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-9.png" />
+    </a>
+<ul>
+<li>
+<p>虚拟地址包括根页表段、用户页表段和页内偏移量</p>
+</li>
+<li>
+<p>根据根页表指针和根页表段，得到用户页表段的基准地址</p>
+</li>
+<li>
+<p>加上用户页表段地址，得到用户页表地址</p>
+</li>
+<li>
+<p>再加上页内偏移量，得到在实际内存中的地址</p>
+</li>
+</ul>
+<hr>
+<p><strong>Problem about page tables</strong></p>
+<ul>
+<li>
+<p>A drawback of the type of page tables is that their size is proportional to that of the virtual address space</p>
+<ul>
+<li>
+<p>Each virtual space page needs a row in the page table</p>
+</li>
+<li>
+<p>If the virtual space of the user program is large, the page table will also be very large</p>
+</li>
+</ul>
+</li>
+<li>
+<p>An alternative is Inverted Page Tables</p>
+</li>
+</ul>
+<h6 id="inverted-page-table">Inverted page table</h6>
+<ul>
+<li>
+<p>Used on <code>PowerPC</code>, <code>UltraSPARC</code>, and <code>IA-64 architecture</code></p>
+</li>
+<li>
+<p><strong>Page number portion of a virtual address is mapped into a hash value</strong></p>
+</li>
+<li>
+<p><strong>Hash value points to inverted page table</strong></p>
+</li>
+<li>
+<p>Fixed proportion of real memory is required for the tables regardless of the number of processes</p>
+</li>
+<li>
+<p><strong>反向页表的行数是物理内存的帧数，和进程数无关</strong></p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Each entry in the page table includes</p>
+<ul>
+<li>
+<p>Page number</p>
+</li>
+<li>
+<p>Process identifier</p>
+<ul>
+<li>The process that owns this page</li>
+</ul>
+</li>
+<li>
+<p>Control bits</p>
+<ul>
+<li>includes flags, such as valid, referenced, etc</li>
+</ul>
+</li>
+<li>
+<p><strong>Chain pointer</strong></p>
+<ul>
+<li><strong>the index value of the next entry in the chain</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Use of inverted page table</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter8-10.png" title="/img/Computer Organization and Architecture/chapter8-10.png" data-thumbnail="/img/Computer Organization and Architecture/chapter8-10.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter8-10.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter8-10.png, /img/Computer%20Organization%20and%20Architecture/chapter8-10.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter8-10.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter8-10.png" />
+    </a>
+<ul>
+<li>
+<p>虚拟地址中的页号通过散列函数，形成一个散列值，映射到反向页表</p>
+</li>
+<li>
+<p>通过页号的散列值和进程ID，确定虚拟地址的页是否在内存中</p>
+</li>
+<li>
+<p>通过链技术来提高查找的速度</p>
+</li>
+</ul>
+<h6 id="translation-lookaside-buffer">Translation lookaside buffer</h6>
+<ul>
+<li>
+<p>Every virtual memory reference causes two physical memory access</p>
+<ul>
+<li>
+<p>Fetch page table entry</p>
+</li>
+<li>
+<p>Fetch data</p>
+</li>
+</ul>
+</li>
+<li>
+<p>To overcome this problem a high-speed cache is set up for page table entries</p>
+<ul>
+<li>
+<p>Called a Translation Lookaside Buffer (<code>TLB</code>)</p>
+</li>
+<li>
+<p>Contains page table entries that have been most recently used</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong><code>TLB</code> operation</strong></p>
+<ul>
+<li>
+<p>根据虚拟地址中的页地址，去快表中查找是否有页帧地址</p>
+</li>
+<li>
+<p>如果有，接就可以生成物理地址</p>
+</li>
+<li>
+<p>如果没有，就去看内存中的页表中是否有这个页</p>
+</li>
+<li>
+<p>如果在内存中的话，就先更新快表，然后生成物理地址</p>
+</li>
+<li>
+<p>如果也没有，就要去读取I/O，然后更新内存页表</p>
+</li>
+</ul>
+<h5 id="segmentation">Segmentation</h5>
+<ul>
+<li>
+<p>Paging is not (usually) visible to the programmer</p>
+</li>
+<li>
+<p>Segmentation is visible to the programmer</p>
+</li>
+<li>
+<p>Usually different segments allocated to program and data</p>
+</li>
+<li>
+<p>May be a number of program and data segments</p>
+</li>
+</ul>
+<hr>
+<p><strong>Advantage of segmentation</strong></p>
+<ul>
+<li>
+<p>Simplified management</p>
+<ul>
+<li>
+<p>Programmers need not know how much space data needs</p>
+</li>
+<li>
+<p>Data can be allocated to its own segment and can be dynamically expanded</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Allows programs to be altered and recompiled independently</p>
+</li>
+<li>
+<p>The segment can be shared among multiple processes</p>
+</li>
+<li>
+<p>Protections from assigning access privileges</p>
+</li>
+</ul>
+<hr>
+<p><strong>Segment tables</strong></p>
+<ul>
+<li>
+<p>Corresponding segment in main memory</p>
+</li>
+<li>
+<p>段需要有段表来实现地址转换</p>
+</li>
+<li>
+<p>虚拟地址中包含段号，从段表中找到该段号对应的段基址，就可以根据偏移量到内存中得到这个虚拟地址对应的物理地址</p>
+</li>
+</ul>
+<hr>
+<p><strong>Combined segmentation and paging</strong></p>
+<ul>
+<li>
+<p>程序员将进程分为若干个段</p>
+</li>
+<li>
+<p>系统将每个段分为多个页</p>
+</li>
+<li>
+<p>在进行地址转换的时候，根据段号，到段表中找到段基址，根据页号，到页表中找到对应的帧号，然后段基址和帧号结合，可以得到实际的物理地址</p>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/computer-organization-and-architecture/">Computer Organization and Architecture</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-01-22</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System" data-hashtags="Computer Organization and Architecture"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-hashtag="Computer Organization and Architecture"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/" data-title="Computer Organization and Architecture Operating System"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-input-output/" class="prev" rel="prev" title="Computer Organization and Architecture Input &amp; Output"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-aritmetic/" class="next" rel="next" title="Computer Organization and Architecture Computer Aritmetic">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(New)\nB(Ready)\nC(Running)\nD(Exit)\nE(Blocked)\nA--Admit--\u003eB--Dispatch--\u003eC--Release--\u003eD\nC--Timeout--\u003eB\nC--Event-Wait--\u003eE--Event-Occurs--\u003eB","id-2":"classDiagram\nclass SimplifiedProcessControlBlock {\n\tIdentifer\n\tState\n\tPriority\n\tProgram Counter\n\tMemory Pointers\n\tContext Data\n\tI/O Status Information\n\tAccounting Information\n\t...\n}"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

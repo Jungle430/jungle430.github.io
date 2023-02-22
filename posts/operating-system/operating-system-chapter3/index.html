@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Operating System Chapter3 多处理器编程：从入门到放弃 - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Operating System Chapter3 多处理器编程：从入门到放弃" />
+<meta property="og:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ 多处理器编程：从入门到放弃 Overview 复习 程序 (源代码S、二进制代码C) = 状态机 编译器 $C = \textrm{compile}(S)\newline$ 应用视角的操作系统 = syscall 指令 本次课回答的问题 Q: 在" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-01-01T19:59:41+08:00" />
+<meta property="article:modified_time" content="2023-01-01T19:59:41+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Operating System Chapter3 多处理器编程：从入门到放弃"/>
+<meta name="twitter:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ 多处理器编程：从入门到放弃 Overview 复习 程序 (源代码S、二进制代码C) = 状态机 编译器 $C = \textrm{compile}(S)\newline$ 应用视角的操作系统 = syscall 指令 本次课回答的问题 Q: 在"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" /><link rel="prev" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" /><link rel="next" href="https://Jungle430.github.io/posts/opencv/opencv-chapter2/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Operating System Chapter3 多处理器编程：从入门到放弃",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter3\/"
+        },"genre": "posts","keywords": "Operating System","wordcount":  4991 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter3\/","datePublished": "2023-01-01T19:59:41+08:00","dateModified": "2023-01-01T19:59:41+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter3 多处理器编程：从入门到放弃</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-01-01">2023-01-01</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4991 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 10 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#多处理器编程从入门到放弃">多处理器编程：从入门到放弃</a>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#入门">入门</a>
+          <ul>
+            <li><a href="#three-easy-pieces-并发">Three Easy Pieces: 并发</a></li>
+            <li><a href="#并发的基本单位线程">并发的基本单位：线程</a></li>
+            <li><a href="#入门threadh-简化的线程-api">入门：<code>thread.h</code> 简化的线程 API</a></li>
+            <li><a href="#入门-contd">入门 (cont&rsquo;d)</a></li>
+            <li><a href="#threadh-背后posix-threads"><code>thread.h</code> 背后：POSIX Threads</a></li>
+          </ul>
+        </li>
+        <li><a href="#放弃1原子性">放弃（1）：原子性</a>
+          <ul>
+            <li><a href="#例子山寨多线程支付宝">例子：山寨多线程支付宝</a></li>
+            <li><a href="#例子求和">例子：求和</a></li>
+            <li><a href="#原子性的丧失">原子性的丧失</a></li>
+            <li><a href="#原子性的丧失有没有感到后怕">原子性的丧失：有没有感到后怕？</a></li>
+            <li><a href="#实现原子性">实现原子性</a></li>
+          </ul>
+        </li>
+        <li><a href="#放弃2顺序">放弃（2）：顺序</a>
+          <ul>
+            <li><a href="#例子求和-再次出现">例子：求和 (再次出现)</a></li>
+            <li><a href="#顺序的丧失">顺序的丧失</a></li>
+            <li><a href="#实现源代码的按顺序翻译">实现源代码的按顺序翻译</a></li>
+          </ul>
+        </li>
+        <li><a href="#放弃-3可见性">放弃 (3)：可见性</a>
+          <ul>
+            <li><a href="#例子">例子</a></li>
+            <li><a href="#现代处理器处理器也是-动态-编译器">现代处理器：处理器也是 (动态) 编译器！</a></li>
+            <li><a href="#多处理器间即时可见性的丧失">多处理器间即时可见性的丧失</a></li>
+            <li><a href="#宽松内存模型-relaxedweak-memory-model">宽松内存模型 (Relaxed/Weak Memory Model)</a></li>
+            <li><a href="#实现顺序一致性">实现顺序一致性</a></li>
+          </ul>
+        </li>
+        <li><a href="#总结">总结</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="多处理器编程从入门到放弃">多处理器编程：从入门到放弃</h2>
+<h3 id="overview">Overview</h3>
+<p>复习</p>
+<ul>
+<li>程序 (源代码<code>S</code>、二进制代码<code>C</code>) = 状态机
+<ul>
+<li>编译器 $C = \textrm{compile}(S)\newline$</li>
+</ul>
+</li>
+<li>应用视角的操作系统 = syscall 指令</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 在多处理器时代，上面的理解应该作出怎样的变化？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>并发程序的状态机模型</li>
+<li>线程库 <code>thread.h</code></li>
+<li>多线程带来的麻烦</li>
+</ul>
+<h3 id="入门">入门</h3>
+<h4 id="three-easy-pieces-并发">Three Easy Pieces: 并发</h4>
+<blockquote>
+<p>Concurrent: existing, happening, or done <em>at the same time</em>.</p>
+<p>In computer science, concurrency refers to the ability of different parts or units of a program, algorithm, or problem to be executed out-of-order or in partial order, without affecting the final outcome. (Wikipedia)</p>
+</blockquote>
+<p>为什么在这门课 (先) 讲并发？</p>
+<ul>
+<li>讲并发
+<ul>
+<li><strong>操作系统是最早的并发程序之一</strong></li>
+<li>今天遍地都是多处理器系统 (为什么？)</li>
+</ul>
+</li>
+<li>先讲并发
+<ul>
+<li>实验是 bottom-up 的 (L1: 多处理器上的 <code>malloc</code>/<code>free</code>)</li>
+</ul>
+</li>
+</ul>
+<h4 id="并发的基本单位线程">并发的基本单位：线程</h4>
+<p>共享内存的多个执行流</p>
+<ul>
+<li>执行流拥有独立的堆栈/寄存器</li>
+<li>共享全部的内存 (指针可以互相引用)</li>
+</ul>
+<hr>
+<p>用状态机的视角就很容易理解了！</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-1.jpg" title="/img/Operating System/chapter3-1.jpg" data-thumbnail="/img/Operating System/chapter3-1.jpg" data-sub-html="<h2>手写(状态机,stack frame与共享内存)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-1.jpg"
+            data-srcset="/img/Operating%20System/chapter3-1.jpg, /img/Operating%20System/chapter3-1.jpg 1.5x, /img/Operating%20System/chapter3-1.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-1.jpg" />
+    </a><figcaption class="image-caption">手写(<code>状态机,stack frame与共享内存</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-2.jpg" title="/img/Operating System/chapter3-2.jpg" data-thumbnail="/img/Operating System/chapter3-2.jpg" data-sub-html="<h2>手写(线程)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-2.jpg"
+            data-srcset="/img/Operating%20System/chapter3-2.jpg, /img/Operating%20System/chapter3-2.jpg 1.5x, /img/Operating%20System/chapter3-2.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-2.jpg" />
+    </a><figcaption class="image-caption">手写(<code>线程</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-3.jpg" title="/img/Operating System/chapter3-3.jpg" data-thumbnail="/img/Operating System/chapter3-3.jpg" data-sub-html="<h2>手写(并发编程的不确定性)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-3.jpg"
+            data-srcset="/img/Operating%20System/chapter3-3.jpg, /img/Operating%20System/chapter3-3.jpg 1.5x, /img/Operating%20System/chapter3-3.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-3.jpg" />
+    </a><figcaption class="image-caption">手写(<code>并发编程的不确定性</code>)</figcaption>
+    </figure>
+<h4 id="入门threadh-简化的线程-api">入门：<code>thread.h</code> 简化的线程 API</h4>
+<p>我们为大家封装了超级好用的线程 API (<a href="https://jyywiki.cn/pages/OS/2022/demos/thread.h" target="_blank" rel="noopener noreffer"><code>thread.h</code></a>)</p>
+<ul>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">create</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>创建一个入口函数是<code>fn</code>的线程，并立即开始执行（状态机理解创建 $\rightarrow$ 在状态机里加入一个新的栈帧的列表，并且每次可以选到每一个链表来执行）</p>
+<ul>
+<li>
+<p>void fn(int tid) { &hellip; }</p>
+</li>
+<li>
+<p>参数 <code>tid</code> 从 1 开始编号</p>
+</li>
+</ul>
+</li>
+<li>
+<p>语义：在状态中新增 stack frame 列表并初始化为 <code>fn(tid)</code></p>
+</li>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">join</span><span class="p">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>等待所有运行线程的 <code>fn</code> 返回</li>
+<li>在 <code>main</code> 返回时会自动等待所有线程结束</li>
+<li><strong>语义：在有其他线程未执行完时死循环，否则返回</strong>（用状态机空转的角度来理解）</li>
+</ul>
+</li>
+<li>
+<p>编译时需要增加 <code>-lpthread</code></p>
+</li>
+</ul>
+<p><code>thread.h</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdatomic.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;assert.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;pthread.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define NTHREAD 64
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">enum</span> <span class="p">{</span> <span class="n">T_FREE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">T_LIVE</span><span class="p">,</span> <span class="n">T_DEAD</span><span class="p">,</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="kr">thread</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">id</span><span class="p">,</span> <span class="n">status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pthread_t</span> <span class="kr">thread</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="kr">thread</span> <span class="n">tpool</span><span class="p">[</span><span class="n">NTHREAD</span><span class="p">],</span> <span class="o">*</span><span class="n">tptr</span> <span class="o">=</span> <span class="n">tpool</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="o">*</span><span class="nf">wrapper</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="kr">thread</span> <span class="o">*</span><span class="kr">thread</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="kr">thread</span> <span class="o">*</span><span class="p">)</span><span class="n">arg</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">thread</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">(</span><span class="kr">thread</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">create</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">fn</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">tptr</span> <span class="o">-</span> <span class="n">tpool</span> <span class="o">&lt;</span> <span class="n">NTHREAD</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="n">tptr</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="kr">thread</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">tptr</span> <span class="o">-</span> <span class="n">tpool</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">T_LIVE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">fn</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">tptr</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">wrapper</span><span class="p">,</span> <span class="n">tptr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="o">++</span><span class="n">tptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">join</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NTHREAD</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="kr">thread</span> <span class="o">*</span><span class="n">t</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tpool</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">t</span><span class="o">-&gt;</span><span class="n">status</span> <span class="o">==</span> <span class="n">T_LIVE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">pthread_join</span><span class="p">(</span><span class="n">t</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">t</span><span class="o">-&gt;</span><span class="n">status</span> <span class="o">=</span> <span class="n">T_DEAD</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">destructor</span><span class="p">))</span> <span class="kt">void</span> <span class="n">cleanup</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="入门-contd">入门 (cont&rsquo;d)</h4>
+<p>Hello, Multi-threaded World!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Ta</span><span class="p">()</span> <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;a&#34;</span><span class="p">);</span> <span class="p">}</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tb</span><span class="p">()</span> <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;b&#34;</span><span class="p">);</span> <span class="p">}</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Ta</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tb</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译（注意使用<code>-lpthread</code>）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ gcc the.c -lpthread 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行 $\rightarrow$ 交替输出</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-4.png" title="/img/Operating System/chapter3-4.png" data-thumbnail="/img/Operating System/chapter3-4.png" data-sub-html="<h2>Linux(输出结果)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-4.png"
+            data-srcset="/img/Operating%20System/chapter3-4.png, /img/Operating%20System/chapter3-4.png 1.5x, /img/Operating%20System/chapter3-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-4.png" />
+    </a><figcaption class="image-caption">Linux(<code>输出结果</code>)</figcaption>
+    </figure>
+<p>利用 <code>thread.h</code> 就可以写出利用多处理器的程序！</p>
+<ul>
+<li>操作系统会自动把线程放置在不同的处理器上</li>
+<li>在后台运行，可以看到 CPU 使用率超过了 100%（2个接近200， 4个接近400）$\rightarrow$ 使用了多个CPU</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-5.png" title="/img/Operating System/chapter3-5.png" data-thumbnail="/img/Operating System/chapter3-5.png" data-sub-html="<h2>top(查看CPU使用率)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-5.png"
+            data-srcset="/img/Operating%20System/chapter3-5.png, /img/Operating%20System/chapter3-5.png 1.5x, /img/Operating%20System/chapter3-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-5.png" />
+    </a><figcaption class="image-caption">top(<code>查看CPU使用率</code>)</figcaption>
+    </figure>
+<blockquote>
+<p>会编程，你就拥有全世界！</p>
+</blockquote>
+<p>如何证明线程确实共享内存？</p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/shm-test.c" target="_blank" rel="noopener noreffer">shm-test.c</a></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Thello</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">usleep</span><span class="p">(</span><span class="n">id</span> <span class="o">*</span> <span class="mi">100000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello from thread #%c</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;123456789ABCDEF&#34;</span><span class="p">[</span><span class="n">x</span><span class="o">++</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Thello</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行结果</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-6.png" title="/img/Operating System/chapter3-6.png" data-thumbnail="/img/Operating System/chapter3-6.png" data-sub-html="<h2>Linux(shm-test.c运行结果)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-6.png"
+            data-srcset="/img/Operating%20System/chapter3-6.png, /img/Operating%20System/chapter3-6.png 1.5x, /img/Operating%20System/chapter3-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-6.png" />
+    </a><figcaption class="image-caption">Linux(<code>shm-test.c运行结果</code>)</figcaption>
+    </figure>
+<hr>
+<p>如何证明线程具有独立堆栈 (以及确定它们的范围)？</p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/stack-probe.c" target="_blank" rel="noopener noreffer">stack-probe.c</a> (输出有点乱？我们还有 <code>sort</code>!)</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">__thread</span> <span class="kt">char</span> <span class="o">*</span><span class="n">base</span><span class="p">,</span> <span class="o">*</span><span class="n">cur</span><span class="p">;</span> <span class="c1">// thread-local variables
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__thread</span> <span class="kt">int</span> <span class="n">id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// objdump to see how thread-local variables are implemented
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">void</span> <span class="n">set_cur</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">char</span> <span class="o">*</span><span class="n">get_cur</span><span class="p">()</span>         <span class="p">{</span> <span class="k">return</span> <span class="n">cur</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">stackoverflow</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">set_cur</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">1024</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">base</span> <span class="o">-</span> <span class="n">get_cur</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Stack size of T%d &gt;= %d KB</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">id</span><span class="p">,</span> <span class="n">sz</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">stackoverflow</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Tprobe</span><span class="p">(</span><span class="kt">int</span> <span class="n">tid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">id</span> <span class="o">=</span> <span class="n">tid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">base</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">tid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">stackoverflow</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">setbuf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tprobe</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行结果</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-7.png" title="/img/Operating System/chapter3-7.png" data-thumbnail="/img/Operating System/chapter3-7.png" data-sub-html="<h2>Linux(stack-probe.c运行结果)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-7.png"
+            data-srcset="/img/Operating%20System/chapter3-7.png, /img/Operating%20System/chapter3-7.png 1.5x, /img/Operating%20System/chapter3-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-7.png" />
+    </a><figcaption class="image-caption">Linux(<code>stack-probe.c运行结果</code>)</figcaption>
+    </figure>
+<p>进行排序</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ gcc stack-probe.c -lpthread <span class="o">&amp;&amp;</span> ./a.out <span class="p">|</span> sort -nk <span class="m">6</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>效果：</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-8.png" title="/img/Operating System/chapter3-8.png" data-thumbnail="/img/Operating System/chapter3-8.png" data-sub-html="<h2>stack-probe.c(排序后)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-8.png"
+            data-srcset="/img/Operating%20System/chapter3-8.png, /img/Operating%20System/chapter3-8.png 1.5x, /img/Operating%20System/chapter3-8.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-8.png" />
+    </a><figcaption class="image-caption">stack-probe.c(<code>排序后</code>)</figcaption>
+    </figure>
+<p>$size\ of\ stack=8192KB\newline$</p>
+<hr>
+<p>更多的习题</p>
+<ul>
+<li>创建线程使用的是哪个系统调用？</li>
+<li>能不能用 gdb 调试？</li>
+<li>基本原则：有需求，就能做到 (<a href="https://sourceware.org/gdb/onlinedocs/gdb/Threads.html" target="_blank" rel="noopener noreffer">RTFM</a>)</li>
+</ul>
+<h4 id="threadh-背后posix-threads"><code>thread.h</code> 背后：POSIX Threads</h4>
+<p>想进一步配置线程？</p>
+<ul>
+<li>设置更大的线程栈</li>
+<li>设置 detach 运行 (不在进程结束后被杀死，也不能 join)</li>
+<li>……</li>
+</ul>
+<hr>
+<p>POSIX 为我们提供了线程库 (pthreads)</p>
+<ul>
+<li>
+<p><code>man 7 pthreads</code></p>
+</li>
+<li>
+<p>练习：改写 thread.h，使得线程拥有更大的栈</p>
+<ul>
+<li>可以用 <a href="https://jyywiki.cn/pages/OS/2022/demos/stack-probe.c" target="_blank" rel="noopener noreffer">stack-probe.c</a> 验证</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">__thread</span> <span class="kt">char</span> <span class="o">*</span><span class="n">base</span><span class="p">,</span> <span class="o">*</span><span class="n">cur</span><span class="p">;</span> <span class="c1">// thread-local variables
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__thread</span> <span class="kt">int</span> <span class="n">id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// objdump to see how thread-local variables are implemented
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">void</span> <span class="n">set_cur</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">char</span> <span class="o">*</span><span class="n">get_cur</span><span class="p">()</span>         <span class="p">{</span> <span class="k">return</span> <span class="n">cur</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">stackoverflow</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">set_cur</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">1024</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">base</span> <span class="o">-</span> <span class="n">get_cur</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Stack size of T%d &gt;= %d KB</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">id</span><span class="p">,</span> <span class="n">sz</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">stackoverflow</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Tprobe</span><span class="p">(</span><span class="kt">int</span> <span class="n">tid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">id</span> <span class="o">=</span> <span class="n">tid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">base</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">tid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">stackoverflow</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">setbuf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tprobe</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然而，可怕的事情正在悄悄逼近……</p>
+<ul>
+<li>
+<p>多处理器系统中线程的代码可能同时执行</p>
+<ul>
+<li>两个线程同时执行 <code>x++</code>，结果会是什么呢？</li>
+</ul>
+</li>
+</ul>
+<h3 id="放弃1原子性">放弃（1）：原子性</h3>
+<h4 id="例子山寨多线程支付宝">例子：山寨多线程支付宝</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">balance</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">Alipay_withdraw</span><span class="p">(</span><span class="kt">int</span> <span class="n">amt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">amt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">balance</span> <span class="o">-=</span> <span class="n">amt</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">FAIL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>两个线程并发支付 ¥100 会发生什么？<a href="https://jyywiki.cn/pages/OS/2022/demos/alipay.c" target="_blank" rel="noopener noreffer">alipay.c</a></p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-10.jpg" title="/img/Operating System/chapter3-10.jpg" data-thumbnail="/img/Operating System/chapter3-10.jpg" data-sub-html="<h2>手写(山寨支付宝状态机)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-10.jpg"
+            data-srcset="/img/Operating%20System/chapter3-10.jpg, /img/Operating%20System/chapter3-10.jpg 1.5x, /img/Operating%20System/chapter3-10.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-10.jpg" />
+    </a><figcaption class="image-caption">手写(<code>山寨支付宝状态机</code>)</figcaption>
+    </figure>
+<ul>
+<li>账户里会多出用不完的钱！</li>
+<li>Bug/漏洞不跟你开玩笑：Mt. Gox Hack 损失650,000
+<ul>
+<li>今天价值 $28,000,000,000</li>
+</ul>
+</li>
+</ul>
+<p><code>alipay.c</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">balance</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Alipay_withdraw</span><span class="p">(</span><span class="kt">int</span> <span class="n">amt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">amt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">usleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// unexpected delays
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">balance</span> <span class="o">-=</span> <span class="n">amt</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Talipay</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Alipay_withdraw</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Talipay</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Talipay</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;balance = %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">balance</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter3-9.png" title="/img/Operating System/chapter3-9.png" data-thumbnail="/img/Operating System/chapter3-9.png" data-sub-html="<h2>Linux(alipay.c运行结果)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-9.png"
+            data-srcset="/img/Operating%20System/chapter3-9.png, /img/Operating%20System/chapter3-9.png 1.5x, /img/Operating%20System/chapter3-9.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-9.png" />
+    </a><figcaption class="image-caption">Linux(<code>alipay.c运行结果</code>)</figcaption>
+    </figure>
+<h4 id="例子求和">例子：求和</h4>
+<p>分两个线程，计算 $1+1+1+\ldots+1+1+1+1+…+1$ (共计 2n 个 1)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define N 100000000
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span> <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">sum</span><span class="o">++</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;sum = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><a href="https://jyywiki.cn/pages/OS/2022/demos/sum.c" target="_blank" rel="noopener noreffer">sum.c</a> 运行结果</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-11.png" title="/img/Operating System/chapter3-11.png" data-thumbnail="/img/Operating System/chapter3-11.png" data-sub-html="<h2>Linux(sum.c运行结果)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-11.png"
+            data-srcset="/img/Operating%20System/chapter3-11.png, /img/Operating%20System/chapter3-11.png 1.5x, /img/Operating%20System/chapter3-11.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-11.png" />
+    </a><figcaption class="image-caption">Linux(<code>sum.c运行结果</code>)</figcaption>
+    </figure>
+<ul>
+<li>
+<p>119790390, 99872322 (结果可以比 <code>N</code> 还要小), &hellip;</p>
+</li>
+<li>
+<p>Inline assembly 也不行</p>
+</li>
+</ul>
+<p>修改</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define N 100000000
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span><span class="s">&#34;lock add $1, %0&#34;</span><span class="o">:</span> <span class="s">&#34;+m&#34;</span><span class="p">(</span><span class="n">sum</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;sum = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-12.png" title="/img/Operating System/chapter3-12.png" data-thumbnail="/img/Operating System/chapter3-12.png" data-sub-html="<h2>Linux(sum.c修改后运行结果)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-12.png"
+            data-srcset="/img/Operating%20System/chapter3-12.png, /img/Operating%20System/chapter3-12.png 1.5x, /img/Operating%20System/chapter3-12.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-12.png" />
+    </a><figcaption class="image-caption">Linux(<code>sum.c修改后运行结果</code>)</figcaption>
+    </figure>
+<p>结果正确，但是运行性能显著下降</p>
+<h4 id="原子性的丧失">原子性的丧失</h4>
+<blockquote>
+<p>“程序 (甚至是一条指令) 独占处理器执行” 的基本假设在现代多处理器系统上不再成立。</p>
+</blockquote>
+<p>原子性：一段代码执行 (例如 <code>pay()</code>) 独占整个计算机系统</p>
+<ul>
+<li>单处理器多线程
+<ul>
+<li>线程在运行时可能被中断，切换到另一个线程执行</li>
+</ul>
+</li>
+<li>多处理器多线程
+<ul>
+<li>线程根本就是并行执行的</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>(历史) 1960s，大家争先在共享内存上实现原子性 (互斥)</p>
+<ul>
+<li>但几乎所有的实现都是错的，直到 <a href="https://en.wikipedia.org/wiki/Dekker%27s_algorithm" target="_blank" rel="noopener noreffer">Dekker&rsquo;s Algorithm</a>，还只能保证两个线程的互斥</li>
+</ul>
+<h4 id="原子性的丧失有没有感到后怕">原子性的丧失：有没有感到后怕？</h4>
+<p><code>printf</code> 还能在多线程程序里调用吗？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">void thread1() { while (1) { printf(&#34;a&#34;); } }
+</span></span><span class="line"><span class="cl">void thread2() { while (1) { printf(&#34;b&#34;); } }
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们都知道 printf 是有缓冲区的 (为什么？)</p>
+<ul>
+<li>如果执行 <code>buf[pos++] = ch</code> (<code>pos</code> 共享) 不就💥了吗？</li>
+</ul>
+<hr>
+<p>RTFM!</p>
+<p>命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ man <span class="m">3</span> <span class="nb">printf</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">ATTRIBUTES
+</span></span><span class="line"><span class="cl">       For an explanation of the terms used in this section, see attributes<span class="o">(</span>7<span class="o">)</span>.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">       ┌────────────────────────┬───────────────┬────────────────┐
+</span></span><span class="line"><span class="cl">       │Interface               │ Attribute     │ Value          │
+</span></span><span class="line"><span class="cl">       ├────────────────────────┼───────────────┼────────────────┤
+</span></span><span class="line"><span class="cl">       │printf<span class="o">()</span>, fprintf<span class="o">()</span>,    │ Thread safety │ MT-Safe locale │
+</span></span><span class="line"><span class="cl">       │sprintf<span class="o">()</span>, snprintf<span class="o">()</span>,  │               │                │
+</span></span><span class="line"><span class="cl">       │vprintf<span class="o">()</span>, vfprintf<span class="o">()</span>,  │               │                │
+</span></span><span class="line"><span class="cl">       │vsprintf<span class="o">()</span>, vsnprintf<span class="o">()</span> │               │                │
+</span></span><span class="line"><span class="cl">       └────────────────────────┴───────────────┴────────────────┘
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>进程安全！</strong></p>
+<h4 id="实现原子性">实现原子性</h4>
+<p>互斥和原子性是本学期的重要主题</p>
+<ul>
+<li>
+<p><code>lock(&amp;lk)</code></p>
+</li>
+<li>
+<p><code>unlock(&amp;lk)</code></p>
+<ul>
+<li>实现临界区 (critical section) 之间的绝对串行化</li>
+<li>程序的其他部分依然可以并行执行</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>99% 的并发问题都可以用一个队列解决</p>
+<ul>
+<li>
+<p>把大任务切分成可以并行的小任务</p>
+</li>
+<li>
+<p>worker thread 去锁保护的队列里取任务</p>
+</li>
+<li>
+<p>除去不可并行的部分，剩下的部分可以获得线性的加速</p>
+<ul>
+<li>$Thm.\ T_n&lt;T_{\infty}+\frac {T_1}{n}$(<a href="https://web.mit.edu/dimitrib/www/pdc.html" target="_blank" rel="noopener noreffer">PDC</a>, Chap. 1)</li>
+</ul>
+</li>
+</ul>
+<h3 id="放弃2顺序">放弃（2）：顺序</h3>
+<h4 id="例子求和-再次出现">例子：求和 (再次出现)</h4>
+<p>分两个线程，计算 $1+1+1+\ldots+1+1+1+1+…+1$ (共计 2n 个 1)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define N 100000000
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span> <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">sum</span><span class="o">++</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;sum = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们好像忘记给 <a href="https://jyywiki.cn/pages/OS/2022/demos/sum.c" target="_blank" rel="noopener noreffer">sum.c</a> 添加编译优化了？</p>
+<ul>
+<li><code>-O1</code>: 100000000 😱😱</li>
+<li><code>-O2</code>: 200000000 😱😱😱</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ gcc -O1 sum.c -lpthread <span class="o">&amp;&amp;</span> ./a.out 
+</span></span><span class="line"><span class="cl"><span class="nv">sum</span> <span class="o">=</span> <span class="m">100000000</span>
+</span></span><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ gcc -O2 sum.c -lpthread <span class="o">&amp;&amp;</span> ./a.out 
+</span></span><span class="line"><span class="cl"><span class="nv">sum</span> <span class="o">=</span> <span class="m">200000000</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="顺序的丧失">顺序的丧失</h4>
+<blockquote>
+<p>编译器对内存访问 “eventually consistent” 的处理导致共享内存作为线程同步工具的失效。</p>
+</blockquote>
+<p>刚才的例子</p>
+<ul>
+<li><code>-O1</code>: <code>R[eax] = sum; R[eax] += N; sum = R[eax]</code></li>
+<li><code>-O2</code>: <code>sum += N;</code></li>
+<li>(你的编译器也许是不同的结果)</li>
+</ul>
+<p>另一个例子</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">done</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// would be optimized to
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">done</span><span class="p">)</span> <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ gcc -c -O1 sum.c <span class="o">&amp;&amp;</span> objdump -d sum.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">sum.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;wrapper&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">48</span> <span class="m">83</span> ec <span class="m">08</span>          	sub    <span class="nv">$0</span>x8,%rsp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">48</span> <span class="m">89</span> f8             	mov    %rdi,%rax
+</span></span><span class="line"><span class="cl">   b:	8b 3f                	mov    <span class="o">(</span>%rdi<span class="o">)</span>,%edi
+</span></span><span class="line"><span class="cl">   d:	ff <span class="m">50</span> <span class="m">10</span>             	call   *0x10<span class="o">(</span>%rax<span class="o">)</span>
+</span></span><span class="line"><span class="cl">  10:	b8 <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>       	mov    <span class="nv">$0</span>x0,%eax
+</span></span><span class="line"><span class="cl">  15:	<span class="m">48</span> <span class="m">83</span> c4 <span class="m">08</span>          	add    <span class="nv">$0</span>x8,%rsp
+</span></span><span class="line"><span class="cl">  19:	c3                   	ret    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">000000000000001a &lt;Tsum&gt;:
+</span></span><span class="line"><span class="cl">  1a:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">  1e:	<span class="m">48</span> 8b <span class="m">15</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> 	mov    0x0<span class="o">(</span>%rip<span class="o">)</span>,%rdx        <span class="c1"># 25 &lt;Tsum+0xb&gt; -&gt; R[eax] = sum</span>
+</span></span><span class="line"><span class="cl">  25:	<span class="m">48</span> 8d <span class="m">42</span> <span class="m">01</span>          	lea    0x1<span class="o">(</span>%rdx<span class="o">)</span>,%rax		 <span class="c1"># -&gt; R[eax] += N, sum = R[eax]</span>
+</span></span><span class="line"><span class="cl">  29:	<span class="m">48</span> <span class="m">81</span> c2 <span class="m">01</span> e1 f5 <span class="m">05</span> 	add    <span class="nv">$0</span>x5f5e101,%rdx
+</span></span><span class="line"><span class="cl">  30:	<span class="m">48</span> <span class="m">89</span> c1             	mov    %rax,%rcx
+</span></span><span class="line"><span class="cl">  33:	<span class="m">48</span> <span class="m">83</span> c0 <span class="m">01</span>          	add    <span class="nv">$0</span>x1,%rax
+</span></span><span class="line"><span class="cl">  37:	<span class="m">48</span> <span class="m">39</span> d0             	cmp    %rdx,%rax
+</span></span><span class="line"><span class="cl">  3a:	<span class="m">75</span> f4                	jne    <span class="m">30</span> &lt;Tsum+0x16&gt;
+</span></span><span class="line"><span class="cl">  3c:	<span class="m">48</span> <span class="m">89</span> 0d <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> 	mov    %rcx,0x0<span class="o">(</span>%rip<span class="o">)</span>        <span class="c1"># 43 &lt;Tsum+0x29&gt;</span>
+</span></span><span class="line"><span class="cl">  43:	c3                   	ret    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter3-13.jpg" title="/img/Operating System/chapter3-13.jpg" data-thumbnail="/img/Operating System/chapter3-13.jpg" data-sub-html="<h2>手写(O1模式下优化)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-13.jpg"
+            data-srcset="/img/Operating%20System/chapter3-13.jpg, /img/Operating%20System/chapter3-13.jpg 1.5x, /img/Operating%20System/chapter3-13.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-13.jpg" />
+    </a><figcaption class="image-caption">手写(<code>O1模式下优化</code>)</figcaption>
+    </figure>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ gcc -c -O2 sum.c <span class="o">&amp;&amp;</span> objdump -d sum.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">sum.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;wrapper&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">48</span> <span class="m">83</span> ec <span class="m">08</span>          	sub    <span class="nv">$0</span>x8,%rsp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">48</span> <span class="m">89</span> f8             	mov    %rdi,%rax
+</span></span><span class="line"><span class="cl">   b:	8b 3f                	mov    <span class="o">(</span>%rdi<span class="o">)</span>,%edi
+</span></span><span class="line"><span class="cl">   d:	ff <span class="m">50</span> <span class="m">10</span>             	call   *0x10<span class="o">(</span>%rax<span class="o">)</span>
+</span></span><span class="line"><span class="cl">  10:	<span class="m">31</span> c0                	xor    %eax,%eax
+</span></span><span class="line"><span class="cl">  12:	<span class="m">48</span> <span class="m">83</span> c4 <span class="m">08</span>          	add    <span class="nv">$0</span>x8,%rsp
+</span></span><span class="line"><span class="cl">  16:	c3                   	ret    
+</span></span><span class="line"><span class="cl">  17:	<span class="m">66</span> 0f 1f <span class="m">84</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> 	nopw   0x0<span class="o">(</span>%rax,%rax,1<span class="o">)</span>
+</span></span><span class="line"><span class="cl">  1e:	<span class="m">00</span> <span class="m">00</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000020</span> &lt;Tsum&gt;:
+</span></span><span class="line"><span class="cl">  20:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">  24:	<span class="m">48</span> <span class="m">81</span> <span class="m">05</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> 	addq   <span class="nv">$0</span>x5f5e100,0x0<span class="o">(</span>%rip<span class="o">)</span>        <span class="c1"># 2f &lt;Tsum+0xf&gt;</span>
+</span></span><span class="line"><span class="cl">  2b:	<span class="m">00</span> e1 f5 <span class="m">05</span> 
+</span></span><span class="line"><span class="cl">  2f:	c3                   	ret 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>O2优化的比较彻底，只add了一次（出问题的概率比较低）</p>
+<h4 id="实现源代码的按顺序翻译">实现源代码的按顺序翻译</h4>
+<p>在代码中插入 “优化不能穿越” 的 barrier</p>
+<ul>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">asm</span> <span class="nf">volatile</span> <span class="p">(</span><span class="s">&#34;&#34;</span> <span class="o">:::</span> <span class="s">&#34;memory&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Barrier 的含义是 “可以读写任何内存”</li>
+</ul>
+</li>
+<li>
+<p>使用<code>volatile</code>变量</p>
+<ul>
+<li>保持 C 语义和汇编语义一致</li>
+</ul>
+</li>
+</ul>
+<hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">extern</span> <span class="kt">int</span> <span class="k">volatile</span> <span class="n">done</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">done</span><span class="p">)</span> <span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="放弃-3可见性">放弃 (3)：可见性</h3>
+<h4 id="例子">例子</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">T1</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span><span class="s">&#34;&#34;</span> <span class="o">:</span> <span class="o">:</span> <span class="s">&#34;memory&#34;</span><span class="p">);</span> <span class="c1">// compiler barrier
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;y = %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">T2</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span><span class="s">&#34;&#34;</span> <span class="o">:</span> <span class="o">:</span> <span class="s">&#34;memory&#34;</span><span class="p">);</span> <span class="c1">// compiler barrier
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;x = %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>问题：我们最终能看到哪些结果？</p>
+<p>状态机</p>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>mem-ordering.c
+<ul>
+<li>输出不好读？<code>pipe to head -n 1000000 | sort | uniq -c</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">atomic_int</span> <span class="n">flag</span><span class="p">;</span> <span class="c1">//开关初始为0（关着），原子变量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define FLAG atomic_load(&amp;flag) </span><span class="c1">//原子读
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define FLAG_XOR(val) atomic_fetch_xor(&amp;flag, val) </span><span class="c1">//原子异或
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define WAIT_FOR(cond) while (!(cond)) ;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"> <span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">write_x_read_y</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">y_val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;movl $1, %0;&#34;</span> <span class="c1">// x = 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="s">&#34;movl %2, %1;&#34;</span> <span class="c1">// y_val = y
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">:</span> <span class="s">&#34;=m&#34;</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">y_val</span><span class="p">)</span> <span class="o">:</span> <span class="s">&#34;m&#34;</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span> <span class="n">y_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">write_y_read_x</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">x_val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;movl $1, %0;&#34;</span> <span class="c1">// y = 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="s">&#34;movl %2, %1;&#34;</span> <span class="c1">// x_val = x
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">:</span> <span class="s">&#34;=m&#34;</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">x_val</span><span class="p">)</span> <span class="o">:</span> <span class="s">&#34;m&#34;</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span> <span class="n">x_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">T1</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">WAIT_FOR</span><span class="p">((</span><span class="n">FLAG</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">));</span> <span class="c1">//等开关1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">write_x_read_y</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FLAG_XOR</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">//关掉开关1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">T2</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">WAIT_FOR</span><span class="p">((</span><span class="n">FLAG</span> <span class="o">&amp;</span> <span class="mi">2</span><span class="p">));</span> <span class="c1">//等开关2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">write_y_read_x</span><span class="p">();</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">FLAG_XOR</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="c1">//关掉开关2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Tsync</span><span class="p">()</span> <span class="p">{</span> <span class="c1">//控制线程
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//布置好初值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">__sync_synchronize</span><span class="p">();</span> <span class="c1">// full barrier
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">usleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>            <span class="c1">// + delay
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">assert</span><span class="p">(</span><span class="n">FLAG</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">//确定开关是关着的
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">FLAG_XOR</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="c1">//开关的两个bit从0变为1（开启开关1，2）（原子操作）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// T1 and T2 clear 0/1-bit, respectively
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">WAIT_FOR</span><span class="p">(</span><span class="n">FLAG</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span> <span class="n">fflush</span><span class="p">(</span><span class="n">stdout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">T1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">T2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsync</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>-O2模式下编译</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">00000000000001a0 &lt;write_x_read_y&gt;:
+</span></span><span class="line"><span class="cl"> 1a0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl"> 1a4:	c7 05 00 00 00 00 01 	movl   $0x1,0x0(%rip)        # 1ae &lt;write_x_read_y+0xe&gt;
+</span></span><span class="line"><span class="cl"> 1ab:	00 00 00 
+</span></span><span class="line"><span class="cl"> 1ae:	8b 15 00 00 00 00    	mov    0x0(%rip),%edx        # 1b4 &lt;write_x_read_y+0x14&gt;
+</span></span><span class="line"><span class="cl"> 1b4:	48 8d 35 00 00 00 00 	lea    0x0(%rip),%rsi        # 1bb &lt;write_x_read_y+0x1b&gt;
+</span></span><span class="line"><span class="cl"> 1bb:	bf 01 00 00 00       	mov    $0x1,%edi
+</span></span><span class="line"><span class="cl"> 1c0:	31 c0                	xor    %eax,%eax
+</span></span><span class="line"><span class="cl"> 1c2:	e9 00 00 00 00       	jmp    1c7 &lt;write_x_read_y+0x27&gt;
+</span></span><span class="line"><span class="cl"> 1c7:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+</span></span><span class="line"><span class="cl"> 1ce:	00 00 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>利用脚本来统计，不知道为啥自己的乌班图💩🐴跑出来都是01，00，01，10，11都跑出来了，和我们的状态机模型不符🤡</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-14.png" title="/img/Operating System/chapter3-14.png" data-thumbnail="/img/Operating System/chapter3-14.png" data-sub-html="<h2>From class(输出结果)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-14.png"
+            data-srcset="/img/Operating%20System/chapter3-14.png, /img/Operating%20System/chapter3-14.png 1.5x, /img/Operating%20System/chapter3-14.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-14.png" />
+    </a><figcaption class="image-caption">From class(<code>输出结果</code>)</figcaption>
+    </figure>
+<h4 id="现代处理器处理器也是-动态-编译器">现代处理器：处理器也是 (动态) 编译器！</h4>
+<p>单个处理器把汇编代码 (用电路) “编译” 成更小的 $\mu ops\newline$</p>
+<ul>
+<li>RF[9] = load(RF[7] + 400)</li>
+<li>store(RF[12], RF[13])</li>
+<li>RF[3] = RF[4] + RF[5]
+<ul>
+<li>每个 $\mu op$ 都有 Fetch, Issue, Execute, Commit 四个阶段</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>在任何时刻，处理器都维护一个 $\mu op$ 的 “池子”</p>
+<ul>
+<li>
+<p>每一周期向池子补充尽可能多的$\mu op\newline$</p>
+<ul>
+<li>“多发射”</li>
+</ul>
+</li>
+<li>
+<p>每一周期 (在不违反编译正确性的前提下) 执行尽可能多的$\mu op\newline$</p>
+<ul>
+<li>“乱序执行”、“按序提交”</li>
+</ul>
+</li>
+<li>
+<p>这就是《计算机体系结构》 (剩下就是木桶效应，哪里短板补哪里)</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-15.jpg" title="/img/Operating System/chapter3-15.jpg" data-thumbnail="/img/Operating System/chapter3-15.jpg" data-sub-html="<h2>神书(《计算机体系结构——量化研究方法》)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-15.jpg"
+            data-srcset="/img/Operating%20System/chapter3-15.jpg, /img/Operating%20System/chapter3-15.jpg 1.5x, /img/Operating%20System/chapter3-15.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-15.jpg" />
+    </a><figcaption class="image-caption">神书(<code>《计算机体系结构——量化研究方法》</code>)</figcaption>
+    </figure>
+<h4 id="多处理器间即时可见性的丧失">多处理器间即时可见性的丧失</h4>
+<blockquote>
+<p>满足单处理器 eventual memory consistency 的执行，在多处理器上可能无法序列化！</p>
+</blockquote>
+<p>当 $x \ne y$ 时，对 $x ,y$ 的内存读写可以交换顺序</p>
+<ul>
+<li>它们甚至可以在同一个周期里完成 (只要 load/store unit 支持)</li>
+<li>如果写x发生 cache miss，可以让读y先执行
+<ul>
+<li>满足 “尽可能执行 “$\mu op$” 的原则，最大化处理器性能</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">     # &lt;-----------+
+</span></span><span class="line"><span class="cl">movl $1, (x)   #   |
+</span></span><span class="line"><span class="cl">movl (y), %eax # --+
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在多处理器上的表现
+<ul>
+<li>两个处理器分别看到 $y=0 和 x=0\newline$</li>
+</ul>
+</li>
+</ul>
+<h4 id="宽松内存模型-relaxedweak-memory-model">宽松内存模型 (Relaxed/Weak Memory Model)</h4>
+<blockquote>
+<p>宽松内存模型的目的是使单处理器的执行更高效。</p>
+</blockquote>
+<p>x86 已经是市面上能买到的 “最强” 的内存模型了 😂</p>
+<ul>
+<li>这也是 Intel 自己给自己加的包袱</li>
+<li>看看 <a href="https://research.swtch.com/mem-weak@2x.png" target="_blank" rel="noopener noreffer">ARM/RISC-V</a> 吧，根本就是个分布式系统</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-16.png" title="/img/Operating System/chapter3-16.png" data-thumbnail="/img/Operating System/chapter3-16.png" data-sub-html="<h2>x86(内存模型)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-16.png"
+            data-srcset="/img/Operating%20System/chapter3-16.png, /img/Operating%20System/chapter3-16.png 1.5x, /img/Operating%20System/chapter3-16.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-16.png" />
+    </a><figcaption class="image-caption">x86(<code>内存模型</code>)</figcaption>
+    </figure>
+<p><strong>(x86-TSO in <a href="https://research.swtch.com/hwmm" target="_blank" rel="noopener noreffer">Hardware memory models</a> by Russ Cox)</strong></p>
+<hr>
+<p><strong>ARM/RISC-V</strong></p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-17.png" title="/img/Operating System/chapter3-17.png" data-thumbnail="/img/Operating System/chapter3-17.png" data-sub-html="<h2>ARM/RISC-V(内存模型)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-17.png"
+            data-srcset="/img/Operating%20System/chapter3-17.png, /img/Operating%20System/chapter3-17.png 1.5x, /img/Operating%20System/chapter3-17.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-17.png" />
+    </a><figcaption class="image-caption">ARM/RISC-V(<code>内存模型</code>)</figcaption>
+    </figure>
+<h4 id="实现顺序一致性">实现顺序一致性</h4>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter3-18.png" title="/img/Operating System/chapter3-18.png" data-thumbnail="/img/Operating System/chapter3-18.png" data-sub-html="<h2>改良(内存模型)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter3-18.png"
+            data-srcset="/img/Operating%20System/chapter3-18.png, /img/Operating%20System/chapter3-18.png 1.5x, /img/Operating%20System/chapter3-18.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter3-18.png" />
+    </a><figcaption class="image-caption">改良(<code>内存模型</code>)</figcaption>
+    </figure>
+<hr>
+<p>软件做不到，硬件来帮忙</p>
+<ul>
+<li>
+<p>Memory barrier: __sync_synchronize() (RTFM)</p>
+<ul>
+<li>Compiler barrier + fence 指令</li>
+<li>插入 fence 指令后，将阻止 x=y=0</li>
+</ul>
+</li>
+<li>
+<p>原子指令 (lock,prefix, lr/sc, &hellip;)</p>
+<ul>
+<li><code>stdatomic.h</code></li>
+</ul>
+</li>
+</ul>
+<p>修改</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">atomic_int</span> <span class="n">flag</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define FLAG atomic_load(&amp;flag)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define FLAG_XOR(val) atomic_fetch_xor(&amp;flag, val)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define WAIT_FOR(cond) while (!(cond)) ;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"> <span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">write_x_read_y</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">y_val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;movl $1, %0;&#34;</span> <span class="c1">// x = 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="s">&#34;mfence;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;movl %2, %1;&#34;</span> <span class="c1">// y_val = y
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">:</span> <span class="s">&#34;=m&#34;</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">y_val</span><span class="p">)</span> <span class="o">:</span> <span class="s">&#34;m&#34;</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span> <span class="n">y_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">write_y_read_x</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">x_val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;movl $1, %0;&#34;</span> <span class="c1">// y = 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="s">&#34;mfence;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;movl %2, %1;&#34;</span> <span class="c1">// x_val = x
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">:</span> <span class="s">&#34;=m&#34;</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">x_val</span><span class="p">)</span> <span class="o">:</span> <span class="s">&#34;m&#34;</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span> <span class="n">x_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">T1</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">WAIT_FOR</span><span class="p">((</span><span class="n">FLAG</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">write_x_read_y</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FLAG_XOR</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">T2</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">WAIT_FOR</span><span class="p">((</span><span class="n">FLAG</span> <span class="o">&amp;</span> <span class="mi">2</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">write_y_read_x</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FLAG_XOR</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Tsync</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__sync_synchronize</span><span class="p">();</span> <span class="c1">// full barrier
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">usleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>            <span class="c1">// + delay
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">assert</span><span class="p">(</span><span class="n">FLAG</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FLAG_XOR</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// T1 and T2 clear 0/1-bit, respectively
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">WAIT_FOR</span><span class="p">(</span><span class="n">FLAG</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span> <span class="n">fflush</span><span class="p">(</span><span class="n">stdout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">T1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">T2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsync</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>不会再看见00的组合了</p>
+<h3 id="总结">总结</h3>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 如何理解多处理器系统？</li>
+</ul>
+<hr>
+<p>Take-away message</p>
+<ul>
+<li>多处理器编程：入门
+<ul>
+<li>多处理器程序 = 状态机 (共享内存；非确定选择线程执行)</li>
+<li>thread.h = create + join</li>
+</ul>
+</li>
+<li>多处理器编程：放弃你对 “程序” 的旧理解
+<ul>
+<li>不原子、能乱序、不立即可见（现代处理器就是一个动态的数据流分析器）
+<ul>
+<li>来自于编译优化 (处理器也是编译器)</li>
+<li><a href="https://www.usenix.org/events/osdi10/tech/full_papers/Xiong.pdf" target="_blank" rel="noopener noreffer">Ad hoc synchronization considered harmful</a> (OSDI'10)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</strong></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-01-01</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃" data-hashtags="Operating System"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-hashtag="Operating System"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" data-title="Operating System Chapter3 多处理器编程：从入门到放弃"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/operating-system/operating-system-chapter2/" class="prev" rel="prev" title="Operating System Chapter2 操作系统上的程序"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/opencv/opencv-chapter2/" class="next" rel="next" title="OpenCV Chapter2 卷积下的运算">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\n1(x=0,y=0,PC=0,0)\n2(x=1,y=0,PC=1,0)\n3(x=0,y=1,PC=0.1)\n4(x=1,y=1,PC=1,1)\n1--T1--\u003e2\n1--T2--\u003e3\n2--T2--\u003e4\n3--T1--\u003e4"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

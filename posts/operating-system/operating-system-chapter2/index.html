@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Operating System Chapter2 操作系统上的程序 - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Operating System Chapter2 操作系统上的程序" />
+<meta property="og:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ 操作系统上的程序 Overview 复习 什么是操作系统？ 应用视角 (设计): 一组对象 (进程/文件/&hellip;) &#43; API 硬件视角 (实现): 一个 C 程序" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-12-31T19:30:30+08:00" />
+<meta property="article:modified_time" content="2022-12-31T19:30:30+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Operating System Chapter2 操作系统上的程序"/>
+<meta name="twitter:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ 操作系统上的程序 Overview 复习 什么是操作系统？ 应用视角 (设计): 一组对象 (进程/文件/&hellip;) &#43; API 硬件视角 (实现): 一个 C 程序"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" /><link rel="prev" href="https://Jungle430.github.io/posts/opencv/opencv-chapter1/" /><link rel="next" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Operating System Chapter2 操作系统上的程序",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter2\/"
+        },"genre": "posts","keywords": "Operating System","wordcount":  5485 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter2\/","datePublished": "2022-12-31T19:30:30+08:00","dateModified": "2022-12-31T19:30:30+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter2 操作系统上的程序</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-31">2022-12-31</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5485 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 11 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#操作系统上的程序">操作系统上的程序</a>
+      <ul>
+        <li><a href="#overview">Overview</a>
+          <ul>
+            <li><a href="#复习">复习</a></li>
+            <li><a href="#本次课程主要问题">本次课程主要问题</a></li>
+            <li><a href="#本次课主要内容">本次课主要内容</a></li>
+          </ul>
+        </li>
+        <li><a href="#状态机与数字电路">状态机与数字电路</a></li>
+        <li><a href="#什么是程序源代码视角">什么是程序（源代码视角）</a>
+          <ul>
+            <li><a href="#c-程序的状态机模型角度一">C 程序的状态机模型（角度一）</a></li>
+            <li><a href="#c-程序的状态机模型角度二">C 程序的状态机模型（角度二）</a></li>
+          </ul>
+        </li>
+        <li><a href="#什么是程序-二进制代码视角">什么是程序 (二进制代码视角)</a>
+          <ul>
+            <li><a href="#一条特殊的指令">一条特殊的指令</a></li>
+            <li><a href="#问题怎么构造一个最小的-hello-world">问题：怎么构造一个最小的 Hello, World？</a>
+              <ul>
+                <li><a href="#解决异常退出">解决异常退出</a></li>
+                <li><a href="#hello-world的汇编实现">Hello, World的汇编实现</a>
+                  <ul>
+                    <li><a href="#彩蛋ansi-escape-code">彩蛋：ANSI Escape Code</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#编译器与编译优化">编译器与编译优化</a>
+          <ul>
+            <li><a href="#现代-与未来的-编译优化">现代 (与未来的) 编译优化</a></li>
+            <li><a href="#进入-plprogramming-language-的领域">进入 PL(Programming language) 的领域</a></li>
+          </ul>
+        </li>
+        <li><a href="#操作系统中的程序">操作系统中的程序</a>
+          <ul>
+            <li><a href="#操作系统中的一般程序">操作系统中的一般程序</a></li>
+            <li><a href="#二进制-程序也是操作系统中的对象">(二进制) 程序也是操作系统中的对象</a></li>
+            <li><a href="#系统中常见的应用程序">系统中常见的应用程序</a></li>
+            <li><a href="#操作系统中的程序dark-side">操作系统中的程序：Dark Side</a>
+              <ul>
+                <li><a href="#main-之前发生了什么"><code>main()</code> 之前发生了什么？</a></li>
+              </ul>
+            </li>
+            <li><a href="#打开程序的执行trace-踪迹">打开程序的执行：Trace (踪迹)</a></li>
+            <li><a href="#本质上所有的程序和-hello-world-类似">本质上，所有的程序和 Hello World 类似</a></li>
+            <li><a href="#yes---这些-api-就是操作系统的全部">Yes! - 这些 API 就是操作系统的全部</a></li>
+            <li><a href="#各式各样的应用程序">各式各样的应用程序</a></li>
+          </ul>
+        </li>
+        <li><a href="#总结">总结</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="操作系统上的程序">操作系统上的程序</h2>
+<h3 id="overview">Overview</h3>
+<h4 id="复习">复习</h4>
+<p>什么是操作系统？</p>
+<ul>
+<li>应用视角 (设计): 一组对象 (进程/文件/&hellip;) + API</li>
+<li>硬件视角 (实现): 一个 C 程序</li>
+</ul>
+<h4 id="本次课程主要问题">本次课程主要问题</h4>
+<ul>
+<li>到底什么是”程序”？</li>
+</ul>
+<h4 id="本次课主要内容">本次课主要内容</h4>
+<ul>
+<li>程序的状态机模型 (和编译器)</li>
+<li>操作系统上的 {最小/一般/图形} 程序</li>
+</ul>
+<h3 id="状态机与数字电路">状态机与数字电路</h3>
+<p>数字逻辑电路</p>
+<ul>
+<li>状态 = 寄存器保存的值 (flip-flop)</li>
+<li>初始状态 = RESET (implementation dependent)</li>
+<li>迁移 = 组合逻辑电路计算寄存器下一周期的值</li>
+</ul>
+<p>例子：
+$$
+\begin{align}
+&amp;X^{&rsquo;}= \neg X \wedge Y\newline
+&amp;Y^{&rsquo;}= \neg X \wedge \neg Y\newline
+\end{align}
+$$</p>
+<div class="mermaid" id="id-1"></div>
+<p>代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define REGS_FOREACH(_)  _(X) _(Y)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RUN_LOGIC        X1 = !X &amp;&amp; Y; \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         Y1 = !X &amp;&amp; !Y;
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DEFINE(X)        static int X, X##1;
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UPDATE(X)        X = X##1;
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define PRINT(X)         printf(#X &#34; = %d; &#34;, X);
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">REGS_FOREACH</span><span class="p">(</span><span class="n">DEFINE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// clock
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">RUN_LOGIC</span>
+</span></span><span class="line"><span class="cl">        <span class="n">REGS_FOREACH</span><span class="p">(</span><span class="n">PRINT</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">REGS_FOREACH</span><span class="p">(</span><span class="n">UPDATE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">putchar</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>宏展开</p>
+<p>使用mingw命令(注意去掉头文件，否则头文件也会一并展开，就没法看了🤡)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -E main.c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>展开后</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">int</span> <span class="n">X</span><span class="p">,</span> <span class="n">X1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Y1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">X1</span> <span class="o">=</span> <span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="n">Y</span><span class="p">;</span> <span class="n">Y1</span> <span class="o">=</span> <span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;X&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">X</span><span class="p">);</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Y&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">Y</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">X</span> <span class="o">=</span> <span class="n">X1</span><span class="p">;</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">putchar</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>更完整的实现：数码管显示</p>
+<p>代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;Windows.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define REGS_FOREACH(_)  _(X) _(Y)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define OUTS_FOREACH(_)  _(A) _(B) _(C) _(D) _(E) _(F) _(G)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RUN_LOGIC        X1 = !X &amp;&amp; Y; \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         Y1 = !X &amp;&amp; !Y; \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         A  = (!X &amp;&amp; !Y) || (X &amp;&amp; !Y); \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         B  = 1; \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         C  = (!X &amp;&amp; !Y) || (!X &amp;&amp; Y); \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         D  = (!X &amp;&amp; !Y) || (X &amp;&amp; !Y); \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         E  = (!X &amp;&amp; !Y) || (X &amp;&amp; !Y); \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         F  = (!X &amp;&amp; !Y); \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                         G  = (X &amp;&amp; !Y);
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define DEFINE(X)   static int X, X##1;
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UPDATE(X)   X = X##1;
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define PRINT(X)    printf(#X &#34; = %d; &#34;, X);
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">REGS_FOREACH</span><span class="p">(</span><span class="n">DEFINE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">OUTS_FOREACH</span><span class="p">(</span><span class="n">DEFINE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// clock
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">RUN_LOGIC</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">OUTS_FOREACH</span><span class="p">(</span><span class="n">PRINT</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">REGS_FOREACH</span><span class="p">(</span><span class="n">UPDATE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">putchar</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fflush</span><span class="p">(</span><span class="n">stdout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>宏展开</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">int</span> <span class="n">X</span><span class="p">,</span> <span class="n">X1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Y1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">int</span> <span class="n">A</span><span class="p">,</span> <span class="n">A1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">B</span><span class="p">,</span> <span class="n">B1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">C</span><span class="p">,</span> <span class="n">C1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">D</span><span class="p">,</span> <span class="n">D1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">E</span><span class="p">,</span> <span class="n">E1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">F</span><span class="p">,</span> <span class="n">F1</span><span class="p">;</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">G</span><span class="p">,</span> <span class="n">G1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">X1</span> <span class="o">=</span> <span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="n">Y</span><span class="p">;</span> <span class="n">Y1</span> <span class="o">=</span> <span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">;</span> <span class="n">A</span> <span class="o">=</span> <span class="p">(</span><span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">);</span> <span class="n">B</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="n">Y</span><span class="p">);</span> <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">);</span> <span class="n">E</span> <span class="o">=</span> <span class="p">(</span><span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">);</span> <span class="n">F</span> <span class="o">=</span> <span class="p">(</span><span class="o">!</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">);</span> <span class="n">G</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Y</span><span class="p">);;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;A&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">A</span><span class="p">);</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;B&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">B</span><span class="p">);</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;C&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">C</span><span class="p">);</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;D&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">D</span><span class="p">);</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;E&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">E</span><span class="p">);</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;F&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">F</span><span class="p">);</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;G&#34;</span> <span class="s">&#34; = %d; &#34;</span><span class="p">,</span> <span class="n">G</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">X</span> <span class="o">=</span> <span class="n">X1</span><span class="p">;</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">Y1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">putchar</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fflush</span><span class="p">(</span><span class="n">stdout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>python后端</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">fileinput</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="n">TEMPLATE</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;
+</span></span></span><span class="line"><span class="cl"><span class="s1"></span><span class="se">\033</span><span class="s1">[2J</span><span class="se">\033</span><span class="s1">[1;1f
+</span></span></span><span class="line"><span class="cl"><span class="s1">     AAAAAAAAA
+</span></span></span><span class="line"><span class="cl"><span class="s1">    FF       BB
+</span></span></span><span class="line"><span class="cl"><span class="s1">    FF       BB
+</span></span></span><span class="line"><span class="cl"><span class="s1">    FF       BB
+</span></span></span><span class="line"><span class="cl"><span class="s1">    FF       BB
+</span></span></span><span class="line"><span class="cl"><span class="s1">    GGGGGGGGGG
+</span></span></span><span class="line"><span class="cl"><span class="s1">   EE       CC
+</span></span></span><span class="line"><span class="cl"><span class="s1">   EE       CC
+</span></span></span><span class="line"><span class="cl"><span class="s1">   EE       CC
+</span></span></span><span class="line"><span class="cl"><span class="s1">   EE       CC
+</span></span></span><span class="line"><span class="cl"><span class="s1">    DDDDDDDDD
+</span></span></span><span class="line"><span class="cl"><span class="s1">&#39;&#39;&#39;</span> 
+</span></span><span class="line"><span class="cl"><span class="n">BLOCK</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[37m░</span><span class="se">\033</span><span class="s1">[0m&#39;</span><span class="p">,</span> <span class="c1"># STFW: ANSI Escape Code</span>
+</span></span><span class="line"><span class="cl">    <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[31m█</span><span class="se">\033</span><span class="s1">[0m&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">VARS</span> <span class="o">=</span> <span class="s1">&#39;ABCDEFG&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">VARS</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">globals</span><span class="p">()[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="n">stdin</span> <span class="o">=</span> <span class="n">fileinput</span><span class="o">.</span><span class="n">input</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exec</span><span class="p">(</span><span class="n">stdin</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pic</span> <span class="o">=</span> <span class="n">TEMPLATE</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">VARS</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pic</span> <span class="o">=</span> <span class="n">pic</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">BLOCK</span><span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">v</span><span class="p">]])</span> <span class="c1"># &#39;A&#39; -&gt; BLOCK[A], ...</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">pic</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用方法</p>
+<p>先通过gcc将c文件编译为exe文件</p>
+<p>然后cmd命令端输入</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">logisim.exe <span class="p">|</span> python seven-seg.py
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>效果：循环出现如下画面</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-1.png" title="/img/Operating System/chapter2-1.png" data-thumbnail="/img/Operating System/chapter2-1.png" data-sub-html="<h2>python后端(image 1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-1.png"
+            data-srcset="/img/Operating%20System/chapter2-1.png, /img/Operating%20System/chapter2-1.png 1.5x, /img/Operating%20System/chapter2-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-1.png" />
+    </a><figcaption class="image-caption">python后端(<code>image 1</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-2.png" title="/img/Operating System/chapter2-2.png" data-thumbnail="/img/Operating System/chapter2-2.png" data-sub-html="<h2>python后端(image 2)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-2.png"
+            data-srcset="/img/Operating%20System/chapter2-2.png, /img/Operating%20System/chapter2-2.png 1.5x, /img/Operating%20System/chapter2-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-2.png" />
+    </a><figcaption class="image-caption">python后端(<code>image 2</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-3.png" title="/img/Operating System/chapter2-3.png" data-thumbnail="/img/Operating System/chapter2-3.png" data-sub-html="<h2>python后端(image 3)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-3.png"
+            data-srcset="/img/Operating%20System/chapter2-3.png, /img/Operating%20System/chapter2-3.png 1.5x, /img/Operating%20System/chapter2-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-3.png" />
+    </a><figcaption class="image-caption">python后端(<code>image 3</code>)</figcaption>
+    </figure>
+<ul>
+<li>
+<p>会编程，你就拥有全世界！</p>
+</li>
+<li>
+<p>同样的方式可以模拟任何数字系统</p>
+<ul>
+<li>当然，也包括计算机系统</li>
+</ul>
+</li>
+</ul>
+<p>UNIX 哲学</p>
+<ul>
+<li>Make each program do one thing well</li>
+<li>Expect the output of every program to become the input to another</li>
+</ul>
+<h3 id="什么是程序源代码视角">什么是程序（源代码视角）</h3>
+<p>程序就是状态机 (你在 gdb 里看到的)</p>
+<p>代码：hanoi-r.c</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">hanoi</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">char</span> <span class="n">from</span><span class="p">,</span> <span class="kt">char</span> <span class="n">to</span><span class="p">,</span> <span class="kt">char</span> <span class="n">via</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%c -&gt; %c</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">hanoi</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="n">via</span><span class="p">,</span> <span class="n">to</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">hanoi</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>     <span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span>  <span class="n">via</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">hanoi</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">via</span><span class="p">,</span>  <span class="n">to</span><span class="p">,</span>  <span class="n">from</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="c-程序的状态机模型角度一">C 程序的状态机模型（角度一）</h4>
+<p><strong>(语义，semantics)</strong></p>
+<ul>
+<li>状态 = 堆 + 栈</li>
+<li>初始状态 = <code>main</code> 的第一条语句</li>
+<li>迁移 = 执行一条简单语句
+<ul>
+<li>任何 C 程序都可以改写成 “非复合语句” 的 C 代码</li>
+<li><a href="https://cil-project.github.io/cil/" target="_blank" rel="noopener noreffer">真的有这种工具</a> (C Intermediate Language) 和<a href="https://gitlab.com/zsaleeba/picoc" target="_blank" rel="noopener noreffer">解释器</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>(这还只是 “粗浅” 的理解)</p>
+<ul>
+<li>Talk is cheap. Show me the code. (Linus Torvalds): 任何真正的理解都应该落到可以执行的代码</li>
+</ul>
+<h4 id="c-程序的状态机模型角度二">C 程序的状态机模型（角度二）</h4>
+<p><strong>(语义，semantics)</strong></p>
+<ul>
+<li>状态 = stack frame 的列表 (每个 frame 有 PC <code>program counter</code> ) + 全局变量</li>
+<li>初始状态 = main(argc, argv), 全局变量初始化</li>
+<li>迁移 = 执行 top stack frame PC 的语句; PC++
+<ul>
+<li>函数调用 = push frame (frame.PC = 入口)</li>
+<li>函数返回 = pop frame</li>
+</ul>
+</li>
+</ul>
+<p><strong>应用：将任何递归程序就地转为非递归</strong>（模拟$stack$）</p>
+<p>$hanoi-nr.c\newline$</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">pc</span><span class="p">,</span> <span class="n">n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">char</span> <span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">via</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Frame</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define call(...) ({ *(++top) = (Frame) { .pc = 0, __VA_ARGS__ }; })
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define ret()     ({ top--; })
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define goto(loc) ({ f-&gt;pc = (loc) - 1; })
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">hanoi</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">char</span> <span class="n">from</span><span class="p">,</span> <span class="kt">char</span> <span class="n">to</span><span class="p">,</span> <span class="kt">char</span> <span class="n">via</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Frame</span> <span class="n">stk</span><span class="p">[</span><span class="mi">64</span><span class="p">],</span> <span class="o">*</span><span class="n">top</span> <span class="o">=</span> <span class="n">stk</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">call</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">via</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">Frame</span> <span class="o">*</span><span class="n">f</span><span class="p">;</span> <span class="p">(</span><span class="n">f</span> <span class="o">=</span> <span class="n">top</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">stk</span><span class="p">;</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">pc</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">switch</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">pc</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">0</span><span class="o">:</span> <span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%c -&gt; %c</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">from</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">to</span><span class="p">);</span> <span class="k">goto</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span> <span class="p">}</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">1</span><span class="o">:</span> <span class="n">call</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">from</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">via</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">to</span><span class="p">);</span>   <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">2</span><span class="o">:</span> <span class="n">call</span><span class="p">(</span>       <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">from</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">to</span><span class="p">,</span>  <span class="n">f</span><span class="o">-&gt;</span><span class="n">via</span><span class="p">);</span>  <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">3</span><span class="o">:</span> <span class="n">call</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">via</span><span class="p">,</span>  <span class="n">f</span><span class="o">-&gt;</span><span class="n">to</span><span class="p">,</span>  <span class="n">f</span><span class="o">-&gt;</span><span class="n">from</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">4</span><span class="o">:</span> <span class="n">ret</span><span class="p">();</span>                                    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">default</span><span class="o">:</span> <span class="n">assert</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>A → B, B → A 的迎刃而解
+<ul>
+<li>还是一样的 <code>call()</code>，但放入不同的 <code>Frame</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="什么是程序-二进制代码视角">什么是程序 (二进制代码视角)</h3>
+<p>还是状态机	(没看过南大的计算机基础和数字逻辑课到这多少有点🤡了)</p>
+<ul>
+<li>状态 = 内存 <code>M</code> + 寄存器 <code>R</code></li>
+<li>初始状态 = (稍后回答)</li>
+<li>迁移 = 执行一条指令
+<ul>
+<li>我们花了一整个《计算机系统基础》解释这件事</li>
+<li>gdb 同样可以观察状态和执行</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>操作系统上的程序</p>
+<ul>
+<li>
+<p>所有的指令都只能<code>计算</code></p>
+<ul>
+<li>deterministic: mov, add, sub, call, &hellip;</li>
+<li>non-deterministic: rdrand, &hellip;</li>
+<li>但这些指令甚至都无法使程序停下来 ,直接🤡, 对于操作系统来说没有什么🐔用(NEMU: 加条 <code>trap</code> 指令)</li>
+</ul>
+</li>
+</ul>
+<h4 id="一条特殊的指令">一条特殊的指令</h4>
+<p>调用操作系统 <code>syscall</code></p>
+<ul>
+<li>把(<code>M</code>, <code>R</code>)<strong>完全交给操作系统</strong>，任其修改
+<ul>
+<li>一个有趣的问题：如果程序不打算完全信任操作系统？</li>
+</ul>
+</li>
+<li>实现与操作系统中的其他对象交互
+<ul>
+<li>读写文件/操作系统状态 (例如把文件内容写入 M<em>M</em>)</li>
+<li>改变进程 (运行中状态机) 的状态，例如创建进程/销毁自己</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>程序 = 计算 + syscall</strong></p>
+<div class="mermaid" id="id-2"></div>
+<h4 id="问题怎么构造一个最小的-hello-world">问题：怎么构造一个最小的 Hello, World？</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello, World</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>gcc 编译出来的文件不满足 “最小”</p>
+<ul>
+<li><code>--verbose</code>可以查看所有编译选项 (真不少)
+<ul>
+<li><code>printf </code>变成了 puts@plt</li>
+</ul>
+</li>
+<li><code>-static</code> 会复制 libc</li>
+</ul>
+<p>gcc能玩的这么多，看来✌️之前天天靠现成$IDE$多少沾点🤡了</p>
+<p>实际使用<code>--verbose</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc --verbose hello.c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>效果</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-4.png" title="/img/Operating System/chapter2-4.png" data-thumbnail="/img/Operating System/chapter2-4.png" data-sub-html="<h2>效果(on windows)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-4.png"
+            data-srcset="/img/Operating%20System/chapter2-4.png, /img/Operating%20System/chapter2-4.png 1.5x, /img/Operating%20System/chapter2-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-4.png" />
+    </a><figcaption class="image-caption">效果(<code>on windows</code>)</figcaption>
+    </figure>
+<p>实际使用<code>–static</code>(不依赖动态链接库)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -static hello.c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译出来的文件会很大（我的是53KB）</p>
+<hr>
+<p>直接硬来？</p>
+<p>强行编译 + 链接：<code>gcc -c</code> + <code>ld</code></p>
+<ul>
+<li>
+<p>直接用 ld 链接失败</p>
+<ul>
+<li>ld 不知道怎么链接库函数……</li>
+</ul>
+</li>
+<li>
+<p>空的 main 函数倒是可以</p>
+<ul>
+<li>链接时得到奇怪的警告 (可以定义成 <code>_start</code> 避免警告)</li>
+<li>但 Segmentation Fault 了……</li>
+</ul>
+</li>
+</ul>
+<p>找了一下<code>Segmentation Fault</code></p>
+<p>$From\ wikipedia\newline$
+$\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target="_blank" rel="noopener noreffer">address</a></p>
+<blockquote>
+<p>In <a href="https://en.wikipedia.org/wiki/Computing" target="_blank" rel="noopener noreffer">computing</a>, a <strong>segmentation fault</strong> (often shortened to <strong>segfault</strong>) or <strong>access violation</strong> is a <a href="https://en.wikipedia.org/wiki/Fault_%28computing%29" target="_blank" rel="noopener noreffer">fault</a>, or failure condition, raised by hardware with <a href="https://en.wikipedia.org/wiki/Memory_protection" target="_blank" rel="noopener noreffer">memory protection</a>, notifying an <a href="https://en.wikipedia.org/wiki/Operating_system" target="_blank" rel="noopener noreffer">operating system</a> (OS) the software has attempted to access a restricted area of memory (a memory access violation). On standard <a href="https://en.wikipedia.org/wiki/X86" target="_blank" rel="noopener noreffer">x86</a> computers, this is a form of <a href="https://en.wikipedia.org/wiki/General_protection_fault" target="_blank" rel="noopener noreffer">general protection fault</a>. The <a href="https://en.wikipedia.org/wiki/Operating_system_kernel" target="_blank" rel="noopener noreffer">operating system kernel</a> will, in response, usually perform some corrective action, generally passing the fault on to the offending <a href="https://en.wikipedia.org/wiki/Process_%28computing%29" target="_blank" rel="noopener noreffer">process</a> by sending the process a <a href="https://en.wikipedia.org/wiki/Signal_%28computing%29" target="_blank" rel="noopener noreffer">signal</a>. Processes can in some cases install a custom signal handler, allowing them to recover on their own,[<a href="https://en.wikipedia.org/wiki/Segmentation_fault#cite_note-Peter_Van_der_Linden-1" target="_blank" rel="noopener noreffer">1]</a> but otherwise the OS default signal handler is used, generally causing <a href="https://en.wikipedia.org/wiki/Abnormal_termination" target="_blank" rel="noopener noreffer">abnormal termination</a> of the process (a program <a href="https://en.wikipedia.org/wiki/Crash_%28computing%29" target="_blank" rel="noopener noreffer">crash</a>), and sometimes a <a href="https://en.wikipedia.org/wiki/Core_dump" target="_blank" rel="noopener noreffer">core dump</a>.</p>
+<p>Segmentation faults are a common class of error in programs written in languages like <a href="https://en.wikipedia.org/wiki/C_%28programming_language%29" target="_blank" rel="noopener noreffer">C</a> that provide low-level memory access and few to no safety checks. They arise primarily due to errors in use of <a href="https://en.wikipedia.org/wiki/Pointer_%28computer_programming%29" target="_blank" rel="noopener noreffer">pointers</a> for <a href="https://en.wikipedia.org/wiki/Virtual_memory" target="_blank" rel="noopener noreffer">virtual memory</a> addressing, particularly illegal access. Another type of memory access error is a <a href="https://en.wikipedia.org/wiki/Bus_error" target="_blank" rel="noopener noreffer">bus error</a>, which also has various causes, but is today much rarer; these occur primarily due to incorrect <em>physical</em> memory addressing, or due to misaligned memory access – these are memory references that the hardware <em>cannot</em> address, rather than references that a process is not <em>allowed</em> to address.</p>
+<p>Many programming languages may employ mechanisms designed to avoid segmentation faults and improve memory safety. For example, <a href="https://en.wikipedia.org/wiki/Rust_%28programming_language%29" target="_blank" rel="noopener noreffer">Rust</a> employs an ownership-based[<a href="https://en.wikipedia.org/wiki/Segmentation_fault#cite_note-2" target="_blank" rel="noopener noreffer">2]</a> model to ensure memory safety.[<a href="https://en.wikipedia.org/wiki/Segmentation_fault#cite_note-3" target="_blank" rel="noopener noreffer">3]</a> Other languages, such as <a href="https://en.wikipedia.org/wiki/Lisp_%28programming_language%29" target="_blank" rel="noopener noreffer">Lisp</a> and <a href="https://en.wikipedia.org/wiki/Java_%28programming_language%29" target="_blank" rel="noopener noreffer">Java</a>, employ <a href="https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29" target="_blank" rel="noopener noreffer">garbage collection</a>,[<a href="https://en.wikipedia.org/wiki/Segmentation_fault#cite_note-4" target="_blank" rel="noopener noreffer">4]</a> which avoids certain classes of memory errors that could lead to segmentation faults.[<a href="https://en.wikipedia.org/wiki/Segmentation_fault#cite_note-5" target="_blank" rel="noopener noreffer">5]</a></p>
+</blockquote>
+<p>主要和非法访问内存有关</p>
+<p>解决方法：观察程序（状态机）执行</p>
+<ul>
+<li>
+<p><code>starti</code>可以帮助我们从<strong>第一条指令</strong>开始执行程序</p>
+<ul>
+<li><code>gdb</code> 可以在两种状态机视角之间切换 (<code>layout</code>) <a href="http://sourceware.org/gdb/documentation/" target="_blank" rel="noopener noreffer">GDB官方文档</a></li>
+</ul>
+</li>
+</ul>
+<p>定位出错位置</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-5.png" title="/img/Operating System/chapter2-5.png" data-thumbnail="/img/Operating System/chapter2-5.png" data-sub-html="<h2>出错位置(on linux)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-5.png"
+            data-srcset="/img/Operating%20System/chapter2-5.png, /img/Operating%20System/chapter2-5.png 1.5x, /img/Operating%20System/chapter2-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-5.png" />
+    </a><figcaption class="image-caption">出错位置(<code>on linux</code>)</figcaption>
+    </figure>
+<p><code>retq</code>:栈由<code>rsp</code>（寄存器）控制,<code>retq</code>就是从<code>rsp</code>寄存器当中取出8个字节，赋值给<code>rip</code>(pc)，然后<code>rsp &lt;- rsp + 8</code>（往上挪一格）（栈向下增长）</p>
+<p>初始<code>rsp</code>顶部为1</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-6.png" title="/img/Operating System/chapter2-6.png" data-thumbnail="/img/Operating System/chapter2-6.png" data-sub-html="<h2>查看错误(on gdb)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-6.png"
+            data-srcset="/img/Operating%20System/chapter2-6.png, /img/Operating%20System/chapter2-6.png 1.5x, /img/Operating%20System/chapter2-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-6.png" />
+    </a><figcaption class="image-caption">查看错误(<code>on gdb</code>)</figcaption>
+    </figure>
+<p>栈</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-7.png" title="/img/Operating System/chapter2-7.png" data-thumbnail="/img/Operating System/chapter2-7.png" data-sub-html="<h2>查看错误(on gdb)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-7.png"
+            data-srcset="/img/Operating%20System/chapter2-7.png, /img/Operating%20System/chapter2-7.png 1.5x, /img/Operating%20System/chapter2-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-7.png" />
+    </a><figcaption class="image-caption">查看错误(<code>on gdb</code>)</figcaption>
+    </figure>
+<p>但是当执行完有问题的语句之后<code>retq</code>，<code>rip</code>就变成了8</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-8.png" title="/img/Operating System/chapter2-8.png" data-thumbnail="/img/Operating System/chapter2-8.png" data-sub-html="<h2>出现错误(on gdb)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-8.png"
+            data-srcset="/img/Operating%20System/chapter2-8.png, /img/Operating%20System/chapter2-8.png 1.5x, /img/Operating%20System/chapter2-8.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-8.png" />
+    </a><figcaption class="image-caption">出现错误(<code>on gdb</code>)</figcaption>
+    </figure>
+<p>非法访问，触发了<code>Segmentation Fault</code></p>
+<p><strong>所以该程序能被操作系统正确的执行，但没有办法返回，问题出在初始状态上（即错误的指令）</strong></p>
+<h5 id="解决异常退出">解决异常退出</h5>
+<p>有办法让状态机 “停下来” 吗？</p>
+<ul>
+<li>纯 “计算” 的状态机：不行</li>
+<li>要么死循环，要么 undefined behavior</li>
+</ul>
+<p>解决办法：<code>syscall</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span><span class="p">(</span><span class="n">SYS_exit</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>linux</code>环境下使用<code>gdb</code>进行调试</p>
+<p>发现调用了<code>syscall</code></p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-9.png" title="/img/Operating System/chapter2-9.png" data-thumbnail="/img/Operating System/chapter2-9.png" data-sub-html="<h2>gdb(on linux)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-9.png"
+            data-srcset="/img/Operating%20System/chapter2-9.png, /img/Operating%20System/chapter2-9.png 1.5x, /img/Operating%20System/chapter2-9.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-9.png" />
+    </a><figcaption class="image-caption">gdb(<code>on linux</code>)</figcaption>
+    </figure>
+<p>进入<code>syscall</code>继续查看</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-10.png" title="/img/Operating System/chapter2-10.png" data-thumbnail="/img/Operating System/chapter2-10.png" data-sub-html="<h2>gdb(继续查看)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-10.png"
+            data-srcset="/img/Operating%20System/chapter2-10.png, /img/Operating%20System/chapter2-10.png 1.5x, /img/Operating%20System/chapter2-10.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-10.png" />
+    </a><figcaption class="image-caption">gdb(<code>继续查看</code>)</figcaption>
+    </figure>
+<p>发现该函数给一大堆寄存器赋了值，赋完值之后会执行一个<code>syscall</code>指令</p>
+<p>实质：准备好一个系统调用的参数，然后把自己完全交给操作系统</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-11.png" title="/img/Operating System/chapter2-11.png" data-thumbnail="/img/Operating System/chapter2-11.png" data-sub-html="<h2>gdb(可以看到退出码)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-11.png"
+            data-srcset="/img/Operating%20System/chapter2-11.png, /img/Operating%20System/chapter2-11.png 1.5x, /img/Operating%20System/chapter2-11.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-11.png" />
+    </a><figcaption class="image-caption">gdb(<code>可以看到退出码</code>)</figcaption>
+    </figure>
+<p>（终止）</p>
+<ul>
+<li>调试代码：syscall 的实现在哪里？
+<ul>
+<li>坏消息：在 libc 里，不方便直接链接</li>
+<li>好消息：代码很短，而且似乎看懂了</li>
+</ul>
+</li>
+</ul>
+<h5 id="hello-world的汇编实现">Hello, World的汇编实现</h5>
+<p>minmal.S</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="n">globl</span> <span class="n">_start</span>
+</span></span><span class="line"><span class="cl"><span class="nl">_start</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_write</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span>   <span class="err">#</span> <span class="n">write</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="err">#</span>   <span class="n">fd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">st</span><span class="p">,</span>        <span class="o">%</span><span class="n">rsi</span>   <span class="err">#</span>   <span class="n">buf</span><span class="o">=</span><span class="n">st</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="p">(</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">),</span> <span class="o">%</span><span class="n">rdx</span>   <span class="err">#</span>   <span class="n">count</span><span class="o">=</span><span class="n">ed</span><span class="o">-</span><span class="n">st</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span>                 <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_exit</span><span class="p">,</span>  <span class="o">%</span><span class="n">rax</span>   <span class="err">#</span> <span class="n">exit</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="err">#</span>   <span class="n">status</span><span class="o">=</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span>                 <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">st</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="n">ascii</span> <span class="s">&#34;</span><span class="se">\033</span><span class="s">[01;31mHello, OS World</span><span class="se">\033</span><span class="s">[0m</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">ed</span><span class="p">:</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note: gcc 支持对汇编代码的预编译 (还会定义 <code>__ASSEMBLER__</code> 宏)</p>
+<p>运行成功，红色的hello,world（<code>linux</code>开始💩🐴犯病，用gdb才调出来）</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-12.png" title="/img/Operating System/chapter2-12.png" data-thumbnail="/img/Operating System/chapter2-12.png" data-sub-html="<h2>运行程序(on gdb)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-12.png"
+            data-srcset="/img/Operating%20System/chapter2-12.png, /img/Operating%20System/chapter2-12.png 1.5x, /img/Operating%20System/chapter2-12.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-12.png" />
+    </a><figcaption class="image-caption">运行程序(<code>on gdb</code>)</figcaption>
+    </figure>
+<p>宏展开结果</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -E minmal.S
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="p">.</span><span class="n">globl</span> <span class="n">_start</span>
+</span></span><span class="line"><span class="cl"><span class="nl">_start</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span> <span class="err">#</span> <span class="n">write</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span> <span class="o">%</span><span class="n">rdi</span> <span class="err">#</span> <span class="n">fd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">st</span><span class="p">,</span> <span class="o">%</span><span class="n">rsi</span> <span class="err">#</span> <span class="n">buf</span><span class="o">=</span><span class="n">st</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="p">(</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">),</span> <span class="o">%</span><span class="n">rdx</span> <span class="err">#</span> <span class="n">count</span><span class="o">=</span><span class="n">ed</span><span class="o">-</span><span class="n">st</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span> <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">60</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span> <span class="err">#</span> <span class="n">exit</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span> <span class="o">%</span><span class="n">rdi</span> <span class="err">#</span> <span class="n">status</span><span class="o">=</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span> <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">st</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="n">ascii</span> <span class="s">&#34;</span><span class="se">\033</span><span class="s">[01;31mHello, OS World</span><span class="se">\033</span><span class="s">[0m</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">ed</span><span class="p">:</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>深究<code>syscall</code></p>
+<p>使用命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">man syscall
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以直接查看手册</p>
+<hr>
+<p>回顾：状态机视角的程序</p>
+<ul>
+<li>程序 = 计算 → <code>syscall </code>→ 计算 → &hellip;</li>
+</ul>
+<h6 id="彩蛋ansi-escape-code">彩蛋：ANSI Escape Code</h6>
+<blockquote>
+<p>为什么 Hello World 有颜色？？</p>
+</blockquote>
+<p>特殊编码的字符实现终端控制</p>
+<ul>
+<li>
+<p><a href="https://git.busybox.net/busybox/tree/editors/vi.c" target="_blank" rel="noopener noreffer">vi.c</a> from busybox</p>
+</li>
+<li>
+<p><code>telnet towel.blinkenlights.nl</code> (电影；Ctrl-] and q 退出)</p>
+</li>
+<li>
+<p><code>dialog --msgbox 'Hello, OS World!' 8 32</code></p>
+</li>
+<li>
+<p><code>ssh sshtron.zachlatta.com</code>(网络游戏)</p>
+<ul>
+<li>
+<p>所以编程可以从一开始就不那么枯燥</p>
+</li>
+<li>
+<p>看似复杂，实际简单明了</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="编译器与编译优化">编译器与编译优化</h3>
+<p>“状态机” 顺便解决了一个非常重要的基本问题：</p>
+<blockquote>
+<p>什么是编译器？？？</p>
+</blockquote>
+<p>编译器：源代码 <code>S</code>(状态机) → 二进制代码 <code>C</code> (状态机)</p>
+<p>$C = \textrm{compile}(S)\newline$</p>
+<p>编译 (优化) 的正确性 (Soundness):</p>
+<ul>
+<li>S<em>S</em> 与 C<em>C</em> 的可观测行为严格一致
+<ul>
+<li>system calls; volatile variable loads/stores; termination</li>
+</ul>
+</li>
+<li><code>Trivially</code> 正确 (但低效) 的实现
+<ul>
+<li>解释执行/直接翻译 <code>S</code>的语义</li>
+</ul>
+</li>
+</ul>
+<h4 id="现代-与未来的-编译优化">现代 (与未来的) 编译优化</h4>
+<p>在保证观测一致性 (sound) 的前提下改写代码 (rewriting)</p>
+<ul>
+<li>
+<p>Inline assembly 也可以参与优化</p>
+<ul>
+<li>其他优化可能会跨过不带 barrier 的 <code>asm volatile</code></li>
+</ul>
+</li>
+<li>
+<p>Eventual memory consistency</p>
+</li>
+<li>
+<p>Call to external CU = write back visible memory</p>
+<ul>
+<li>talk is cheap, show me the code!</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>这给了我们很多想象的空间（🐮🍺的东西）</p>
+<ul>
+<li>Semantic-based compilation (synthesis)</li>
+<li>AI-based rewriting</li>
+<li>Fine-grained semantics &amp; system call fusion</li>
+</ul>
+<p>不可优化的部分可以进行合并？（🐮🍺的东西）</p>
+<h4 id="进入-plprogramming-language-的领域">进入 PL(Programming language) 的领域</h4>
+<p>PL 领域 (的很多人) 有一种倾向：用数学化的语言定义和理解一切 (all about semantics)</p>
+<ul>
+<li><del>所以你看一眼 paper 就觉得自己瞎了</del></li>
+<li>但背后的直觉依然是 system/software 的
+<ul>
+<li>(我们是人，不是无情的数学机器 😂)</li>
+<li>溜了溜了，回到 system 的世界</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>Further readings</p>
+<ul>
+<li><a href="https://dl.acm.org/doi/10.1145/2103621.2103719" target="_blank" rel="noopener noreffer">An executable formal semantics of C with applications</a> (POPL'12)</li>
+<li><a href="https://compcert.org/motivations.html" target="_blank" rel="noopener noreffer">CompCert C verified compiler</a> and a <a href="https://xavierleroy.org/publi/compcert-backend.pdf" target="_blank" rel="noopener noreffer">paper</a> (POPL'06, Most Influential Paper Award :gold medal🐮)</li>
+<li><a href="https://dl.acm.org/doi/10.1145/3485513" target="_blank" rel="noopener noreffer">Copy-and-patch compilation</a> (OOPSLA'21, Distinguished Paper 🐮)</li>
+</ul>
+<h3 id="操作系统中的程序">操作系统中的程序</h3>
+<h4 id="操作系统中的一般程序">操作系统中的一般程序</h4>
+<blockquote>
+<p>和 <a href="https://jyywiki.cn/pages/OS/2022/demos/minimal.S" target="_blank" rel="noopener noreffer">minimal.S</a> 没有本质区别：程序 = 计算 → syscall → &hellip;</p>
+</blockquote>
+<p>操作系统收编了所有的硬件/软件资源</p>
+<ul>
+<li>只能用操作系统允许的方式访问操作系统中的对象
+<ul>
+<li>从而实现操作系统的 “霸主” 地位</li>
+<li>例子：<a href="https://jyywiki.cn/pages/OS/2022/demos/tryopen.c" target="_blank" rel="noopener noreffer">tryopen.c</a></li>
+</ul>
+</li>
+<li>这是为 “管理多个状态机” 所必须的
+<ul>
+<li>不能打架，谁有权限就给他</li>
+</ul>
+</li>
+</ul>
+<p>tryopen.c</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">try_open</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">fname</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;open(</span><span class="se">\&#34;</span><span class="s">%s</span><span class="se">\&#34;</span><span class="s">) returns %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">perror</span><span class="p">(</span><span class="s">&#34;  FAIL&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;  SUCCESS!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">try_open</span><span class="p">(</span><span class="s">&#34;/something/not/exist&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">try_open</span><span class="p">(</span><span class="s">&#34;/dev/sda&#34;</span><span class="p">);</span> <span class="c1">// hard drive
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行效果</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">jungle@jungle-virtual-machine:~$ gcc tryopen.c <span class="o">&amp;&amp;</span> ./a.out
+</span></span><span class="line"><span class="cl">open<span class="o">(</span><span class="s2">&#34;/something/not/exist&#34;</span><span class="o">)</span> returns -1
+</span></span><span class="line"><span class="cl">  FAIL: No such file or directory
+</span></span><span class="line"><span class="cl">open<span class="o">(</span><span class="s2">&#34;/dev/sda&#34;</span><span class="o">)</span> returns -1
+</span></span><span class="line"><span class="cl">  FAIL: Permission denied
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="二进制-程序也是操作系统中的对象">(二进制) 程序也是操作系统中的对象</h4>
+<p>可执行文件</p>
+<ul>
+<li>与大家日常使用的文件 (a.c, README.txt) 没有本质区别</li>
+<li>操作系统提供 API 打开、读取、改写 (都需要相应的权限)</li>
+</ul>
+<hr>
+<p>查看可执行文件</p>
+<ul>
+<li>
+<p><code>vim</code>,<code>cat</code>,<code>xxd</code></p>
+<p>都可以直接查看可执行文件</p>
+<ul>
+<li><code>vim</code> 中二进制的部分无法 “阅读”，但可以看到字符串常量</li>
+<li>使用 <code>xxd</code> 可以看到文件以 <code>&quot;\x7f&quot; &quot;ELF&quot;</code> 开头</li>
+<li>vscode 有 <code>binary editor</code> 插件</li>
+</ul>
+</li>
+</ul>
+<h4 id="系统中常见的应用程序">系统中常见的应用程序</h4>
+<p>Core Utilities (coreutils)</p>
+<ul>
+<li><em>standard</em> programs for text and file manipulation</li>
+<li>系统中安装的是 <a href="https://www.gnu.org/software/coreutils/" target="_blank" rel="noopener noreffer">GNU Coreutils</a>
+<ul>
+<li>有较小的替代品 <a href="https://www.busybox.net/" target="_blank" rel="noopener noreffer">busybox</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>系统/工具程序</p>
+<ul>
+<li>
+<p>bash,binutils, apt, ip, ssh, vim, tmux, jdk, python, &hellip;</p>
+<ul>
+<li>
+<p>这些工具的原理都不复杂 (例如 apt 其实只是 dpkg 的壳)</p>
+</li>
+<li>
+<p><a href="https://packages.ubuntu.com/" target="_blank" rel="noopener noreffer">Ubuntu Packages</a> (和 apt-file 工具) 支持文件名检索</p>
+<ul>
+<li>例子：找不到 <code>SDL2/SDL.h</code> 时&hellip;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>其他各种应用程序</p>
+<ul>
+<li>浏览器、音乐播放器……</li>
+</ul>
+<h4 id="操作系统中的程序dark-side">操作系统中的程序：Dark Side</h4>
+<blockquote>
+<p>杀人的面试题 (1)：一个普通的、人畜无害的 Hello World C 程序执行的第一条指令在哪里？</p>
+</blockquote>
+<p>等价问法</p>
+<ul>
+<li>“二进制程序状态机的初始状态是什么？”
+<ul>
+<li><code>main</code> 的第一条指令 ❌</li>
+<li><code>libc</code> 的 <code>_start</code> ❌</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>问 gdb 吧</p>
+<ul>
+<li><code>info proc {mappings,...}</code> - 打印进程内存</li>
+</ul>
+<p>使用<code>gdb</code></p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-13.png" title="/img/Operating System/chapter2-13.png" data-thumbnail="/img/Operating System/chapter2-13.png" data-sub-html="<h2>gdb(查看入口)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-13.png"
+            data-srcset="/img/Operating%20System/chapter2-13.png, /img/Operating%20System/chapter2-13.png 1.5x, /img/Operating%20System/chapter2-13.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-13.png" />
+    </a><figcaption class="image-caption">gdb(<code>查看入口</code>)</figcaption>
+    </figure>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">0x00007ffff7fe32b0 in _start <span class="o">()</span> from /lib64/ld-linux-x86-64.so.2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用<code>info proc mappings</code>命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> info proc mappings 
+</span></span><span class="line"><span class="cl">process <span class="m">48808</span>
+</span></span><span class="line"><span class="cl">Mapped address spaces:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          Start Addr           End Addr       Size     Offset  Perms  objfile
+</span></span><span class="line"><span class="cl">      0x555555554000     0x555555555000     0x1000        0x0  r--p   /home/jungle/a.out
+</span></span><span class="line"><span class="cl">      0x555555555000     0x555555556000     0x1000     0x1000  r-xp   /home/jungle/a.out
+</span></span><span class="line"><span class="cl">      0x555555556000     0x555555557000     0x1000     0x2000  r--p   /home/jungle/a.out
+</span></span><span class="line"><span class="cl">      0x555555557000     0x555555559000     0x2000     0x2000  rw-p   /home/jungle/a.out
+</span></span><span class="line"><span class="cl">      0x7ffff7fbd000     0x7ffff7fc1000     0x4000        0x0  r--p   <span class="o">[</span>vvar<span class="o">]</span>
+</span></span><span class="line"><span class="cl">      0x7ffff7fc1000     0x7ffff7fc3000     0x2000        0x0  r-xp   <span class="o">[</span>vdso<span class="o">]</span>
+</span></span><span class="line"><span class="cl">      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+</span></span><span class="line"><span class="cl">      0x7ffff7fc5000     0x7ffff7fef000    0x2a000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+</span></span><span class="line"><span class="cl">      0x7ffff7fef000     0x7ffff7ffa000     0xb000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+</span></span><span class="line"><span class="cl">      0x7ffff7ffb000     0x7ffff7fff000     0x4000    0x37000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+</span></span><span class="line"><span class="cl">      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   <span class="o">[</span>stack<span class="o">]</span>
+</span></span><span class="line"><span class="cl">  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   <span class="o">[</span>vsyscall<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="main-之前发生了什么"><code>main()</code> 之前发生了什么？</h5>
+<p><code>ld-linux-x86-64.so</code> 加载了 libc</p>
+<ul>
+<li>之后 libc 完成了自己的初始化
+<ul>
+<li>RTFM: <a href="https://www.gnu.org/software/hurd/glibc/startup.html" target="_blank" rel="noopener noreffer">libc startup</a> on Hurd</li>
+<li><code>main()</code> 的开始/结束并不是整个程序的开始/结束</li>
+<li>例子：<a href="https://jyywiki.cn/pages/OS/2022/demos/hello-goodbye.c" target="_blank" rel="noopener noreffer">hello-goodbye.c</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>谁规定是 <code>ld-linux-x86-64.so</code>，而不是 <code>rtfm.so</code>？</p>
+<ul>
+<li>readelf 告诉你答案</li>
+<li>(计算机系统不存在玄学；一切都建立在确定的机制上)
+<ul>
+<li>回顾 <code>gcc --verbose</code></li>
+</ul>
+</li>
+</ul>
+<p><code>hello-goodbye.c</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">constructor</span><span class="p">))</span> <span class="kt">void</span> <span class="n">hello</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello, World</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// See also: atexit(3)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__attribute__</span><span class="p">((</span><span class="n">destructor</span><span class="p">))</span> <span class="kt">void</span> <span class="n">goodbye</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Goodbye, Cruel OS World!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter2-14.png" title="/img/Operating System/chapter2-14.png" data-thumbnail="/img/Operating System/chapter2-14.png" data-sub-html="<h2>vim(汇编代码)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-14.png"
+            data-srcset="/img/Operating%20System/chapter2-14.png, /img/Operating%20System/chapter2-14.png 1.5x, /img/Operating%20System/chapter2-14.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-14.png" />
+    </a><figcaption class="image-caption">vim(<code>汇编代码</code>)</figcaption>
+    </figure>
+<p>后面老师hacker改二进制代码的时候✌️的👀已经跟不上了，脑子更是直接💩🐴</p>
+<blockquote>
+<p>杀人的面试题 (2)：main 执行之前、执行中、执行后，发生了哪些操作系统 API 调用？</p>
+</blockquote>
+<hr>
+<p>呃……</p>
+<ul>
+<li>(计算机系统不存在玄学；一切都建立在确定的机制上)</li>
+<li>所以你应该有一个强烈的信念：这个问题是可以回答的</li>
+</ul>
+<h4 id="打开程序的执行trace-踪迹">打开程序的执行：Trace (踪迹)</h4>
+<blockquote>
+<p>In general, trace refers to the process of following <em>anything</em> from the beginning to the end. For example, the <code>traceroute</code> command follows each of the network hops as your computer connects to another computer.</p>
+</blockquote>
+<p>这门课中很重要的工具：strace</p>
+<ul>
+<li>system call trace</li>
+<li>理解程序运行时使用的系统调用
+<ul>
+<li>demo: <code>strace ./hello-goodbye</code></li>
+<li>在这门课中，你能理解 strace 的输出并在你自己的操作系统里实现相当一部分系统调用 (mmap, execve, &hellip;)</li>
+</ul>
+</li>
+</ul>
+<p>使用<code>strace</code></p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-15.png" title="/img/Operating System/chapter2-15.png" data-thumbnail="/img/Operating System/chapter2-15.png" data-sub-html="<h2>linux(使用strace)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-15.png"
+            data-srcset="/img/Operating%20System/chapter2-15.png, /img/Operating%20System/chapter2-15.png 1.5x, /img/Operating%20System/chapter2-15.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-15.png" />
+    </a><figcaption class="image-caption">linux(<code>使用strace</code>)</figcaption>
+    </figure>
+<h4 id="本质上所有的程序和-hello-world-类似">本质上，所有的程序和 Hello World 类似</h4>
+<p>程序 = 状态机 = 计算 → syscall → 计算 →</p>
+<ul>
+<li>
+<p>被操作系统加载</p>
+<ul>
+<li>通过另一个进程执行 execve 设置为初始状态</li>
+</ul>
+</li>
+<li>
+<p>状态机执行</p>
+<ul>
+<li>进程管理：fork, execve, exit, &hellip;</li>
+<li>文件/设备管理：open, close, read, write, &hellip;</li>
+<li>存储管理：mmap, brk, &hellip;</li>
+</ul>
+</li>
+<li>
+<p>直到 _exit (exit_group) 退出</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>说好的浏览器、游戏、杀毒软件、病毒呢？都是这些 API 吗？💢💢💢(都是) $\rightarrow$🐮🍺</li>
+</ul>
+<h4 id="yes---这些-api-就是操作系统的全部">Yes! - 这些 API 就是操作系统的全部</h4>
+<p>编译器 (gcc)，代表其他工具程序</p>
+<ul>
+<li>
+<p>主要的系统调用：execve, read, write</p>
+</li>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">strace -f gcc a.c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>(gcc 会启动其他进程)</p>
+<ul>
+<li>可以管道给编辑器 <code>vim -</code></li>
+<li>编辑器里还可以 <code>%!grep</code> (细节/技巧)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>图形界面程序 (xedit)，代表其他图形界面程序 (例如 vscode)</p>
+<ul>
+<li>
+<p>主要的系统调用：poll, recvmsg, writev</p>
+</li>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">strace xedit
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>图形界面程序和 X-Window 服务器按照 X11 协议通信</li>
+<li>虚拟机中的 <code>xedit</code> 将 <code>X11</code> 命令通过<code>ssh</code>(X11 forwarding) 转发到 Host</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-16.png" title="/img/Operating System/chapter2-16.png" data-thumbnail="/img/Operating System/chapter2-16.png" data-sub-html="<h2>strace(xedit)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-16.png"
+            data-srcset="/img/Operating%20System/chapter2-16.png, /img/Operating%20System/chapter2-16.png 1.5x, /img/Operating%20System/chapter2-16.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-16.png" />
+    </a><figcaption class="image-caption">strace(<code>xedit</code>)</figcaption>
+    </figure>
+<h4 id="各式各样的应用程序">各式各样的应用程序</h4>
+<p>都在操作系统 API (syscall) 和操作系统中的对象上构建</p>
+<ul>
+<li>窗口管理器
+<ul>
+<li>管理设备和屏幕 (read/write/mmap)</li>
+<li>进程间通信 (send, recv)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>任务管理器
+<ul>
+<li>访问操作系统提供的进程对象 (readdir/read)</li>
+<li>参考 gdb 里的 <code>info proc *</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>杀毒软件
+<ul>
+<li>文件静态扫描 (read)</li>
+<li>主动防御 (ptrace)</li>
+<li>其他更复杂的安全机制……</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结">总结</h3>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 到底什么是 “程序”？</li>
+</ul>
+<hr>
+<p>$Take-away\ message\newline$</p>
+<ul>
+<li>程序 = 状态机
+<ul>
+<li>源代码 S: 状态迁移 = 执行语句</li>
+<li>二进制代码 C: 状态迁移 = 执行指令</li>
+<li>编译器 $C=compile(S)\newline$</li>
+</ul>
+</li>
+<li>应用视角的操作系统
+<ul>
+<li>就是一条 <code>syscall</code> 指令</li>
+</ul>
+</li>
+<li>计算机系统不存在玄学；一切都建立在确定的机制上
+<ul>
+<li>理解操作系统的重要工具：<code>gcc</code>, <code>binutils</code>, <code>gdb</code>, <code>strace</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</strong></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-12-31</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序" data-hashtags="Operating System"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-hashtag="Operating System"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/" data-title="Operating System Chapter2 操作系统上的程序"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/opencv/opencv-chapter1/" class="prev" rel="prev" title="OpenCV Chapter1 基本操作与阈值处理"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/operating-system/operating-system-chapter3/" class="next" rel="next" title="Operating System Chapter3 多处理器编程：从入门到放弃">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA((00))\nB((01))\nC((10))\nA--\u003eB--clk--\u003eC--\u003eA","id-2":"graph LR\n1(初始状态)\n2(1 state)\n3(2 state)\n4(3 state)\n5(......)\n1--计算指令--\u003e2--计算指令--\u003e3--syscall--\u003e4--计算指令/syscall--\u003e5"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

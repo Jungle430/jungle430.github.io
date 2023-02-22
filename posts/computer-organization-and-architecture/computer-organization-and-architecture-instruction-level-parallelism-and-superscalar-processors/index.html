@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors" />
+<meta property="og:description" content="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors Outline Overview of Superscalar Design Issues of Superscalar Superscalar in Pentium Superscalar in ARM CORTEX-A8 Overview of Superscalar Ideal pipeline 理想的指令流水线的执行过程 指令执行分为6个阶段，且不共享资源 每个时间单位都会有1" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-01-30T16:28:39+08:00" />
+<meta property="article:modified_time" content="2023-01-30T16:28:39+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors"/>
+<meta name="twitter:description" content="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors Outline Overview of Superscalar Design Issues of Superscalar Superscalar in Pentium Superscalar in ARM CORTEX-A8 Overview of Superscalar Ideal pipeline 理想的指令流水线的执行过程 指令执行分为6个阶段，且不共享资源 每个时间单位都会有1"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" /><link rel="prev" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-reduced-instruction-set-computers/" /><link rel="next" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors\/"
+        },"genre": "posts","keywords": "Computer Organization and Architecture","wordcount":  4050 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors\/","datePublished": "2023-01-30T16:28:39+08:00","dateModified": "2023-01-30T16:28:39+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/computer-organization-and-architecture/"><i class="far fa-folder fa-fw"></i>Computer Organization and Architecture</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-01-30">2023-01-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4050 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#instruction-level-parallelism-and-superscalar-processors">Instruction Level Parallelism and Superscalar Processors</a>
+      <ul>
+        <li><a href="#outline">Outline</a></li>
+        <li><a href="#overview-of-superscalar">Overview of Superscalar</a>
+          <ul>
+            <li><a href="#problem-about-pipeline">Problem about pipeline</a></li>
+            <li><a href="#question">Question</a></li>
+            <li><a href="#superpipeline">Superpipeline</a>
+              <ul>
+                <li><a href="#limit-of-superpipeline">Limit of Superpipeline</a></li>
+              </ul>
+            </li>
+            <li><a href="#vector-and-scalar">Vector and Scalar</a>
+              <ul>
+                <li><a href="#scalar-instruction">Scalar instruction</a></li>
+                <li><a href="#vector-instruction">Vector instruction</a></li>
+              </ul>
+            </li>
+            <li><a href="#key-problem-of-superscalar">Key problem of superscalar</a>
+              <ul>
+                <li><a href="#application-of-superscalar">Application of superscalar</a></li>
+              </ul>
+            </li>
+            <li><a href="#factors-limiting-parallelism">Factors limiting parallelism</a></li>
+            <li><a href="#limitations">Limitations</a></li>
+          </ul>
+        </li>
+        <li><a href="#design-issues-of-superscalar">Design Issues of Superscalar</a>
+          <ul>
+            <li><a href="#parallelism">Parallelism</a>
+              <ul>
+                <li><a href="#machine-parallelism">Machine Parallelism</a></li>
+              </ul>
+            </li>
+            <li><a href="#instruction-issue">Instruction issue</a>
+              <ul>
+                <li><a href="#order-about-instruction-issue">Order about instruction issue</a></li>
+                <li><a href="#instruction-issue-policy">Instruction issue policy</a>
+                  <ul>
+                    <li><a href="#in-order-issuein-order-completion">In-order issue/in-order completion</a></li>
+                    <li><a href="#in-order-issueout-of-order-completion">In-order issue/out-of-order completion</a></li>
+                    <li><a href="#out-of-order-issueout-of-order-completion">Out-of-order issue/out-of-order completion</a></li>
+                    <li><a href="#anti-dependencywrite-after-read">Anti-dependency(Write-after-read)</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#analysis-of-three-technologies---">Analysis of three technologies ! ! !</a></li>
+            <li><a href="#about-instruction-window">About instruction window</a></li>
+            <li><a href="#consideration-of-control-dependence">Consideration of control dependence</a></li>
+            <li><a href="#summary">Summary</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
+<h2 id="instruction-level-parallelism-and-superscalar-processors">Instruction Level Parallelism and Superscalar Processors</h2>
+<h3 id="outline">Outline</h3>
+<ul>
+<li>
+<p>Overview of Superscalar</p>
+</li>
+<li>
+<p>Design Issues of Superscalar</p>
+</li>
+<li>
+<p>Superscalar in Pentium</p>
+</li>
+<li>
+<p>Superscalar in ARM CORTEX-A8</p>
+</li>
+</ul>
+<h3 id="overview-of-superscalar">Overview of Superscalar</h3>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-1.png" title="/img/Computer Organization and Architecture/chapter14-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-1.png" data-sub-html="<h2>Ideal pipeline</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-1.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-1.png, /img/Computer%20Organization%20and%20Architecture/chapter14-1.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-1.png" />
+    </a><figcaption class="image-caption"><code>Ideal pipeline</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>理想的指令流水线的执行过程</p>
+</li>
+<li>
+<p>指令执行分为6个阶段，且不共享资源</p>
+</li>
+<li>
+<p>每个时间单位都会有1个指令完成执行</p>
+</li>
+<li>
+<p>指令数量足够多时，执行效率为原来的6倍</p>
+</li>
+</ul>
+<hr>
+<p><strong>Actual pipeline</strong></p>
+<ul>
+<li>
+<p>Not all instructions require the same steps</p>
+<ul>
+<li>Some pipeline stages are idle</li>
+</ul>
+</li>
+<li>
+<p>Running time of different pipeline stages is different</p>
+<ul>
+<li>running time of some pipeline stages is wasted</li>
+</ul>
+</li>
+<li>
+<p>Instructions are not independent of each other</p>
+<ul>
+<li>Poor operation of the pipeline</li>
+</ul>
+</li>
+</ul>
+<h4 id="problem-about-pipeline">Problem about pipeline</h4>
+<ul>
+<li>
+<p>The pipeline pauses due to dependencies between instructions, which is called pipeline risk</p>
+</li>
+<li>
+<p>There are three types of dependencies</p>
+<ul>
+<li>
+<p>Data dependence</p>
+</li>
+<li>
+<p>Control dependence</p>
+</li>
+<li>
+<p>resource dependence</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="question">Question</h4>
+<ul>
+<li>
+<p>Is instruction pipelining truly parallel?</p>
+<ul>
+<li>
+<p>Yes: There are indeed multiple instructions in the pipeline being processed at the same time</p>
+</li>
+<li>
+<p>No: multiple instructions do not enter the pipeline at the same time</p>
+</li>
+</ul>
+</li>
+<li>
+<p>How to further improve the execution efficiency of instructions?</p>
+<ul>
+<li>
+<p>Optimize pipeline: super pipeline</p>
+</li>
+<li>
+<p>True instruction level parallelism: superscalar pipelining</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="superpipeline">Superpipeline</h4>
+<ul>
+<li>
+<p>In an ordinary pipeline, each clock cycle can complete processing of one pipeline stage</p>
+</li>
+<li>
+<p>Many pipeline stages need less than half a clock cycle</p>
+</li>
+<li>
+<p>Superpipeline</p>
+<ul>
+<li>
+<p>Double internal clock rate is adopted for instruction scheduling</p>
+</li>
+<li>
+<p>Double internal clock speed gets two tasks per external clock cycle</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Get twice the instruction throughput</p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-2.png" title="/img/Computer Organization and Architecture/chapter14-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-2.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-2.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-2.png, /img/Computer%20Organization%20and%20Architecture/chapter14-2.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-2.png" />
+    </a>
+<ul>
+<li>
+<p>四阶段流水线，指令划分为4个阶段</p>
+</li>
+<li>
+<p>普通流水线中，每个阶段需要1个时钟周期来完成。最高能达到4倍的指令执行效率，每个时钟周期可以输出1个指令的执行结果</p>
+</li>
+<li>
+<p>超级流水线。通过采用双倍内部时钟的方式，每0.5个外部时钟周期，就能完成1个指令阶段的执行。最高能达到8倍的执行效率</p>
+</li>
+</ul>
+<h5 id="limit-of-superpipeline">Limit of Superpipeline</h5>
+<ul>
+<li>
+<p>The effect is similar to that of increasing the main frequency</p>
+</li>
+<li>
+<p><strong>It is still not really instruction level parallelism</strong></p>
+</li>
+<li>
+<p>The overall performance is limited by the clock cycle and the length of time the instruction phase executes</p>
+<ul>
+<li>Long execution phases affect overall performance</li>
+</ul>
+</li>
+<li>
+<p><strong>Another technology-superscalar</strong></p>
+</li>
+</ul>
+<h4 id="vector-and-scalar">Vector and Scalar</h4>
+<ul>
+<li>
+<p>Scalar</p>
+<ul>
+<li>
+<p>Also called “vector free”. Some physical quantities have only numerical value, but no direction. Some of them are positive or negative</p>
+</li>
+<li>
+<p>A single number used to represent a single attribute of a thing</p>
+</li>
+<li>
+<p>For example: temperature, length</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Vector</p>
+<ul>
+<li>
+<p>Originally refers to a quantity with size and direction</p>
+</li>
+<li>
+<p>A group of orderly arranged numbers used to demarcate the quantitative characteristics of things</p>
+</li>
+<li>
+<p>For example: the position of a point in the plane coordinate system$ (x, y) $</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="scalar-instruction">Scalar instruction</h5>
+<ul>
+<li>
+<p>The instructions that do not have vector processing functions and only operate on a single quantity, namely a scalar quantity, are called scalar instructions</p>
+</li>
+<li>
+<p>Most instructions are scalar</p>
+</li>
+</ul>
+<h5 id="vector-instruction">Vector instruction</h5>
+<ul>
+<li>
+<p>The basic operating object is a vector, that is, a group of numbers arranged in order</p>
+</li>
+<li>
+<p>The instruction determines the address of the vector operand and directly or implicitly specifies vector parameters such as increment, vector length, etc</p>
+</li>
+<li>
+<p>The vector instruction specifies that the processor processes vector according to the same operation, which can effectively improve the operation speed</p>
+</li>
+<li>
+<p>Some mainframes are equipped with vector operation instruction systems with complete functions</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-3.png" title="/img/Computer Organization and Architecture/chapter14-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-3.png" data-sub-html="<h2>Superscalar</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-3.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-3.png, /img/Computer%20Organization%20and%20Architecture/chapter14-3.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-3.png" />
+    </a><figcaption class="image-caption"><code>Superscalar</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>超标量采用了2个独立的流水线</p>
+</li>
+<li>
+<p>每个流水线都可以再进行指令的并行运行</p>
+</li>
+<li>
+<p>能够并行执行每个阶段的2个指令</p>
+</li>
+<li>
+<p>在稳定运行的状态下，可以达到8倍的执行效率</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-4.png" title="/img/Computer Organization and Architecture/chapter14-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-4.png" data-sub-html="<h2>Ceneral Superscalar organization</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-4.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-4.png, /img/Computer%20Organization%20and%20Architecture/chapter14-4.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-4.png" />
+    </a><figcaption class="image-caption"><code>Ceneral Superscalar organization</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>包含了2个整数运算单元，2个浮点数运算单元，一个存储单元</p>
+</li>
+<li>
+<p>整数运算单元中，允许有2个指令并行执行，浮点数运算单元也允许2个浮点指令同时运行。与此同时，1个存储器操作也可以并行来执行</p>
+</li>
+<li>
+<p>这个结构中，同时允许5个指令并行执行</p>
+</li>
+</ul>
+<h4 id="key-problem-of-superscalar">Key problem of superscalar</h4>
+<ul>
+<li>
+<p>Superscalar implementations raise a number of complex design issues related to the instruction pipeline</p>
+<ul>
+<li>
+<p>First, the relevance of the pipeline itself still exists</p>
+</li>
+<li>
+<p>Multiple pipelines bring more complex correlation problems</p>
+</li>
+</ul>
+</li>
+<li>
+<p>The compiler is required to have more complex optimization techniques to achieve greater instruction level parallelism</p>
+</li>
+</ul>
+<h5 id="application-of-superscalar">Application of superscalar</h5>
+<ul>
+<li>
+<p><strong>Superscalar technology itself is proposed and developed with the development of RISC technology</strong></p>
+</li>
+<li>
+<p>RISC processors also tend to use superscalar technology</p>
+</li>
+<li>
+<p><strong>Although RISC machine lends itself readily to superscalar techniques, the superscalar approach can be used on either a RISC or CISC architecture</strong></p>
+</li>
+<li>
+<p><strong>Superscalar approach has now become the standard method for implementing high-performance microprocessors</strong></p>
+</li>
+</ul>
+<h4 id="factors-limiting-parallelism">Factors limiting parallelism</h4>
+<ul>
+<li>
+<p>Instruction level parallelism</p>
+<ul>
+<li>The degree to which program instructions can be executed in parallel</li>
+</ul>
+</li>
+<li>
+<p>Compiler capabilities</p>
+<ul>
+<li>The compiler can maximize instruction level parallelism of programs</li>
+</ul>
+</li>
+<li>
+<p>Hardware techniques</p>
+<ul>
+<li>Hardware capability supports parallel operation of instructions</li>
+</ul>
+</li>
+</ul>
+<h4 id="limitations">Limitations</h4>
+<ul>
+<li>
+<p>The most important reason for limiting instruction level parallelism is the correlation between instructions in the program</p>
+</li>
+<li>
+<p>The dependencies between instructions include</p>
+<ul>
+<li>
+<p>True data dependency</p>
+</li>
+<li>
+<p>Output dependency</p>
+</li>
+<li>
+<p>Anti-dependency</p>
+</li>
+<li>
+<p>Procedural dependency</p>
+</li>
+<li>
+<p>Resource conflicts</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>True Data Dependency</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-5.png" title="/img/Computer Organization and Architecture/chapter14-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-5.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-5.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-5.png, /img/Computer%20Organization%20and%20Architecture/chapter14-5.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-5.png" />
+    </a>
+<ul>
+<li>
+<p>I0和i1能够同时进行取指和解码</p>
+</li>
+<li>
+<p><strong>但是由于i1取的操作数是i0的结果，所以必须要等到i0执行完之后，i1才能进行取指</strong></p>
+</li>
+<li>
+<p>第二条指令存在一个时钟周期的延迟</p>
+</li>
+<li>
+<p><strong>先写后读，也称为“写后读相关性”</strong></p>
+</li>
+<li>
+<p><strong>这种相关性和指令的执行顺序严格相关，是真实的相关性</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Procedural dependency</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-6.png" title="/img/Computer Organization and Architecture/chapter14-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-6.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-6.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-6.png, /img/Computer%20Organization%20and%20Architecture/chapter14-6.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-6.png" />
+    </a>
+<ul>
+<li>
+<p>分支前和分支后的指令不能并行执行</p>
+</li>
+<li>
+<p>如果指令非定长，则必须对指令进行解码，才能确定取多长的指令</p>
+</li>
+<li>
+<p><strong>如果使用的是变长指令，在取后续指令之前，前一个指令必须要部分译码，否则下一个指令不知道从内存的哪个位置去取，这阻止了同时取指的操作</strong></p>
+</li>
+<li>
+<p>超标量更适合RISC架构的理由之一，因为RISC的指令都是定长的，不会有这种相关性</p>
+</li>
+</ul>
+<hr>
+<p><strong>Resource conflict</strong></p>
+<ul>
+<li>
+<p>资源冲突，也称为资源相关性</p>
+</li>
+<li>
+<p>指令i0和i1在执行过程中，都需要用到同一个功能单元，所以他们不能并行执行，只能串行处理。这里浪费了一个时钟周期</p>
+</li>
+<li>
+<p>资源冲突和数据相关性的表现差不多，但是资源冲突可以通过复制资源来解决，例如在前面讲到的增加干衣机</p>
+</li>
+</ul>
+<h3 id="design-issues-of-superscalar">Design Issues of Superscalar</h3>
+<h4 id="parallelism">Parallelism</h4>
+<ul>
+<li>
+<p><strong>Factors limiting parallelism</strong></p>
+<ul>
+<li>
+<p><strong>Instruction level parallelism</strong></p>
+</li>
+<li>
+<p><strong>Compiler capabilities</strong></p>
+</li>
+<li>
+<p><strong>Hardware techniques</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Instruction level parallelism</p>
+<ul>
+<li>
+<p>Instructions have the characteristics of parallel execution</p>
+</li>
+<li>
+<p>Instructions in a sequence are independent</p>
+</li>
+<li>
+<p>Execution can be overlapped</p>
+</li>
+<li>
+<p>Governed by data and procedural dependency</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="machine-parallelism">Machine Parallelism</h5>
+<ul>
+<li>
+<p>Machine Parallelism</p>
+<ul>
+<li>
+<p>Ability to take advantage of instruction level parallelism</p>
+</li>
+<li>
+<p>Governed by number of parallel pipelines</p>
+</li>
+<li>
+<p>The ability to find independent instructions and obtain instruction level parallelism</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Instructions that can be executed in parallel</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Load R1 &lt;- R2(23)
+</span></span><span class="line"><span class="cl">Add R3 &lt;- R3, &#34;1&#34;
+</span></span><span class="line"><span class="cl">Add R4 &lt;- R4, R2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Instructions that cannot be executed in parallel</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Add R3 &lt;- R3, &#34;1&#34;
+</span></span><span class="line"><span class="cl">Add R4 &lt;- R3, R2
+</span></span><span class="line"><span class="cl">Store[R4] &lt;- R0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="instruction-issue">Instruction issue</h4>
+<ul>
+<li>
+<p><strong>Instruction issue： the process of starting instructions to be executed by the functional unit of the processor</strong></p>
+<ul>
+<li>Instruction issue occurs when instruction moves from the decode stage of the pipeline to the first execute stage of the pipeline</li>
+</ul>
+</li>
+<li>
+<p><strong>In order to improve the parallelism, it is necessary to use a reasonable issue order, instead of the original order</strong></p>
+</li>
+<li>
+<p>In essence, instruction emission is a strategy to find instructions that can enter the pipeline and be executed</p>
+</li>
+</ul>
+<h5 id="order-about-instruction-issue">Order about instruction issue</h5>
+<ul>
+<li>
+<p>Three sequences are involved in the command sending process</p>
+<ul>
+<li>
+<p>Order in which instructions are fetched</p>
+</li>
+<li>
+<p>Order in which instructions are executed</p>
+</li>
+<li>
+<p>Order in which instructions change registers and memory</p>
+</li>
+</ul>
+</li>
+<li>
+<p>The one constraint on the processor is that the result must be correct</p>
+</li>
+<li>
+<p>Instruction issue policy refers to the protocol used to start the execution of the command</p>
+</li>
+</ul>
+<h5 id="instruction-issue-policy">Instruction issue policy</h5>
+<ul>
+<li>
+<p><strong>The original instruction stream itself has dependencies</strong></p>
+</li>
+<li>
+<p>To improve the parallelism of execution, the processor may change the order in which instructions are executed</p>
+</li>
+<li>
+<p>The more sophisticated the processor, the less it is bound by a strict relationship between these orderings</p>
+</li>
+<li>
+<p><strong>There are three issue policy</strong></p>
+<ul>
+<li>
+<p><strong>In-order issue with in-order completion</strong></p>
+</li>
+<li>
+<p><strong>In-order issue with out-of-order completion</strong></p>
+</li>
+<li>
+<p><strong>Out-of order issue with out-of –order completion</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h6 id="in-order-issuein-order-completion">In-order issue/in-order completion</h6>
+<ul>
+<li>
+<p>Issue instructions in the order they occur</p>
+</li>
+<li>
+<p>Write the results in the same order to complete the execution of instructions</p>
+</li>
+<li>
+<p><strong>Very inefficient，even scalar pipeline will not use policy</strong></p>
+</li>
+<li>
+<p>In Superscalar pipeline</p>
+<ul>
+<li>
+<p>May fetch more than one instruction</p>
+</li>
+<li>
+<p><strong>To ensure orderly completion, when the functional units conflict, or the execution of the functional units requires multiple cycles, instruction issue must wait</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-7.png" title="/img/Computer Organization and Architecture/chapter14-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-7.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-7.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-7.png, /img/Computer%20Organization%20and%20Architecture/chapter14-7.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-7.png" />
+    </a>
+<ul>
+<li>
+<p><strong>超标量处理器有2个独立的流水线，能够同时取2个指令</strong></p>
+</li>
+<li>
+<p><strong>有3个执行单元，以及2个写回的单元</strong></p>
+</li>
+<li>
+<p>I1需要2个周期完成执行；I3和I4需要同时使用某个功能单元，导致出现冲突；I5依赖于I4的结果；I5和I6需要同时使用某个功能单元，导致出现冲突</p>
+</li>
+<li>
+<p>成对取指并送到译码单元进行译码。I1需要花费2个时钟周期执行。所以I3和I4需要在第四个周期开始执行。由于I3和I4资源冲突，所以I3和I4需要顺序执行。I5需要依赖I4的结果，并且I5和I6存在资源冲突，所以I5和I6需要串行执行</p>
+</li>
+<li>
+<p>8个指令，总共需要8个时钟周期才能完成</p>
+</li>
+<li>
+<p>由于指令执行的时间不一样，所以如果同时发射的指令给执行单元，需要等全部执行完成之后，才能进行下一次发射</p>
+</li>
+<li>
+<p>如果指令间存在数据依赖关系，需要停止调度行为，等具备条件之后，才能进行指令发射</p>
+</li>
+</ul>
+<hr>
+<h6 id="in-order-issueout-of-order-completion">In-order issue/out-of-order completion</h6>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-8.png" title="/img/Computer Organization and Architecture/chapter14-8.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-8.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-8.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-8.png, /img/Computer%20Organization%20and%20Architecture/chapter14-8.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-8.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-8.png" />
+    </a>
+<ul>
+<li>
+<p>I1和I2同时发射到执行单元，由于I2只需要1个周期完成，所以I2可以先完成。I3可以和I1同时执行，并进入写的阶段</p>
+</li>
+<li>
+<p>I4由于和I3资源冲突，所以需要等I3完成之后才能执行。I5依赖于I4的结果，所以也需要等待I4，同理I6需要等待I5</p>
+</li>
+<li>
+<p>整体上需要7个周期完成指令的执行</p>
+</li>
+</ul>
+<hr>
+<p><strong>Output (write-write) dependency</strong></p>
+<ul>
+<li>In the process of out of sequence completion, the execution order is different from the original order, which may lead to output dependency problems</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">R3 = R3 + R5 ;(l1)
+</span></span><span class="line"><span class="cl">R4 = R3 + 1  ;(l2)
+</span></span><span class="line"><span class="cl">R3 = R5 + 1  ;(l3)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Analyze
+<ul>
+<li>I2 depends on result of I1 - data dependency</li>
+<li>If I3 completes before I1, the result from I1 will be wrong - output (write-write) dependency</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>How?</strong></p>
+<ul>
+<li>
+<p><strong>Adopt dynamic scheduling strategy</strong></p>
+</li>
+<li>
+<p>Idea: Move the dependent instructions out of the way of independent ones (s.t. independent ones can execute)</p>
+<ul>
+<li>Rest areas for dependent instructions: Reservation stations</li>
+</ul>
+</li>
+<li>
+<p>Monitor the source “values” of each instruction in the resting area</p>
+</li>
+<li>
+<p>When all source “values” of an instruction are available, “fire” (i.e. dispatch) the instruction</p>
+<ul>
+<li>Instructions dispatched in <strong>data-flow order，not control-flow</strong></li>
+</ul>
+</li>
+<li>
+<p>Benefit</p>
+<ul>
+<li>
+<p>Latency tolerance: Allows independent instructions to execute and complete in the presence of a long latency operation</p>
+</li>
+<li>
+<p>Reasonably schedule instructions with dependencies</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Problem about In-order issue</strong></p>
+</li>
+<li>
+<p>When decoding instructions, if there are related points or conflicting points, the decoding needs to stop</p>
+</li>
+<li>
+<p>In this way, subsequent instructions cannot be decoded</p>
+</li>
+<li>
+<p>At this time, the processor cannot check whether any instruction is independent and can be executed on the pipeline</p>
+</li>
+</ul>
+<hr>
+<h6 id="out-of-order-issueout-of-order-completion">Out-of-order issue/out-of-order completion</h6>
+<ul>
+<li>
+<p>Solution: decouple decode from execution</p>
+</li>
+<li>
+<p>Decode</p>
+<ul>
+<li>
+<p>Decode stage can continuously fetch and decode</p>
+</li>
+<li>
+<p>Decoded instruction is put into the buffer</p>
+</li>
+<li>
+<p>As long as the buffer is not full, fetching and decoding can continue</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Execution</p>
+<ul>
+<li>
+<p>When the functional unit is available, transmit the executable instructions to execute</p>
+</li>
+<li>
+<p>Since the instruction has been decoded, the processor can first identify whether the instruction can be executed</p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-9.png" title="/img/Computer Organization and Architecture/chapter14-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-9.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-9.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-9.png, /img/Computer%20Organization%20and%20Architecture/chapter14-9.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-9.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-9.png" />
+    </a>
+<ul>
+<li>第一个周期，I1和I2进行解码，完成解码后进入发射缓冲区。执行单元为空，I1和I2被发射出去执行</li>
+<li>第二个周期，I3和I4进行解码，完成解码后进入发射缓冲区。由于I3和I4共用执行单元，I3发射出去进行执行</li>
+<li>第三个周期，I5和I6进行解码，完成解码后进入发射缓冲区。此时，I3执行完了，所以I4可以发射了。同时由于I5和I4有数据相关性，所以I5不能发射，于是把I6发射出去执行</li>
+<li>第四个周期，没有指令需要解码</li>
+<li>第五个周期，没有指令需要解码。此时发射缓冲区只有I5。I6执行完成，可以发射I5指令。I5在第五个时钟周期完成执行，并在第六个时钟周期完成写入操作</li>
+<li>整个过程需要6个时钟周期。比之前的又缩短了1个周期</li>
+</ul>
+<h6 id="anti-dependencywrite-after-read">Anti-dependency(Write-after-read)</h6>
+<ul>
+<li>
+<p>Out-of-order issue/out-of-order completion also need to comply with restrictions</p>
+</li>
+<li>
+<p>Anti correlation occurs</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">R3 = R3 + R5 ;l1
+</span></span><span class="line"><span class="cl">R4 = R3 + 1  ;l2
+</span></span><span class="line"><span class="cl">R3 = R5 + 1  ;l3
+</span></span><span class="line"><span class="cl">R7 = R3 + R4 ;l4
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Analyze
+<ul>
+<li>I3 can not complete before I2 starts as I2 needs a value in R3 and I3 changes R3</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Dependency Analyzing</strong></p>
+<ul>
+<li>
+<p>True data dependency reflects the real dependency between data</p>
+</li>
+<li>
+<p>In essence, anti dependency and output dependency are caused by register conflict</p>
+<ul>
+<li>Register contents may not reflect the correct ordering from the program</li>
+</ul>
+</li>
+<li>
+<p>Instruction issue stops, pipeline stall</p>
+<ul>
+<li>Processor pauses for one cycle</li>
+</ul>
+</li>
+<li>
+<p>This situation is more serious when register optimization technology is used</p>
+<ul>
+<li>
+<p>Register optimization technology maximizes the use of registers to improve performance</p>
+</li>
+<li>
+<p>Register conflicts will be more significant</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Register renaming</strong></p>
+<ul>
+<li>
+<p>Registers are dynamically allocated by hardware</p>
+</li>
+<li>
+<p>When an instruction with a register as the destination operand is executed, a new register is allocated</p>
+</li>
+<li>
+<p><strong>The instruction that accesses the original register after this instruction must be modified to the newly allocated register to maintain consistency</strong></p>
+</li>
+<li>
+<p>Avoid dependencies caused by register conflicts</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Original</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">R3 = R3 + R5 ;I1
+</span></span><span class="line"><span class="cl">R4 = R3 + 1  ;I2
+</span></span><span class="line"><span class="cl">R3 = R5 + 1  ;I3
+</span></span><span class="line"><span class="cl">R7 = R3 + R4 ;I4
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>I1和I2存在真实数据相关性</p>
+</li>
+<li>
+<p>I3和I4存在真实数据相关性</p>
+</li>
+<li>
+<p>I3和I2存在反相关性，读后写</p>
+</li>
+<li>
+<p>I3和I1存在输出相关性，写后写</p>
+</li>
+<li>
+<p><strong>Register renaming</strong></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">R3b = R3a + R5a ;l1
+</span></span><span class="line"><span class="cl">R4b = R3b + 1   ;l2
+</span></span><span class="line"><span class="cl">R3c = R5a + 1   ;l3
+</span></span><span class="line"><span class="cl">R7 = R3c + R4b  ;l4
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>采用寄存器重命名的规则，I1的R3修改成R3b，I3中的R3，修改成R3c。</p>
+</li>
+<li>
+<p><strong>I3和I2之间的反相关性没有了，I3和I1之间的输出相关性也没有了，I3可以立即发射</strong></p>
+</li>
+<li>
+<p><strong>真实数据相关性无法通过寄存器重命名来解决</strong></p>
+</li>
+</ul>
+<h4 id="analysis-of-three-technologies---">Analysis of three technologies ! ! !</h4>
+<ul>
+<li>
+<p><strong>Techniques for improving performance in superscalar processors</strong></p>
+<ul>
+<li>
+<p><strong>Duplication of Resources</strong></p>
+</li>
+<li>
+<p><strong>Out of order issue</strong></p>
+</li>
+<li>
+<p><strong>Renaming</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Resources are the foundation</strong></p>
+<ul>
+<li>Sufficient resources to execute multiple pipelines</li>
+</ul>
+</li>
+<li>
+<p><strong>Out of order issue is the method</strong></p>
+<ul>
+<li>Provide executable instructions through disordered transmissionRenaming is a guarantee</li>
+</ul>
+</li>
+<li>
+<p><strong>Renaming is a guarantee</strong></p>
+<ul>
+<li>Rename mechanism reduces the correlation between instructions</li>
+</ul>
+</li>
+</ul>
+<h4 id="about-instruction-window">About instruction window</h4>
+<ul>
+<li>
+<p>Out of order issue: register window is used to cache instructions after decoding</p>
+</li>
+<li>
+<p>Through the register window, the processor can identify independent instructions that can be placed in the execution segment</p>
+</li>
+<li>
+<p><strong>If the instruction window is very small, the probability of successful recognition is very low</strong></p>
+</li>
+<li>
+<p><strong>The instruction window needs to be large enough to find independent instructions and use the hardware more effectively</strong></p>
+</li>
+<li>
+<p><strong>Need instruction window large enough (more than 8)</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Effect of technology</strong></p>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter14-10.png" title="/img/Computer Organization and Architecture/chapter14-10.png" data-thumbnail="/img/Computer Organization and Architecture/chapter14-10.png" data-sub-html="<h2>Without Procedural Dependencies</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter14-10.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter14-10.png, /img/Computer%20Organization%20and%20Architecture/chapter14-10.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter14-10.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter14-10.png" />
+    </a><figcaption class="image-caption"><code>Without Procedural Dependencies</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>Base：不复制任何功能单元</p>
+</li>
+<li>
+<p>+Id/st：增加了装入/存储单元</p>
+</li>
+<li>
+<p>+alu：增加了ALU单元</p>
+</li>
+<li>
+<p>+both：增加了ALU和Id/st</p>
+</li>
+<li>
+<p>不考虑过程相关性</p>
+</li>
+<li>
+<p>没有采用寄存器重命名，增加硬件执行效果并不明显。而采用寄存器重命名后，增加了ALU会明显提高加速比</p>
+</li>
+<li>
+<p>从发射窗口的角度来看，窗口数量从8个增加到16个，效果就很明显。但从16个到32个，效果稍差一些</p>
+</li>
+<li>
+<p><strong>资源复制、乱序发射、寄存器重命名三者相互影响</strong></p>
+</li>
+</ul>
+<h4 id="consideration-of-control-dependence">Consideration of control dependence</h4>
+<ul>
+<li>
+<p>Also called branch hazard</p>
+</li>
+<li>
+<p>When branching instructions, it is not possible to determine which instruction to execute after the branch</p>
+</li>
+<li>
+<p>In the pipeline, after prefetching the wrong instruction, it is necessary to discard and re fetch the instruction, which causes the pipeline to fail to run with full load</p>
+</li>
+</ul>
+<p><strong>Methods</strong></p>
+<ul>
+<li>
+<p>Processing method of control dependence</p>
+<ul>
+<li>
+<p>Multiple Streams</p>
+</li>
+<li>
+<p>Prefetch Branch Target</p>
+</li>
+<li>
+<p>Loop buffer</p>
+</li>
+<li>
+<p>Branch prediction</p>
+</li>
+<li>
+<p>Delayed branching</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Goal: Keep the pipeline running full</p>
+</li>
+</ul>
+<p><strong>About delayed branch</strong></p>
+<ul>
+<li>
+<p>Delayed branching is often used in RIS</p>
+</li>
+<li>
+<p>Calculate result of branch before unusable instructions pre-fetched</p>
+<ul>
+<li>
+<p>Instructions that are not affected by branches are immediately followed by branch</p>
+</li>
+<li>
+<p>Keeps pipeline full while fetching new instruction stream</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Not as good for superscalar</p>
+<ul>
+<li>Multiple instructions need to execute in delay slot</li>
+<li>Instruction dependence problems</li>
+<li>Often use branch prediction</li>
+</ul>
+</li>
+</ul>
+<p><strong>Superscalar execution</strong></p>
+<ul>
+<li>
+<p>静态程序通过取指和分支预测，形成动态的指令流</p>
+</li>
+<li>
+<p>指令流经过处理器的相关性检查，会去掉不必要的相关性，比如反相关和输出相关。然后将指令放到执行窗口中，等待执行</p>
+</li>
+<li>
+<p>在执行窗口中的指令，根据真实数据相关性来排序。处理器根据真实数据相关性和资源可用性，来发射指令到执行单元进行执行</p>
+</li>
+<li>
+<p>最后的执行结果需要有一个提交的步骤。因为指令不是按照原有的顺序来执行的，同时分支预测和推测执行使得有些执行的结果需要丢弃</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Simultaneously fetch multiple instructions</p>
+<ul>
+<li>
+<p>Multiple fetching and decoding</p>
+</li>
+<li>
+<p>Branch prediction logic</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Logic to determine true dependencies involving register values</p>
+<ul>
+<li>Determine instruction position of true correlation</li>
+</ul>
+</li>
+<li>
+<p>Dealing with unnecessary dependencies</p>
+<ul>
+<li>Anti-dependency and output dependency</li>
+</ul>
+</li>
+<li>
+<p>Mechanisms to initiate multiple instructions in parallel</p>
+<ul>
+<li>
+<p>Instruction window</p>
+</li>
+<li>
+<p>Out of order issue logic</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Resources for parallel execution of multiple instructions</p>
+<ul>
+<li>The system has sufficient resources</li>
+</ul>
+</li>
+<li>
+<p>Mechanisms for committing process state in correct order</p>
+<ul>
+<li>Submit results according to the order of instructions</li>
+</ul>
+</li>
+</ul>
+<h4 id="summary">Summary</h4>
+<ul>
+<li>
+<p><strong>Resources are the foundation</strong></p>
+<ul>
+<li><strong>Machine parallelism</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Out of order issue is the method</strong></p>
+<ul>
+<li><strong>Instruction level parallelism</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Renaming is a guarantee</strong></p>
+<ul>
+<li><strong>Methods of improving instruction level parallelism</strong></li>
+</ul>
+</li>
+<li>
+<p>Through superscalar pipeline, multiple pipelines can run at the same time to achieve truly parallel operation at the instruction level</p>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/computer-organization-and-architecture/">Computer Organization and Architecture</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-01-30</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors" data-hashtags="Computer Organization and Architecture"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-hashtag="Computer Organization and Architecture"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" data-title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-reduced-instruction-set-computers/" class="prev" rel="prev" title="Computer Organization and Architecture Reduced Instruction Set Computers"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" class="next" rel="next" title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

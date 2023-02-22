@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Computer Organization and Architecture Parallel Process &amp; Multicore Computers - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Computer Organization and Architecture Parallel Process &amp; Multicore Computers" />
+<meta property="og:description" content="Computer Organization and Architecture Parallel Process &amp; Multicore Computers Outline Parallel Processing Multiple Processor Organizations Symmetric Multiprocessors Clusters Nonuniform Memory Access Vector Computation Multicore Computers Multiple Processor Organizations Types of multiple processor Single instruction, single data stream – SISD Single instruction, multiple data stream – SIMD Multiple instruction, single data stream – MISD Multiple instruction, multiple data stream - MIMD SISD Organizations SISD的结构中" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-02-01T01:31:38+08:00" />
+<meta property="article:modified_time" content="2023-02-01T01:31:38+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Computer Organization and Architecture Parallel Process &amp; Multicore Computers"/>
+<meta name="twitter:description" content="Computer Organization and Architecture Parallel Process &amp; Multicore Computers Outline Parallel Processing Multiple Processor Organizations Symmetric Multiprocessors Clusters Nonuniform Memory Access Vector Computation Multicore Computers Multiple Processor Organizations Types of multiple processor Single instruction, single data stream – SISD Single instruction, multiple data stream – SIMD Multiple instruction, single data stream – MISD Multiple instruction, multiple data stream - MIMD SISD Organizations SISD的结构中"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" /><link rel="prev" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" /><link rel="next" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Computer Organization and Architecture Parallel Process \u0026 Multicore Computers",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-parallel-process-multicore-computers\/"
+        },"genre": "posts","keywords": "Computer Organization and Architecture","wordcount":  2620 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-parallel-process-multicore-computers\/","datePublished": "2023-02-01T01:31:38+08:00","dateModified": "2023-02-01T01:31:38+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Computer Organization and Architecture Parallel Process &amp; Multicore Computers</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/computer-organization-and-architecture/"><i class="far fa-folder fa-fw"></i>Computer Organization and Architecture</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-02-01">2023-02-01</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2620 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#parallel-process--multicore-computers">Parallel Process &amp; Multicore Computers</a>
+      <ul>
+        <li><a href="#outline">Outline</a></li>
+        <li><a href="#multiple-processor-organizations">Multiple Processor Organizations</a>
+          <ul>
+            <li><a href="#types-of-multiple-processor">Types of multiple processor</a></li>
+            <li><a href="#sisd-organizations">SISD Organizations</a></li>
+            <li><a href="#misd">MISD</a></li>
+          </ul>
+        </li>
+        <li><a href="#symmetric-multiprocessors">Symmetric Multiprocessors</a>
+          <ul>
+            <li><a href="#smp">SMP</a></li>
+            <li><a href="#characteristic-of-smp">Characteristic of SMP</a></li>
+            <li><a href="#smp-advantages">SMP Advantages</a></li>
+            <li><a href="#design-issues">Design issues</a></li>
+          </ul>
+        </li>
+        <li><a href="#clusters">Clusters</a>
+          <ul>
+            <li><a href="#cluster-benefits">Cluster Benefits</a></li>
+            <li><a href="#blade-servers">Blade Servers</a></li>
+            <li><a href="#cluster-v-smp">Cluster v. SMP</a></li>
+          </ul>
+        </li>
+        <li><a href="#nonuniform-memory-access">Nonuniform Memory Access</a>
+          <ul>
+            <li><a href="#numa">NUMA</a></li>
+            <li><a href="#nonuniform-memory-access-1">Nonuniform Memory Access</a></li>
+            <li><a href="#motivation">Motivation</a></li>
+          </ul>
+        </li>
+        <li><a href="#vector-computation">Vector Computation</a></li>
+        <li><a href="#multicore-computers">Multicore Computers</a>
+          <ul>
+            <li><a href="#what-is-multicore-computers">What is Multicore Computers?</a></li>
+          </ul>
+        </li>
+        <li><a href="#hardware-performance-issues">Hardware Performance Issues</a>
+          <ul>
+            <li><a href="#simultaneous-multithreading">Simultaneous multithreading</a></li>
+            <li><a href="#hardware-performance-issues-1">Hardware Performance Issues</a></li>
+            <li><a href="#power-consumption">Power consumption</a></li>
+            <li><a href="#pollacks-rule">Pollack’s rule</a></li>
+          </ul>
+        </li>
+        <li><a href="#software-performance-issues">Software Performance Issues</a>
+          <ul>
+            <li><a href="#effective-applications">Effective Applications</a></li>
+          </ul>
+        </li>
+        <li><a href="#multicore-organization">Multicore Organization</a>
+          <ul>
+            <li><a href="#individual-core-architecture">Individual Core Architecture</a></li>
+          </ul>
+        </li>
+        <li><a href="#intel-x86-multicore-organization">Intel x86 Multicore Organization</a></li>
+        <li><a href="#arm11-mpcore">ARM11 MPCore</a>
+          <ul>
+            <li><a href="#summary-of-parallel">Summary of parallel</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
+<h2 id="parallel-process--multicore-computers">Parallel Process &amp; Multicore Computers</h2>
+<h3 id="outline">Outline</h3>
+<ul>
+<li>
+<p>Parallel Processing</p>
+<ul>
+<li>Multiple Processor Organizations</li>
+<li>Symmetric Multiprocessors</li>
+<li>Clusters</li>
+<li>Nonuniform Memory Access</li>
+<li>Vector Computation</li>
+</ul>
+</li>
+<li>
+<p>Multicore Computers</p>
+</li>
+</ul>
+<h3 id="multiple-processor-organizations">Multiple Processor Organizations</h3>
+<h4 id="types-of-multiple-processor">Types of multiple processor</h4>
+<ul>
+<li>
+<p>Single instruction, single data stream – <code>SISD</code></p>
+</li>
+<li>
+<p>Single instruction, multiple data stream – <code>SIMD</code></p>
+</li>
+<li>
+<p>Multiple instruction, single data stream – <code>MISD</code></p>
+</li>
+<li>
+<p>Multiple instruction, multiple data stream - <code>MIMD</code></p>
+</li>
+</ul>
+<h4 id="sisd-organizations">SISD Organizations</h4>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>SISD的结构中包含1个CU控制单元，1个PU处理单元，以及1个MU存储单元</p>
+</li>
+<li>
+<p>CU向PU发送指令流，MU向PU发送数据流</p>
+</li>
+<li>
+<p>PU根据CU发送的指令流，对来自MU的数据流进行操作，并产生结果。</p>
+</li>
+<li>
+<p>SISD并没有并行的能力，PU按照CU提供的指令流，进行相应的操作</p>
+</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>
+<p>SIMD，单指令多数据流，结构中包含1个控制单元，多个处理单元。每个处理单元有自己的存储器</p>
+</li>
+<li>
+<p>控制单元将指令流发送给多个处理单元进行同步处理，同步处理采用的是锁步方式</p>
+</li>
+<li>
+<p>不同的处理器在不同的数据集上执行相同的指令，产生不同的处理结果</p>
+</li>
+<li>
+<p>实质是对不同的数据集进行相同的处理，通过并行得到一组结果，并行处理提高效率</p>
+</li>
+<li>
+<p>矢量和阵列处理器属于SIMD类型</p>
+</li>
+</ul>
+<h4 id="misd">MISD</h4>
+<ul>
+<li>
+<p>Sequence of data</p>
+</li>
+<li>
+<p>Transmitted to set of processors</p>
+</li>
+<li>
+<p>Each processor executes different instruction sequence</p>
+</li>
+<li>
+<p>Never been implemented</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter17-1.png" title="/img/Computer Organization and Architecture/chapter17-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter17-1.png" data-sub-html="<h2>MIMD Organizations</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter17-1.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter17-1.png, /img/Computer%20Organization%20and%20Architecture/chapter17-1.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter17-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter17-1.png" />
+    </a><figcaption class="image-caption"><code>MIMD Organizations</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>MIMD，多指令多数据流架构，多个控制单元CU，多个处理单元PU。存储方面，有两种结构</p>
+<ul>
+<li>
+<p>共享存储器：所有的PU共享一个存储器，数据都存储在共享存储器中</p>
+</li>
+<li>
+<p>分布式存储：每个PU都有自己的LM，这些机器通过互联网连接在一起</p>
+</li>
+</ul>
+</li>
+<li>
+<p>一组处理器，能够同时执行不同的指令序列。每个处理器都有自己的数据集。</p>
+</li>
+<li>
+<p>对称多处理SMP，集群，非均匀存储器访问NUMA等，都属于MIMD架构</p>
+</li>
+</ul>
+<h3 id="symmetric-multiprocessors">Symmetric Multiprocessors</h3>
+<h4 id="smp">SMP</h4>
+<ul>
+<li>
+<p>Tightly Coupled</p>
+</li>
+<li>
+<p>Processors share memory and I/O</p>
+<ul>
+<li>
+<p>Share single memory or pool</p>
+</li>
+<li>
+<p>Shared bus to access memory</p>
+</li>
+<li>
+<p>Public area set in shared storage stores status information to achieve communication between processors</p>
+</li>
+<li>
+<p>Memory access time to given area of memory is approximately the same for each processor</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="characteristic-of-smp">Characteristic of SMP</h4>
+<ul>
+<li>
+<p>Two or more processors with similar function</p>
+<ul>
+<li>
+<p>All processors share memory and I/O</p>
+</li>
+<li>
+<p>All processors share access to I/O</p>
+</li>
+<li>
+<p>Perform the same function</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Controlled by a centralized operating system</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter17-2.png" title="/img/Computer Organization and Architecture/chapter17-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter17-2.png" data-sub-html="<h2>Symmetric Multiprocessor Organization</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter17-2.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter17-2.png, /img/Computer%20Organization%20and%20Architecture/chapter17-2.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter17-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter17-2.png" />
+    </a><figcaption class="image-caption"><code>Symmetric Multiprocessor Organization</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>每个处理器有自己的$L1\ cache$，也可能会配置各自的$L2\ cache\newline$</p>
+</li>
+<li>
+<p>处理器都挂在共享的系统总线上，共享对主存储器的访问</p>
+</li>
+<li>
+<p>I/O系统也挂在系统总线上，各个处理器对I/O系统进行共享访问</p>
+</li>
+</ul>
+<h4 id="smp-advantages">SMP Advantages</h4>
+<ul>
+<li>
+<p>High performance</p>
+<ul>
+<li>Greatly improved performance if some work can be done in parallel</li>
+</ul>
+</li>
+<li>
+<p>High availability</p>
+<ul>
+<li>
+<p>All processors can perform the same functions</p>
+</li>
+<li>
+<p>Failure of a single processor does not halt the system</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Incremental growth</p>
+<ul>
+<li>
+<p>Flexible system expansion</p>
+</li>
+<li>
+<p>User can enhance performance by adding additional processors</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Scaling</p>
+<ul>
+<li>
+<p>Vendors can offer range of products based on number of processors</p>
+</li>
+<li>
+<p>Different products have different prices and performance, which can give users more choices</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="design-issues">Design issues</h4>
+<ul>
+<li>
+<p>SMP system is managed by a unified operating system</p>
+</li>
+<li>
+<p>Operating system is responsible for scheduling processes and resources</p>
+</li>
+<li>
+<p>Operating system needs to complete</p>
+<ul>
+<li>
+<p>Simultaneous concurrent processes</p>
+</li>
+<li>
+<p>Scheduling</p>
+</li>
+<li>
+<p>Synchronization</p>
+</li>
+<li>
+<p>Memory management</p>
+</li>
+<li>
+<p>Reliability and fault tolerance</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Simultaneous concurrent processes</p>
+<ul>
+<li>
+<p>Allow multiple processors to execute the same piece of OS code at the same time</p>
+</li>
+<li>
+<p>Manage OS tables and other structures to avoid deadlocks</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Scheduling</p>
+<ul>
+<li>Reasonably schedule the processor execution process</li>
+</ul>
+</li>
+<li>
+<p>Synchronization</p>
+<ul>
+<li>Provide synchronization mechanism to ensure mutual exclusion and order of memory and I/O access</li>
+</ul>
+</li>
+<li>
+<p>Memory management</p>
+<ul>
+<li>Solve concurrency and consistency problems</li>
+<li>Ensure the performance and correctness under multiprocessors</li>
+</ul>
+</li>
+<li>
+<p>Reliability and fault tolerance</p>
+<ul>
+<li>For a processor failure, the operating system shall be able to reconstruct the system so that the system can be degraded for use</li>
+</ul>
+</li>
+</ul>
+<h3 id="clusters">Clusters</h3>
+<ul>
+<li>
+<p>Loosely Coupled</p>
+</li>
+<li>
+<p>Collection of independent uniprocessors or <code>SMPs</code></p>
+</li>
+<li>
+<p>Interconnected to form a cluster</p>
+</li>
+<li>
+<p>Communication via fixed path or network connections</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Composition of cluster</p>
+<ul>
+<li>
+<p>A group of interconnected whole computers</p>
+</li>
+<li>
+<p>Working together as unified resource</p>
+</li>
+<li>
+<p>Illusion of being one machine</p>
+</li>
+<li>
+<p>Each computer called a node</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Characteristics</p>
+<ul>
+<li>
+<p>High performance</p>
+</li>
+<li>
+<p>High availability</p>
+</li>
+<li>
+<p>Alternative to SMP</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Server applications</p>
+</li>
+</ul>
+<h4 id="cluster-benefits">Cluster Benefits</h4>
+<ul>
+<li>
+<p>Absolute scalability</p>
+<ul>
+<li>
+<p>Build hundreds of thousands of independent computers into a large cluster system, and the processing capacity may far exceed that of the largest independent computer</p>
+</li>
+<li>
+<p>Each machine in the cluster can be a single processing system or a multiprocessor architecture</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Incremental scalability</p>
+<ul>
+<li>
+<p>New nodes can be added to the cluster system step by step to improve processing capacity and gradually expand</p>
+</li>
+<li>
+<p>Very flexible capacity expansion</p>
+</li>
+</ul>
+</li>
+<li>
+<p>High availability</p>
+<ul>
+<li>
+<p>Each node is an independent computer</p>
+</li>
+<li>
+<p>The failure of one or more nodes will not affect the use of the cluster system</p>
+</li>
+<li>
+<p>Node fault diagnosis and fault tolerance are automatically completed by the system</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Superior price/performance</p>
+<ul>
+<li>
+<p>Combine mature commercial computers into a cluster</p>
+</li>
+<li>
+<p>The system performance is far greater than that of a single large server</p>
+</li>
+<li>
+<p>High cost performance</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="blade-servers">Blade Servers</h4>
+<ul>
+<li>
+<p><strong>Common implementation of cluster</strong></p>
+</li>
+<li>
+<p>Server houses multiple server modules (blades) in single chassis</p>
+<ul>
+<li>
+<p>Save space</p>
+</li>
+<li>
+<p>Improve system management</p>
+</li>
+<li>
+<p>Chassis provides power supply</p>
+</li>
+<li>
+<p>Each blade has processor, memory, disk</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter17-3.png" title="/img/Computer Organization and Architecture/chapter17-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter17-3.png" data-sub-html="<h2>Blade Servers</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter17-3.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter17-3.png, /img/Computer%20Organization%20and%20Architecture/chapter17-3.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter17-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter17-3.png" />
+    </a><figcaption class="image-caption"><code>Blade Servers</code></figcaption>
+    </figure>
+<h4 id="cluster-v-smp">Cluster v. SMP</h4>
+<ul>
+<li>
+<p>Both provide multiprocessor support to high demand applications</p>
+</li>
+<li>
+<p>Both available commercially</p>
+</li>
+<li>
+<p>SMP for longer</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><code>SMP</code></p>
+<ul>
+<li>
+<p>Easier to manage and control</p>
+</li>
+<li>
+<p>Closer to single processor systems</p>
+</li>
+<li>
+<p>Scheduling is important</p>
+</li>
+<li>
+<p>Less physical space</p>
+</li>
+<li>
+<p>Lower power consumption</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Clustering</p>
+<ul>
+<li>
+<p>Superior incremental &amp; absolute scalability</p>
+</li>
+<li>
+<p>Superior availability</p>
+<ul>
+<li>Redundancy</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="nonuniform-memory-access">Nonuniform Memory Access</h3>
+<h4 id="numa">NUMA</h4>
+<ul>
+<li>
+<p>Tightly Coupled</p>
+</li>
+<li>
+<p>Nonuniform memory access</p>
+<ul>
+<li>Access times to different regions of memory may differ</li>
+</ul>
+</li>
+<li>
+<p>Main object</p>
+<ul>
+<li>
+<p>Overcoming the limitation on the number of processors in SMP</p>
+</li>
+<li>
+<p>It solves the problem caused by the independent memory used by each node in the cluster system</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Alternative to SMP &amp; clustering</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Uniform memory access</p>
+<ul>
+<li>
+<p>All processors have access to all parts of memory</p>
+</li>
+<li>
+<p>Using load &amp; store</p>
+</li>
+<li>
+<p>Access time to all regions of memory is the same</p>
+</li>
+<li>
+<p>Access time to memory for different processors same</p>
+</li>
+<li>
+<p>As used by SMP</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="nonuniform-memory-access-1">Nonuniform Memory Access</h4>
+<ul>
+<li>
+<p>All processors have access to all parts of memory</p>
+</li>
+<li>
+<p>Using load &amp; store</p>
+</li>
+<li>
+<p>Access time of processor differs depending on region of memory</p>
+</li>
+<li>
+<p>Different processors access different regions of memory at different speeds</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Cache coherent NUMA(<code>CC-NUMA</code>)</p>
+<ul>
+<li>
+<p>Cache coherence is maintained among the caches of the various processors</p>
+</li>
+<li>
+<p>For a system without cache consistency maintenance, it is similar to a cluster system</p>
+</li>
+<li>
+<p><code>CC-NUMA</code> is discussed here</p>
+</li>
+<li>
+<p>Significantly different from SMP and clusters</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="motivation">Motivation</h4>
+<ul>
+<li>
+<p>SMP has practical limit to number of processors</p>
+<ul>
+<li>Bus traffic limits to between 16 and 64 processors</li>
+</ul>
+</li>
+<li>
+<p>In cluster，each node has own memory</p>
+<ul>
+<li>Apps do not see large global memory</li>
+<li>Coherence maintained by software not hardware</li>
+</ul>
+</li>
+<li>
+<p>NUMA retains SMP flavour while giving large scale multiprocessing</p>
+<ul>
+<li>e.g. Silicon Graphics Origin NUMA 1024 MIPS R10000 processors</li>
+</ul>
+</li>
+<li>
+<p>Objective</p>
+<ul>
+<li>
+<p>maintain transparent system wide memory while permitting multiprocessor nodes</p>
+</li>
+<li>
+<p>each with own bus or internal interconnection system</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter17-4.png" title="/img/Computer Organization and Architecture/chapter17-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter17-4.png" data-sub-html="<h2>CC-NUMA Organization</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter17-4.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter17-4.png, /img/Computer%20Organization%20and%20Architecture/chapter17-4.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter17-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter17-4.png" />
+    </a><figcaption class="image-caption"><code>CC-NUMA Organization</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>NUMA系统由多个结点组成。每个节点包含有若干个处理器，每个处理器有自己的L1 cache和L2 cache，有自己的内部总线，并且有自己的主存和I/O</p>
+</li>
+<li>
+<p>处理器访问存储器的时候，首先看是否在cache中，如果不在，cache会去访问本地存储器。如果在的话，就通过内部总线取过来。如果不在本地存储器中，cache会发出一个请求，通过互联网络从远端取过来，放到总线上，发出请求的cache从总线上读取。这些动作都是自动的，对处理器和cache都是透明的。</p>
+</li>
+</ul>
+<h3 id="vector-computation">Vector Computation</h3>
+<ul>
+<li>
+<p>Maths problems involving physical processes present different difficulties for computation</p>
+<ul>
+<li>
+<p>Aerodynamics, seismology, meteorology</p>
+</li>
+<li>
+<p>Continuous field simulation</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Requirement</p>
+<ul>
+<li>
+<p>High precision</p>
+</li>
+<li>
+<p>Repeated floating point calculations on large arrays of numbers</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Solution 1: supercomputer</p>
+<ul>
+<li>
+<p>Hundreds of millions of float</p>
+</li>
+<li>
+<p>Optimized for Vector Computation</p>
+</li>
+<li>
+<p>$10-15 million</p>
+</li>
+<li>
+<p>Limited market</p>
+</li>
+<li>
+<p>Research, government agencies, meteorology</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Solution 2:  Array processor</p>
+<ul>
+<li>
+<p>Alternative to supercomputer</p>
+</li>
+<li>
+<p>Configured as peripherals to mainframe &amp; mini</p>
+</li>
+<li>
+<p>Just run vector portion of problems</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="multicore-computers">Multicore Computers</h3>
+<h4 id="what-is-multicore-computers">What is Multicore Computers?</h4>
+<ul>
+<li>
+<p>Also known as single chip multiprocessor</p>
+</li>
+<li>
+<p>Two or more processors are integrated on a single chip, and each processor is called a core</p>
+</li>
+<li>
+<p>Each core consists of all components of an independent processor, including register set, ALU, pipeline hardware, control unit, and L1 data and instruction cache</p>
+</li>
+<li>
+<p>Some multicore processors also include L2 cache and L3 cache on the chip</p>
+</li>
+</ul>
+<h3 id="hardware-performance-issues">Hardware Performance Issues</h3>
+<ul>
+<li>
+<p>Microprocessors have seen an exponential increase in performance</p>
+<ul>
+<li>
+<p>Improved organization</p>
+</li>
+<li>
+<p>Increased clock frequency</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Increase in Parallelism</p>
+<ul>
+<li>
+<p>Pipelining</p>
+</li>
+<li>
+<p>Superscalar</p>
+</li>
+<li>
+<p>Simultaneous multithreading</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="simultaneous-multithreading">Simultaneous multithreading</h4>
+<ul>
+<li>
+<p>同步多线程能够从多个线程中取出指令来运行，它能够同时执行不同线程的指令</p>
+</li>
+<li>
+<p>同步多线程架构中，配置了多个PC和多个寄存器组，底层共享指令cache和数据cache。这样可以在多个线程之间共享流水线资源</p>
+</li>
+<li>
+<p>通过同步多线程技术，系统能够动态调整系统环境，如有可能同时执行不同线程的指令。当一个线程遇到长延迟事件时，允许另一个线程使用所有的处理单元</p>
+</li>
+</ul>
+<h4 id="hardware-performance-issues-1">Hardware Performance Issues</h4>
+<ul>
+<li>
+<p>Processor performance continues to improve</p>
+<ul>
+<li>
+<p>Adjustment of chip architecture</p>
+</li>
+<li>
+<p>Improvement of main frequency</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Diminishing returns</p>
+<ul>
+<li>
+<p>More complexity requires more logic</p>
+</li>
+<li>
+<p>Need more chip area for coordinating and signal transfer logic</p>
+</li>
+<li>
+<p>Harder to design, make and debug</p>
+</li>
+<li>
+<p>Hardware performance reaches the bottleneck, which is very difficult to improve</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="power-consumption">Power consumption</h4>
+<ul>
+<li>
+<p>Power requirements grow exponentially with chip density and clock frequency</p>
+</li>
+<li>
+<p>Increased power consumption causes CPU cooling problems</p>
+</li>
+<li>
+<p>It is increasingly difficult to improve performance by improving chip integration</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>One solution is use more chip area for cache</p>
+<ul>
+<li>
+<p>Storage transistors require low power consumption</p>
+</li>
+<li>
+<p>Cache is close to CPU and fast</p>
+</li>
+<li>
+<p>By 2015，100 billion transistors on 300mm2 ，Cache of 100MB ，1 billion transistors for logic</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Large capacity cache provides basic resources for multi-core processors</p>
+</li>
+</ul>
+<h4 id="pollacks-rule">Pollack’s rule</h4>
+<ul>
+<li>
+<p>Pollack’s rule</p>
+<ul>
+<li>
+<p>Performance is roughly proportional to square root of increase in complexity</p>
+</li>
+<li>
+<p>Double complexity gives 40% more performance</p>
+</li>
+</ul>
+</li>
+<li>
+<p>So,integrating multiple processor cores on one chip becomes a better solution</p>
+<ul>
+<li>
+<p>Multicore makes performance close to linear improvement</p>
+</li>
+<li>
+<p>Unlikely that one core can use all cache effectively</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="software-performance-issues">Software Performance Issues</h3>
+<ul>
+<li>
+<p>Performance benefits dependent on effective exploitation of parallel resources</p>
+<ul>
+<li>
+<p>Amdahl’s Law</p>
+</li>
+<li>
+<p>Even small amounts of serial code impact performance</p>
+</li>
+<li>
+<p>10% inherently serial on 8 processor system gives only 4.7 times performance</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Other factors affecting performance: communication, distribution of work and cache coherence overheads</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter17-5.png" title="/img/Computer Organization and Architecture/chapter17-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter17-5.png" data-sub-html="<h2>Performance Effect of Multiple Cores</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter17-5.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter17-5.png, /img/Computer%20Organization%20and%20Architecture/chapter17-5.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter17-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter17-5.png" />
+    </a><figcaption class="image-caption"><code>Performance Effect of Multiple Cores</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>图（a）给出了串行代码比例对加速比的影响。如果没有串行代码，理论上加速比和性能的提升成正比。但是，由于串行处理的问题，导致加速比比理论值小了很多。</p>
+</li>
+<li>
+<p>图（b）指出管理开销对加速比的影响。可以看到，在5个处理器的时候，加速比最大，随着核数的增加，管理开销会导致性能收益递减</p>
+</li>
+</ul>
+<h4 id="effective-applications">Effective Applications</h4>
+<ul>
+<li>
+<p>Some applications effectively exploit multicore processors</p>
+<ul>
+<li>
+<p>Database</p>
+</li>
+<li>
+<p>Servers handling independent transactions</p>
+</li>
+<li>
+<p>Multi-threaded native applications，such as Lotus Domino, Siebel CRM</p>
+</li>
+<li>
+<p>Multi-process applications, such as Oracle, SAP, PeopleSoft</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Java applications</p>
+<ul>
+<li>
+<p><code>JVM</code> is multi-thread with scheduling and memory management</p>
+</li>
+<li>
+<p>Sun’s Java Application Server, BEA’s Weblogic, IBM Websphere, Tomcat</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Multi-instance applications</p>
+<ul>
+<li>One application running multiple times</li>
+</ul>
+</li>
+<li>
+<p>Game Software</p>
+</li>
+</ul>
+<h3 id="multicore-organization">Multicore Organization</h3>
+<ul>
+<li>
+<p>Number of core processors on chip</p>
+</li>
+<li>
+<p>Number of levels of cache on chip</p>
+</li>
+<li>
+<p>Amount of shared cache</p>
+</li>
+<li>
+<p>Next slide examples of each organization</p>
+<ul>
+<li>
+<p>(a) ARM11 MPCore</p>
+</li>
+<li>
+<p>(b) AMD Opteron</p>
+</li>
+<li>
+<p>(c) Intel Core Duo</p>
+</li>
+<li>
+<p>(d) Intel Core i7</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="individual-core-architecture">Individual Core Architecture</h4>
+<ul>
+<li>
+<p>Intel Core Duo uses superscalar cores</p>
+</li>
+<li>
+<p>Intel Core i7 uses simultaneous multi-threading (SMT)</p>
+<ul>
+<li>Scales up number of threads supported</li>
+<li>4 SMT cores, each supporting 4 threads appears as 16 core</li>
+</ul>
+</li>
+</ul>
+<h3 id="intel-x86-multicore-organization">Intel x86 Multicore Organization</h3>
+<p>Example: Core Duo and Core i7</p>
+<h3 id="arm11-mpcore">ARM11 MPCore</h3>
+<ul>
+<li>
+<p>Up to 4 processors each with own L1 instruction and data cache</p>
+</li>
+<li>
+<p>Distributed interrupt controller</p>
+</li>
+<li>
+<p>Timer per CPU</p>
+</li>
+<li>
+<p>Watchdog</p>
+<ul>
+<li>Warning alerts for software failures</li>
+<li>Counts down from predetermined values</li>
+<li>Issues warning at zero</li>
+</ul>
+</li>
+<li>
+<p>CPU interface</p>
+<ul>
+<li>Interrupt acknowledgement, masking and completion acknowledgement</li>
+</ul>
+</li>
+<li>
+<p>CPU</p>
+<ul>
+<li>Single ARM11 called MP11</li>
+</ul>
+</li>
+<li>
+<p>Vector floating-point unit</p>
+<ul>
+<li>FP co-processor</li>
+</ul>
+</li>
+<li>
+<p>L1 cache</p>
+</li>
+<li>
+<p>Snoop control unit</p>
+<ul>
+<li>Maintain L1 cache coherency</li>
+</ul>
+</li>
+</ul>
+<h4 id="summary-of-parallel">Summary of parallel</h4>
+<ul>
+<li>
+<p>Internal of CPU</p>
+<ul>
+<li>
+<p>Pipeline</p>
+</li>
+<li>
+<p>Superscalar</p>
+</li>
+<li>
+<p>simultaneous multi-threading(SMT)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>On chip</p>
+<ul>
+<li>Multicore</li>
+</ul>
+</li>
+<li>
+<p>Internal of machine</p>
+<ul>
+<li>
+<p>SMP</p>
+</li>
+<li>
+<p>NUMA</p>
+</li>
+<li>
+<p>Array processor</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Multi-machine</p>
+<ul>
+<li>Cluster</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/computer-organization-and-architecture/">Computer Organization and Architecture</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-02-01</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers" data-hashtags="Computer Organization and Architecture"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-hashtag="Computer Organization and Architecture"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" data-title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" class="prev" rel="prev" title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/cmu-15-445-database-systems/chapter1/" class="next" rel="next" title="CMU 15-445 Lecture #01: Course Overview &amp; Relational Model">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(CU)\nB(PU)\nC(MU)\nA--IS--\u003eB\nB--DS--\u003eC--DS--\u003eB","id-2":"graph LR\nA(CU)\nB(PU1)\nC(LM1)\nD(PU2)\nE(LM2)\nF(PUn)\nG(LMn)\nH(...)\nA--IS--\u003eB--DS--\u003eC--DS--\u003eB\nA--IS--\u003eD--DS--\u003eE--DS--\u003eD\nA--IS--\u003eH\nA--IS--\u003eF--DS--\u003eG--DS--\u003eF"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

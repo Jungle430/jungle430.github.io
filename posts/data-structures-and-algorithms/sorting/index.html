@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Sorting - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Sorting" />
+<meta property="og:description" content="Data Structure Sorting QuickSort Idea $Process\ after\ dividing \rightarrow$(like MergeSort in thought)
+Divide the sequence into two subsequences $$ S=S_L&#43;S_R $$ Downsizing $$ max(|S_L|,|S_R|) &lt; n $$ Be independent of each other $$ max(S_L) \leq min(S_R) $$ After the subsequences are sorted recursively, the original sequence is ordered naturally $$ Sorted(S)=Sorted(S_L)&#43;Sorted(S_R) $$ A trivial solution: With a single element, is itself a solution$\rightarrow Recursive\ base\newline$
+Problem How to delimit subsequence?" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-18T22:05:21+08:00" />
+<meta property="article:modified_time" content="2022-11-18T22:05:21+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Sorting"/>
+<meta name="twitter:description" content="Data Structure Sorting QuickSort Idea $Process\ after\ dividing \rightarrow$(like MergeSort in thought)
+Divide the sequence into two subsequences $$ S=S_L&#43;S_R $$ Downsizing $$ max(|S_L|,|S_R|) &lt; n $$ Be independent of each other $$ max(S_L) \leq min(S_R) $$ After the subsequences are sorted recursively, the original sequence is ordered naturally $$ Sorted(S)=Sorted(S_L)&#43;Sorted(S_R) $$ A trivial solution: With a single element, is itself a solution$\rightarrow Recursive\ base\newline$
+Problem How to delimit subsequence?"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" /><link rel="prev" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" /><link rel="next" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter1/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Sorting",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/sorting\/"
+        },"genre": "posts","keywords": "Data Structure","wordcount":  2654 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/sorting\/","datePublished": "2022-11-18T22:05:21+08:00","dateModified": "2022-11-18T22:05:21+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Sorting</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/data-structure/"><i class="far fa-folder fa-fw"></i>Data Structure</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-11-18">2022-11-18</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2654 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 13 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#sorting">Sorting</a>
+      <ul>
+        <li><a href="#quicksort">QuickSort</a>
+          <ul>
+            <li><a href="#idea">Idea</a></li>
+            <li><a href="#problem">Problem</a></li>
+            <li><a href="#pivot">Pivot</a></li>
+            <li><a href="#partition">Partition</a></li>
+            <li><a href="#construct-pivot">Construct Pivot</a></li>
+            <li><a href="#analysis">Analysis</a>
+              <ul>
+                <li><a href="#in-place">In-place</a></li>
+                <li><a href="#in-time">In-time</a>
+                  <ul>
+                    <li><a href="#best-case">Best case</a></li>
+                    <li><a href="#worst-case">Worst case</a></li>
+                    <li><a href="#average">Average</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#algorithm-of-optimizationlgu">Algorithm of optimization(LGU)</a>
+              <ul>
+                <li><a href="#code">code</a></li>
+                <li><a href="#in-place-1">In-place</a></li>
+                <li><a href="#in-time-1">In-time</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#selection">Selection</a>
+          <ul>
+            <li><a href="#median">Median</a></li>
+            <li><a href="#mode">Mode</a>
+              <ul>
+                <li><a href="#mode-algorithm">mode algorithm</a></li>
+              </ul>
+            </li>
+            <li><a href="#general-purpose-algorithm">General purpose algorithm</a>
+              <ul>
+                <li><a href="#quickselect">quickSelect</a>
+                  <ul>
+                    <li><a href="#worst-case-1">Worst case</a></li>
+                  </ul>
+                </li>
+                <li><a href="#linearselect">linearSelect</a>
+                  <ul>
+                    <li><a href="#in-time-2">In-time</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#shellsort">ShellSort</a>
+          <ul>
+            <li><a href="#idea-1">Idea</a></li>
+            <li><a href="#step-sequence">step sequence</a></li>
+            <li><a href="#algorithm">Algorithm</a>
+              <ul>
+                <li>
+                  <ul>
+                    <li><a href="#internal-sort-rightarrowinput-sensitive-algorithm">Internal sort $\rightarrow$Input sensitive algorithm</a></li>
+                    <li><a href="#the-biggest-factor"><strong>The biggest factor</strong></a></li>
+                    <li><a href="#example">Example</a></li>
+                    <li><a href="#code-1">code</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#code-by-pythonuse-numpy">Code by Python(use numpy)</a>
+          <ul>
+            <li><a href="#selectionsort">SelectionSort</a></li>
+            <li><a href="#bubblesort">BubbleSort</a></li>
+            <li><a href="#mergesort">MergeSort</a></li>
+            <li><a href="#binaryinsertsort">BinaryInsertSort</a></li>
+            <li><a href="#insertsort">InsertSort</a></li>
+            <li><a href="#heapsort">HeapSort</a></li>
+            <li><a href="#shellsort-1">ShellSort</a></li>
+            <li><a href="#quicksort-1">QuickSort</a></li>
+            <li><a href="#twoway_insertionsort">TwoWay_InsertionSort</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="data-structure">Data Structure</h1>
+<h2 id="sorting">Sorting</h2>
+<h3 id="quicksort">QuickSort</h3>
+<h4 id="idea">Idea</h4>
+<blockquote>
+<p>$Process\ after\ dividing \rightarrow$(like MergeSort in thought)</p>
+</blockquote>
+<p>Divide the sequence into two subsequences
+$$
+S=S_L+S_R
+$$
+Downsizing
+$$
+max(|S_L|,|S_R|) &lt; n
+$$
+Be independent of each other
+$$
+max(S_L) \leq min(S_R)
+$$
+After the subsequences are sorted recursively, the original sequence is ordered naturally
+$$
+Sorted(S)=Sorted(S_L)+Sorted(S_R)
+$$
+A trivial solution: <strong>With a single element, is itself a solution</strong>$\rightarrow Recursive\ base\newline$</p>
+<h4 id="problem">Problem</h4>
+<p>How to delimit subsequence?</p>
+<h4 id="pivot">Pivot</h4>
+<p><strong>None</strong> of the <strong>left/right</strong> elements are <strong>bigger/smaller</strong> than it</p>
+<p>$\rightarrow$ With the <strong>pivot as the boundary</strong>, the partition of the sequence will be realized naturally
+$$
+[l0,hi)=[lo,mi)+[mi]+(mi,hi)
+$$
+Key point: <strong>Construct Pivot!</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> 
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">quickSort</span> <span class="p">(</span> <span class="n">Rank</span> <span class="n">lo</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//0 &lt;= lo &lt; hi &lt;= size
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">if</span> <span class="p">(</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="p">)</span> <span class="k">return</span><span class="p">;</span> <span class="c1">//Recursive base
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="n">Rank</span> <span class="n">mi</span> <span class="o">=</span> <span class="n">partition</span> <span class="p">(</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="p">);</span> <span class="c1">//Key point
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="n">quickSort</span> <span class="p">(</span> <span class="n">lo</span><span class="p">,</span> <span class="n">mi</span> <span class="p">);</span> 
+</span></span><span class="line"><span class="cl">   <span class="n">quickSort</span> <span class="p">(</span> <span class="n">mi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">hi</span> <span class="p">);</span> 
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="partition">Partition</h4>
+<blockquote>
+<p>Difficulty: pivot <strong>may not exist</strong> in the original sequence</p>
+<p>Good news: The pivot <strong>must be in place</strong></p>
+<p>In an ordered sequence, <strong>all elements</strong> are pivots <strong>and vice versa</strong></p>
+</blockquote>
+<h4 id="construct-pivot">Construct Pivot</h4>
+<div class="mermaid" id="id-1"></div>
+<h4 id="analysis">Analysis</h4>
+<p><strong>Unstable</strong>
+$$
+\begin{align}
+&amp;Example:\newline
+&amp;Before:[&hellip;5_a&hellip;5_b&hellip;]\newline
+&amp;After:[&hellip;5_b&hellip;5_a&hellip;]\newline
+\end{align}
+$$</p>
+<h5 id="in-place">In-place</h5>
+<p>$O(1)$ nice!</p>
+<h5 id="in-time">In-time</h5>
+<h6 id="best-case">Best case</h6>
+<p>The pivot is always (near) in the center</p>
+<p>$$
+T(n)=2T(\frac{n-1}{2})+O(n)\newline
+T(n)=O(n\log n)\newline
+$$</p>
+<h6 id="worst-case">Worst case</h6>
+<p>Each division is extremely uneven
+$$
+T(n)=T(n-1)+T(0)+O(n)\newline
+T(n)=O(n^2)\newline
+$$</p>
+<blockquote>
+<p>Reduce the worst case probability</p>
+<blockquote>
+<p>Random selection</p>
+<p>Middle of three(Randomly select three elements in the sequence and take the middle value)</p>
+</blockquote>
+<p>But it can only reduce the probability, not eliminate</p>
+</blockquote>
+<h6 id="average">Average</h6>
+<p>$O(n\log n)\newline$</p>
+<p>Take a <strong>uniformly independent distributed sequence</strong> as an example
+$$
+\begin{align}
+&amp;order\ the\ rank\ of\ the\ pivot\ is\ k\newline
+&amp;\rightarrow probability:\frac{1}{n}\newline\newline
+&amp;then\ T(n)=(n+1)+(\frac{1}{n}) * \sum_{k=0}^{n-1}[T(k)+T(n-k-1)]\newline
+&amp;It&rsquo;s\ easy\ to\ see\ that\rightarrow T(k)=T(n-k-1)\newline
+&amp;T(n)=(n+1)+(\frac{2}{n}) * \sum_{k=0}^{n-1}T(k)\newline
+&amp;n*T(n)=n * (n+1)+2 * \sum_{k=0}^{n-1}T(k)\ (1)\newline\newline
+&amp;make\ n = n - 1\newline
+&amp;(n-1) * T(n-1)=(n-1) * n+2 * \sum_{k=0}^{n-2}T(k)\ (2)\newline\newline
+&amp;Then\ (1)-(2)\newline
+&amp;n * T(n) - (n - 1) * T(n - 1) = 2 * n + 2 * T(n-1)\newline
+&amp;n * T(n) - (n + 1) * T(n - 1)=2 * n\newline
+&amp;\frac {T(n)}{n + 1} = \frac {T(n - 1)}{n}+\frac {2}{n+1}\newline
+&amp;=\frac {2}{n+1} + \frac {2}{n} + \frac {2}{n-1} + &hellip; + \frac {2}{2} + \frac{T(0)}{1}\newline
+&amp;=(2\ln2) * \log n \approx 1.39 * \log n\newline
+\end{align}
+$$</p>
+<h4 id="algorithm-of-optimizationlgu">Algorithm of optimization(LGU)</h4>
+<p>$$
+S=[l0]+L(lo,mi]+G(mi,k)+U[l,hi]\newline
+L &lt; pivot\leq G\newline
+$$</p>
+<div class="mermaid" id="id-2"></div>
+<h5 id="code">code</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//pivot construction algorithm;
+</span></span></span><span class="line"><span class="cl"><span class="c1">//by adjusting the element position to construct the pivot of the interval [lo, hi] and return its rank
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Rank</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">partition</span> <span class="p">(</span> <span class="n">Rank</span> <span class="n">lo</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//LGU
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="n">swap</span> <span class="p">(</span> <span class="n">_elem</span><span class="p">[</span><span class="n">lo</span><span class="p">],</span> <span class="n">_elem</span><span class="p">[</span> <span class="n">lo</span> <span class="o">+</span> <span class="n">rand</span><span class="p">()</span> <span class="o">%</span> <span class="p">(</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span> <span class="p">)</span> <span class="p">]</span> <span class="p">);</span> <span class="c1">//Swap any element with the first element
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="n">T</span> <span class="n">pivot</span> <span class="o">=</span> <span class="n">_elem</span><span class="p">[</span><span class="n">lo</span><span class="p">];</span> <span class="c1">//Take the first element as the candidate pivot 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    					<span class="c1">//-- after the above exchange, equivalent to random selection
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="kt">int</span> <span class="n">mi</span> <span class="o">=</span> <span class="n">lo</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">//   ---- L &lt; [lo] ----- ] ----- [lo] &lt;= G --- ] [ ----- Unknown -------
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">// X x . . . . . . . . . x . . . . . . . . . . . x . . . . . . . . . . x X
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">// |                     |                       |                       |
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">// lo (pivot candidate)  mi                      k                       hi
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    
+</span></span><span class="line"><span class="cl">   <span class="k">for</span> <span class="p">(</span> <span class="n">Rank</span> <span class="n">k</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span> <span class="p">)</span> <span class="c1">//Scan from left to right
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">if</span> <span class="p">(</span> <span class="n">_elem</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pivot</span> <span class="p">)</span> <span class="c1">//If the current element _elem[k] is less than pivot
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>         <span class="n">swap</span> <span class="p">(</span> <span class="n">_elem</span><span class="p">[</span><span class="o">++</span><span class="n">mi</span><span class="p">],</span> <span class="n">_elem</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="p">);</span> <span class="c1">//After swapping _elem[k] to the original mi, 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    									 <span class="c1">//the L subsequence expands to the right
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    
+</span></span><span class="line"><span class="cl">   <span class="c1">//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">//   --------- L &lt; [lo] ---------- ] ------------- [lo] &lt;= G ----------]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">// X x . . . . . . . . . . . . . . x . . . . . . . . . . . . . . . . . x X
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">// |                               |                                     |
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">// lo (pivot candidate)            mi                                    hi
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="c1">//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    
+</span></span><span class="line"><span class="cl">   <span class="n">swap</span> <span class="p">(</span> <span class="n">_elem</span><span class="p">[</span><span class="n">lo</span><span class="p">],</span> <span class="n">_elem</span><span class="p">[</span><span class="n">mi</span><span class="p">]</span> <span class="p">);</span> <span class="c1">//Candidate pivot homing
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">return</span> <span class="n">mi</span><span class="p">;</span> <span class="c1">//return its rank
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="in-place-1">In-place</h5>
+<p>$O(1)\newline$</p>
+<h5 id="in-time-1">In-time</h5>
+<p>$O(n)\newline$</p>
+<h3 id="selection">Selection</h3>
+<blockquote>
+<p>The time cost of sorting is too high and you need to find other methods</p>
+</blockquote>
+<p><strong>K-selection</strong></p>
+<p>In any set of comparably sized elements, how do you go from small to large to find the elements of order k?</p>
+<p><strong>Example</strong></p>
+<blockquote>
+<p>Excel: large(range, rank)</p>
+</blockquote>
+<h4 id="median">Median</h4>
+<p>The length of the <strong>sorted sequence</strong> S is n$(range\ from\ 0\ to\ n - 1)$, the element whose order is $\lfloor \frac {n}{2} \rfloor$ is called median</p>
+<p><strong>Example</strong></p>
+<blockquote>
+<p>Excel: median(range)</p>
+</blockquote>
+<h4 id="mode">Mode</h4>
+<p>In an <strong>unordered sequence</strong>, if <strong>more than half</strong> of the elements are m, m is called the mode</p>
+<p><strong>Example</strong>
+$$
+\begin{align}
+&amp;[3,5,2,3,3]\rightarrow mode\ is\ 3\newline
+&amp;but\ in\ [3,5,2,3,3,0]\rightarrow no\ mode\newline
+\end{align}
+$$</p>
+<h5 id="mode-algorithm">mode algorithm</h5>
+<blockquote>
+<p>Trivial algorithm: sort + traversal</p>
+</blockquote>
+<p>but if we want that $\rightarrow T(n) \leq O(n)\ and\ S(n)\leq O(1)?\newline$</p>
+<blockquote>
+<p>Necessary condition: If mode exists, then <strong>the mode must also be the median</strong></p>
+<p>The mode, if it exists, <strong>must be frequent</strong></p>
+</blockquote>
+<p>$Process\ after\ reducing\newline$</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> 
+</span></span><span class="line"><span class="cl"><span class="n">T</span> <span class="n">majEleCandidate</span> <span class="p">(</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">A</span> <span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">   <span class="n">T</span> <span class="n">maj</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="k">for</span> <span class="p">(</span> <span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">A</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span> <span class="mi">0</span> <span class="o">==</span> <span class="n">c</span> <span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">         <span class="n">maj</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> 
+</span></span><span class="line"><span class="cl">          <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">      <span class="p">}</span> <span class="k">else</span> 
+</span></span><span class="line"><span class="cl">         <span class="n">maj</span> <span class="o">==</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">?</span> <span class="n">c</span><span class="o">++</span> <span class="o">:</span> <span class="n">c</span><span class="o">--</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="n">maj</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="general-purpose-algorithm">General purpose algorithm</h4>
+<h5 id="quickselect">quickSelect</h5>
+<p>$Process\ after\ reducing\newline$</p>
+<p>Partition</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> 
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">quickSelect</span> <span class="p">(</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">k</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="k">for</span> <span class="p">(</span> <span class="n">Rank</span> <span class="n">lo</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">A</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">;</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="n">lo</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">hi</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">      <span class="n">T</span> <span class="n">pivot</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">lo</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">      <span class="k">while</span> <span class="p">(</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//O(hi - lo + 1) = O(n)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>         <span class="k">while</span> <span class="p">(</span> <span class="p">(</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span> <span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span> <span class="n">pivot</span> <span class="o">&lt;=</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span> <span class="n">j</span><span class="o">--</span><span class="p">;</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">         <span class="k">while</span> <span class="p">(</span> <span class="p">(</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span> <span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pivot</span> <span class="p">)</span> <span class="p">)</span> <span class="n">i</span><span class="o">++</span><span class="p">;</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span> <span class="c1">//assert: quit with i == j
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pivot</span><span class="p">;</span> <span class="c1">// A[0,i) &lt;= A[i] &lt;= A(i, n)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">if</span> <span class="p">(</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="p">)</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">k</span> <span class="p">)</span> <span class="n">lo</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span> <span class="c1">//A[k] is now a pivot
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h6 id="worst-case-1">Worst case</h6>
+<p>$T(n)=O(n)+T(\frac {n}{Q})+T(\frac{3n}{4})\newline$</p>
+<p>$if\ we\ want\ that\ T(n)=O(n)\newline$</p>
+<p>$we\ should\ make\ \frac{n}{Q}+\frac{3n}{4}&lt;n \newline$</p>
+<p>$so\ \frac{1}{Q}+\frac{3}{4}&lt;1\newline$</p>
+<p>$make\ Q=5\newline$</p>
+<p>$T(n)=cn+T(\frac{n}{5})+T(\frac{3n}{4})\newline$</p>
+<p>$then\ T(n)=O(20cn)=O(n)\newline$</p>
+<h5 id="linearselect">linearSelect</h5>
+<p>Let Q be a small constant</p>
+<ol start="0">
+<li>
+<p>if ( n = |A| &lt; Q ) return trivialSelect( A, k )</p>
+</li>
+<li>
+<p>else divide A evenly into n/Q subsequences (each of size Q)</p>
+</li>
+<li>
+<p>Sort each subsequence and determine n/Q medians //e.g. by insertionsort</p>
+</li>
+<li>
+<p>Call linearSelect() to find M, median of the medians //by recursion</p>
+</li>
+<li>
+<p>Let L/E/G = { x &lt;/=/&gt; M | x $\in$ A }</p>
+</li>
+<li></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="o">|</span><span class="n">L</span><span class="o">|</span> <span class="p">)</span> <span class="k">return</span> <span class="n">linearSelect</span><span class="p">(</span> <span class="n">L</span><span class="p">,</span> <span class="n">k</span> <span class="p">)</span> 
+</span></span><span class="line"><span class="cl">  	<span class="k">if</span> <span class="p">(</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="o">|</span><span class="n">L</span><span class="o">|</span> <span class="o">+</span> <span class="o">|</span><span class="n">E</span><span class="o">|</span> <span class="p">)</span> <span class="k">return</span> <span class="n">M</span> 
+</span></span><span class="line"><span class="cl">  	<span class="k">return</span> <span class="n">linearSelect</span><span class="p">(</span> <span class="n">G</span><span class="p">,</span> <span class="n">k</span> <span class="o">-</span> <span class="o">|</span><span class="n">L</span><span class="o">|</span> <span class="o">-</span> <span class="o">|</span><span class="n">E</span><span class="o">|</span> <span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h6 id="in-time-2">In-time</h6>
+<p>$T(n)=O(n)\newline$</p>
+<h3 id="shellsort">ShellSort</h3>
+<blockquote>
+<p>Donald L.Shell,1959</p>
+</blockquote>
+<h4 id="idea-1">Idea</h4>
+<p><strong>Think of the whole sequence as a matrix, with each column sorted individually</strong>$\rightarrow(w-sorting)\newline$</p>
+<h4 id="step-sequence">step sequence</h4>
+<p>An <strong>inverted</strong> sequence of <strong>the width of each matrix</strong></p>
+<p>$set(step)={w_1=1,w_2,w_3,&hellip;w_k,&hellip;}\newline$</p>
+<blockquote>
+<p>diminishing increment</p>
+</blockquote>
+<h4 id="algorithm">Algorithm</h4>
+<p>$Call-by-rank\newline$</p>
+<p>$The\ width\ of\ the\ matrix\ is\ w,then\ the\ elements\ in\ the\ i^{th}\ column\ is\ a[i+kw],0\leq k &lt;\frac {n}{w}\newline$</p>
+<h6 id="internal-sort-rightarrowinput-sensitive-algorithm">Internal sort $\rightarrow$Input sensitive algorithm</h6>
+<p>$\rightarrow insertionsort(The\ running\ time\ depends\ on\ the\ total\ number\ of\ inversions)\newline$</p>
+<h6 id="the-biggest-factor"><strong>The biggest factor</strong></h6>
+<p>$\rightarrow set(step)={w_1=1,w_2,w_3,&hellip;w_k,&hellip;}\newline$</p>
+<h6 id="example">Example</h6>
+<p>$set(step)_{shell}={1,2,4,8,&hellip;,2^k,&hellip;}\newline$</p>
+<p>worst-case: $O(n\log n)\newline$</p>
+<p>best-case: $O(n)\newline$</p>
+<h6 id="code-1">code</h6>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">shellSort</span> <span class="p">(</span> <span class="n">Rank</span> <span class="n">lo</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//0 &lt;= lo &lt; hi &lt;= size &lt;= 2^30
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="cm">/*DSA*/</span> <span class="n">printf</span> <span class="p">(</span> <span class="s">&#34;</span><span class="se">\t</span><span class="s">SHELLsort [%3d, %3d)</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="k">for</span> <span class="p">(</span> <span class="n">Rank</span> <span class="n">d</span> <span class="o">=</span> <span class="mh">0x3FFFFFFF</span><span class="p">;</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">d</span><span class="p">;</span> <span class="n">d</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span> <span class="p">)</span> <span class="c1">//PS Sequence: { 1, 3, 7, 15, ..., 1073741823 }
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">for</span> <span class="p">(</span> <span class="n">Rank</span> <span class="n">j</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">+</span> <span class="n">d</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//for each j in [lo+d, hi)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>         <span class="n">T</span> <span class="n">x</span> <span class="o">=</span> <span class="n">_elem</span><span class="p">[</span><span class="n">j</span><span class="p">];</span> <span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">d</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="k">while</span> <span class="p">(</span> <span class="n">lo</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="o">&amp;&amp;</span> <span class="n">_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span> <span class="n">_elem</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">_elem</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">i</span> <span class="o">-=</span> <span class="n">d</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">         <span class="n">_elem</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">//insert [j] into its subsequence
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="code-by-pythonuse-numpy">Code by Python(use numpy)</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="selectionsort">SelectionSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">SelectionSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">length</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">minPosition</span> <span class="o">=</span> <span class="n">i</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">minPosition</span> <span class="o">=</span> <span class="n">j</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">[</span><span class="n">minPosition</span><span class="p">]</span> <span class="k">else</span> <span class="n">minPosition</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">minPosition</span> <span class="o">!=</span> <span class="n">i</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">temp</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">minPosition</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">x</span><span class="p">[</span><span class="n">minPosition</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="bubblesort">BubbleSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">BubbleSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">length</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">flag</span> <span class="o">=</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">temp</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">x</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+</span></span><span class="line"><span class="cl">                <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="n">flag</span> <span class="o">=</span> <span class="kc">False</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="mergesort">MergeSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">MergeSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mergeSort</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">hi</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mi</span> <span class="o">=</span> <span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mergeSort</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">mi</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mergeSort</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">merge</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">Arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">low</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">middle</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">nonlocal</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span><span class="line"><span class="cl">        <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">        <span class="n">B</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">low</span><span class="p">:</span><span class="n">middle</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="n">lb</span><span class="p">,</span> <span class="n">lc</span> <span class="o">=</span> <span class="n">middle</span> <span class="o">-</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">-</span> <span class="n">middle</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">lb</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">lc</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">B</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">middle</span> <span class="o">+</span> <span class="n">k</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Arr</span><span class="p">[</span><span class="n">low</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Arr</span><span class="p">[</span><span class="n">low</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">middle</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">lb</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Arr</span><span class="p">[</span><span class="n">low</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">mergeSort</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="binaryinsertsort">BinaryInsertSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">BinaryInsertSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">Search</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Val</span><span class="p">,</span> <span class="n">lo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">hi</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">nonlocal</span> <span class="n">CountOfCompare</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mi</span> <span class="o">=</span> <span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">Val</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">mi</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">hi</span> <span class="o">=</span> <span class="n">mi</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">lo</span> <span class="o">=</span> <span class="n">mi</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">lo</span> <span class="o">-</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">Insert</span><span class="p">(</span><span class="n">Arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">Rank</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Length</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">nonlocal</span> <span class="n">CountOfMove</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Length</span><span class="p">,</span> <span class="n">Rank</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Arr</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">_</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Arr</span><span class="p">[</span><span class="n">Rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+</span></span><span class="line"><span class="cl">        <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Local</span> <span class="o">=</span> <span class="n">Search</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Insert</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Local</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="insertsort">InsertSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">InsertSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">key</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">key</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">x</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">_</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">x</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+</span></span><span class="line"><span class="cl">        <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="heapsort">HeapSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">HeapSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="n">length</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">BuildHeap</span><span class="p">(</span><span class="n">Arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">nonlocal</span> <span class="n">length</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">heapify</span><span class="p">(</span><span class="n">Arr</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">heapify</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">nonlocal</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">largest</span> <span class="o">=</span> <span class="n">i</span>
+</span></span><span class="line"><span class="cl">        <span class="n">leftChild</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">rightChild</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">        <span class="n">largest</span> <span class="o">=</span> <span class="n">leftChild</span> <span class="k">if</span> <span class="n">leftChild</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">arr</span><span class="p">[</span><span class="n">largest</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">leftChild</span><span class="p">]</span> <span class="k">else</span> <span class="n">largest</span>
+</span></span><span class="line"><span class="cl">        <span class="n">largest</span> <span class="o">=</span> <span class="n">rightChild</span> <span class="k">if</span> <span class="n">rightChild</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">arr</span><span class="p">[</span><span class="n">largest</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">rightChild</span><span class="p">]</span> <span class="k">else</span> <span class="n">largest</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">largest</span> <span class="o">!=</span> <span class="n">i</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">temp</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">largest</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">arr</span><span class="p">[</span><span class="n">largest</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+</span></span><span class="line"><span class="cl">            <span class="n">heapify</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">largest</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">heap_sort</span><span class="p">(</span><span class="n">Array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">nonlocal</span> <span class="n">length</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span><span class="line"><span class="cl">        <span class="n">BuildHeap</span><span class="p">(</span><span class="n">Array</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">temp</span> <span class="o">=</span> <span class="n">Array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+</span></span><span class="line"><span class="cl">            <span class="n">heapify</span><span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">heap_sort</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="shellsort-1">ShellSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">ShellSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+</span></span><span class="line"><span class="cl">    <span class="n">inc</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="n">inc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inc</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">key</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span> <span class="o">=</span> <span class="n">i</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="n">inc</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="n">inc</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="n">inc</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="n">inc</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+</span></span><span class="line"><span class="cl">        <span class="n">inc</span> <span class="o">=</span> <span class="n">inc</span> <span class="o">//</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="quicksort-1">QuickSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">QuickSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">qsort</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">hi</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pi</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">qsort</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">pi</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">qsort</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">pi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">partition</span><span class="p">(</span><span class="n">Arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">low</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">nonlocal</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span><span class="line"><span class="cl">        <span class="n">i</span> <span class="o">=</span> <span class="n">low</span> <span class="o">-</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pivot</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">high</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">Arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pivot</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="n">temp</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+</span></span><span class="line"><span class="cl">                <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">temp</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Arr</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Arr</span><span class="p">[</span><span class="n">high</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Arr</span><span class="p">[</span><span class="n">high</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">qsort</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="twoway_insertionsort">TwoWay_InsertionSort</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">TwoWay_InsertionSort</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span><span class="line"><span class="cl">    <span class="n">first</span><span class="p">,</span> <span class="n">final</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">temp</span><span class="p">[</span><span class="n">first</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">first</span> <span class="o">=</span> <span class="p">(</span><span class="n">first</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl">            <span class="n">temp</span><span class="p">[</span><span class="n">first</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="k">elif</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">temp</span><span class="p">[</span><span class="n">final</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">final</span> <span class="o">=</span> <span class="p">(</span><span class="n">final</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl">            <span class="n">temp</span><span class="p">[</span><span class="n">final</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">            <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">final</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="n">temp</span><span class="p">[(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">CountOfCompare</span> <span class="o">=</span> <span class="n">CountOfCompare</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="n">temp</span><span class="p">[(</span><span class="n">k</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">temp</span><span class="p">[(</span><span class="n">k</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">final</span> <span class="o">=</span> <span class="p">(</span><span class="n">final</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">CountOfMove</span> <span class="o">=</span> <span class="n">CountOfMove</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[(</span><span class="n">first</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CountOfCompare</span><span class="p">,</span> <span class="n">CountOfMove</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/data-structure/">Data Structure</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-11-18</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting" data-hashtags="Data Structure"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-hashtag="Data Structure"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" data-title="Sorting"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/data-structures-and-algorithms/searching/" class="prev" rel="prev" title="Searching"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/operating-system/operating-system-chapter1/" class="next" rel="next" title="Operating System Chapter1 操作系统概述">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(L \u003c= pivot)\nB(U)\nC(pivot \u003c= G)\nA----B----C","id-2":"graph LR\nA(L)\nB(G)\nU(U)\nA----B----U"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

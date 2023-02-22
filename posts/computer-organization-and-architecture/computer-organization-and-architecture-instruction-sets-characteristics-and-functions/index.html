@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Computer Organization and Architecture Instruction Sets: Characteristics and Functions - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Computer Organization and Architecture Instruction Sets: Characteristics and Functions" />
+<meta property="og:description" content="Computer Organization and Architecture Instruction Sets: Characteristics and Functions Outline Machine Instruction Characteristics Types of Operands Intel x86 and ARM Data Types Types of Operations Endian Support Machine Instruction Characteristics Language Programming language Classification of programming language Machine language Assembly language High-level language Compiler Computers can only recognize machine language Translation program that converts high-level/assembly language programs into machine language Machine language Defined by the compu" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-01-25T17:56:04+08:00" />
+<meta property="article:modified_time" content="2023-01-25T17:56:04+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Computer Organization and Architecture Instruction Sets: Characteristics and Functions"/>
+<meta name="twitter:description" content="Computer Organization and Architecture Instruction Sets: Characteristics and Functions Outline Machine Instruction Characteristics Types of Operands Intel x86 and ARM Data Types Types of Operations Endian Support Machine Instruction Characteristics Language Programming language Classification of programming language Machine language Assembly language High-level language Compiler Computers can only recognize machine language Translation program that converts high-level/assembly language programs into machine language Machine language Defined by the compu"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" /><link rel="prev" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-aritmetic/" /><link rel="next" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Computer Organization and Architecture Instruction Sets: Characteristics and Functions",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-instruction-sets-characteristics-and-functions\/"
+        },"genre": "posts","keywords": "Computer Organization and Architecture","wordcount":  4026 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-instruction-sets-characteristics-and-functions\/","datePublished": "2023-01-25T17:56:04+08:00","dateModified": "2023-01-25T17:56:04+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Computer Organization and Architecture Instruction Sets: Characteristics and Functions</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/computer-organization-and-architecture/"><i class="far fa-folder fa-fw"></i>Computer Organization and Architecture</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-01-25">2023-01-25</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4026 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#instruction-sets-characteristics-and-functions">Instruction Sets: Characteristics and Functions</a>
+      <ul>
+        <li><a href="#outline">Outline</a></li>
+        <li><a href="#machine-instruction-characteristics">Machine Instruction Characteristics</a>
+          <ul>
+            <li><a href="#language">Language</a></li>
+            <li><a href="#instruction-set">Instruction set</a>
+              <ul>
+                <li><a href="#elements-of-an-instruction">Elements of an instruction</a></li>
+                <li><a href="#instruction-representation">Instruction representation</a></li>
+                <li><a href="#instruction-types">Instruction types</a></li>
+              </ul>
+            </li>
+            <li><a href="#number-of-addresses">Number of addresses</a>
+              <ul>
+                <li><a href="#3-addresses">3 addresses</a></li>
+                <li><a href="#2-addresses">2 addresses</a></li>
+                <li><a href="#1-addresses">1 addresses</a></li>
+                <li><a href="#0-addresses">0 addresses</a></li>
+              </ul>
+            </li>
+            <li><a href="#instruction-set-design">Instruction set design</a>
+              <ul>
+                <li><a href="#design-issues-of-instruction-set">Design issues of instruction set</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#types-of-operands">Types of Operands</a>
+          <ul>
+            <li><a href="#address">Address</a></li>
+            <li><a href="#numbers">Numbers</a></li>
+            <li><a href="#characters">Characters</a></li>
+            <li><a href="#logical-data">Logical data</a></li>
+          </ul>
+        </li>
+        <li><a href="#intel-x86-and-arm-data-types">Intel x86 and ARM Data Types</a>
+          <ul>
+            <li><a href="#x86-data-types">X86 data types</a></li>
+            <li><a href="#simd-data-types">SIMD data types</a></li>
+            <li><a href="#arm-data-types">ARM data types</a></li>
+          </ul>
+        </li>
+        <li><a href="#types-of-operations">Types of Operations</a>
+          <ul>
+            <li><a href="#data-transfer">Data transfer</a></li>
+            <li><a href="#common-data-transfer-instructions">Common Data Transfer Instructions</a></li>
+            <li><a href="#arithmetic">Arithmetic</a></li>
+            <li><a href="#logical">Logical</a></li>
+            <li><a href="#shift-operations--">Shift operations! ! !</a></li>
+            <li><a href="#conversion">Conversion</a></li>
+            <li><a href="#inputoutput">Input/output</a></li>
+            <li><a href="#system-control">System control</a></li>
+            <li><a href="#transfer-of-control">Transfer of control</a>
+              <ul>
+                <li><a href="#role-of-control-transfer">Role of control transfer</a></li>
+                <li><a href="#some-control-transfer-instruction">Some control transfer instruction</a></li>
+              </ul>
+            </li>
+            <li><a href="#procedure-call-instruction">Procedure call instruction</a>
+              <ul>
+                <li><a href="#nested-procedure-calls">Nested procedure calls</a></li>
+                <li><a href="#use-of-stacks">Use of stacks</a></li>
+                <li><a href="#passing-parameters">Passing parameters</a></li>
+              </ul>
+            </li>
+            <li><a href="#stack">Stack</a></li>
+          </ul>
+        </li>
+        <li><a href="#endian-support">Endian Support</a>
+          <ul>
+            <li><a href="#endian">Endian</a></li>
+            <li><a href="#standard">Standard</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
+<h2 id="instruction-sets-characteristics-and-functions">Instruction Sets: Characteristics and Functions</h2>
+<h3 id="outline">Outline</h3>
+<ul>
+<li>
+<p>Machine Instruction Characteristics</p>
+</li>
+<li>
+<p>Types of Operands</p>
+</li>
+<li>
+<p>Intel x86 and ARM Data Types</p>
+</li>
+<li>
+<p>Types of Operations</p>
+</li>
+<li>
+<p>Endian Support</p>
+</li>
+</ul>
+<h3 id="machine-instruction-characteristics">Machine Instruction Characteristics</h3>
+<h4 id="language">Language</h4>
+<p><strong>Programming language</strong></p>
+<ul>
+<li>
+<p>Classification of programming language</p>
+<ul>
+<li>
+<p>Machine language</p>
+</li>
+<li>
+<p>Assembly language</p>
+</li>
+<li>
+<p>High-level language</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Compiler</p>
+<ul>
+<li>
+<p>Computers can only recognize machine language</p>
+</li>
+<li>
+<p>Translation program that converts high-level/assembly language programs into machine language</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Machine language</strong></p>
+<ul>
+<li>
+<p>Defined by the computer’s hardware design</p>
+</li>
+<li>
+<p>Consists of streams of numbers (1s and 0s)</p>
+</li>
+<li>
+<p>Instruct the computer to perform the most basic operations</p>
+</li>
+<li>
+<p>A computer can understand only its own machine language</p>
+</li>
+<li>
+<p>It is difficult to remember, and generally will not be used directly</p>
+</li>
+</ul>
+<hr>
+<p><strong>Assembly language</strong></p>
+<ul>
+<li>
+<p>Represents machine-language instructions using English-like abbreviations</p>
+</li>
+<li>
+<p>Replace the address of an instruction or operand with an address symbol or label</p>
+</li>
+<li>
+<p>Assemblers convert assembly language to machine language</p>
+</li>
+<li>
+<p>Specific assembly language and specific machine language instruction set are one-to-one, and cannot be directly transplanted between different computer</p>
+</li>
+</ul>
+<h4 id="instruction-set">Instruction set</h4>
+<ul>
+<li>
+<p>The complete collection of instructions that are understood by a CPU</p>
+<ul>
+<li>
+<p>Machine Code</p>
+</li>
+<li>
+<p>Binary</p>
+</li>
+<li>
+<p>Usually represented by assembly codes</p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-1.png" title="/img/Computer Organization and Architecture/chapter10-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-1.png" data-sub-html="<h2>Instruction cycle state diagram</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-1.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-1.png, /img/Computer%20Organization%20and%20Architecture/chapter10-1.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-1.png" />
+    </a><figcaption class="image-caption"><code>Instruction cycle state diagram</code></figcaption>
+    </figure>
+<h5 id="elements-of-an-instruction">Elements of an instruction</h5>
+<ul>
+<li>
+<p><strong>Operation code (Op code)</strong></p>
+<ul>
+<li><strong>Do what</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Source Operand reference</strong></p>
+<ul>
+<li><strong>From this</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Result Operand reference</strong></p>
+<ul>
+<li><strong>Put the answer here</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Next Instruction Reference</strong></p>
+<ul>
+<li>
+<p><strong>When you have done that, do this&hellip;</strong></p>
+</li>
+<li>
+<p><strong>Generally, it defaults to the next storage unit</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="instruction-representation">Instruction representation</h5>
+<ul>
+<li>
+<p>In machine code,each opcode has a unique bit string</p>
+</li>
+<li>
+<p>For programmers a symbolic representation is used</p>
+<ul>
+<li>e.g. ADD,SUB,LOAD</li>
+</ul>
+</li>
+<li>
+<p>The operand follows the opcode in the instruction</p>
+</li>
+<li>
+<p>If there are multiple operands, separate them with “, ”</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ADD A,B
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<p><strong>简单的指令格式</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-2.png" title="/img/Computer Organization and Architecture/chapter10-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-2.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-2.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-2.png, /img/Computer%20Organization%20and%20Architecture/chapter10-2.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-2.png" />
+    </a>
+<ul>
+<li>
+<p>指令总共16个bit长，分为三个部分</p>
+<ul>
+<li>
+<p>第一部分是操作码，4个bit。最多有16种操作</p>
+</li>
+<li>
+<p>第二部分是操作数1的引用，6个bit</p>
+</li>
+<li>
+<p>第三部分是操作数2的引用，6个bit</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>在指令中，源操作数和目的操作数可以在内存、CPU寄存器中或者I/O中，也可能是一个数，称之为立即数</strong></p>
+</li>
+</ul>
+<p>Operands</p>
+<ul>
+<li>
+<p>Main memory</p>
+<ul>
+<li>
+<p>Memory address must be supplied</p>
+</li>
+<li>
+<p><strong>If virtual address is supplied,address translation required</strong></p>
+</li>
+<li>
+<p><strong>It may be in the cache</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>I/O device</p>
+<ul>
+<li><strong>The instruction must specify the I/O module and device for the operation</strong></li>
+</ul>
+</li>
+<li>
+<p>CPU register</p>
+<ul>
+<li>
+<p><strong>If only one register exists, reference to it may be implicit</strong></p>
+</li>
+<li>
+<p><strong>If more than one register exists, then each register is assigned a unique name or number</strong></p>
+</li>
+<li>
+<p><strong>Instruction must contain the number of the desired register</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Immediate</p>
+<ul>
+<li>The value of the operand is contained in a field in the instruction being executed</li>
+</ul>
+</li>
+</ul>
+<h5 id="instruction-types">Instruction types</h5>
+<ul>
+<li>
+<p>The instructions can be categorized into four types</p>
+<ul>
+<li>
+<p>Data processing</p>
+</li>
+<li>
+<p>Data storage</p>
+</li>
+<li>
+<p>Data movement</p>
+</li>
+<li>
+<p>Program flow control</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Data processing instruction</p>
+<ul>
+<li>
+<p>Processing data</p>
+</li>
+<li>
+<p>Including arithmetic and logic instructions</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Data storage</p>
+<ul>
+<li>
+<p>Storing data</p>
+</li>
+<li>
+<p>Mainly refers to the <strong>transfer of data between memory and CPU registers</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>Data movement
+<ul>
+<li>mainly refers to the data transmission between CPU and I/O</li>
+<li>I/O instructions</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Program flow control</p>
+<ul>
+<li>
+<p>Some instructions of CPU execution control</p>
+</li>
+<li>
+<p>Test instructions</p>
+</li>
+<li>
+<p>Branch instructions</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Instruction types</strong></p>
+<ul>
+<li>
+<p>Arithmetic instructions</p>
+</li>
+<li>
+<p>Logic (Boolean) instructions</p>
+</li>
+<li>
+<p>Memory instructions: moving data between memory and the registers</p>
+</li>
+<li>
+<p>I/O instructions</p>
+</li>
+<li>
+<p>Test instructions: used to test the value of a data word or the status of a computation</p>
+</li>
+<li>
+<p>Branch instructions: used to branch to a different set of instructions</p>
+</li>
+</ul>
+<h4 id="number-of-addresses">Number of addresses</h4>
+<ul>
+<li>
+<p>The address in the instruction is used to address the operand</p>
+</li>
+<li>
+<p>The number of addresses in instructions varies with different instruction types</p>
+</li>
+<li>
+<p>Different computers support different numbers of operands</p>
+</li>
+<li>
+<p><strong>The number of operands in an instruction may be 3, 2, 1, or none</strong></p>
+</li>
+</ul>
+<h5 id="3-addresses">3 addresses</h5>
+<ul>
+<li>
+<p><strong>Operand 1, Operand 2, Result</strong></p>
+</li>
+<li>
+<p><strong>a = b + c</strong></p>
+</li>
+<li>
+<p>May be a forth - next instruction (usually implicit)</p>
+</li>
+<li>
+<p>Not common</p>
+</li>
+<li>
+<p>Needs very long words to hold everything</p>
+</li>
+</ul>
+<h5 id="2-addresses">2 addresses</h5>
+<ul>
+<li>
+<p>Two operand</p>
+</li>
+<li>
+<p><strong>One address doubles as operand and result</strong></p>
+</li>
+<li>
+<p><strong>a = a + b</strong></p>
+</li>
+<li>
+<p>Reduces length of instruction</p>
+</li>
+<li>
+<p>Requires some extra work</p>
+<ul>
+<li><strong>Temporary storage to hold some results</strong></li>
+</ul>
+</li>
+</ul>
+<h5 id="1-addresses">1 addresses</h5>
+<ul>
+<li>
+<p><strong>Implicit second address</strong></p>
+</li>
+<li>
+<p><strong>Usually a register (accumulator)</strong></p>
+</li>
+<li>
+<p>Common on early machines</p>
+<ul>
+<li>
+<p>LOAD A  $AC \leftarrow A\newline$</p>
+</li>
+<li>
+<p>SUB B  $AC \leftarrow AC-B\newline$</p>
+</li>
+<li>
+<p>STORE Y  $Y \leftarrow AC\newline$</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="0-addresses">0 addresses</h5>
+<ul>
+<li>
+<p><strong>0 (zero) addresses: All addresses implicit</strong></p>
+<ul>
+<li>
+<p><strong>Usually use stack to imply the operands</strong></p>
+</li>
+<li>
+<p>e.g:</p>
+<ul>
+<li>push a</li>
+<li>push b</li>
+<li>add (pop a and b,then add a and b(c=a+b) and push the result to the stack)</li>
+<li>pop c</li>
+<li>c = a + b</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>More addresses</p>
+<ul>
+<li>
+<p>More complex instructions</p>
+</li>
+<li>
+<p>Fewer instructions per program</p>
+</li>
+<li>
+<p>Inter-register operations are quicker</p>
+</li>
+<li>
+<p>More registers</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Fewer addresses</p>
+<ul>
+<li>
+<p>Less complex instructions</p>
+</li>
+<li>
+<p>More instructions per program</p>
+</li>
+<li>
+<p>Faster fetch/execution of instructions</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="instruction-set-design">Instruction set design</h4>
+<h5 id="design-issues-of-instruction-set">Design issues of instruction set</h5>
+<ul>
+<li>
+<p>Operation repertoire: how many and which operations to provides, and how complex operations should be</p>
+</li>
+<li>
+<p>Data types: the operands types</p>
+</li>
+<li>
+<p>Instruction format: instruction length, number of addresses…</p>
+</li>
+<li>
+<p>Registers: how many registers can be used by the instructions</p>
+</li>
+<li>
+<p>Addressing: how to access a memory location, how many modes can be used</p>
+</li>
+</ul>
+<h3 id="types-of-operands">Types of Operands</h3>
+<ul>
+<li>
+<p>Addresses</p>
+</li>
+<li>
+<p>Numbers</p>
+<ul>
+<li>Integer/floating point</li>
+</ul>
+</li>
+<li>
+<p>Characters</p>
+<ul>
+<li>ASCII etc</li>
+</ul>
+</li>
+<li>
+<p>Logical Data</p>
+<ul>
+<li>Bits or flags</li>
+</ul>
+</li>
+</ul>
+<h4 id="address">Address</h4>
+<ul>
+<li>
+<p>The data operated by the instruction may be in memory</p>
+<ul>
+<li>
+<p>Address is used for addressing operands</p>
+</li>
+<li>
+<p>Treat as an unsigned integer</p>
+</li>
+</ul>
+</li>
+<li>
+<p>In many cases, need to process the address to get the actual address of the data</p>
+</li>
+</ul>
+<h4 id="numbers">Numbers</h4>
+<ul>
+<li>
+<p>Three types of numerical data are common in computers</p>
+<ul>
+<li>
+<p>Binary integer or binary fixed point</p>
+</li>
+<li>
+<p>Binary floating point</p>
+</li>
+<li>
+<p>Decimal</p>
+<ul>
+<li>
+<p>Packed decimal</p>
+</li>
+<li>
+<p>Use 4-bit binary number to represent a decimal number</p>
+</li>
+<li>
+<p>In the packed decimal representation, only the previous 10 codes are used, that is, from 0000 to 1001</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="characters">Characters</h4>
+<ul>
+<li>
+<p>A common form of data is text or character strings</p>
+</li>
+<li>
+<p>The most commonly used</p>
+<ul>
+<li>
+<p>International Reference Alphabet (IRA)</p>
+</li>
+<li>
+<p>United States as the American Standard Code for Information Interchange (ASCII)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Extended Binary Coded Decimal Interchange Code (EBCDIC)</p>
+<ul>
+<li>Used on IBM mainframes</li>
+</ul>
+</li>
+</ul>
+<h4 id="logical-data">Logical data</h4>
+<ul>
+<li>
+<p>Boolean or binary data items</p>
+<ul>
+<li>Each item can take on only the values 1 (true) and 0 (false)</li>
+</ul>
+</li>
+<li>
+<p>There are occasions when we wish to manipulate the bits of a data item</p>
+</li>
+</ul>
+<p>数据都是以二进制串的形式保存的。<strong>因此数据是什么类型的主要取决于指令的类型。指令中确定了它所操作的数据的类型</strong></p>
+<h3 id="intel-x86-and-arm-data-types">Intel x86 and ARM Data Types</h3>
+<h4 id="x86-data-types">X86 data types</h4>
+<ul>
+<li>
+<p>8 bit Byte</p>
+</li>
+<li>
+<p>16 bit word</p>
+</li>
+<li>
+<p>32 bit double word</p>
+</li>
+<li>
+<p>64 bit quad word</p>
+</li>
+<li>
+<p>128 bit double quadword</p>
+</li>
+<li>
+<p>Addressing is by 8 bit unit</p>
+</li>
+<li>
+<p><strong>Words do not need to align at even-numbered address</strong></p>
+</li>
+<li>
+<p><strong>Data accessed across 32 bit bus in units of double word read at addresses divisible by 4</strong></p>
+</li>
+<li>
+<p><strong>Little endian</strong></p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>无符号整数4种格式，分别是8位，16位，32位和64位</li>
+<li>有符号数采用补码形式，也有4种格式，位数是8位，16位，32位和64位</li>
+<li>浮点数，包括单精度浮点数，32位；双精度浮点数，64位，以及扩展的双精度浮点数，80位</li>
+<li>浮点数表示符合IEEE 754标准的要求</li>
+</ul>
+<h4 id="simd-data-types">SIMD data types</h4>
+<ul>
+<li>
+<p>In the X86 architecture, <code>MMX</code>(Multi Media eXtension)related instructions are added to improve the processing efficiency of multimedia data</p>
+</li>
+<li>
+<p><code>MMX</code> technology adds 57 instructions specially designed for video signal, audio signal and graphic manipulation to the CPU</p>
+</li>
+<li>
+<p>Therefore, <code>MMX</code> CPU greatly improves the computer’s multimedia (such as stereo, video, 3D animation, etc.) processing function</p>
+</li>
+<li>
+<p>In <code>MMX</code> instructions, one instruction can process multiple data at the same time, which is called <strong>single instruction multiple data(<code>SIMD</code>)</strong></p>
+</li>
+<li>
+<p><strong>Basic idea of <code>SIMD</code> is to package multiple operands into one memory addressable data, that is, the data obtained by one addressing is the result of multiple data packages</strong></p>
+<ul>
+<li><strong>one instruction can obtain multiple operands and process them at the same time</strong></li>
+</ul>
+</li>
+<li>
+<p>Five packaging methods for compressed data</p>
+<ul>
+<li>
+<p>Packed byte and packed byte integer</p>
+</li>
+<li>
+<p>Packed word and packed word integer</p>
+</li>
+<li>
+<p>Packed doubleword and packed doubleword integer</p>
+</li>
+<li>
+<p>Packed quadword and packed quadword integer</p>
+</li>
+<li>
+<p>Packed single-precision floating-point and packed double-precision floatingpoint</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Packed byte and packed byte integer</p>
+<ul>
+<li>
+<p>Bytes packed into 64-bit quadword</p>
+</li>
+<li>
+<p>or 128-bit double quadword</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Packed word and packed word integer</p>
+<ul>
+<li>
+<p>16-bit words packed into 64-bit quadword</p>
+</li>
+<li>
+<p>or 128-bit double quadword</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Packed doubleword and packed doubleword integer</p>
+<ul>
+<li>
+<p>32-bit doublewords packed into 64-bit quadword</p>
+</li>
+<li>
+<p>or 128-bit double quadword</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Packed quadword and packed quadword integer</p>
+<ul>
+<li>Two 64-bit quadwords packed into 128-bit double quadword</li>
+</ul>
+</li>
+<li>
+<p>Packed single-precision floating-point and packed double-precision floating-point</p>
+<ul>
+<li>Four 32-bit floating-point or two 64-bit floating-point values packed into a 128-bit double quadword</li>
+</ul>
+</li>
+</ul>
+<h4 id="arm-data-types">ARM data types</h4>
+<ul>
+<li>
+<p><strong>8 (byte), 16 (halfword), 32 (word) bits</strong></p>
+</li>
+<li>
+<p><strong>Halfword and word accesses should be word aligned</strong></p>
+</li>
+<li>
+<p>Nonaligned access alternatives</p>
+<ul>
+<li>
+<p>Default</p>
+<ul>
+<li>
+<p>Treated as truncated</p>
+</li>
+<li>
+<p><strong>Load single word instructions rotate right word aligned data transferred by non word-aligned address one, two or three bytes Alignment checking</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Data abort signal indicates alignment fault for attempting unaligned access</strong></p>
+</li>
+<li>
+<p><strong>Unaligned access: Processor uses one or more memory accesses to generate transfer of adjacent bytes transparently to the programmer</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Unsigned integer interpretation supported for all types</p>
+</li>
+<li>
+<p>Twos-complement signed integer interpretation supported for all types</p>
+</li>
+<li>
+<p><strong>Majority of implementations do not provide floating-point hardware</strong></p>
+<ul>
+<li>
+<p><strong>Saves power and area</strong></p>
+</li>
+<li>
+<p><strong>Floating-point arithmetic implemented in software</strong></p>
+</li>
+<li>
+<p><strong>Optional floating-point coprocessor</strong></p>
+</li>
+<li>
+<p><strong>Single- and double-precision IEEE 754 floating point data types</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="types-of-operations">Types of Operations</h3>
+<ul>
+<li>
+<p>Arithmetic</p>
+</li>
+<li>
+<p>Logical</p>
+</li>
+<li>
+<p>Data Transfer</p>
+</li>
+<li>
+<p>Conversion</p>
+</li>
+<li>
+<p>I/O</p>
+</li>
+<li>
+<p>System Control</p>
+</li>
+<li>
+<p>Transfer of Control</p>
+</li>
+</ul>
+<h4 id="data-transfer">Data transfer</h4>
+<ul>
+<li>
+<p>Location of source and destination must be specified</p>
+<ul>
+<li>Memory</li>
+<li>Register</li>
+<li>Top of the stack</li>
+</ul>
+</li>
+<li>
+<p>For the memory access, addressing mode must be specified</p>
+<ul>
+<li>Memory has multiple addressing modes, such as direct addressing and indirect addressing</li>
+</ul>
+</li>
+<li>
+<p>The length of the operands must be specified</p>
+</li>
+<li>
+<p>Data transmission instructions need to specify</p>
+<ul>
+<li>
+<p><strong>Source address</strong></p>
+</li>
+<li>
+<p><strong>Destination address</strong></p>
+</li>
+<li>
+<p><strong>Amount of data</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Which data transfer instructions are included is one of the important issues to be considered in instruction set design</p>
+</li>
+<li>
+<p>For example, whether the location of the operand is determined by the opcode or by the operand needs to be designed</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>IBM 390</p>
+<ul>
+<li>
+<p>Use different instructions for different movements</p>
+</li>
+<li>
+<p>Operation code determines the direction of data movement</p>
+</li>
+</ul>
+</li>
+<li>
+<p>VAX</p>
+<ul>
+<li>
+<p>Data transmission between different data sources with the same</p>
+</li>
+<li>
+<p>The position of each operand must be specified separately in the instruction</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="common-data-transfer-instructions">Common Data Transfer Instructions</h4>
+<ul>
+<li>
+<p>常见的数据传送指令包括：移动、存储、加载、交换、清除、设置、进栈、出栈等</p>
+</li>
+<li>
+<p>数据传送对于处理器来说是最基本、最简单的操作，实现了数据从一个位置到另一个位置的移动</p>
+</li>
+<li>
+<p>数据传送指令将数据从一个位置移动到另一个位置</p>
+</li>
+<li>
+<p><strong>如果数据传送涉及到内存的话，还有一点复杂:</strong></p>
+<ul>
+<li>
+<p><strong>需要根据寻址方式来计算存储器的地址</strong></p>
+</li>
+<li>
+<p><strong>如果给的是虚拟地址的话，还需要进行虚拟地址到实际地址的转换</strong></p>
+</li>
+<li>
+<p><strong>所以得到实存地址后，需要检查数据是否在cache中。如果在cache中，就对cache进行读取操作；如果没有命中，需要进行存储器的读或者写操作</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="arithmetic">Arithmetic</h4>
+<ul>
+<li>
+<p>Single operand instruction</p>
+<ul>
+<li>absolute, negate, increment, decrement</li>
+</ul>
+</li>
+<li>
+<p>Two operands instruction</p>
+<ul>
+<li>Add, subtract, multiply, divide</li>
+</ul>
+</li>
+<li>
+<p>The operands are</p>
+<ul>
+<li>
+<p>Signed integer (fixed point) numbers</p>
+</li>
+<li>
+<p>Floating-point numbers</p>
+</li>
+<li>
+<p><strong>Packed decimal numbers</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Mainly completed by CPU</p>
+</li>
+<li>
+<p>算术运算的操作可能会包括数据传输传送操作。数据传送操作的目的是在运算前给ALU提供操作的数据，或者在运算后将结果输出</p>
+</li>
+<li>
+<p>算术操作的实际执行是在ALU中</p>
+</li>
+<li>
+<p>计算完成之后，还会设置状态码或标志位，用以表示计算的结果，比如是否溢出，是否出错等</p>
+</li>
+</ul>
+<h4 id="logical">Logical</h4>
+<ul>
+<li>
+<p>Most processors can operate on a single bit of a word or addressable unit</p>
+<ul>
+<li>
+<p><strong>Called <code>bit twiddling</code></strong></p>
+</li>
+<li>
+<p>It&rsquo;s actually a bit wise Boolean operation</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Basic logic operation</p>
+<ul>
+<li><strong>AND, OR, NOT, Exclusive-OR</strong></li>
+</ul>
+</li>
+<li>
+<p>Extended logical operations</p>
+<ul>
+<li><strong>Test，compare，set control variables，shift，rotate</strong></li>
+</ul>
+</li>
+<li>
+<p>测试test：测试指令，进行特定条件的测试并设置标志位</p>
+</li>
+<li>
+<p>比较compare：比较指令，对两个或多个操作数进行比较，并设置标志位</p>
+</li>
+<li>
+<p>设置控制变量set control variables：一组用于设置控制位的指令，以进行保护，中断处理，定时控制的用途</p>
+</li>
+<li>
+<p>移位shift：左移或右移数据</p>
+</li>
+<li>
+<p>循环rotate：循环移位</p>
+</li>
+</ul>
+<h4 id="shift-operations--">Shift operations! ! !</h4>
+<ul>
+<li>
+<p><strong>Logical shift: without considering the highest sign bit</strong></p>
+<ul>
+<li>
+<p><strong>Logical right: Move the operand to the right by n bits, and fill in 0 at the left position</strong></p>
+</li>
+<li>
+<p><strong>Logical left: Move the operand to the left by n, and fill in 0 for the n bits vacated on the right</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Arithmetic shift: consider the highest sign bit</strong></p>
+<ul>
+<li>
+<p><strong>Arithmetic right: Shift n bits to the right as a whole, and fill the empty n bits on the left with the highest sign bit</strong></p>
+</li>
+<li>
+<p><strong>Arithmetic left: Retain the sign bit of the highest bit, and then shift the other bits by n bits to the left</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>10100110：移动3位</p>
+<ul>
+<li>
+<p>逻辑右移：00010100，逻辑左移：00110000</p>
+</li>
+<li>
+<p>算术右移：11110100，算术左移：10110000</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Rotate/Cyclic shift</strong></p>
+<ul>
+<li>
+<p>Rotate right: Each number moves one digit to the right, and the rightmost digit moves to the leftmost digit</p>
+</li>
+<li>
+<p>Rotate left: Each number moves one digit to the left, and the leftmost digit moves to the rightmost digit</p>
+</li>
+<li>
+<p><strong>One possible use of the loop is to move left circularly, place each bit at the highest bit in turn, and then test the sign bit to determine the value of each bit</strong></p>
+</li>
+<li>
+<p>10100110：移动3位</p>
+<ul>
+<li>
+<p>循环右移：11010110</p>
+</li>
+<li>
+<p>循环左移：00110101</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Role of shift</strong></p>
+<ul>
+<li>
+<p>Right shift</p>
+<ul>
+<li>
+<p><strong>Logical right shift: which is equivalent to dividing an unsigned integer by 2</strong></p>
+</li>
+<li>
+<p><strong>Arithmetic right shift: for complement representation, it is equivalent to dividing by 2</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Left shift: overflow needs to be considered</p>
+<ul>
+<li>
+<p><strong>When there is no overflow, it is equivalent to multiplying by 2</strong></p>
+</li>
+<li>
+<p><strong>When there is overflow, it has different effects on logical shift left and arithmetic shift left</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-3.png" title="/img/Computer Organization and Architecture/chapter10-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-3.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-3.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-3.png, /img/Computer%20Organization%20and%20Architecture/chapter10-3.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-3.png" />
+    </a>
+<h4 id="conversion">Conversion</h4>
+<ul>
+<li>
+<p>转换指令主要目的是改变数据格式，或者对数据格式进行操作</p>
+</li>
+<li>
+<p>比如说，对二级制的数据格式进行转换，转换成十进制，或者从压缩的10进制转换为二进制</p>
+</li>
+<li>
+<p>还有一种是翻译，根据一个表的相应位的值，将内存块中的一些数据翻译成另一些数</p>
+</li>
+</ul>
+<h4 id="inputoutput">Input/output</h4>
+<ul>
+<li>
+<p>May be specific instructions</p>
+</li>
+<li>
+<p><strong>May be done using data movement instructions (memory mapped)</strong></p>
+</li>
+<li>
+<p><strong>May be done by a separate controller (<code>DMA</code>)</strong></p>
+</li>
+</ul>
+<h4 id="system-control">System control</h4>
+<ul>
+<li>
+<p>Privileged instructions</p>
+</li>
+<li>
+<p>CPU needs to be in specific state</p>
+<ul>
+<li>Kernel mode</li>
+</ul>
+</li>
+<li>
+<p>For operating systems use</p>
+</li>
+<li>
+<p>Some control instructions</p>
+<ul>
+<li>
+<p><strong>Read or write a control register</strong></p>
+</li>
+<li>
+<p><strong>Read or write a storage protection key</strong></p>
+</li>
+<li>
+<p><strong>Access to process control blocks in a multiprogramming system</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="transfer-of-control">Transfer of control</h4>
+<ul>
+<li>
+<p><strong>The first scenario is that we need to repeat some instructions</strong></p>
+<ul>
+<li>
+<p><strong>Multiplication of vector or matrix is easy to implement if circular statements are used</strong></p>
+</li>
+<li>
+<p><strong>Need use the transfer instruction, starting from the end of the loop body</strong></p>
+</li>
+<li>
+<p>It is almost impossible without a transfer instruction</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>The second scenario is that when we write a program, we often need to judge which operation to do next according to a calculation result</strong></p>
+<ul>
+<li>
+<p>When calculating division, you can first verify whether the divisor is 0. If it is 0, you can directly report an error</p>
+</li>
+<li>
+<p><strong>Transfer instructions are required, and the instructions to be executed in the next step are determined according to the judgment results</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>The third scenario is that when we write programs, we often use procedures or functions</strong></p>
+<ul>
+<li>
+<p>Break a large program into several small parts, and then process them separately</p>
+</li>
+<li>
+<p>Procedures or functions can be called multiple times</p>
+</li>
+<li>
+<p>Transfer instructions must be used when calling procedures or functions</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="role-of-control-transfer">Role of control transfer</h5>
+<ul>
+<li>
+<p><strong>Normal execution of instructions</strong></p>
+<ul>
+<li>
+<p><strong>PC(program counter)stores the address of the next instruction to be executed</strong></p>
+</li>
+<li>
+<p><strong>After the instruction retrieval is completed, PC automatically adds 1 to point to the next instruction address</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Control transfer instructions</strong></p>
+<ul>
+<li>
+<p><strong>Determine the next instruction to be executed according to the execution result of the current instruction</strong></p>
+</li>
+<li>
+<p><strong>Change the original instruction execution order</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-4.png" title="/img/Computer Organization and Architecture/chapter10-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-4.png" data-sub-html="<h2>Types of control transfer</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-4.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-4.png, /img/Computer%20Organization%20and%20Architecture/chapter10-4.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-4.png" />
+    </a><figcaption class="image-caption"><code>Types of control transfer</code></figcaption>
+    </figure>
+<h5 id="some-control-transfer-instruction">Some control transfer instruction</h5>
+<ul>
+<li>
+<p>Branch</p>
+<ul>
+<li>
+<p><strong>Also called jump</strong></p>
+</li>
+<li>
+<p><strong>Take the address of next instruction to be executed as an operand of current instruction</strong></p>
+</li>
+<li>
+<p>For conditional branch instructions, the branch is made only if a certain condition is met</p>
+<ul>
+<li>Otherwise, executes next instruction in sequence</li>
+</ul>
+</li>
+<li>
+<p>Usually the condition is taken as a result of an operation (arithmetic or logic)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Skip</p>
+<ul>
+<li>
+<p><strong>Skip execution of the next instruction</strong></p>
+</li>
+<li>
+<p>It is not necessary to specify the address of the next instruction in the instruction</p>
+</li>
+<li>
+<p>The skip instruction includes an implied address</p>
+</li>
+<li>
+<p><strong>The skip implies that one instruction be skipped</strong></p>
+<ul>
+<li>The implied address equals the address of next instruction plus one instruction-length</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Subroutine call</p>
+<ul>
+<li>
+<p><strong>Call the procedure code to execute the procedure</strong></p>
+</li>
+<li>
+<p><strong>After execution, return to the point where the call occurred and continue to execute next instruction</strong></p>
+</li>
+<li>
+<p><strong>A procedure is a subroutine, that is, a computer program, which can perform certain functions</strong></p>
+</li>
+<li>
+<p>Write the general function as a procedure, which can be called many times in the program</p>
+<ul>
+<li>
+<p>Save the workload of programming</p>
+</li>
+<li>
+<p><strong>Memory space occupied by programs is also reduced</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Through procedure writing, modular programming is carried out to improve the efficiency of programming</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="procedure-call-instruction">Procedure call instruction</h4>
+<ul>
+<li>
+<p>It is invoked by a calling instruction and returned by a return instruction</p>
+<ul>
+<li>
+<p><strong>Procedure call can be nested</strong></p>
+</li>
+<li>
+<p><strong>Each procedure call is matched by a return in the called program</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>The CPU must save the return address，it also need to pass parameters to the procedure in one of the following ways</p>
+<ul>
+<li>
+<p><strong>Register</strong></p>
+</li>
+<li>
+<p><strong>Start of called procedure</strong></p>
+</li>
+<li>
+<p><strong>Top of stack</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="nested-procedure-calls">Nested procedure calls</h5>
+<ul>
+<li>
+<p>主程序中调用过程1</p>
+</li>
+<li>
+<p>过程1中有2个调用过程2的步骤</p>
+</li>
+<li>
+<p>每次调用完必须有返回的指令，返回到调用的地方</p>
+</li>
+<li>
+<p><strong>返回地址的保存和使用方式，一般采用栈来完成</strong></p>
+</li>
+</ul>
+<h5 id="use-of-stacks">Use of stacks</h5>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-5.png" title="/img/Computer Organization and Architecture/chapter10-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-5.png" data-sub-html="<h2>stack</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-5.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-5.png, /img/Computer%20Organization%20and%20Architecture/chapter10-5.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-5.png" />
+    </a><figcaption class="image-caption"><code>stack</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>初始化时，栈是空栈</strong></p>
+</li>
+<li>
+<p><strong>调用过程1时，需要把返回地址，也就是4101压栈</strong></p>
+</li>
+<li>
+<p><strong>过程1中调用过程2时，需要把返回地址4601压栈</strong></p>
+</li>
+<li>
+<p><strong>第一个过程2执行完成，把4601弹出，这样就返回到过程调用前的状态</strong></p>
+</li>
+<li>
+<p><strong>第二次调用过程2，同样把返回地址压栈</strong></p>
+</li>
+<li>
+<p><strong>过程执行结束，弹出4651。过程1执行结束，弹出4101，继续执行主程序</strong></p>
+</li>
+</ul>
+<h5 id="passing-parameters">Passing parameters</h5>
+<ul>
+<li>
+<p>Pass parameters is important to the procedure cal</p>
+</li>
+<li>
+<p>Using registers</p>
+<ul>
+<li>Must assure that the registers are used properly</li>
+</ul>
+</li>
+<li>
+<p>Using memory cells</p>
+<ul>
+<li>It is difficult to exchange the variables</li>
+</ul>
+</li>
+<li>
+<p><strong>Using stack</strong></p>
+<ul>
+<li>
+<p>more flexible</p>
+</li>
+<li>
+<p>When a procedure is called</p>
+<ul>
+<li>
+<p>Stack the return address</p>
+</li>
+<li>
+<p>Stack parameters to be passed to the called procedure</p>
+</li>
+</ul>
+</li>
+<li>
+<p>When return</p>
+<ul>
+<li>Return parameters can also be placed on the stack</li>
+</ul>
+</li>
+<li>
+<p><strong>All above stacked info for the procedure is called a stack frame(OS)</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-6.png" title="/img/Computer Organization and Architecture/chapter10-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-6.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-6.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-6.png, /img/Computer%20Organization%20and%20Architecture/chapter10-6.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-6.png" />
+    </a>
+<ul>
+<li>
+<p>主程序调用P的时候，先把返回地址压栈，然后将之前的帧指针地址保存，之后再将x1和x2这两个参数压到栈里面</p>
+</li>
+<li>
+<p>P调用Q的时候，先把返回地址压栈，然后将老的帧地址保存，再将P要传给Q的y1和y2地址压栈</p>
+</li>
+<li>
+<p>通过栈，完成了参数、返回地址的传递</p>
+</li>
+</ul>
+<h4 id="stack">Stack</h4>
+<ul>
+<li>
+<p>Queues work in two basic ways</p>
+<ul>
+<li><code>FIFO</code>: first in first out</li>
+<li><code>LIFO</code>: last in first out</li>
+</ul>
+</li>
+<li>
+<p><strong>Stack is a <code>LIFO</code></strong></p>
+</li>
+<li>
+<p>A stack is an ordered set of elements, only one of which can be accessed at a time</p>
+</li>
+<li>
+<p>The point of access is called the top of the stack</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-7.png" title="/img/Computer Organization and Architecture/chapter10-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-7.png" data-sub-html="<h2>stack operation</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-7.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-7.png, /img/Computer%20Organization%20and%20Architecture/chapter10-7.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-7.png" />
+    </a><figcaption class="image-caption"><code>stack operation</code></figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-8.png" title="/img/Computer Organization and Architecture/chapter10-8.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-8.png" data-sub-html="<h2>Typical stack organization</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-8.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-8.png, /img/Computer%20Organization%20and%20Architecture/chapter10-8.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-8.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-8.png" />
+    </a><figcaption class="image-caption"><code>Typical stack organization</code></figcaption>
+    </figure>
+<h3 id="endian-support">Endian Support</h3>
+<ul>
+<li>Example of Endian
+<ul>
+<li>Suppose we want to store a 32-bit hex value 12345678 to address 184</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter10-9.png" title="/img/Computer Organization and Architecture/chapter10-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter10-9.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter10-9.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter10-9.png, /img/Computer%20Organization%20and%20Architecture/chapter10-9.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter10-9.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter10-9.png" />
+    </a>
+<h4 id="endian">Endian</h4>
+<ul>
+<li>
+<p>Big endian</p>
+<ul>
+<li>
+<p>The most significant byte in the lowest numerical byte address</p>
+</li>
+<li>
+<p>Equivalent to the <strong>left-to-right order</strong> of writing</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Little endian</p>
+<ul>
+<li>
+<p>The least significant byte in the lowest numerical byte address</p>
+</li>
+<li>
+<p>Reminiscent of the <strong>right-to-left order</strong> of arithmetic operations in arithmetic units</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Machines from different manufacturers may adopt different endian</p>
+</li>
+</ul>
+<h4 id="standard">Standard</h4>
+<ul>
+<li>
+<p>Pentium (x86), VAX, Alpha are little-endian</p>
+</li>
+<li>
+<p>BM 370, Motorola 680x0 (Mac), and most RISC are big-endian</p>
+</li>
+<li>
+<p><strong>Internet is big-endian</strong></p>
+<ul>
+<li>
+<p><strong>Makes writing Internet programs on PC more awkward!</strong></p>
+</li>
+<li>
+<p><strong>WinSock provides HtoI and ItoH (Host to Internet &amp; Internet to Host) functions to convert</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>ARM endian support</strong></p>
+<ul>
+<li>
+<p>ARM supports two endian</p>
+</li>
+<li>
+<p>E-bit in system control register</p>
+</li>
+<li>
+<p><strong>E-bit=0 is the big endian; if E-bit=1, it is the little endian E-bit=0</strong></p>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/computer-organization-and-architecture/">Computer Organization and Architecture</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-01-25</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions" data-hashtags="Computer Organization and Architecture"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-hashtag="Computer Organization and Architecture"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" data-title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-aritmetic/" class="prev" rel="prev" title="Computer Organization and Architecture Computer Aritmetic"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" class="next" rel="next" title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph BT\nA(hardware)\nB(instruction set)\nC(Software, compiler)\nA--\u003eB--\u003eC"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

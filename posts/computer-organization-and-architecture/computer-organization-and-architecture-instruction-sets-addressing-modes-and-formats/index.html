@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Computer Organization and Architecture Instruction Sets Addressing Modes and Formats - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats" />
+<meta property="og:description" content="Computer Organization and Architecture Instruction Sets: Addressing Modes and Formats Outline Addressing x86 and ARM addressing modes Instruction Formats x86 and ARM instruction formats Addressing What is addressing mode? Elements in the instruction include: opcode, source operand, destination operand, and next instruction address Possible positions of operands Memory Register Immediate I/O Addressing mode specifies how to obtain an operand of an instruction Addressing is relatively simple when the operand is" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-01-26T16:30:34+08:00" />
+<meta property="article:modified_time" content="2023-01-26T16:30:34+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats"/>
+<meta name="twitter:description" content="Computer Organization and Architecture Instruction Sets: Addressing Modes and Formats Outline Addressing x86 and ARM addressing modes Instruction Formats x86 and ARM instruction formats Addressing What is addressing mode? Elements in the instruction include: opcode, source operand, destination operand, and next instruction address Possible positions of operands Memory Register Immediate I/O Addressing mode specifies how to obtain an operand of an instruction Addressing is relatively simple when the operand is"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" /><link rel="prev" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" /><link rel="next" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-processor-structure-and-function/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Computer Organization and Architecture Instruction Sets Addressing Modes and Formats",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats\/"
+        },"genre": "posts","keywords": "Computer Organization and Architecture","wordcount":  5305 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats\/","datePublished": "2023-01-26T16:30:34+08:00","dateModified": "2023-01-26T16:30:34+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Computer Organization and Architecture Instruction Sets Addressing Modes and Formats</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/computer-organization-and-architecture/"><i class="far fa-folder fa-fw"></i>Computer Organization and Architecture</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-01-26">2023-01-26</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5305 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 11 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#instruction-sets-addressing-modes-and-formats">Instruction Sets: Addressing Modes and Formats</a>
+      <ul>
+        <li><a href="#outline">Outline</a></li>
+        <li><a href="#addressing">Addressing</a>
+          <ul>
+            <li><a href="#what-is-addressing-mode">What is addressing mode?</a></li>
+            <li><a href="#memory-addressing">Memory addressing</a></li>
+            <li><a href="#common-addressing-mode">Common addressing mode</a>
+              <ul>
+                <li><a href="#immediate-addressing">Immediate addressing</a></li>
+                <li><a href="#direct-addressing">Direct addressing</a></li>
+                <li><a href="#indirect-addressing">Indirect addressing</a></li>
+                <li><a href="#register-addressing">Register addressing</a></li>
+                <li><a href="#register-indirect-addressing">Register indirect addressing</a></li>
+                <li><a href="#displacement-addressing">Displacement addressing</a>
+                  <ul>
+                    <li><a href="#relative-addressing">Relative addressing</a></li>
+                    <li><a href="#base-register-addressing">Base-register addressing</a></li>
+                    <li><a href="#indexed-addressing">Indexed addressing</a></li>
+                  </ul>
+                </li>
+                <li><a href="#combinations">Combinations</a></li>
+                <li><a href="#stack-addressing">Stack addressing</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#x86-and-arm-addressing-modes"><code>x86</code> and <code>ARM</code> addressing modes</a>
+          <ul>
+            <li><a href="#swapping">Swapping</a></li>
+            <li><a href="#partitioning">Partitioning</a>
+              <ul>
+                <li><a href="#variable-sized-partitions">Variable sized partitions</a></li>
+              </ul>
+            </li>
+            <li><a href="#relocation">Relocation</a></li>
+            <li><a href="#paging">Paging</a></li>
+            <li><a href="#real-and-virtual-memory">Real and virtual memory</a></li>
+            <li><a href="#segmentation">Segmentation</a></li>
+            <li><a href="#x86-addressing-modes"><code>x86</code> addressing modes</a></li>
+            <li><a href="#arm-addressing-modes"><code>ARM</code> addressing modes</a>
+              <ul>
+                <li><a href="#offset">Offset</a></li>
+                <li><a href="#pre-index">Pre-index</a></li>
+                <li><a href="#post-index">Post-index</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#instruction-formats">Instruction Formats</a>
+          <ul>
+            <li><a href="#key-of-instruction-formats">Key of instruction formats</a></li>
+            <li><a href="#allocation-of-bits">Allocation of bits</a></li>
+          </ul>
+        </li>
+        <li><a href="#x86-and-arm-instruction-formats"><code>x86</code> and <code>ARM</code> instruction formats</a>
+          <ul>
+            <li><a href="#x86-instruction-format"><code>x86</code> instruction format</a></li>
+            <li><a href="#arm-instruction-formats"><code>ARM</code> instruction formats</a>
+              <ul>
+                <li><a href="#condition-code">Condition code</a></li>
+              </ul>
+            </li>
+            <li><a href="#data-processing">Data processing</a></li>
+            <li><a href="#loadstore">Load/Store</a></li>
+            <li><a href="#branch">Branch</a></li>
+            <li><a href="#arm-immediate-constants">ARM immediate constants</a></li>
+            <li><a href="#thumb-instruction-set">Thumb instruction set</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
+<h2 id="instruction-sets-addressing-modes-and-formats">Instruction Sets: Addressing Modes and Formats</h2>
+<h3 id="outline">Outline</h3>
+<ul>
+<li>
+<p>Addressing</p>
+</li>
+<li>
+<p><code>x86</code> and <code>ARM</code> addressing modes</p>
+</li>
+<li>
+<p>Instruction Formats</p>
+</li>
+<li>
+<p><code>x86</code> and <code>ARM</code> instruction formats</p>
+</li>
+</ul>
+<h3 id="addressing">Addressing</h3>
+<h4 id="what-is-addressing-mode">What is addressing mode?</h4>
+<ul>
+<li>
+<p><strong>Elements in the instruction include: opcode, source operand, destination operand, and next instruction address</strong></p>
+</li>
+<li>
+<p>Possible positions of operands</p>
+<ul>
+<li>
+<p>Memory</p>
+</li>
+<li>
+<p>Register</p>
+</li>
+<li>
+<p>Immediate</p>
+</li>
+<li>
+<p>I/O</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Addressing mode specifies how to obtain an operand of an instruction</strong></p>
+</li>
+<li>
+<p>Addressing is relatively simple when the operand is in a register or immediate</p>
+</li>
+<li>
+<p>If the operand is in memory</p>
+<ul>
+<li>
+<p>The address field of an operand in an instruction cannot be too long</p>
+</li>
+<li>
+<p>Want to access a large memory space</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Memory addressing adopts multiple addressing modes</p>
+<ul>
+<li><strong>Balance</strong> the addressable address range, addressing flexibility, addressing complexity and the number of storage units occupied</li>
+</ul>
+</li>
+</ul>
+<h4 id="memory-addressing">Memory addressing</h4>
+<ul>
+<li>
+<p>Absolute</p>
+</li>
+<li>
+<p>Displacement</p>
+</li>
+<li>
+<p>Indexed</p>
+</li>
+<li>
+<p>register indirect</p>
+</li>
+<li>
+<p>memory indirect</p>
+</li>
+<li>
+<p>Autoincrement</p>
+</li>
+<li>
+<p>Autodecrement</p>
+</li>
+</ul>
+<hr>
+<p><strong>Advantage</strong></p>
+<ul>
+<li>
+<p>Expanding addressable address space</p>
+</li>
+<li>
+<p>Improved addressing flexibility</p>
+</li>
+<li>
+<p>Provide better program architecture to help programmers design more flexible programs</p>
+<ul>
+<li>For example, array, pointer based access, etc</li>
+</ul>
+</li>
+</ul>
+<h4 id="common-addressing-mode">Common addressing mode</h4>
+<ul>
+<li>
+<p>Immediate</p>
+</li>
+<li>
+<p>Direct</p>
+</li>
+<li>
+<p>Indirect</p>
+</li>
+<li>
+<p>Register</p>
+</li>
+<li>
+<p>Register Indirect</p>
+</li>
+<li>
+<p>Displacement (Indexed)</p>
+</li>
+<li>
+<p>Stack</p>
+</li>
+</ul>
+<h5 id="immediate-addressing">Immediate addressing</h5>
+<ul>
+<li>
+<p>Operand is part of instruction</p>
+<ul>
+<li><strong>Operand = address field</strong></li>
+</ul>
+</li>
+<li>
+<p>e.g.</p>
+<ul>
+<li>
+<p>ADD 5</p>
+</li>
+<li>
+<p>Add 5 to contents of accumulator</p>
+</li>
+<li>
+<p>5 is operand</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>No memory reference to fetch data</strong></p>
+<ul>
+<li>
+<p><strong>Fast</strong></p>
+</li>
+<li>
+<p><strong>Limited range: length of the address field in the instruction is limited</strong></p>
+</li>
+<li>
+<p><strong>Inflexible</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">MOV BL,10
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><strong>指令中包含了操作码和立即数</strong></p>
+</li>
+<li>
+<p><strong>复杂一点的指令中，操作数包括立即数，以及其他寻址方式</strong></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">MOV BL,10
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><strong>这个指令把10这个立即数送到BL寄存器中</strong></p>
+</li>
+<li>
+<p><strong>立即数寻址在很多指令中都会用到，但是受到的限制比较大</strong></p>
+</li>
+</ul>
+<h5 id="direct-addressing">Direct addressing</h5>
+<ul>
+<li>
+<p><strong>Address field contains address of operand</strong></p>
+</li>
+<li>
+<p>Effective address (EA) = address field (A)</p>
+<ul>
+<li>
+<p><strong>Single memory reference to access data</strong></p>
+</li>
+<li>
+<p><strong>No additional calculations to work out effective address</strong></p>
+</li>
+<li>
+<p><strong>Limited address space</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ADD A
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>Add contents of cell A to accumulator</p>
+</li>
+<li>
+<p>Look in memory at address A for operand</p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-1.png" title="/img/Computer Organization and Architecture/chapter11-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-1.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-1.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-1.png, /img/Computer%20Organization%20and%20Architecture/chapter11-1.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-1.png" />
+    </a>
+<ul>
+<li>
+<p>指令中给出了操作数在主存储器中的地址</p>
+</li>
+<li>
+<p>通过一次存储器访问，就可以得到操作数</p>
+</li>
+<li>
+<p>操作数的地址直接在指令中。指令的长度有限，能留给直接寻址的地址域的长度有限，导致寻址空间有限</p>
+</li>
+</ul>
+<h5 id="indirect-addressing">Indirect addressing</h5>
+<ul>
+<li>
+<p>Memory cell pointed to by address field contains the address of (pointer to) the operand</p>
+</li>
+<li>
+<p>EA = (A)</p>
+<ul>
+<li>
+<p><strong>Access the storage unit with address A to obtain the actual address of the operand</strong></p>
+</li>
+<li>
+<p><strong>Access the memory according to this address to get the operand</strong></p>
+</li>
+<li>
+<p>Memory needs to be accessed twice</p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ADD (A)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><strong>Add contents of cell pointed to by contents of A to accumulator</strong></p>
+</li>
+<li>
+<p>Large address space</p>
+<ul>
+<li>$2^n\ where\ \rightarrow n=word\ length\newline$</li>
+</ul>
+</li>
+<li>
+<p><strong>May be nested, multilevel, cascaded</strong></p>
+<ul>
+<li>
+<p>e.g. EA=((A))</p>
+</li>
+<li>
+<p>Effective address is the value of the storage unit pointed to by (A)</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Multiple memory accesses to find operand</strong></p>
+</li>
+<li>
+<p><strong>Hence slower</strong></p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-2.png" title="/img/Computer Organization and Architecture/chapter11-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-2.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-2.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-2.png, /img/Computer%20Organization%20and%20Architecture/chapter11-2.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-2.png" />
+    </a>
+<ul>
+<li>
+<p>指令中包含了一个地址A</p>
+</li>
+<li>
+<p>根据A去存储器中访问，得到操作数的地址</p>
+</li>
+<li>
+<p>根据这个地址去获得操作数</p>
+</li>
+<li>
+<p>要2次访问存储器，访问速度相对比较慢</p>
+</li>
+</ul>
+<h5 id="register-addressing">Register addressing</h5>
+<ul>
+<li>
+<p>Operand is held in register named in address field</p>
+</li>
+<li>
+<p>EA = R</p>
+</li>
+<li>
+<p><strong>Limited number of registers</strong></p>
+<ul>
+<li>Register address field is 3-5 bits, and the number of accessible registers ranges from 8 to 32</li>
+</ul>
+</li>
+<li>
+<p><strong>Very small address field needed</strong></p>
+<ul>
+<li><strong>Shorter instructions</strong></li>
+<li><strong>Faster instruction fetch</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Similar to direct addressing</strong></p>
+<ul>
+<li>
+<p><strong>No memory access</strong></p>
+</li>
+<li>
+<p><strong>Very fast execution</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Very limited address space</p>
+</li>
+<li>
+<p>Multiple registers helps performance</p>
+<ul>
+<li>
+<p>Requires good assembly programming or compiler writing</p>
+</li>
+<li>
+<p>Multiple used operands are placed in registers</p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-3.png" title="/img/Computer Organization and Architecture/chapter11-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-3.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-3.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-3.png, /img/Computer%20Organization%20and%20Architecture/chapter11-3.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-3.png" />
+    </a>
+<ul>
+<li>
+<p>寄存器寻址和存储器直接寻址非常类似</p>
+</li>
+<li>
+<p>访问的是CPU内部的寄存器</p>
+</li>
+<li>
+<p><strong>访问寄存器的速度比访问存储器快很多，并且寄存器的数量少，充分利用好寄存器寻址，可以提高处理速度</strong></p>
+</li>
+</ul>
+<h5 id="register-indirect-addressing">Register indirect addressing</h5>
+<ul>
+<li>
+<p>Similar to indirect addressing</p>
+</li>
+<li>
+<p>EA = (R)</p>
+<ul>
+<li>Operand is in memory cell pointed to by contents of register R</li>
+</ul>
+</li>
+<li>
+<p><strong>Large address space</strong>($2^n$)</p>
+<ul>
+<li><strong>n is the word length of register</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Much faster than indirect addressing</strong></p>
+<ul>
+<li><strong>One memory access + one register access</strong></li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-4.png" title="/img/Computer Organization and Architecture/chapter11-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-4.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-4.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-4.png, /img/Computer%20Organization%20and%20Architecture/chapter11-4.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-4.png" />
+    </a>
+<ul>
+<li>
+<p>指令中的地址域中是寄存器R，而寄存器R中的值是操作数在主存中的地址</p>
+</li>
+<li>
+<p>经过两次访问，才能得到操作数。第一次是寄存器访问，第二次是存储器访问</p>
+</li>
+<li>
+<p>由于寄存器的访问时间很短，所以寄存器间接寻址的时间，基本上和访问存储器的时间相当</p>
+</li>
+</ul>
+<h5 id="displacement-addressing">Displacement addressing</h5>
+<ul>
+<li>
+<p><strong>Add a displacement to the base address to obtain the actual address of the operand</strong></p>
+<ul>
+<li>EA = A + (R)</li>
+</ul>
+</li>
+<li>
+<p><strong>Address field hold two values</strong></p>
+<ul>
+<li><strong>A = base value</strong></li>
+<li><strong>R = register that holds displacement</strong></li>
+<li><strong>or vice versa</strong></li>
+</ul>
+</li>
+<li>
+<p>The operand address is the relative address of the base address, which is often used in virtual addresses</p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-5.png" title="/img/Computer Organization and Architecture/chapter11-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-5.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-5.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-5.png, /img/Computer%20Organization%20and%20Architecture/chapter11-5.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-5.png" />
+    </a>
+<ul>
+<li>
+<p>指令中包含了2个地址字段，寄存器R和基址A</p>
+</li>
+<li>
+<p>寻址时，根据R的值，去寄存器中读取操作数的地址偏移量，加上基址A，得到操作数在主存中的地址，访问存储器，得到操作数</p>
+</li>
+<li>
+<p>偏移寻址有三种方式：第一种是相对寻址，第二种是基址寄存器寻址，第三种是变址寻址</p>
+</li>
+</ul>
+<h6 id="relative-addressing">Relative addressing</h6>
+<ul>
+<li>
+<p>A version of displacement addressing</p>
+<ul>
+<li>
+<p>R = Program counter, PC</p>
+</li>
+<li>
+<p><strong>EA = A + (PC)</strong></p>
+</li>
+<li>
+<p>obtain the operand from the memory, and the address of the operand comes from PC and A</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Locality of reference &amp; cache usage</p>
+<ul>
+<li>
+<p>Program counter is instruction address</p>
+</li>
+<li>
+<p>Based on the principle of locality, the probability of data in cache is very high, and data access is fast</p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-6.png" title="/img/Computer Organization and Architecture/chapter11-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-6.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-6.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-6.png, /img/Computer%20Organization%20and%20Architecture/chapter11-6.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-6.png" />
+    </a>
+<ul>
+<li>
+<p>相对寻址中，<strong>隐含使用了PC作为基础地址，用指令中地址域中的A作为偏移量</strong></p>
+</li>
+<li>
+<p>通过两个的计算，得到操作数在主存中的地址</p>
+</li>
+<li>
+<p>根据这个地址，访问存储器，得到实际的操作数</p>
+</li>
+</ul>
+<h6 id="base-register-addressing">Base-register addressing</h6>
+<ul>
+<li>
+<p>Use a register R as the base register</p>
+<ul>
+<li>
+<p>R holds pointer to base address</p>
+</li>
+<li>
+<p>R may be explicit or implicit</p>
+</li>
+<li>
+<p>e.g. segment registers in 80x86 is implicit</p>
+</li>
+</ul>
+</li>
+<li>
+<p>The address field in the instruction gives displacement A</p>
+</li>
+<li>
+<p>The operation of R and A can obtain the actual address of the operand</p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-7.png" title="/img/Computer Organization and Architecture/chapter11-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-7.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-7.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-7.png, /img/Computer%20Organization%20and%20Architecture/chapter11-7.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-7.png" />
+    </a>
+<ul>
+<li>
+<p>基址寄存器BR中包含了寻址的基址，而指令中的地址字段中包含了偏移量</p>
+</li>
+<li>
+<p>这两个相加，得到操作数地址，访问存储器，获取操作数</p>
+</li>
+<li>
+<p>基址寄存器寻址的寻址过程包括：<strong>1. 访问1次寄存器；2. 进行一次加法运算；3. 访问一次主存</strong></p>
+</li>
+</ul>
+<h6 id="indexed-addressing">Indexed addressing</h6>
+<ul>
+<li>
+<p>One type of displacement addressing mode</p>
+</li>
+<li>
+<p><strong>The base address is in the address field, and the offset is in the register</strong></p>
+<ul>
+<li>
+<p>A = base</p>
+</li>
+<li>
+<p>R = displacement</p>
+</li>
+<li>
+<p>EA = A + R</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Good for accessing arrays</strong></p>
+<ul>
+<li>EA = A + R</li>
+<li>R++</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-8.png" title="/img/Computer Organization and Architecture/chapter11-8.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-8.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-8.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-8.png, /img/Computer%20Organization%20and%20Architecture/chapter11-8.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-8.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-8.png" />
+    </a>
+<ul>
+<li>
+<p>变址寻址中，<strong>寄存器中的值是偏移量，基址为指令中给出的地址</strong></p>
+</li>
+<li>
+<p>寻址时，将基址和寄存器中的偏移量进行相加，得到存储器地址</p>
+</li>
+<li>
+<p>根据这个地址访问内存，得到操作数</p>
+</li>
+</ul>
+<h5 id="combinations">Combinations</h5>
+<ul>
+<li>
+<p>Post-index: Indexing after indirect addressing</p>
+<ul>
+<li>
+<p>First get address from memory, then indexing address</p>
+</li>
+<li>
+<p>EA = (A) + (R)</p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-9.png" title="/img/Computer Organization and Architecture/chapter11-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-9.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-9.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-9.png, /img/Computer%20Organization%20and%20Architecture/chapter11-9.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-9.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-9.png" />
+    </a>
+<ul>
+<li>指令中地址字段的内容用来访问存储器，获得操作数的直接地址</li>
+<li>直接地址被寄存器值变址，得到操作数的实际地址，然后访问这个地址，得到操作数</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Pre-index: Indirect addressing after indexing</p>
+<ul>
+<li>
+<p>Index first, read the memory after getting the address</p>
+</li>
+<li>
+<p>EA = (A + (R))</p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-10.png" title="/img/Computer Organization and Architecture/chapter11-10.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-10.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-10.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-10.png, /img/Computer%20Organization%20and%20Architecture/chapter11-10.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-10.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-10.png" />
+    </a>
+<ul>
+<li>
+<p>指令中地址字段和寄存器先进行变址，得到操作数的间接地址</p>
+</li>
+<li>
+<p>访问存储器，得到操作数的实际地址</p>
+</li>
+<li>
+<p>再一次访问存储器，得到操作数</p>
+</li>
+</ul>
+<h5 id="stack-addressing">Stack addressing</h5>
+<ul>
+<li>
+<p><strong>Operand is implicitly on top of stack</strong></p>
+</li>
+<li>
+<p>e.g. ADD</p>
+<ul>
+<li>
+<p><strong>Pop top two number from stack</strong></p>
+</li>
+<li>
+<p><strong>Add the two numbers</strong></p>
+</li>
+<li>
+<p><strong>Push the sum</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="x86-and-arm-addressing-modes"><code>x86</code> and <code>ARM</code> addressing modes</h3>
+<h4 id="swapping">Swapping</h4>
+<ul>
+<li>
+<p>Problem: I/O is so slow compared with CPU that even in multi-programming system, CPU can be idle most of the time</p>
+</li>
+<li>
+<p>Solutions</p>
+<ul>
+<li>
+<p>Increase main memory</p>
+<ul>
+<li>Expensive</li>
+<li>Leads to larger programs</li>
+</ul>
+</li>
+<li>
+<p><strong>Swapping</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="partitioning">Partitioning</h4>
+<ul>
+<li>
+<p><strong>Splitting memory into sections to allocate to processes (including Operating System)</strong></p>
+</li>
+<li>
+<p>Fixed-sized partitions</p>
+<ul>
+<li>
+<p>May not be equal size</p>
+</li>
+<li>
+<p><strong>Process is fitted into smallest hole that will take it (best fit)</strong></p>
+</li>
+<li>
+<p><strong>Some wasted memory</strong></p>
+</li>
+<li>
+<p>Leads to variable sized partitions</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="variable-sized-partitions">Variable sized partitions</h5>
+<ul>
+<li>
+<p>Allocate exactly the required memory to a process</p>
+<ul>
+<li>
+<p>This leads to a hole at the end of memory, too small to use</p>
+</li>
+<li>
+<p>Only one small hole - less waste</p>
+</li>
+</ul>
+</li>
+<li>
+<p>When all processes are blocked, swap out a process and bring in another</p>
+<ul>
+<li>New process may be smaller than swapped out process</li>
+<li>Another hole</li>
+</ul>
+</li>
+<li>
+<p><strong>Eventually have lots of holes，called fragmentation</strong></p>
+</li>
+<li>
+<p>Solutions</p>
+<ul>
+<li>
+<p><strong>Coalesce - Join adjacent holes into one large hole</strong></p>
+</li>
+<li>
+<p><strong>Compaction - From time to time go through memory and move all hole into one free block</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="relocation">Relocation</h4>
+<ul>
+<li>
+<p>Instructions contain addresses</p>
+<ul>
+<li>
+<p>Locations of data</p>
+</li>
+<li>
+<p>Addresses for instructions (branching)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>No guarantee that process will load into the same place in memory</p>
+<ul>
+<li>
+<p>Logical address - relative to beginning of program</p>
+</li>
+<li>
+<p>Physical address - actual location in memory (this time)</p>
+</li>
+<li>
+<p>Automatic conversion using base address</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="paging">Paging</h4>
+<ul>
+<li>
+<p>Use paging to solve the problem of memory waste</p>
+<ul>
+<li>
+<p>Split memory into equal sized, small chunks-page frames</p>
+</li>
+<li>
+<p>Split programs (processes) into equal sized small chunks–pages</p>
+</li>
+<li>
+<p>Allocate the required number page frames to a process</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Operating System is responsible for the management of page tables</strong></p>
+<ul>
+<li>
+<p>A process does not require contiguous page frames</p>
+</li>
+<li>
+<p><strong>Each process uses a page table to record which page frames in memory it uses</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Each process has its own page table</p>
+</li>
+<li>
+<p><strong>Each page table entry contains the frame number of the corresponding page in main memory</strong></p>
+</li>
+<li>
+<p>Two extra bits are needed to indicate</p>
+<ul>
+<li>
+<p><strong>whether the page is in main memory or not</strong></p>
+</li>
+<li>
+<p><strong>Whether the contents of the page has been altered since it was last loaded</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="real-and-virtual-memory">Real and virtual memory</h4>
+<ul>
+<li>
+<p><strong>Real memory</strong></p>
+<ul>
+<li><strong>Main memory, the actual <code>RAM</code></strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Virtual memory</strong></p>
+<ul>
+<li>
+<p><strong>Memory on disk</strong></p>
+</li>
+<li>
+<p><strong>Allows for effective multiprogramming and relieves the user of tight constraints of main memory</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Advantage of virtual memory</strong></p>
+<ul>
+<li>
+<p><strong>You do not need to load all processes into memory</strong></p>
+</li>
+<li>
+<p><strong>Running multiple processes simultaneously</strong></p>
+</li>
+<li>
+<p><strong>Improved operational efficiency</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="segmentation">Segmentation</h4>
+<ul>
+<li>
+<p><strong>Paging is not (usually) visible to the programmer</strong></p>
+</li>
+<li>
+<p><strong>Segmentation is visible to the programmer</strong></p>
+</li>
+<li>
+<p>Usually different segments allocated to program and data</p>
+</li>
+<li>
+<p>May be a number of program and data segments</p>
+</li>
+</ul>
+<h4 id="x86-addressing-modes"><code>x86</code> addressing modes</h4>
+<ul>
+<li>
+<p><strong><code>x86</code> adopts a memory management mechanism combining segments and pages</strong></p>
+</li>
+<li>
+<p><strong>Virtual or effective address is offset into segment</strong></p>
+<ul>
+<li>
+<p>Starting address plus offset gives linear address</p>
+</li>
+<li>
+<p>This goes through page translation if paging enabled</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>9 addressing modes available</p>
+<ul>
+<li>
+<p>Immediate</p>
+</li>
+<li>
+<p>Register operand</p>
+</li>
+<li>
+<p>Displacement</p>
+</li>
+<li>
+<p>Base</p>
+</li>
+<li>
+<p>Base with displacement</p>
+</li>
+<li>
+<p>Scaled index with displacement</p>
+</li>
+<li>
+<p>Base with index and displacement</p>
+</li>
+<li>
+<p>Base scaled index with displacement</p>
+</li>
+<li>
+<p>Relative</p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-11.png" title="/img/Computer Organization and Architecture/chapter11-11.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-11.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-11.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-11.png, /img/Computer%20Organization%20and%20Architecture/chapter11-11.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-11.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-11.png" />
+    </a>
+<ul>
+<li>
+<p>指令中给的逻辑地址包含两个部分：段和段内偏移量</p>
+</li>
+<li>
+<p>查找段表，可以得到段起始地址，加上段内偏移量，得到操作数的线性地址</p>
+</li>
+<li>
+<p>线性地址采用了分页的方式，所以还需要通过页转换机制，得到物理地址，最后通过物理地址查询得到这个操作数。页表采用两级页表的形式</p>
+</li>
+<li>
+<p>6个段寄存器，每个进程使用哪个段寄存器由指令和执行的上下文来确定。每个段寄存器对应一个段描述符表，记录了段的访问权限，段的起始地址和段的长度</p>
+</li>
+<li>
+<p>基址寄存器和变址寄存器，用于构造复杂的寻址方式</p>
+</li>
+<li>
+<p>基址、变址以及指令中的偏移量计算得到有效地址，加上段地址得到操作数的线性地址，然后再根据分页的规则，得到物理地址</p>
+</li>
+</ul>
+<hr>
+<p><strong>Terms</strong></p>
+<ul>
+<li>
+<p>Effective address</p>
+</li>
+<li>
+<p>Physical address</p>
+</li>
+<li>
+<p>LA: linear address</p>
+</li>
+<li>
+<p>SR : segment register</p>
+</li>
+<li>
+<p>B: base register</p>
+</li>
+<li>
+<p>I : index register</p>
+</li>
+<li>
+<p>S: scale factor</p>
+</li>
+</ul>
+<hr>
+<p><strong><code>x86</code> addressing modes</strong></p>
+<ul>
+<li>
+<p>8个32位通用寄存器，分别是EAX、EBX、ECX、EDX、ESI、EDI、ESP、EBP</p>
+</li>
+<li>
+<p>8个16位通用寄存器，AX、BX、CX、DX、SI、DI、SP、BP</p>
+</li>
+<li>
+<p>8个8位通用寄存器，AH、BH、CH、DH、AL、BL、CL、DL</p>
+</li>
+<li>
+<p>通过段寄存器来确定段的起始地址，然后计算得到线性地址</p>
+</li>
+<li>
+<p>比例变址寻址带偏移量寻址模式中，变址比例因子为1、2、4、8，这个是因为<code>x86</code>是按字节寻址，设置比例因子可以按16位或32位进行变址</p>
+</li>
+<li>
+<p>相对寻址主要用于控制转移指令</p>
+</li>
+<li>
+<p>将偏移量加到程序计数器中，得到相对于下一个需要执行指令的地址的偏移地址</p>
+</li>
+<li>
+<p>偏移量是一个有符号整数，通过计算，可以增加也可以减少程序计数器中的地址值</p>
+</li>
+</ul>
+<h4 id="arm-addressing-modes"><code>ARM</code> addressing modes</h4>
+<ul>
+<li>
+<p><strong><code>ARM</code> is a <code>RISC</code> architecture processor</strong></p>
+</li>
+<li>
+<p>RISC uses simple addressing modes, but ARM provides more addressing modes</p>
+</li>
+<li>
+<p>Only load/store instructions can reference memory</p>
+</li>
+<li>
+<p>Indirectly through base register plus offset</p>
+</li>
+<li>
+<p>Base register itself may be updated during addressing</p>
+</li>
+<li>
+<p>3 addressing mode</p>
+</li>
+</ul>
+<h5 id="offset">Offset</h5>
+<ul>
+<li>偏移寻址：只偏移，不变址。从基址寄存器增加或减少偏移量来形成内存地址</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">STRB r0, [r1,#12]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>将r0存放到存储器中，存储器地址为r1的值加上立即数12</strong></li>
+</ul>
+<h5 id="pre-index">Pre-index</h5>
+<ul>
+<li>
+<p>内存地址跟偏移寻址一样，基址寄存器增加或减少偏移量来形成内存地址</p>
+</li>
+<li>
+<p><strong>内存地址会写回到基址寄存器，基址寄存器的值会增加或减少一个偏移量</strong></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">STRB r0, [r1,#12]!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>这里！就是标识是前变址</p>
+</li>
+<li>
+<p>寻址完成后，r1寄存器的值变成了r1-12</p>
+</li>
+</ul>
+<h5 id="post-index">Post-index</h5>
+<ul>
+<li>操作数的地址就是在基址寄存器的值</li>
+<li><strong>寻址完成后，基址寄存器的值会增加或减少一个偏移量，相当于寻址完成后，基址寄存器自身增加或减少了一个偏移量</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">STRBv r0, [r1],#12
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><strong>#表示后变址</strong></p>
+</li>
+<li>
+<p><strong>寻址用r1地址，同时r1寄存器的值变成了r1-12</strong></p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Base register acts as index register for pre-index and postindex addressing</p>
+</li>
+<li>
+<p><strong>Offset either immediate value in instruction or another register</strong></p>
+</li>
+<li>
+<p><strong>If register，scaled register addressing available</strong></p>
+<ul>
+<li>
+<p>Offset register value scaled by shift operator</p>
+</li>
+<li>
+<p>Instruction specifies shift size</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Data Processing</p>
+<ul>
+<li>
+<p>Register addressing</p>
+</li>
+<li>
+<p>Value in register operands may be scaled using a shift operator</p>
+</li>
+<li>
+<p>Or mixture of register and immediate addressing</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Addressing of branch</strong></p>
+<ul>
+<li>
+<p>Branch</p>
+<ul>
+<li>
+<p><strong>Only immediate</strong></p>
+</li>
+<li>
+<p>Instruction contains 24 bit value</p>
+</li>
+<li>
+<p>When addressing, this immediate value will be shifted two bits to the left, reaching the boundary of a 32-bit word</p>
+</li>
+<li>
+<p>Shifted 2 bits to the left, which is equivalent to an offset of 26 bits. The effective address range is+- 32MB</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>ARM Load/Store Multiple Addressing</strong></p>
+<ul>
+<li>
+<p>One instruction can load or store multiple data at the same time</p>
+<ul>
+<li>Load or store a set of general registers</li>
+</ul>
+</li>
+<li>
+<p>16-bit instruction field in instruction specifies list of registers</p>
+<ul>
+<li>Registers corresponds to a sequential storage unit in memory</li>
+<li>Memory unit with the lowest address corresponds to the register with the lowest number</li>
+</ul>
+</li>
+<li>
+<p>Base register specifies first main memory address</p>
+</li>
+<li>
+<p>Four types</p>
+<ul>
+<li>increment after</li>
+<li>increment before</li>
+<li>decrement after</li>
+<li>decrement before</li>
+</ul>
+</li>
+<li>
+<p><strong>Incrementing or decrementing starts before or after first memory access</strong></p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-12.png" title="/img/Computer Organization and Architecture/chapter11-12.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-12.png" data-sub-html="<h2>Multiple addressing diagram</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-12.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-12.png, /img/Computer%20Organization%20and%20Architecture/chapter11-12.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-12.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-12.png" />
+    </a><figcaption class="image-caption"><code>Multiple addressing diagram</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>r10开始的三个单元内容加载到r0，r1，r4这三个寄存器中。R0为低地址，r4为高地址</p>
+</li>
+<li>
+<p>采用后递增，从0x20C开始，连续三个存储单元的内容取出后，分别给r0，r1和r4。采用前递增，第一个存储单元的地址要在基址寄存器中的地址基础上加1，然后取连续三个存储单元的内容取出后，分别给r0，r1和r4</p>
+</li>
+<li>
+<p>对于后递减，就是从基址寄存器开始，地址递减的连续三个存储单元。对于前递减，就是先在基址寄存器的地址上减1，然后地址递减的连续三个存储单元</p>
+</li>
+</ul>
+<h3 id="instruction-formats">Instruction Formats</h3>
+<ul>
+<li>
+<p>Instruction set is the interface provided by the processor to the upper layer</p>
+<ul>
+<li>
+<p>An important symbol of CPU performance</p>
+</li>
+<li>
+<p>The rationality of the instruction set has a great impact on the performance of the CPU</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Therefore, the design of instruction format is the core content of processor design</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Instruction formats</strong></p>
+<ul>
+<li>
+<p>Instruction include</p>
+<ul>
+<li>
+<p>Opcode</p>
+</li>
+<li>
+<p>Operand(s) (implicit or explicit) and addressing mode</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Instruction formats: How many bits do the parts of the instruction occupy, and in what order</strong></p>
+</li>
+<li>
+<p>Layout of bits in an instruction</p>
+</li>
+<li>
+<p>Usually more than one instruction format in an instruction set</p>
+</li>
+</ul>
+<h4 id="key-of-instruction-formats">Key of instruction formats</h4>
+<ul>
+<li>
+<p>The width of opcodes: determines number of operation</p>
+<ul>
+<li><strong>The more opcodes, the more functions of the instruction set, and the larger the number of bits</strong></li>
+</ul>
+</li>
+<li>
+<p>The width of operands: effect the instruction length</p>
+<ul>
+<li>
+<p>The operand takes up a large proportion of the instruction length</p>
+</li>
+<li>
+<p><strong>Number of operands, addressing mode and size of addressing space have a great impact on the length of instructions</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Addressing modes: determine the complexity and the length of the instruction</p>
+<ul>
+<li>
+<p><strong>The more complex the addressing mode is, the more operations are required to obtain the physical address of the operand, and the higher the time complexity is</strong></p>
+</li>
+<li>
+<p><strong>Complex addressing mode can use less address field length to obtain larger addressing space and save instruction length</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>First step in instruction set design is to determine the length of instructions</strong></p>
+</li>
+<li>
+<p><strong>Trade off between powerful instruction repertoire and saving space</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Summary</strong></p>
+<ul>
+<li>
+<p>The operation code and operands should have as many digits as possible</p>
+</li>
+<li>
+<p>The longer the instruction, the more memory space it takes</p>
+</li>
+<li>
+<p>Generally，instruction length is consistent with the bus width , or an integer multiple</p>
+</li>
+<li>
+<p>In the design of instruction set</p>
+<ul>
+<li>
+<p>Every part of the directive needs to be properly planned</p>
+</li>
+<li>
+<p>Seeking the best balance among various design scheme</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="allocation-of-bits">Allocation of bits</h4>
+<ul>
+<li>
+<p>After the length of the instruction is determined, each bit in the instruction needs to be allocated reasonably to maximize the use of each bit</p>
+<ul>
+<li><strong>If the opcode is long, operands is short</strong></li>
+<li><strong>Variable length opcode, additional bits determine operation</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>First, you need to determine the number of operands and opcodes</strong></p>
+</li>
+</ul>
+<p><strong>The following factors need to be considered</strong></p>
+<ul>
+<li>
+<p>Number of operands</p>
+</li>
+<li>
+<p>Number of addressing modes</p>
+</li>
+<li>
+<p>Register versus memory</p>
+</li>
+<li>
+<p>Number of register sets</p>
+</li>
+<li>
+<p>Address range</p>
+</li>
+<li>
+<p>Address granularity</p>
+</li>
+</ul>
+<hr>
+<p><strong>Number of addressing modes</strong></p>
+<ul>
+<li>
+<p>Some opcodes implicitly specify the addressing mode of the operand, which does not need to be specified separately</p>
+</li>
+<li>
+<p>Sometimes it is necessary to explicitly specify the addressing mode of this operand, and one or more addressing mode bits are required</p>
+</li>
+<li>
+<p>There may be multiple addressing modes in an instruction</p>
+</li>
+</ul>
+<hr>
+<p><strong>Number of operands</strong></p>
+<ul>
+<li>
+<p>If the instruction only supports one operand, it is troublesome to write the program</p>
+</li>
+<li>
+<p>Generally, two operands are supported</p>
+</li>
+<li>
+<p>Each operand hope an independent addressing mode</p>
+<ul>
+<li>
+<p>Flexible</p>
+</li>
+<li>
+<p>Need addressing indication bit</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Some processors allow one operand to specify the addressing bit</p>
+</li>
+</ul>
+<hr>
+<p><strong>Register versus memory</strong></p>
+<ul>
+<li>Data needs to be loaded into CPU through registers for processing</li>
+<li>If there is only one register, it does not need to be specified, but it is very troublesome to use</li>
+<li>Several registers are generally provided
+<ul>
+<li>Several bits can specify a register, which takes up less instruction bits</li>
+</ul>
+</li>
+<li>Most processors have more than 32 registers</li>
+</ul>
+<hr>
+<p><strong>Number of register sets</strong></p>
+<ul>
+<li>
+<p>Most processors provide only one set of general-purpose registers</p>
+<ul>
+<li>
+<p>Store Data</p>
+</li>
+<li>
+<p>Store address field in offset addressing mode</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Some processors, such as the x86 processor, can provide multiple sets of registers</p>
+<ul>
+<li>
+<p>Divide by function, some store data, some store offset</p>
+</li>
+<li>
+<p>Opcode implicitly determines which set of registers to use</p>
+</li>
+<li>
+<p>Reduce the number of instructions</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Address range</strong></p>
+<ul>
+<li>
+<p>In direct addressing, the address range is determined by the length of the address field in the instruction</p>
+<ul>
+<li>
+<p>Instruction length is limited</p>
+</li>
+<li>
+<p>The address range of direct addressing is small</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>General use offset addressing</strong></p>
+<ul>
+<li>
+<p>Length of the address register is critical</p>
+</li>
+<li>
+<p>If the offset is large, the length of the address field in the instruction is also long</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Address granularity</strong></p>
+<ul>
+<li>
+<p><strong>The smaller the addressable address granularity is, the longer the address bits are required</strong></p>
+</li>
+<li>
+<p>Addressing by byte</p>
+<ul>
+<li>
+<p>Some operations are more convenient</p>
+</li>
+<li>
+<p>e.g. character processing</p>
+</li>
+<li>
+<p>More address bits required</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Operate according to words</p>
+<ul>
+<li>
+<p>Number of address bits reduced</p>
+</li>
+<li>
+<p>Reduced operational flexibility</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="x86-and-arm-instruction-formats"><code>x86</code> and <code>ARM</code> instruction formats</h3>
+<h4 id="x86-instruction-format"><code>x86</code> instruction format</h4>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-13.png" title="/img/Computer Organization and Architecture/chapter11-13.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-13.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-13.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-13.png, /img/Computer%20Organization%20and%20Architecture/chapter11-13.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-13.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-13.png" />
+    </a>
+<p><strong>Characteristic</strong></p>
+<ul>
+<li>
+<p><strong>Addressing mode is associated with the instruction opcode</strong></p>
+</li>
+<li>
+<p><strong>An instruction has only one addressing mode</strong></p>
+</li>
+<li>
+<p><strong>Only one memory operand can be referenced in an instruction</strong></p>
+</li>
+<li>
+<p><strong>Typical <code>CISC</code> architecture，use complex instruction format</strong></p>
+<ul>
+<li>
+<p><code>X86</code> needs to consider downward compatibility</p>
+</li>
+<li>
+<p>Hope to provide richer instructions for compiler developers</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="arm-instruction-formats"><code>ARM</code> instruction formats</h4>
+<ul>
+<li>
+<p><strong>Typical <code>RISC</code> architecture</strong></p>
+</li>
+<li>
+<p><strong>All the instructions are 32 bits, and the format is very neat</strong></p>
+</li>
+<li>
+<p><strong><code>ARM</code> instructions are divided into four categories</strong></p>
+<ul>
+<li>
+<p><strong>data processing instructions</strong></p>
+</li>
+<li>
+<p><strong>load / save instructions</strong></p>
+</li>
+<li>
+<p><strong>overload / save instructions</strong></p>
+</li>
+<li>
+<p><strong>branch instructions</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>All instructions are conditionally executed</strong></p>
+</li>
+</ul>
+<h5 id="condition-code">Condition code</h5>
+<ul>
+<li>
+<p><strong>All instructions are conditionally executed</strong></p>
+</li>
+<li>
+<p>The instruction contains a 4-bit condition code, which is in the highest 4-bit of the instruction</p>
+</li>
+<li>
+<p>Except for the condition flags 1110 and 1111, all other instructions must meet the conditions before they can be executed</p>
+</li>
+<li>
+<p><strong>The condition code includes four condition flags, which are stored in the program status register</strong></p>
+</li>
+<li>
+<p><strong>The four condition flags are N negative flag, Z zero flag, C carry flag, V overflow flag</strong></p>
+</li>
+<li>
+<p><strong>For all arithmetic or logic instructions, an S bit is given to indicate whether the instruction modifies the condition flag bit</strong></p>
+</li>
+</ul>
+<h4 id="data-processing">Data processing</h4>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter11-14.png" title="/img/Computer Organization and Architecture/chapter11-14.png" data-thumbnail="/img/Computer Organization and Architecture/chapter11-14.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter11-14.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter11-14.png, /img/Computer%20Organization%20and%20Architecture/chapter11-14.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter11-14.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter11-14.png" />
+    </a>
+<ul>
+<li>
+<p>数据处理指令类型为000或001。操作码都是4位，s表示是否修改条件标志位。指令中都有三个操作数</p>
+</li>
+<li>
+<p>第一种格式中，目的寄存器Rd，第一个操作数寄存器Rn和第二个操作数寄存器Rm，操作数可以根据shift的标志进行移位，shift amount指明移动多少位</p>
+</li>
+<li>
+<p>第二种格式跟第一种类似，只是移位的位数不是立即数，而是由寄存器Rs来确定</p>
+</li>
+<li>
+<p>第三种格式中，第二操作数是一个立即数，并且可以针对立即数进行循环右移，循环右移的次数由rotate域中的值决定</p>
+</li>
+</ul>
+<h4 id="loadstore">Load/Store</h4>
+<ul>
+<li>
+<p>加载/保存指令中，指令一般类型为010和011。后面5位标识了寻址模式、数据类型，是字节还是字，以及加载和保存标志。</p>
+</li>
+<li>
+<p>第一种加载/保存指令是立即数偏移指令，指令中给出了12位的偏移量。内存地址就是基址寄存器Rn加上或减去立即数偏移量。</p>
+</li>
+<li>
+<p>第二种指令是寄存器偏移。偏移量在Rm寄存器中，通过shift确定移位操作，移动shift amount位之后得到，然后再和基址寄存器Rn计算，得到内存地址。</p>
+</li>
+<li>
+<p>多载/多存指令中，指令一般类型为100。指令中给了16位的寄存器列表，内存地址在Rn中，是先递增，先递减，还是后递增，后递减，由寻址模式来决定</p>
+</li>
+</ul>
+<h4 id="branch">Branch</h4>
+<ul>
+<li>分支指令的指令一般类型为101，提供了一个24位的立即数</li>
+<li>还有一个标志位L，这个标志位决定返回地址是否保存在连接寄存器，也就是link register中。</li>
+</ul>
+<h4 id="arm-immediate-constants">ARM immediate constants</h4>
+<ul>
+<li>
+<p>数据处理指令中，立即数占了8位，<strong>同时还规定了一个循环移位的值。这样设计的目的是为了获得取值范围较大的数</strong></p>
+</li>
+<li>
+<p>通过循环移位，可以将立即数的范围从8位最多扩展到32位</p>
+</li>
+</ul>
+<h4 id="thumb-instruction-set">Thumb instruction set</h4>
+<ul>
+<li>
+<p>Special Usage: use 16 bit instructions to implement most of 32-bit instructions</p>
+</li>
+<li>
+<p>In an embedded system, there may only be a 16 bit bus</p>
+</li>
+<li>
+<p><strong>Thumb instruction set: Re-encoded subset of ARM instruction set</strong></p>
+</li>
+<li>
+<p><strong>Increases performance in 16-bit or less data bus</strong></p>
+</li>
+<li>
+<p>Need to reduce 16 bits in the instruction</p>
+</li>
+<li>
+<p>Unconditional (4 bits saved)</p>
+</li>
+<li>
+<p>Always update conditional flags</p>
+<ul>
+<li>Update flag not used (1 bit saved)</li>
+</ul>
+</li>
+<li>
+<p>Subset of instructions</p>
+<ul>
+<li>
+<p>2 bit opcode, 3 bit type field (2 bit saved)</p>
+</li>
+<li>
+<p>Reduced operand specifications (9 bits saved)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>压缩指令集的16位指令可以扩展到32位的标准指令</p>
+<ul>
+<li>
+<p>压缩的指令集只有16位，可以在配置较低的硬件上执行</p>
+</li>
+<li>
+<p>如果在标准的ARM处理器上执行，可以按照这个图上的方法，扩充到32位之后进行执行</p>
+</li>
+</ul>
+</li>
+<li>
+<p>ARM处理器能够执行16位和32位的指令，并且能够两种格式混合执行</p>
+</li>
+<li>
+<p>处理器中的控制寄存器中的1位用来确定当前的执行是16位的指令还是32位的指令</p>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/computer-organization-and-architecture/">Computer Organization and Architecture</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-01-26</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats" data-hashtags="Computer Organization and Architecture"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-hashtag="Computer Organization and Architecture"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/" data-title="Computer Organization and Architecture Instruction Sets Addressing Modes and Formats"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/" class="prev" rel="prev" title="Computer Organization and Architecture Instruction Sets: Characteristics and Functions"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-processor-structure-and-function/" class="next" rel="next" title="Computer Organization and Architecture Processor Structure and Function">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"classDiagram\nclass Instruction {\n\tOpcode\n\tOperand\n}"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

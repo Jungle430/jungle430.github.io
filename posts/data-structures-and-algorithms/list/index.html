@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>List - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="List" />
+<meta property="og:description" content="Data Structure List Definition A list is a finite sequence of N elements $write\ as\newline$ $L = (a_1, a_2, a_3，…a_n)\newline$ $The\ size\ of\ this\ list\ is\ n\newline$ $n=0 \rightarrow empty\ list\newline$ element The first element(No predecessor),called &ldquo;head&rdquo; The ith element(has only one predecessor and only one successor) The last element(No successor),called &ldquo;tail&rdquo; ADT" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-06T22:35:11+08:00" />
+<meta property="article:modified_time" content="2022-11-06T22:35:11+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="List"/>
+<meta name="twitter:description" content="Data Structure List Definition A list is a finite sequence of N elements $write\ as\newline$ $L = (a_1, a_2, a_3，…a_n)\newline$ $The\ size\ of\ this\ list\ is\ n\newline$ $n=0 \rightarrow empty\ list\newline$ element The first element(No predecessor),called &ldquo;head&rdquo; The ith element(has only one predecessor and only one successor) The last element(No successor),called &ldquo;tail&rdquo; ADT"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" /><link rel="prev" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/algorithms-analysis/" /><link rel="next" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "List",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/list\/"
+        },"genre": "posts","keywords": "Data Structure","wordcount":  2224 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/list\/","datePublished": "2022-11-06T22:35:11+08:00","dateModified": "2022-11-06T22:35:11+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">List</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/data-structure/"><i class="far fa-folder fa-fw"></i>Data Structure</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-11-06">2022-11-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2224 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#list">List</a>
+      <ul>
+        <li><a href="#definition">Definition</a></li>
+        <li><a href="#adt">ADT</a></li>
+        <li><a href="#operation">Operation</a></li>
+        <li><a href="#the-code">The code</a></li>
+        <li><a href="#implementation-of-lists">Implementation of Lists</a>
+          <ul>
+            <li><a href="#array-implementation-of-lists">Array implementation of lists</a></li>
+            <li><a href="#advantage">Advantage</a></li>
+            <li><a href="#disadvantage">Disadvantage</a></li>
+            <li><a href="#linked-list-implement-of-lists">Linked list implement of lists</a></li>
+            <li><a href="#types-of-linked-list">Types of linked list</a></li>
+            <li><a href="#singly-linked-list">Singly Linked list</a></li>
+            <li><a href="#circular-singly-linked-list">Circular, singly linked list</a></li>
+            <li><a href="#doubly-linked-list">Doubly linked list</a></li>
+            <li><a href="#circular-doubly-linked-list">Circular, doubly linked list</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#select-arrayedlist-or-linkedlist">Select ArrayedList or LinkedList?</a>
+      <ul>
+        <li><a href="#othercursor-implementation-of-linked-list">Other:Cursor Implementation of Linked List</a></li>
+        <li><a href="#about-homework">About Homework</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="data-structure">Data Structure</h1>
+<h2 id="list">List</h2>
+<h3 id="definition">Definition</h3>
+<p>A list is a finite sequence of N elements</p>
+<p>$write\ as\newline$
+$L = (a_1, a_2, a_3，…a_n)\newline$</p>
+<p>$The\ size\ of\ this\ list\ is\ n\newline$</p>
+<p>$n=0 \rightarrow empty\ list\newline$</p>
+<p>element</p>
+<ol>
+<li>The first element(No predecessor),called &ldquo;head&rdquo;</li>
+<li>The ith element(has only one predecessor and only one successor)</li>
+<li>The last element(No successor),called &ldquo;tail&rdquo;</li>
+</ol>
+<h3 id="adt">ADT</h3>
+<p>ADT List {</p>
+<pre><code>Data object：D = {ai | ai∈Elements, (i=1,2,…,n, n≥0)}
+
+Data relationship ： R1 = { ＜ ai-1,ai ＞ |ai-1,ai ∈ D,
+(i=2,3,…,n) }
+
+Operations：
+• InitList(&amp;L);
+• DestroyList(&amp;L);
+• ListInsert(&amp;L,i,e); 
+• ListDelete(&amp;L,i,&amp;e);
+……and so on
+</code></pre>
+<p>} ADT List</p>
+<h3 id="operation">Operation</h3>
+<p>{</p>
+<pre><code>InitList(&amp;L):Create a empty list
+DestroyList(&amp;L):Delete a list(L has been initialized)
+ClearList(&amp;L):make L be an empty list(L has been initialized)
+
+ListLength(L):return the size of elements in the list(L has been initialized)
+ListEmpty(L):return if the list is an empty list(L has been initialized)
+
+GetElem(L, i, &amp;e): 
+make e equaled to the ith element in the list(L has been initialized and 1 &lt;= i &lt;= ListLength(L))
+LocateElem(L, e, compare()): 
+return the rank that the rank of the element is the first element which compare(element[rank], e) is true(L has been initialized),
+if no element satisfy it, return 0
+
+PriorElem(L, cur_e, &amp;pre_e): 
+make the pre_e equal the predecessor of the element which is the first which equal to cur_e, or return FAIL(L has been initialized)
+NextElem(L, cur_e, &amp;next_e):
+make the next_e equal the successor of the element which is the first which equal to cur_e, or return FAIL(L has been initialized)
+
+ListInsert(&amp;L, i, e): 
+insert the element in the ith rank of the list(L has been initialized)
+ListDelete(&amp;L, i, &amp;e):
+delete the ith element in the list(L has been initialized and not be empty)
+
+ListTraverse(&amp;L, visit()):
+    for (begin, end)
+        visit(list[rank]_data)
+(L has been initialized)
+</code></pre>
+<p>}</p>
+<p>Example: make $ListA \bigcup ListB$</p>
+<h3 id="the-code">The code</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">union</span><span class="p">(</span><span class="n">List</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="n">List</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">La_len</span> <span class="o">=</span> <span class="n">ListLength</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Lb_len</span> <span class="o">=</span> <span class="n">ListLength</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">Lb_len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">GetElem</span><span class="p">(</span><span class="n">Lb_len</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">LocateElem</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">equal</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ListInsert</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">++</span><span class="n">La_len</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Merge List</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">MergeList</span><span class="p">(</span><span class="n">List</span> <span class="n">La</span><span class="p">,</span> <span class="n">List</span> <span class="n">Lb</span><span class="p">,</span> <span class="n">List</span> <span class="o">&amp;</span><span class="n">Lc</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">InitList</span><span class="p">(</span><span class="n">Lc</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">La_len</span> <span class="o">=</span> <span class="n">ListLength</span><span class="p">(</span><span class="n">La</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">Lb_len</span> <span class="o">=</span> <span class="n">ListLength</span><span class="p">(</span><span class="n">Lb</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">While</span> <span class="p">((</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">La_len</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="n">Lb_len</span><span class="p">)){</span> <span class="c1">//La和Lb均非空
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">GetElem</span><span class="p">(</span><span class="n">La</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ai</span><span class="p">);</span> <span class="n">GetElem</span><span class="p">(</span><span class="n">Lb</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">bj</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">ai</span> <span class="o">&lt;=</span> <span class="n">bj</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ListInsert</span><span class="p">(</span><span class="n">Lc</span><span class="p">,</span> <span class="o">++</span><span class="n">k</span><span class="p">,</span> <span class="n">ai</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">                <span class="o">++</span><span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">                <span class="n">ListInsert</span><span class="p">(</span><span class="n">Lc</span><span class="p">,</span> <span class="o">++</span><span class="n">k</span><span class="p">,</span> <span class="n">bj</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">                <span class="o">++</span><span class="n">j</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">La_len</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">GetElem</span><span class="p">(</span><span class="n">La</span><span class="p">,</span><span class="n">i</span><span class="o">++</span><span class="p">,</span><span class="n">ai</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">ListInsert</span><span class="p">(</span><span class="n">Lc</span><span class="p">,</span> <span class="o">++</span><span class="n">k</span><span class="p">,</span> <span class="n">ai</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="n">Lb_len</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">GetElem</span><span class="p">(</span><span class="n">Lb</span><span class="p">,</span><span class="n">j</span><span class="o">++</span><span class="p">,</span><span class="n">bj</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">ListInsert</span><span class="p">(</span><span class="n">Lc</span><span class="p">,</span><span class="o">++</span><span class="n">k</span><span class="p">,</span> <span class="n">bj</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>   
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="c1">// MergeList
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="implementation-of-lists">Implementation of Lists</h3>
+<h4 id="array-implementation-of-lists">Array implementation of lists</h4>
+<p>Using consecutive storage units to store elements of a list,the elements are stored in the logic order</p>
+<blockquote>
+<p>k&mdash;- the memory space size for one element</p>
+<blockquote>
+<p>The address of the (i+1)th element-&gt;Loc(ai+1) = Loc(ai) + k</p>
+<p>Loc(a1)&mdash;-base address of the list</p>
+<p>The address of the ith element:-&gt;Loc(ai) = Loc(a1) + (i-1)*k</p>
+</blockquote>
+</blockquote>
+<p>$logic\ Element: [a_0, a_1, &hellip;, a_n]\newline$
+$Physical\ Element:{[locate(a_0)]\ [locate(a_1)]\ &hellip;\ [locate(a_n)]}\newline$</p>
+<p>$!!!\ Storage\ structure: random\ storage$</p>
+<p>about data</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Vector</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">protected</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="o">*</span><span class="n">_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">_size</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">_capacity</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>supplement expend and shrink</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">expand</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_capacity</span> <span class="o">&gt;=</span> <span class="n">AUTO_INITIALIZER</span> <span class="o">&amp;&amp;</span> <span class="n">_size</span> <span class="o">&lt;</span> <span class="n">_capacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_capacity</span> <span class="o">&lt;</span> <span class="n">AUTO_INITIALIZER</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_capacity</span> <span class="o">=</span> <span class="n">AUTO_INITIALIZER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_size</span> <span class="o">&gt;=</span> <span class="n">_capacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_capacity</span> <span class="o">&lt;&lt;=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="o">*</span><span class="n">OldData</span> <span class="o">=</span> <span class="n">_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_data</span> <span class="o">=</span> <span class="k">new</span> <span class="n">T</span><span class="p">[</span><span class="n">_capacity</span><span class="p">]{};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">OldData</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span><span class="p">[]</span><span class="n">OldData</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">shrink</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_capacity</span> <span class="o">&lt;</span> <span class="n">AUTO_INITIALIZER</span> <span class="o">||</span> <span class="n">_size</span> <span class="o">&gt;=</span> <span class="n">_capacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_capacity</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">T</span> <span class="o">*</span><span class="n">OldData</span> <span class="o">=</span> <span class="n">_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_data</span> <span class="o">=</span> <span class="k">new</span> <span class="n">T</span><span class="p">[</span><span class="n">_capacity</span><span class="p">]{};</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">OldData</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="k">delete</span><span class="p">[]</span><span class="n">OldData</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>T(n) = O(n)</p>
+<p>insert</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">insert</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">Val</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">_size</span><span class="p">)</span> <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">out_of_range</span><span class="p">{</span><span class="s">&#34;The array is out of range!&#34;</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">expand</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">--</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_data</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span> <span class="c1">//Prevents data from being overwritten
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">_data</span><span class="p">[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">Val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_size</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>!!!The number of elements moved depends on the length of the order table and the location of the inserted element.</p>
+</blockquote>
+<p>!!!Average:</p>
+<p>$T(n) = \frac{\sum_{i=0}^n i}{n + 1} = \frac{\frac{n(n + 1)}{2}}{n + 1} = \frac {n}{2} = O(n)$</p>
+<p>delete</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">remove</span><span class="p">(</span><span class="n">Rank</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">_size</span><span class="p">)</span> <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">out_of_range</span><span class="p">{</span><span class="s">&#34;out of range&#34;</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_data</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_size</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">shrink</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>!!!The number of elements moved depends on the length of the order table and the location of the deleted element</p>
+</blockquote>
+<p>!!!Average:</p>
+<p>$T(n) = \frac{\sum_{i = 0}^{n - 1} i}{n} = \frac{\frac{n(n - 1)}{2}}{n} = \frac{n - 1}{2} = O(n)$</p>
+<h4 id="advantage">Advantage</h4>
+<ol>
+<li>Logic is Contiguous, and physical is Contiguous</li>
+<li>Random access any element</li>
+<li>The address can be calculated by base address</li>
+</ol>
+<h4 id="disadvantage">Disadvantage</h4>
+<ol>
+<li>Insertion and deletion must move lot of elements</li>
+<li>Must assign memory with maximum-size</li>
+<li>It is not easy to extend array size</li>
+</ol>
+<h4 id="linked-list-implement-of-lists">Linked list implement of lists</h4>
+<ol>
+<li>Connected by pointer links</li>
+<li>Accessed via a pointer to the first node of the list</li>
+<li>Subsequent nodes are accessed via the link-pointer
+member of the current node</li>
+<li>Link pointer in the last node is set to null to mark the
+list’s end</li>
+</ol>
+<p>Use a linked list instead of an array when</p>
+<ol>
+<li>You have an unpredictable number of data elements</li>
+<li>Your list needs to be sorted quickly</li>
+</ol>
+<h4 id="types-of-linked-list">Types of linked list</h4>
+<ol>
+<li>
+<p>Singly linked list</p>
+<blockquote>
+<p>Only traversed in one direction</p>
+</blockquote>
+</li>
+<li>
+<p>Circular, singly linked list</p>
+<blockquote>
+<p>Pointer in the last node points back to the first node</p>
+</blockquote>
+</li>
+<li>
+<p>Doubly linked list</p>
+<blockquote>
+<p>Allows traversals both forwards and backwards</p>
+</blockquote>
+</li>
+<li>
+<p>Circular, doubly linked list</p>
+<blockquote>
+<p>Forward pointer of the last node points to the first node and backward pointer of the first node points to the last
+node</p>
+</blockquote>
+</li>
+</ol>
+<h4 id="singly-linked-list">Singly Linked list</h4>
+<blockquote>
+<p>without head node</p>
+</blockquote>
+<p>$head(pointer) \rightarrow [a_1] [pointer]\rightarrow [a_2] [pointer]\rightarrow &hellip;&hellip;\rightarrow [a_n] [pointer]\rightarrow null$</p>
+<blockquote>
+<p>empty list</p>
+</blockquote>
+<p>$head\rightarrow null$</p>
+<blockquote>
+<p>with head node</p>
+</blockquote>
+<p>$head(pointer)\rightarrow [head] [pointer]\rightarrow [a_1] [pointer]\rightarrow [a_2] [pointer]\rightarrow &hellip;&hellip;\rightarrow[a_n] [pointer]\rightarrow null$</p>
+<blockquote>
+<p>empty list</p>
+</blockquote>
+<p>$head\rightarrow [head] [pointer]\rightarrow null$</p>
+<p>code</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//ListNode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ListNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="n">ListNodePosition</span> <span class="o">=</span> <span class="n">ListNode</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">*</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ListNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="n">data</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ListNodePosition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">successor</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//List without headNode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">using</span> <span class="n">Rank</span> <span class="o">=</span> <span class="kt">int</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">List</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">protected</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ListNodePosition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>address data</p>
+<p>code</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">T</span> <span class="o">&amp;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="k">operator</span><span class="p">[](</span><span class="n">Rank</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">head</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>insert node</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//data
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ListNodePosition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">ListNode</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">insertAsSuccessor</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span><span class="n">Val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">temp</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ListNode</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">{</span><span class="n">Val</span><span class="p">,</span> <span class="n">successor</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">successor</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">temp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ListNodePosition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">ListNode</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">insertAsSuccessor</span><span class="p">(</span><span class="n">ListNodePosition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">listNodePosition</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">listNodePosition</span><span class="o">-&gt;</span><span class="n">successor</span> <span class="o">=</span> <span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">successor</span> <span class="o">=</span> <span class="n">listNodePosition</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">listNodePosition</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>delete</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//by the rank
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">Delete</span><span class="p">(</span><span class="n">Rank</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">record</span> <span class="o">=</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span> <span class="o">=</span> <span class="n">record</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span> <span class="n">record</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_size</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="circular-singly-linked-list">Circular, singly linked list</h4>
+<blockquote>
+<p>A Feature of the circulated linked lists&mdash;the next pointer of the last node points to the head, so the linked list becomes a circle</p>
+<p>Any node can be found from any given node</p>
+</blockquote>
+<p>structure</p>
+<blockquote>
+<p>without head node</p>
+</blockquote>
+<p>$head(pointer) \rightarrow [a_1] [pointer]\rightarrow [a_2] [pointer]\rightarrow &hellip;&hellip;\rightarrow [a_n] [pointer]\rightarrow head, tail \rightarrow [a_n]$</p>
+<blockquote>
+<p>empty list</p>
+</blockquote>
+<p>$head\rightarrow head, tail\rightarrow head$</p>
+<blockquote>
+<p>with head node</p>
+</blockquote>
+<p>$head(pointer)\rightarrow [head] [pointer]\rightarrow [a_1] [pointer]\rightarrow [a_2] [pointer]\rightarrow &hellip;&hellip;\rightarrow[a_n] [pointer]\rightarrow [a_0]$</p>
+<blockquote>
+<p>empty list</p>
+</blockquote>
+<p>$head\rightarrow [head] [pointer]\rightarrow [head]$</p>
+<p>code</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">using</span> <span class="n">Rank</span> <span class="o">=</span> <span class="kt">int</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ListCircle</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">protected</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ListNodePosition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ListCircle</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ListCircle</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">args</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="na">[[nodiscard]]</span> <span class="n">Rank</span> <span class="n">size</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="nf">DeleteNode</span><span class="p">(</span><span class="n">Rank</span> <span class="n">index</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">traverse</span><span class="p">(</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">~</span><span class="n">ListCircle</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ListCircle</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">ListCircle</span><span class="p">()</span> <span class="o">:</span><span class="n">head</span><span class="p">{</span><span class="k">new</span> <span class="n">ListNode</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">{</span><span class="n">T</span><span class="p">{},</span> <span class="k">nullptr</span><span class="p">}},</span> <span class="n">_size</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">head</span><span class="o">-&gt;</span><span class="n">successor</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ListCircle</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">ListCircle</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">args</span><span class="p">)</span> <span class="o">:</span><span class="n">ListCircle</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_size</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Rank</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">begin</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">iter</span><span class="o">-&gt;</span><span class="n">insertAsSuccessor</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">begin</span> <span class="o">+</span> <span class="n">i</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">iter</span> <span class="o">=</span> <span class="n">iter</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">iter</span><span class="o">-&gt;</span><span class="n">successor</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Rank</span> <span class="n">ListCircle</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">size</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">ListCircle</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">clear</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">head</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">auto</span> <span class="n">record</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">delete</span> <span class="n">record</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ListCircle</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::~</span><span class="n">ListCircle</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Rank</span> <span class="n">ListCircle</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">DeleteNode</span><span class="p">(</span><span class="n">Rank</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">record</span> <span class="o">=</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span> <span class="o">=</span> <span class="n">record</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span> <span class="n">record</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_size</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">index</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">ListCircle</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">traverse</span><span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Empty List&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">head</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="n">Rank</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">,</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">-&gt;</span><span class="n">successor</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">visit</span><span class="p">(</span><span class="n">temp</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="doubly-linked-list">Doubly linked list</h4>
+<blockquote>
+<p>The feature of double linked lists &mdash;- There are two pointer fields in one node, one points to the predecessor, another to the successor</p>
+<p>Any node in the list can be found by tracing back and forth from any given node.</p>
+</blockquote>
+<p>structure</p>
+<p>$[a_{i-1}]^\rightarrow_\leftarrow[prior] [data] [next]^\rightarrow_\leftarrow[a_{i + 1}]$</p>
+<blockquote>
+<p>no empty list</p>
+</blockquote>
+<p>$L\rightarrow[head]\rightarrow[a_1]^\rightarrow_\leftarrow[a_2]^\rightarrow_\leftarrow&hellip;&hellip;^\rightarrow_\leftarrow[a_n]\rightarrow null\newline$
+$head.prior\rightarrow[a_n]\newline$</p>
+<blockquote>
+<p>empty list</p>
+</blockquote>
+<p>$L\rightarrow prior = L\rightarrow next = null$</p>
+<p>delete</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">remove</span> <span class="p">(</span> <span class="n">ListNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">p</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="n">T</span> <span class="n">e</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">p</span><span class="o">-&gt;</span><span class="n">pred</span><span class="o">-&gt;</span><span class="n">succ</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">succ</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">   <span class="n">p</span><span class="o">-&gt;</span><span class="n">succ</span><span class="o">-&gt;</span><span class="n">pred</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">pred</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="k">delete</span> <span class="n">p</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">   <span class="n">_size</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="n">e</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>insert</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">bool</span> <span class="nf">ListInsert_DuL</span><span class="p">(</span><span class="n">DuLinklist</span> <span class="o">&amp;</span><span class="n">L</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">ElemType</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DuLinklist</span> <span class="n">s</span><span class="p">,</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">GetElemP_DuL</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">i</span><span class="p">)))</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">DuLinklist</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">DuLNode</span><span class="p">))))</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="n">e</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="o">-&gt;</span><span class="n">prior</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">prior</span><span class="p">;</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">-&gt;</span> <span class="n">prior</span> <span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">prior</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="circular-doubly-linked-list">Circular, doubly linked list</h4>
+<p>structure</p>
+<blockquote>
+<p>without head</p>
+</blockquote>
+<p>$head\rightarrow prior = [a_n]\ a_n\rightarrow next = head$</p>
+<blockquote>
+<p>empty</p>
+</blockquote>
+<p>$head\rightarrow prior = head\rightarrow next = head$</p>
+<p>Summary</p>
+<p>Advantage</p>
+<ol>
+<li>store items &ldquo;sequentially&rdquo; without restrictions on location</li>
+<li>insert new item without shifting</li>
+<li>delete existing item without shifting</li>
+<li>size can expand/contract throughout use</li>
+</ol>
+<p>Disadvantage</p>
+<ol>
+<li>overhead of links: used only internally, pure overhead</li>
+<li>no longer have direct access to each element of the list. O(1)
+access becomes O(n) access since we must go through first element, and then second, and then third, etc.</li>
+</ol>
+<h2 id="select-arrayedlist-or-linkedlist">Select ArrayedList or LinkedList?</h2>
+<p>Array-Based List:</p>
+<ol>
+<li>Insertion and deletion are O(n).</li>
+<li>Direct access are O(1).</li>
+<li>Array must be allocated in advance.</li>
+<li>No overhead if all array positions are full.</li>
+</ol>
+<p>Linked List:</p>
+<ol>
+<li>Insertion and deletion are O(1).</li>
+<li>Direct access are O(n).</li>
+<li>Space grows with number of elements.</li>
+<li>Every element requires overhead.</li>
+</ol>
+<p>Contiguous storage is generally preferable:</p>
+<ol>
+<li>when the entries are individually very small;</li>
+<li>when the size of the list is known when the program is written;</li>
+<li>when few insertions or deletions need to be made except at the end of the list;</li>
+<li>when random access is important.</li>
+</ol>
+<p>Linked storage proves superior</p>
+<ol>
+<li>when the entries are large;</li>
+<li>when the size of the list is not known in advance</li>
+<li>when flexibility is needed in inserting, deleting, and
+rearranging the entries.</li>
+</ol>
+<h3 id="othercursor-implementation-of-linked-list">Other:Cursor Implementation of Linked List</h3>
+<blockquote>
+<p>implementation in a consecutive storage, and the next is not a pointer but a Rank to search next node</p>
+</blockquote>
+<ol>
+<li>You still need to allocate a large space beforehand;</li>
+<li>But in the linear table insert and delete operations do not need to move elements, only need to modify the cursor (pointer), so it still has the main advantages of chain storage structure;</li>
+<li>A linked list described by an array is called a static linked list.</li>
+</ol>
+<p>Application of Linked list:</p>
+<p>Example: Polynomials</p>
+<p>$P(x) = a_0 + a_1x + a_2x^2 + &hellip; + a_nx^n$</p>
+<blockquote>
+<p>Array-based implementation:Disadvantage: for sparse polynomials
+-&gt;waste memory!</p>
+<p>Linked list implementation can solve the problem</p>
+</blockquote>
+<h3 id="about-homework">About Homework</h3>
+<p>you can use Singly linked list like a stack (push and pop)</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/data-structure/">Data Structure</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-11-06</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List" data-hashtags="Data Structure"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-hashtag="Data Structure"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" data-title="List"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/data-structures-and-algorithms/algorithms-analysis/" class="prev" rel="prev" title="Algorithms Analysis"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/data-structures-and-algorithms/stack-and-queue/" class="next" rel="next" title="Stack and Queue">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

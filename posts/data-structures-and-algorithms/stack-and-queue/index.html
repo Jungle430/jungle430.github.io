@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Stack and Queue - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Stack and Queue" />
+<meta property="og:description" content="Data Structure Stack and Queue Stack Definition: Lists with the restriction that insertions and deletions can be performed in only one position, namely, the end of the list. Access the list from the top. First in, last out (FILO) lists Or last in, first out (LIFO) lists. Basic Concepts Top: the end of the list, namely, the operation end. Bottom: the head of the list Push: Insert an element into" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-06T22:36:10+08:00" />
+<meta property="article:modified_time" content="2022-11-06T22:36:10+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Stack and Queue"/>
+<meta name="twitter:description" content="Data Structure Stack and Queue Stack Definition: Lists with the restriction that insertions and deletions can be performed in only one position, namely, the end of the list. Access the list from the top. First in, last out (FILO) lists Or last in, first out (LIFO) lists. Basic Concepts Top: the end of the list, namely, the operation end. Bottom: the head of the list Push: Insert an element into"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" /><link rel="prev" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/list/" /><link rel="next" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Stack and Queue",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/stack-and-queue\/"
+        },"genre": "posts","keywords": "Data Structure","wordcount":  2333 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/stack-and-queue\/","datePublished": "2022-11-06T22:36:10+08:00","dateModified": "2022-11-06T22:36:10+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Stack and Queue</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/data-structure/"><i class="far fa-folder fa-fw"></i>Data Structure</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-11-06">2022-11-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2333 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#stack-and-queue">Stack and Queue</a>
+      <ul>
+        <li><a href="#stack">Stack</a>
+          <ul>
+            <li><a href="#basic-concepts">Basic Concepts</a></li>
+            <li><a href="#adt">ADT</a></li>
+            <li><a href="#stack-mixed-wash">Stack mixed wash</a></li>
+            <li><a href="#array-implementation-of-stacks">Array implementation of stacks</a></li>
+            <li><a href="#linked-list-implementation-of-stacks">Linked List implementation of stacks</a></li>
+          </ul>
+        </li>
+        <li><a href="#application-of-stack">Application of Stack</a>
+          <ul>
+            <li><a href="#balancing-symbols">Balancing Symbols</a></li>
+            <li><a href="#conversion">Conversion</a></li>
+            <li><a href="#evaluate-postfix-expression">Evaluate postfix expression</a></li>
+            <li><a href="#infix-to-postfix">infix to postfix</a></li>
+            <li><a href="#function-calls">Function Calls</a></li>
+            <li><a href="#recursion">Recursion</a></li>
+          </ul>
+        </li>
+        <li><a href="#queue">Queue</a>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#operations">Operations</a></li>
+            <li><a href="#implementation-of-queue">Implementation of Queue</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="data-structure">Data Structure</h1>
+<h2 id="stack-and-queue">Stack and Queue</h2>
+<h3 id="stack">Stack</h3>
+<p>Definition: Lists with the restriction that insertions
+and deletions can be performed in only one position, namely,
+the end of the list. Access the list from the top.</p>
+<ol>
+<li>First in, last out (FILO) lists</li>
+<li>Or last in, first out (LIFO) lists.</li>
+</ol>
+<h4 id="basic-concepts">Basic Concepts</h4>
+<blockquote>
+<p>Top: the end of the list, namely, the operation end.</p>
+<p>Bottom: the head of the list</p>
+<p>Push: Insert an element into the end of the list.</p>
+<p>Pop: Delete an element from the end of the list.</p>
+</blockquote>
+<p>$Bottom\rightarrow [a_1] [a_2]&hellip;&hellip;[a_{n-1}] [a_n]\leftarrow Top$</p>
+<p>$Operation$</p>
+<p>$[a_1] [a_2]&hellip;&hellip;[a_{n-1}] [a_n]^{\rightarrow Pop}_{\leftarrow Push}$</p>
+<h4 id="adt">ADT</h4>
+<p>ADT Stack {</p>
+<pre><code>Data Object：D = {ai | ai∈ElementSet, (i=1,2,…,n, n≥1)}
+Data Relationship：R = {＜ai-1,ai＞|ai-1,ai ∈ D, (i=2,3,…,n)}
+assume an is top, a1 is bottom.
+</code></pre>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">    <span class="c1">//Basic Operations:
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">InitStack</span><span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">)</span> <span class="c1">//Create an empty Stack.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">DestroyStack</span><span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">)</span> <span class="c1">//If S exists, Destroy it.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ClearStack</span><span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">)</span> <span class="c1">//If S exists, make the Stack empty. 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">StackEmpty</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="c1">//if S is empty, return TRUE, otherwise return FALSE.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">StackLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="c1">//return the length of Stack.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">GetTop</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="o">&amp;</span><span class="n">e</span><span class="p">)</span> <span class="c1">// If S exists and non-empty, return the top element.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Push</span><span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">,</span><span class="n">e</span><span class="p">)</span> <span class="c1">// Insert e as the top element.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Pop</span><span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">,</span><span class="o">&amp;</span><span class="n">e</span><span class="p">)</span> <span class="c1">// If Stack exists and non-empty, set the top element to e, then delete the top element. 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">StackTraverse</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">visit</span><span class="p">())</span> <span class="c1">//visit all of elements in the Stack.
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>}</p>
+<p>$!if\ input\ is {&hellip;a_i, &hellip; a_j, &hellip;a_k, &hellip;}, then\ the\ output\ is\ impossible {&hellip;a_k, &hellip;a_i, &hellip;a_j, &hellip;}$</p>
+<h4 id="stack-mixed-wash">Stack mixed wash</h4>
+<blockquote>
+<p>$if\ the\ stack.size()\ is\ n,then\ the\ size\ of\ Stack\ mixed\ wash\ sp(n)\ is\ Catalan(n)=\frac{(2n)!}{(n + 1)!n!}, and\ sp(n) = \sum_{k=1}^nsp(n - k)*sp(k - 1), base:\ sp(1) = 1$</p>
+</blockquote>
+<h4 id="array-implementation-of-stacks">Array implementation of stacks</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">STACK_INIT_SIZE</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">STACKINCREMENT</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SElemType</span> <span class="o">*</span><span class="n">base</span><span class="p">;</span> <span class="c1">//Bottom pointer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">SElemType</span> <span class="o">*</span><span class="n">top</span><span class="p">;</span> <span class="c1">//Top pointer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">stacksize</span><span class="p">;</span> <span class="c1">//max capacity
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="n">SqStack</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>Bottom Pointer base,always points to the bottom;</p>
+<p>Top pointer, is on the top of the Stack.</p>
+</blockquote>
+<blockquote>
+<p>When top=M, Stack is full，If run push, then overflow.</p>
+<p>When top=base, Stack is empty，If run Pop, then underflow;</p>
+</blockquote>
+<p>Initialize Stack</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">InitStack</span> <span class="p">(</span><span class="n">SqStack</span> <span class="o">&amp;</span><span class="n">S</span><span class="p">)</span> <span class="p">{</span><span class="c1">// Create an empty Stack
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">//Allocate memory
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">S</span><span class="p">.</span><span class="n">base</span><span class="o">=</span><span class="p">(</span><span class="n">SElemType</span><span class="o">*</span><span class="p">)</span> <span class="n">malloc</span><span class="p">(</span><span class="n">STACK_INIT_SIZE</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">SElemType</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">S</span><span class="p">.</span><span class="n">base</span><span class="p">)</span>    
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span> <span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span> <span class="c1">//if allocate failed, then assignment failed.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">//initialize top pointer(equal to base)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">S</span><span class="p">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">S</span><span class="p">.</span><span class="n">base</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">S</span><span class="p">.</span><span class="n">stacksize</span> <span class="o">=</span> <span class="n">STACK_INIT_SIZE</span><span class="p">;</span><span class="c1">//initialize stack&#39;s max capacity
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Push an element into the stack:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">Push</span> <span class="p">(</span><span class="n">SqStack</span> <span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="n">SElemType</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//Stack Full，Extend space of the stack
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">S</span><span class="p">.</span><span class="n">top</span> <span class="o">-</span> <span class="n">S</span><span class="p">.</span><span class="n">base</span> <span class="o">&gt;=</span> <span class="n">S</span><span class="p">.</span><span class="n">stacksize</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">S</span><span class="p">.</span><span class="n">base</span> <span class="o">=</span> <span class="p">(</span><span class="n">SElemType</span> <span class="o">*</span><span class="p">)</span> <span class="n">realloc</span> <span class="p">(</span> <span class="n">S</span><span class="p">.</span><span class="n">base</span><span class="p">,(</span><span class="n">S</span><span class="p">.</span><span class="n">stacksize</span> <span class="o">+</span> <span class="n">STACKINCREMENT</span><span class="p">)</span> <span class="o">*</span><span class="k">sizeof</span> <span class="p">(</span><span class="n">SElemType</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">S</span><span class="p">.</span><span class="n">base</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span> <span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span> <span class="c1">//Assignment failed.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">S</span><span class="p">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">S</span><span class="p">.</span><span class="n">base</span> <span class="o">+</span> <span class="n">S</span><span class="p">.</span><span class="n">stacksize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">S</span><span class="p">.</span><span class="n">stacksize</span> <span class="o">+=</span> <span class="n">STACKINCREMENT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>   
+</span></span><span class="line"><span class="cl">    <span class="c1">//push the element
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">*</span><span class="n">S</span><span class="p">.</span><span class="n">top</span><span class="o">++</span> <span class="o">=</span> <span class="n">e</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Pop the top of the stack</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">Pop</span> <span class="p">(</span><span class="n">SqStack</span> <span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="n">SElemType</span> <span class="o">&amp;</span><span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// If Stack is Non-empty，let top element to e，then delete
+</span></span></span><span class="line"><span class="cl"><span class="c1">// the top element, return OK, otherwise return ERROR.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">S</span><span class="p">.</span><span class="n">top</span> <span class="o">==</span> <span class="n">S</span><span class="p">.</span><span class="n">base</span><span class="p">)</span>   
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">e</span> <span class="o">=</span> <span class="o">*--</span><span class="n">S</span><span class="p">.</span><span class="n">top</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="linked-list-implementation-of-stacks">Linked List implementation of stacks</h4>
+<p>structure of node:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">Snode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SElemType</span> <span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="nc">Snode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Snode</span><span class="p">,</span> <span class="o">*</span><span class="n">LinkStack</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Initialize Stack</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">InitlinkStack</span><span class="p">(</span><span class="n">LinkStack</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">s</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// InitlinkStack
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>memory structure</p>
+<p>$top\rightarrow [a_n]\rightarrow [a_{n-1}]\rightarrow&hellip;&hellip;\rightarrow[a_1]\rightarrow null$</p>
+<p>push:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">Push</span><span class="p">(</span><span class="n">LinkStack</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="n">SElemType</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">Snode</span> <span class="o">*</span><span class="p">)</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Snode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="n">e</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// Push;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>pop:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">Pop</span><span class="p">(</span><span class="n">LinkStack</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="n">SElemType</span> <span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="p">)</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">e</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">free</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// Pop;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="application-of-stack">Application of Stack</h3>
+<h4 id="balancing-symbols">Balancing Symbols</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">algorithm</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">exp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LinkedStack</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span> <span class="n">stack</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">length</span> <span class="o">=</span> <span class="n">exp</span><span class="p">.</span><span class="n">length</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">exp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;(&#39;</span> <span class="o">||</span> <span class="n">exp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;[&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">exp</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">((</span><span class="n">exp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;)&#39;</span> <span class="o">&amp;&amp;</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">()</span> <span class="o">==</span> <span class="sc">&#39;(&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">exp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;]&#39;</span> <span class="o">&amp;&amp;</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">()</span> <span class="o">==</span> <span class="sc">&#39;[&#39;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Fail!&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Fail!&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">?</span> <span class="s">&#34;Success!&#34;</span> <span class="o">:</span> <span class="s">&#34;Fail!&#34;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="conversion">Conversion</h4>
+<p>Example: 10-&gt;8</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">algorithm</span><span class="p">(</span><span class="kt">int</span> <span class="n">Number</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LinkedStack</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">stack</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Number</span> <span class="o">&amp;</span> <span class="mh">0x07</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Number</span> <span class="o">&gt;&gt;=</span> <span class="mi">3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">Number</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="evaluate-postfix-expression">Evaluate postfix expression</h4>
+<p>Example:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">double</span> <span class="nf">evaluate</span> <span class="p">(</span> <span class="kt">char</span><span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">RPN</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//对（已剔除白空格的）表达式S求值，并转换为逆波兰式RPN
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Stack</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">opnd</span><span class="p">;</span> <span class="n">Stack</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span> <span class="n">optr</span><span class="p">;</span> <span class="c1">//运算数栈、运算符栈
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">optr</span><span class="p">.</span><span class="n">push</span> <span class="p">(</span> <span class="sc">&#39;\0&#39;</span> <span class="p">);</span> <span class="c1">//尾哨兵&#39;\0&#39;也作为头哨兵首先入栈
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">while</span> <span class="p">(</span> <span class="o">!</span><span class="n">optr</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//在运算符栈非空之前，逐个处理表达式中各字符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>       <span class="k">if</span> <span class="p">(</span> <span class="n">isdigit</span> <span class="p">(</span> <span class="o">*</span><span class="n">S</span> <span class="p">)</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//若当前字符为操作数，则
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="n">readNumber</span> <span class="p">(</span> <span class="n">S</span><span class="p">,</span> <span class="n">opnd</span> <span class="p">);</span> <span class="n">append</span> <span class="p">(</span> <span class="n">RPN</span><span class="p">,</span> <span class="n">opnd</span><span class="p">.</span><span class="n">top</span><span class="p">()</span> <span class="p">);</span> <span class="c1">//读入操作数，并将其接至RPN末尾
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>       <span class="p">}</span> <span class="k">else</span> <span class="c1">//若当前字符为运算符，则
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="k">switch</span> <span class="p">(</span> <span class="n">priority</span> <span class="p">(</span> <span class="n">optr</span><span class="p">.</span><span class="n">top</span><span class="p">(),</span> <span class="o">*</span><span class="n">S</span> <span class="p">)</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//视其与栈顶运算符之间优先级高低分别处理
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>             <span class="k">case</span> <span class="sc">&#39;&lt;&#39;</span><span class="o">:</span> <span class="c1">//栈顶运算符优先级更低时
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="n">optr</span><span class="p">.</span><span class="n">push</span> <span class="p">(</span> <span class="o">*</span><span class="n">S</span> <span class="p">);</span> <span class="n">S</span><span class="o">++</span><span class="p">;</span> <span class="c1">//计算推迟，当前运算符进栈
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="sc">&#39;=&#39;</span><span class="o">:</span> <span class="c1">//优先级相等（当前运算符为右括号或者尾部哨兵&#39;\0&#39;）时
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>               <span class="n">optr</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span> <span class="n">S</span><span class="o">++</span><span class="p">;</span> <span class="c1">//脱括号并接收下一个字符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">             <span class="k">case</span> <span class="sc">&#39;&gt;&#39;</span><span class="o">:</span> <span class="p">{</span> <span class="c1">//栈顶运算符优先级更高时，可实施相应的计算，并将结果重新入栈
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="kt">char</span> <span class="n">op</span> <span class="o">=</span> <span class="n">optr</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span> <span class="n">append</span> <span class="p">(</span> <span class="n">RPN</span><span class="p">,</span> <span class="n">op</span> <span class="p">);</span> <span class="c1">//栈顶运算符出栈并续接至RPN末尾
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">if</span> <span class="p">(</span> <span class="sc">&#39;!&#39;</span> <span class="o">==</span> <span class="n">op</span> <span class="p">)</span> <span class="c1">//若属于一元运算符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                   <span class="n">opnd</span><span class="p">.</span><span class="n">push</span> <span class="p">(</span> <span class="n">calcu</span> <span class="p">(</span> <span class="n">op</span><span class="p">,</span> <span class="n">opnd</span><span class="p">.</span><span class="n">pop</span><span class="p">()</span> <span class="p">)</span> <span class="p">);</span> <span class="c1">//则取一个操作数，计算结果入栈
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">else</span> <span class="p">{</span> <span class="c1">//对于其它（二元）运算符
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                   <span class="kt">double</span> <span class="n">pOpnd2</span> <span class="o">=</span> <span class="n">opnd</span><span class="p">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">pOpnd1</span> <span class="o">=</span> <span class="n">opnd</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span> <span class="c1">//取出后、前操作数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                   <span class="n">opnd</span><span class="p">.</span><span class="n">push</span> <span class="p">(</span> <span class="n">calcu</span> <span class="p">(</span> <span class="n">pOpnd1</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">pOpnd2</span> <span class="p">)</span> <span class="p">);</span> <span class="c1">//实施二元计算，结果入栈
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">             <span class="p">}</span>
+</span></span><span class="line"><span class="cl">             <span class="k">default</span> <span class="o">:</span> <span class="n">exit</span> <span class="p">(</span> <span class="o">-</span><span class="mi">1</span> <span class="p">);</span> <span class="c1">//逢语法错误，不做处理直接退出
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="p">}</span><span class="c1">//switch
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span><span class="c1">//while
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">opnd</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span> <span class="c1">//弹出并返回最后的计算结果
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="infix-to-postfix">infix to postfix</h4>
+<p>Precedence:</p>
+<ol>
+<li>&lsquo;(&rsquo; and &lsquo;)&rsquo; have the highest precedence</li>
+<li>&lsquo;*&rsquo; and &lsquo;/ &lsquo;have lower precedence than &lsquo;(&rsquo; and &lsquo;)&rsquo;</li>
+<li>&lsquo;+&rsquo; and &lsquo;-&rsquo; have lower precedence than &lsquo;*&rsquo; and &lsquo;/&rsquo;</li>
+</ol>
+<blockquote>
+<p>Converting infix expressions into postfix</p>
+<p>$Infix: [A * B + C * D]$</p>
+<p>$Postfix: [A B * C D * +]$</p>
+</blockquote>
+<p>Example:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">algorithm</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="mi">100</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">100</span><span class="o">&gt;</span> <span class="n">matrix</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;+&#39;</span><span class="p">][</span><span class="sc">&#39;+&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;+&#39;</span><span class="p">][</span><span class="sc">&#39;-&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;+&#39;</span><span class="p">][</span><span class="sc">&#39;*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;+&#39;</span><span class="p">][</span><span class="sc">&#39;/&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;+&#39;</span><span class="p">][</span><span class="sc">&#39;^&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;-&#39;</span><span class="p">][</span><span class="sc">&#39;+&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;-&#39;</span><span class="p">][</span><span class="sc">&#39;-&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;-&#39;</span><span class="p">][</span><span class="sc">&#39;*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;-&#39;</span><span class="p">][</span><span class="sc">&#39;/&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;-&#39;</span><span class="p">][</span><span class="sc">&#39;^&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;*&#39;</span><span class="p">][</span><span class="sc">&#39;+&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;*&#39;</span><span class="p">][</span><span class="sc">&#39;-&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;*&#39;</span><span class="p">][</span><span class="sc">&#39;*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;*&#39;</span><span class="p">][</span><span class="sc">&#39;/&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;*&#39;</span><span class="p">][</span><span class="sc">&#39;^&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;/&#39;</span><span class="p">][</span><span class="sc">&#39;+&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;/&#39;</span><span class="p">][</span><span class="sc">&#39;-&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;/&#39;</span><span class="p">][</span><span class="sc">&#39;*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;/&#39;</span><span class="p">][</span><span class="sc">&#39;/&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;/&#39;</span><span class="p">][</span><span class="sc">&#39;^&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;^&#39;</span><span class="p">][</span><span class="sc">&#39;+&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;^&#39;</span><span class="p">][</span><span class="sc">&#39;-&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;^&#39;</span><span class="p">][</span><span class="sc">&#39;*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;^&#39;</span><span class="p">][</span><span class="sc">&#39;/&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">matrix</span><span class="p">[</span><span class="sc">&#39;^&#39;</span><span class="p">][</span><span class="sc">&#39;^&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">length</span> <span class="o">=</span> <span class="n">string</span><span class="p">.</span><span class="n">length</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LinkedStack</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span> <span class="n">linkedStack</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">iteration</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="sc">&#39;A&#39;</span> <span class="o">&amp;&amp;</span> <span class="n">string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="sc">&#39;F&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">iteration</span> <span class="o">+=</span> <span class="n">string</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">linkedStack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">string</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">linkedStack</span><span class="p">.</span><span class="n">top</span><span class="p">()])</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">iteration</span> <span class="o">+=</span> <span class="n">linkedStack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="k">else</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">linkedStack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">string</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">iteration</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">linkedStack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">iteration</span> <span class="o">+=</span> <span class="n">linkedStack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">iteration</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="function-calls">Function Calls</h4>
+<p>When a function is called</p>
+<blockquote>
+<p>• Local variables and status should be saved</p>
+</blockquote>
+<p>When the function returns</p>
+<blockquote>
+<p>• Saved values needs to be restored
+In what order?</p>
+</blockquote>
+<p>Structure:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">main</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">f</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">f</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">g</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">h</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">g</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">h</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>$bottom\rightarrow[main()]\rightarrow[f()]\rightarrow[g()]\rightarrow top$</p>
+<p>$next:pop\ g(), push\ h()$</p>
+<p>$bottom\rightarrow[main()]\rightarrow[f()]\rightarrow[h()]\rightarrow top$</p>
+<h4 id="recursion">Recursion</h4>
+<blockquote>
+<p>Definition: Recursion simply means a function that calls itself directly or indirectly.</p>
+</blockquote>
+<p>Example: Find the last element of a list</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Find</span> <span class="p">(</span><span class="n">LinkList</span> <span class="n">L</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">L</span><span class="err">→</span><span class="n">next</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printf</span><span class="p">(</span><span class="n">L</span><span class="err">→</span><span class="n">data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">Find</span><span class="p">(</span><span class="n">L</span><span class="err">→</span><span class="n">next</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The general form of a recursive algorithm</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">p</span> <span class="o">(</span><span class="n">parameters</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">stopping</span> <span class="n">condition</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">base</span> <span class="k">case</span> <span class="n">that</span> <span class="n">is</span> <span class="n">processed</span> <span class="n">without</span> <span class="n">recursion</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="nf">p</span><span class="o">(</span><span class="n">smaller</span> <span class="n">parameters</span><span class="o">);</span> <span class="c1">//recursive case
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Step to make a recursive algorithm:</p>
+<ol>
+<li>Find the key step. Begin by asking yourself, “How can this problem be divided into parts?” or “How will the key step in the middle be done?”</li>
+<li>Find a stopping rule. This stopping rule is usually the small,special case that is trivial or easy to handle without recursion.</li>
+<li>Outline your algorithm. Combine the stopping rule and the key step, using an if statement to select between them.</li>
+<li>Check termination. Verify that the recursion will always terminate. Be sure that your algorithm correctly handles extreme cases</li>
+</ol>
+<h3 id="queue">Queue</h3>
+<h4 id="features">Features</h4>
+<blockquote>
+<p>insertions at one end</p>
+<p>deletions at another end</p>
+<p>FIFO (First In First Out)</p>
+</blockquote>
+<h4 id="operations">Operations</h4>
+<p>{</p>
+<pre><code>Enqueue(element):insert an element at the end of the list(rear)
+Dequeue:delete the element at the start of the list (front)
+IsEmpty:check whether the queue has an element or not
+</code></pre>
+<p>}</p>
+<h4 id="implementation-of-queue">Implementation of Queue</h4>
+<blockquote>
+<p>Linked list implementation of queues</p>
+<p>keep two pointers the front and the rear</p>
+<blockquote>
+<p>• Front is the head of the linked list</p>
+<p>• Rear is the tail of the linked list</p>
+</blockquote>
+<p>Array implementation of queues</p>
+<blockquote>
+<p>keep positions of the front and the rear. When one reaches to the end of the Array, it starts over from the beginning</p>
+<p>• Array is used as a circular array</p>
+</blockquote>
+<p>keep track of the size of queue</p>
+</blockquote>
+<p>Linked Queue</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">QNode</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">QElemType</span> <span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="nc">QNode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="n">Qnode</span><span class="p">,</span> <span class="o">*</span><span class="n">QueuePtr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">QueuePtr</span> <span class="n">front</span><span class="p">;</span> <span class="c1">// front pointer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">QueuePtr</span> <span class="n">rear</span><span class="p">;</span> <span class="c1">// rear pointer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span><span class="n">LinkQueue</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>memory structure</p>
+<p>$front\rightarrow [head]\rightarrow [X]\rightarrow [Y]^{\rightarrow null}_{\leftarrow rear}$</p>
+<p>Initialization of a queue</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">InitQueue</span><span class="p">(</span><span class="n">LinkQueue</span> <span class="o">&amp;</span><span class="n">Q</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">Q</span><span class="p">.</span><span class="n">rear</span> <span class="o">=</span> <span class="p">(</span><span class="n">QueuePtr</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">QNode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Q</span><span class="p">.</span><span class="n">front</span> <span class="o">=</span> <span class="n">Q</span><span class="p">.</span><span class="n">rear</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Q</span><span class="p">.</span><span class="n">front</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">Q</span><span class="p">.</span><span class="n">front</span> <span class="o">-&gt;</span> <span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// InitQueue
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Destroy a Queue</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">DestroyQueue</span><span class="p">(</span><span class="n">LinkQueue</span> <span class="o">&amp;</span><span class="n">Q</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">Q</span><span class="p">.</span><span class="n">front</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Q</span><span class="p">.</span><span class="n">rear</span> <span class="o">=</span> <span class="n">Q</span><span class="p">.</span><span class="n">front</span> <span class="o">-&gt;</span> <span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">free</span><span class="p">(</span><span class="n">Q</span><span class="p">.</span><span class="n">front</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Q</span><span class="p">.</span><span class="n">front</span> <span class="o">=</span> <span class="n">Q</span><span class="p">.</span><span class="n">rear</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// DestroyQueue
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>push an element</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">EnQueue</span><span class="p">(</span><span class="n">LinkQueue</span> <span class="o">&amp;</span><span class="n">Q</span><span class="p">,</span> <span class="n">QelemType</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="p">(</span> <span class="n">QueuePtr</span> <span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">QNode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">p</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="n">e</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">Q</span><span class="p">.</span><span class="n">rear</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Q</span><span class="p">.</span><span class="n">rear</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// EnQueue
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>pop an element</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">DeQueue</span><span class="p">(</span><span class="n">LinkQueue</span> <span class="o">&amp;</span><span class="n">Q</span><span class="p">,</span> <span class="n">QelemType</span> <span class="o">&amp;</span><span class="n">e</span><span class="p">){</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">Q</span><span class="p">.</span><span class="n">front</span> <span class="o">==</span> <span class="n">Q</span><span class="p">.</span><span class="n">rear</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="n">Q</span><span class="p">.</span><span class="n">front</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">e</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Q</span><span class="p">.</span><span class="n">front</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">Q</span><span class="p">.</span><span class="n">rear</span> <span class="o">==</span> <span class="n">p</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">Q</span><span class="p">.</span><span class="n">rear</span> <span class="o">=</span> <span class="n">Q</span><span class="p">.</span><span class="n">front</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">free</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// DeQueue
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Array Queue</p>
+<p>Avoid false overflow</p>
+<ol>
+<li>$move\ element$</li>
+<li>$use\ array\ as\ a\ circle, empty\rightarrow(r - l) == 0, and\ full\rightarrow (rear + 1) % maxlength == front$</li>
+</ol>
+<blockquote>
+<p>Enqueue</p>
+<blockquote>
+<p>Increment QueueSize</p>
+<p>Queue [rear] = X</p>
+<p>Increment rear</p>
+</blockquote>
+<p>Dequeue</p>
+<blockquote>
+<p>Decrement QueueSize</p>
+<p>Increment front</p>
+<p>return Queue[front-1]</p>
+</blockquote>
+</blockquote>
+<p>Application:</p>
+<blockquote>
+<p>Print jobs</p>
+<p>Computer networks</p>
+<p>OS</p>
+<p>Real-life waiting lines</p>
+</blockquote>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/data-structure/">Data Structure</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-11-06</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue" data-hashtags="Data Structure"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-hashtag="Data Structure"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" data-title="Stack and Queue"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/data-structures-and-algorithms/list/" class="prev" rel="prev" title="List"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/data-structures-and-algorithms/string/" class="next" rel="next" title="String">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

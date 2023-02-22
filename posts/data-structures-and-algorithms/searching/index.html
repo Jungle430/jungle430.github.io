@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Searching - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Searching" />
+<meta property="og:description" content="Data Structure Searching Read Map Static Search Table Sequential Search Binary Search Indexing Search Binary Search Trees (Dynamic Search Table) Binary search tree AVL tree B-Tree Hash Table What is hashing Hash Function Collision Resolution Closed Hashing Open Hashing Analysis of Hashing Search Table Definition A set of the same type of data elements Key The value of data item in the data element. It is used to identify the" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-18T14:47:32+08:00" />
+<meta property="article:modified_time" content="2022-11-18T14:47:32+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Searching"/>
+<meta name="twitter:description" content="Data Structure Searching Read Map Static Search Table Sequential Search Binary Search Indexing Search Binary Search Trees (Dynamic Search Table) Binary search tree AVL tree B-Tree Hash Table What is hashing Hash Function Collision Resolution Closed Hashing Open Hashing Analysis of Hashing Search Table Definition A set of the same type of data elements Key The value of data item in the data element. It is used to identify the"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" /><link rel="prev" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/" /><link rel="next" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Searching",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/searching\/"
+        },"genre": "posts","keywords": "Data Structure","wordcount":  4874 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/searching\/","datePublished": "2022-11-18T14:47:32+08:00","dateModified": "2022-11-18T14:47:32+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Searching</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/data-structure/"><i class="far fa-folder fa-fw"></i>Data Structure</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-11-18">2022-11-18</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4874 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 10 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#searching">Searching</a>
+      <ul>
+        <li><a href="#read-map">Read Map</a>
+          <ul>
+            <li><a href="#static-search-table">Static Search Table</a></li>
+            <li><a href="#binary-search-trees-dynamic-search-table">Binary Search Trees (Dynamic Search Table)</a></li>
+            <li><a href="#hash-table">Hash Table</a></li>
+          </ul>
+        </li>
+        <li><a href="#search-table">Search Table</a>
+          <ul>
+            <li><a href="#definition">Definition</a></li>
+            <li><a href="#key">Key</a></li>
+            <li><a href="#searching-1">Searching</a></li>
+            <li><a href="#operations-on-searching-table">Operations on searching table</a></li>
+            <li><a href="#static-search-table-1">Static Search Table</a></li>
+            <li><a href="#dynamic-search-table">Dynamic Search Table</a></li>
+          </ul>
+        </li>
+        <li><a href="#basic-concepts">Basic concepts</a>
+          <ul>
+            <li><a href="#search-problem">Search Problem</a></li>
+            <li><a href="#search">Search</a></li>
+            <li><a href="#successful-vs-unsuccessful">Successful vs Unsuccessful</a></li>
+          </ul>
+        </li>
+        <li><a href="#approaches-to-search">Approaches to Search</a></li>
+        <li><a href="#static-search-table-2">Static Search Table</a>
+          <ul>
+            <li><a href="#sequential-search">Sequential Search</a>
+              <ul>
+                <li><a href="#general-idea">General Idea</a></li>
+                <li><a href="#analysis">Analysis</a></li>
+                <li><a href="#average-search-lengthasl">Average Search Length(ASL)</a></li>
+              </ul>
+            </li>
+            <li><a href="#binary-search">Binary Search</a>
+              <ul>
+                <li><a href="#ordered-list">Ordered List</a></li>
+                <li><a href="#idea">Idea</a></li>
+                <li><a href="#code">code</a></li>
+                <li><a href="#analysis-1">Analysis</a></li>
+                <li><a href="#decision-tree">Decision Tree</a>
+                  <ul>
+                    <li><a href="#definition-1">definition</a></li>
+                    <li><a href="#example">Example</a></li>
+                    <li><a href="#analysis-by-decision-tree">Analysis by decision tree</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#indexing-search">Indexing Search</a>
+              <ul>
+                <li><a href="#data-structure-1">Data Structure</a></li>
+                <li><a href="#idea-1">Idea</a></li>
+                <li><a href="#analysis-2">Analysis</a></li>
+              </ul>
+            </li>
+            <li><a href="#summary-and-comparison">Summary and Comparison</a></li>
+          </ul>
+        </li>
+        <li><a href="#binary-search-trees-dynamic-search-table-1">Binary Search Trees (Dynamic search table)</a>
+          <ul>
+            <li><a href="#binary-search-tree">Binary Search Tree</a>
+              <ul>
+                <li><a href="#definition-2">Definition</a></li>
+                <li><a href="#example-1">Example</a></li>
+                <li><a href="#search-path">Search path</a></li>
+                <li><a href="#insertion-into-bst">Insertion into BST</a></li>
+                <li><a href="#deletion-from-bst">Deletion from BST</a></li>
+              </ul>
+            </li>
+            <li><a href="#avl-tree">AVL Tree</a>
+              <ul>
+                <li><a href="#tree-balancing">Tree Balancing</a>
+                  <ul>
+                    <li><a href="#for-avldifferent-in-bst">For AVL(different in BST)</a></li>
+                  </ul>
+                </li>
+                <li><a href="#balance-factor">Balance Factor</a>
+                  <ul>
+                    <li><a href="#definition-3">Definition</a></li>
+                  </ul>
+                </li>
+                <li><a href="#insert">insert</a></li>
+                <li><a href="#remove">remove</a></li>
+                <li><a href="#refactoring-34">refactoring-&gt;”3+4”</a></li>
+                <li><a href="#summary">summary</a></li>
+              </ul>
+            </li>
+            <li><a href="#b-tree">B-Tree</a>
+              <ul>
+                <li><a href="#definition-4">Definition</a></li>
+                <li><a href="#application">Application</a></li>
+                <li><a href="#b-tree-search">B-Tree Search</a></li>
+                <li><a href="#b-tree-insertion">B-Tree Insertion</a></li>
+                <li><a href="#b-tree-deletion">B-Tree Deletion</a>
+                  <ul>
+                    <li><a href="#case-1">case 1</a></li>
+                    <li><a href="#case-2">case 2</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#hash-table-1">Hash Table</a>
+          <ul>
+            <li><a href="#what-is-hashing">What is hashing</a></li>
+            <li><a href="#general-idea-1">General Idea</a></li>
+            <li><a href="#hash-function">Hash Function</a>
+              <ul>
+                <li><a href="#choosing-a-hash-function">Choosing a Hash Function</a></li>
+                <li><a href="#example-2">Example</a></li>
+              </ul>
+            </li>
+            <li><a href="#collisions">Collisions</a>
+              <ul>
+                <li><a href="#collision-resolution">Collision Resolution</a></li>
+                <li><a href="#closed-hashing">Closed hashing</a>
+                  <ul>
+                    <li><a href="#linear-probing">Linear Probing</a></li>
+                    <li><a href="#quadratic-probing">Quadratic probing</a></li>
+                    <li><a href="#random-problem">Random problem</a></li>
+                    <li><a href="#rehashing">Rehashing</a></li>
+                  </ul>
+                </li>
+                <li><a href="#open-hashing">Open Hashing</a>
+                  <ul>
+                    <li><a href="#separate-chaining">Separate Chaining</a></li>
+                  </ul>
+                </li>
+                <li><a href="#analysis-of-hashing">Analysis of Hashing</a>
+                  <ul>
+                    <li><a href="#searching-2">Searching</a></li>
+                  </ul>
+                </li>
+                <li><a href="#summary-1">Summary</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="data-structure">Data Structure</h1>
+<h2 id="searching">Searching</h2>
+<h3 id="read-map">Read Map</h3>
+<h4 id="static-search-table">Static Search Table</h4>
+<blockquote>
+<p>Sequential Search</p>
+<p>Binary Search</p>
+<p>Indexing Search</p>
+</blockquote>
+<h4 id="binary-search-trees-dynamic-search-table">Binary Search Trees (Dynamic Search Table)</h4>
+<blockquote>
+<p>Binary search tree</p>
+<p>AVL tree</p>
+<p>B-Tree</p>
+</blockquote>
+<h4 id="hash-table">Hash Table</h4>
+<blockquote>
+<p>What is hashing</p>
+<p>Hash Function</p>
+<p>Collision Resolution</p>
+<p>Closed Hashing</p>
+<p>Open Hashing</p>
+<p>Analysis of Hashing</p>
+</blockquote>
+<h3 id="search-table">Search Table</h3>
+<h4 id="definition">Definition</h4>
+<p>A set of the same type of data elements</p>
+<h4 id="key">Key</h4>
+<p>The value of <strong>data item</strong> in the data element. It is used to identify the data elements</p>
+<blockquote>
+<p>Primary Key and Second Key</p>
+</blockquote>
+<h4 id="searching-1">Searching</h4>
+<p>Based on the search value of key find out the element whose key value is same as search value</p>
+<p>It <strong>returns the position of the element</strong> located in</p>
+<h4 id="operations-on-searching-table">Operations on searching table</h4>
+<ol>
+<li>
+<p>Search a given element in the search table</p>
+</li>
+<li>
+<p>Get attributes of a given element</p>
+</li>
+<li>
+<p>Insert an element into the search table</p>
+</li>
+<li>
+<p>Delete an element from the search table</p>
+</li>
+</ol>
+<h4 id="static-search-table-1">Static Search Table</h4>
+<p>Only do search on the search table</p>
+<h4 id="dynamic-search-table">Dynamic Search Table</h4>
+<p>Need do search and insertion and deletion on the search table</p>
+<h3 id="basic-concepts">Basic concepts</h3>
+<blockquote>
+<p>Given: Distinct keys $k_1 , k_2 , …, k_n$ and collection T of n records of the form $((k_1 , I_1 ), (k_2 , I_2 ), …, (k_n , I_n ))\newline$</p>
+<p>where $I_j$ is the information associated with key $k_j\ for\ 1 \leq j \leq n\newline$</p>
+</blockquote>
+<h4 id="search-problem">Search Problem</h4>
+<p>For key value K, locate the record $(k_j , I_j)$ in T such that $k_j = K\newline$</p>
+<h4 id="search">Search</h4>
+<p>Searching is a systematic method for locating the $record(s)$ with key value $k_j = K\newline$</p>
+<h4 id="successful-vs-unsuccessful">Successful vs Unsuccessful</h4>
+<p>A <strong>successful</strong> search is one in which a record with key $k_j = K$ is found</p>
+<p>An <strong>unsuccessful</strong> search is one in which no record with $k_j = K$ is found (and presumably no such record exists)</p>
+<blockquote>
+<p>We often ask how many times one key is compared with another during a search.</p>
+<p>This gives us a good measure of the total amount of work that the algorithm will do</p>
+</blockquote>
+<h3 id="approaches-to-search">Approaches to Search</h3>
+<ol>
+<li>
+<p>Sequential and list methods (lists, tables, arrays).</p>
+</li>
+<li>
+<p>Tree indexing methods</p>
+</li>
+<li>
+<p>Direct access by key value (hashing)</p>
+</li>
+</ol>
+<div class="mermaid" id="id-1"></div>
+<h3 id="static-search-table-2">Static Search Table</h3>
+<h4 id="sequential-search">Sequential Search</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="k">auto</span> <span class="n">LIST_SIZE</span> <span class="mi">20</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">KeyType</span> <span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">OtherType</span> <span class="n">other_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">ElemType</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ElemType</span> <span class="o">*</span><span class="n">elem</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">length</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">SSTable</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="general-idea">General Idea</h5>
+<p>Begin at one end of the list and scan down it until the desired key is found or the end is reached</p>
+<blockquote>
+<p>A successful search returns the position of the record</p>
+<p>An unsuccessful search returns 0</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">S_search</span><span class="p">(</span><span class="n">SSTable</span> <span class="n">ST</span><span class="p">[],</span> <span class="n">KeyType</span> <span class="n">K</span><span class="p">,</span> <span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">i</span><span class="p">{};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ST</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">key</span> <span class="o">=</span> <span class="n">K</span><span class="p">;</span><span class="cm">/*a sentinel,storage the Key Value*/</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span> <span class="n">ST</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">key</span> <span class="o">!=</span> <span class="n">K</span><span class="p">;</span> <span class="n">i</span> <span class="o">--</span><span class="p">);</span><span class="cm">/*compare backwards*/</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">i</span><span class="p">;</span><span class="cm">/*return the position, or 0*/</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="analysis">Analysis</h5>
+<blockquote>
+<p>To analyze the behavior of an algorithm that makes comparisons of keys</p>
+<p>we shall use the count of these key comparisons as our measure of the work done</p>
+</blockquote>
+<h5 id="average-search-lengthasl">Average Search Length(ASL)</h5>
+<p>$$
+ASL=P_1C_1+P_2C_2+&hellip;+P_nC_n=\sum_{i=1}^nP_iC_i\newline
+$$
+$Where\ P_i\ is\ probability(frequency)\ of\ search\ i^{th}\ record\newline$
+$and\ C_i\ is\ the\ count\ of\ key\ comparisons\ when\ search\ it\newline$</p>
+<p>$for\ sequential\ search$
+$$
+\begin{align}
+&amp;success\rightarrow\newline
+&amp;best\ case:\ 1\ comparison\newline
+&amp;worst\ case:n\ comparisons\newline
+&amp;average\ case:ASL_{sq}=\sum^n_{i=1}P_iC_i=\sum^n_{i=1}\frac {1}{n}(n-i+1)=\frac {n+1}{2}\newline\newline
+&amp;unsuccessful\ search:\rightarrow n+1\ comparisons\newline
+\end{align}
+$$</p>
+<h4 id="binary-search">Binary Search</h4>
+<h5 id="ordered-list">Ordered List</h5>
+<p>An ordered list is a list in which each entry contains a key, such that <strong>the keys are in order</strong></p>
+<p>That is, if entry $i$ comes before entry $j$ in the list, then the key of entry $i$ is less than or equal to the key of entry $j$ .</p>
+<h5 id="idea">Idea</h5>
+<p>In searching an ordered list, first compare the target to the key in the center of the list.</p>
+<p>If it is <strong>smaller</strong>, restrict the <strong>search to the left half</strong>. <strong>otherwise restrict the search to the right half</strong></p>
+<p>and repeat. In this way, <strong>at each step we reduce the length of the list to be searched by half</strong></p>
+<p>Initialization: <strong>Set Low=1 and High= Length of List</strong></p>
+<p>Repeat the following
+$$
+\begin{align}
+&amp;If\ Low &gt; High, Return\ 0\ to\ indicate\ Item\ not\ found\newline
+&amp;mid=\frac{low+high}{2}\newline
+&amp;if\ (K&lt;ST[mid])\rightarrow high=mid - 1\newline
+&amp;else\ if\ (K&gt;ST[mid])\rightarrow low = mid + 1\newline
+&amp;else\ return\ mid\ as\ location\ of\ the\ target\newline
+\end{align}
+$$</p>
+<h5 id="code">code</h5>
+<p>URL $\rightarrow$ <a href="https://zhuanlan.zhihu.com/p/565438258" target="_blank" rel="noopener noreffer">https://zhuanlan.zhihu.com/p/565438258</a></p>
+<p>$Three\ editions:\ 《Data\ Structure》\ from\ Tsinghua\ University\ -\ Deng\ Junhui\newline$</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cm">/******************************************************************************************
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Data Structures in C++
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ISBN: 7-302-33064-6 &amp; 7-302-33065-3 &amp; 7-302-29652-2 &amp; 7-302-26883-3
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Junhui DENG, deng@tsinghua.edu.cn
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Computer Science &amp; Technology, Tsinghua University
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Copyright (c) 2003-2021. All rights reserved.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> ******************************************************************************************/</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma once
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">//[lo, hi) and 0 &lt;= lo &lt;= hi &lt;= _size
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">static</span> <span class="n">Rank</span> <span class="n">binSearch</span> <span class="p">(</span> <span class="n">T</span><span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="n">T</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">lo</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="k">while</span> <span class="p">(</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">      <span class="n">Rank</span> <span class="n">mi</span> <span class="o">=</span> <span class="p">(</span> <span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span> <span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">      <span class="k">if</span>      <span class="p">(</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="n">S</span><span class="p">[</span><span class="n">mi</span><span class="p">]</span> <span class="p">)</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">mi</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">      <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span> <span class="n">S</span><span class="p">[</span><span class="n">mi</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">e</span> <span class="p">)</span> <span class="n">lo</span> <span class="o">=</span> <span class="n">mi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">      <span class="k">else</span>                  <span class="k">return</span> <span class="n">mi</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span> 
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="p">}</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cm">/******************************************************************************************
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Data Structures in C++
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ISBN: 7-302-33064-6 &amp; 7-302-33065-3 &amp; 7-302-29652-2 &amp; 7-302-26883-3
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Junhui DENG, deng@tsinghua.edu.cn
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Computer Science &amp; Technology, Tsinghua University
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Copyright (c) 2003-2021. All rights reserved.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> ******************************************************************************************/</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma once
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">//[lo, hi) and 0 &lt;= lo &lt; hi &lt;= _size
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">static</span> <span class="n">Rank</span> <span class="n">binSearch</span> <span class="p">(</span> <span class="n">T</span><span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="n">T</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">lo</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="k">while</span> <span class="p">(</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Rank</span> <span class="n">mi</span> <span class="o">=</span> <span class="p">(</span> <span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span> <span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">(</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="n">S</span><span class="p">[</span><span class="n">mi</span><span class="p">]</span> <span class="p">)</span> <span class="o">?</span> <span class="n">hi</span> <span class="o">=</span> <span class="nl">mi</span> <span class="p">:</span> <span class="n">lo</span> <span class="o">=</span> <span class="n">mi</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">   <span class="p">}</span> 
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="n">S</span><span class="p">[</span><span class="n">lo</span><span class="p">]</span> <span class="o">?</span> <span class="n">lo</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">:</span> <span class="n">lo</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="p">}</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cm">/******************************************************************************************
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Data Structures in C++
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ISBN: 7-302-33064-6 &amp; 7-302-33065-3 &amp; 7-302-29652-2 &amp; 7-302-26883-3
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Junhui DENG, deng@tsinghua.edu.cn
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Computer Science &amp; Technology, Tsinghua University
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Copyright (c) 2003-2021. All rights reserved.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> ******************************************************************************************/</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#pragma once
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">//[lo, hi) and 0 &lt;= lo &lt;= hi &lt;= _size
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">static</span> <span class="n">Rank</span> <span class="n">binSearch</span> <span class="p">(</span> <span class="n">T</span><span class="o">*</span> <span class="n">S</span><span class="p">,</span> <span class="n">T</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">lo</span><span class="p">,</span> <span class="n">Rank</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="k">while</span> <span class="p">(</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Rank</span> <span class="n">mi</span> <span class="o">=</span> <span class="p">(</span> <span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span> <span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">      <span class="p">(</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="n">S</span><span class="p">[</span><span class="n">mi</span><span class="p">]</span> <span class="p">)</span> <span class="o">?</span> <span class="n">hi</span> <span class="o">=</span> <span class="nl">mi</span> <span class="p">:</span> <span class="n">lo</span> <span class="o">=</span> <span class="n">mi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="n">lo</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="p">}</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="analysis-1">Analysis</h5>
+<p>$$
+\begin{align}
+&amp;T(n)=T(\frac{n}{2})+O(1)\newline
+&amp;T(n)=T(\frac{n}{2})+O(1)=T(\frac{n}{4})+O(2)=T(\frac{n}{8})+O(3)=&hellip;=O(\log n)\newline
+\end{align}
+$$</p>
+<h5 id="decision-tree">Decision Tree</h5>
+<h6 id="definition-1">definition</h6>
+<blockquote>
+<p>The decision tree (also called comparison tree or search tree) of an algorithm is obtained by tracing the action of binary search algorithm, representing each comparison of keys by a node of the tree (which we draw as a circle)</p>
+</blockquote>
+<p>Branches (lines) drawn down from the circle represent the possible outcomes of the comparison. When the algorithm terminates, we put either F (for failure) or the location where the target is found at the end of the appropriate branch, and draw as a square</p>
+<h6 id="example">Example</h6>
+<p>$$
+array:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]\newline
+$$</p>
+<div class="mermaid" id="id-2"></div>
+<h6 id="analysis-by-decision-tree">Analysis by decision tree</h6>
+<p>$$
+\begin{align}
+&amp;The\ best\ case:1\ comparison\newline
+&amp;The\ worst\ case:the\ depth\ of\ a\ decision\ tree\ h\newline
+&amp;The\ depth\ of\ a\ decision\ tree\rightarrow h=\lfloor \log_2n \rfloor+1\newline
+&amp;O(\log_2 n)\newline
+&amp;Average\ case(ASL): O(\log_2 n)\newline
+&amp;ASL_{bn}=\sum^n_{i=1}P_iC_i=\frac {1}{n}[1 * 2^0 + 2 * 2^1 + 3 * 2^2 + &hellip; + h * 2^{h-1}]\newline
+&amp;=\frac {n+1}{n}\log_2(n+1)-1 \approx \log_2(n+1)-1=O(log_2 n)\newline
+\end{align}
+$$</p>
+<h4 id="indexing-search">Indexing Search</h4>
+<h5 id="data-structure-1">Data Structure</h5>
+<p>Divided a search list R[n] into b sublist.</p>
+<p><strong>Each sublist may not be ordered by key</strong>, but <strong>the maximal key in the front sublist must be lower than the minimal key in the next successor list</strong></p>
+<p>An indexing table ID[b]. ID[i] stores the maximal key in i-th list. ID[b] is an ordered list</p>
+<h5 id="idea-1">Idea</h5>
+<ol>
+<li>Search in ID[b] to determine the possible sublist <strong>(Sequential search or binary search can be used)</strong></li>
+<li>Search in R[n] <strong>(Only sequential search can be used)</strong></li>
+</ol>
+<h5 id="analysis-2">Analysis</h5>
+<p>$ASL=ASL_{Index\ table}+ASL_{Sublist}\newline$</p>
+<p>For search list of length n, it is divided into b sublist and the length of a sublist is $s = \frac {n}{b}\newline$</p>
+<blockquote>
+<p>If using binary search in indexing table, the Average Search Length will be $log_2 (1 + \frac {n+1}{s})-1 + \frac {s + 1}{2}\newline$</p>
+</blockquote>
+<blockquote>
+<p>If using sequential search in indexing table, the Average Search Length will be $\frac {b+1}{2} + \frac {s+1}{2} = \frac {s^2 + 2s + n}{2s}\newline$</p>
+</blockquote>
+<p>For list of length 10000,</p>
+<p>Sequential search: $ASL=\frac {n+1}{2}=5000\newline$</p>
+<p>Indexing search (s=100):</p>
+<p>$ASL= log_2 (b+1)-1+ \frac {S+1}{2} &lt;57\newline$</p>
+<p>$or ASL= \frac {b+1}{2} + \frac {S+1}{2} = 101\newline$</p>
+<p>Binary search: $ASL=log_2 (n+1)-1 &lt; 14\newline$</p>
+<h4 id="summary-and-comparison">Summary and Comparison</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sequential Search</th>
+<th>Binary Search</th>
+<th>Indexing Search</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ASL</td>
+<td>Largest</td>
+<td>Smallest</td>
+<td>Middle</td>
+</tr>
+<tr>
+<td>List Structure</td>
+<td>Ordered Unordered</td>
+<td>Ordered</td>
+<td>Ordered indexing table</td>
+</tr>
+<tr>
+<td>Storage Structure</td>
+<td>Array or Linked List</td>
+<td>Array</td>
+<td>Array or Linked List</td>
+</tr>
+</tbody>
+</table>
+<h3 id="binary-search-trees-dynamic-search-table-1">Binary Search Trees (Dynamic search table)</h3>
+<h4 id="binary-search-tree">Binary Search Tree</h4>
+<h5 id="definition-2">Definition</h5>
+<p>Binary Search Tree (BST) is a binary tree in which</p>
+<ol>
+<li>
+<p>Every element has a unique key.</p>
+</li>
+<li>
+<p>The keys in a nonempty left subtree (right subtree) are smaller (larger) than the key in the root of subtree.</p>
+</li>
+<li>
+<p>The left and right subtrees are also Binary Search Trees.</p>
+</li>
+</ol>
+<p>Note that this tree is <strong>ordered</strong>!</p>
+<ol>
+<li>
+<p>Each element to the <strong>left</strong> of the root is <strong>less than the root</strong></p>
+</li>
+<li>
+<p>Each element to the <strong>right</strong> of the root is <strong>greater than the root</strong></p>
+</li>
+</ol>
+<h5 id="example-1">Example</h5>
+<div class="mermaid" id="id-3"></div>
+<h5 id="search-path">Search path</h5>
+<p>$Search\ path\ is\ a\ path\ from\ root\ to\ a\ node.\ The\ number\ of\ comparisons\ is\ the\ level\ of\ the\ node.\newline$</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">BiTree</span> <span class="nf">SearchBST</span> <span class="p">(</span><span class="n">BiTree</span> <span class="n">T</span> <span class="p">,</span> <span class="n">keytype</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// T is the root of the binary search tree
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">T</span> <span class="o">||</span> <span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">key</span> <span class="o">==</span> <span class="n">k</span><span class="p">))</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">T</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="n">SearchBST</span> <span class="p">(</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">,</span> <span class="n">k</span><span class="p">);</span> <span class="c1">//Searching in left subtree
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">else</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">SearchBST</span><span class="p">(</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">,</span> <span class="n">k</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="c1">//Searching in right subtree
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>The searching efficiency is affected by the shape of Binary Search Tree</p>
+</blockquote>
+<p>The worst case(one node per level, binary search degenerates to sequential search):$ASL=\frac {n+1}{2}\newline$</p>
+<p>The best case (n nodes should have $\lfloor \log_2n\rfloor +1$ levels) :$ASL=\log_2 (n+1)-1\newline$</p>
+<h5 id="insertion-into-bst">Insertion into BST</h5>
+<p>When search is <strong>not successful</strong>, the new data is inserted into BST</p>
+<p><strong>The new node must be a leaf of BST,</strong> and it is inserted into the position of searching fault</p>
+<figure><a class="lightgallery" href="/img/CreateBST.png" title="/img/CreateBST.png" data-thumbnail="/img/CreateBST.png" data-sub-html="<h2>case1(image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CreateBST.png"
+            data-srcset="/img/CreateBST.png, /img/CreateBST.png 1.5x, /img/CreateBST.png 2x"
+            data-sizes="auto"
+            alt="/img/CreateBST.png" />
+    </a><figcaption class="image-caption">case1(<code>image1</code>)</figcaption>
+    </figure>
+<h5 id="deletion-from-bst">Deletion from BST</h5>
+<ol>
+<li>
+<p>The deleted node is a leaf node &ndash; delete node, reset link from parent to Null</p>
+</li>
+<li>
+<p>The deleted node with 1 child &ndash; delete node, reset link from parent to point to child</p>
+</li>
+<li>
+<p>The deleted node with 2 children</p>
+<blockquote>
+<p>Let left subtree of P as left subtree of F;</p>
+<p>Or Replace node with inorder predecessor (successor) S</p>
+<p>Delete S (which has 0 or 1 child)</p>
+</blockquote>
+</li>
+</ol>
+<figure><a class="lightgallery" href="/img/DeletionFromBST1.png" title="/img/DeletionFromBST1.png" data-thumbnail="/img/DeletionFromBST1.png" data-sub-html="<h2>case1 (image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/DeletionFromBST1.png"
+            data-srcset="/img/DeletionFromBST1.png, /img/DeletionFromBST1.png 1.5x, /img/DeletionFromBST1.png 2x"
+            data-sizes="auto"
+            alt="/img/DeletionFromBST1.png" />
+    </a><figcaption class="image-caption">case1 (<code>image1</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/DelectionFromBST2.png" title="/img/DelectionFromBST2.png" data-thumbnail="/img/DelectionFromBST2.png" data-sub-html="<h2>case2 (image2)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/DelectionFromBST2.png"
+            data-srcset="/img/DelectionFromBST2.png, /img/DelectionFromBST2.png 1.5x, /img/DelectionFromBST2.png 2x"
+            data-sizes="auto"
+            alt="/img/DelectionFromBST2.png" />
+    </a><figcaption class="image-caption">case2 (<code>image2</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/DelectFromBST3.png" title="/img/DelectFromBST3.png" data-thumbnail="/img/DelectFromBST3.png" data-sub-html="<h2>case3 (image3)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/DelectFromBST3.png"
+            data-srcset="/img/DelectFromBST3.png, /img/DelectFromBST3.png 1.5x, /img/DelectFromBST3.png 2x"
+            data-sizes="auto"
+            alt="/img/DelectFromBST3.png" />
+    </a><figcaption class="image-caption">case3 (<code>image3</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/DelectFromBST4.png" title="/img/DelectFromBST4.png" data-thumbnail="/img/DelectFromBST4.png" data-sub-html="<h2>case4 (image4)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/DelectFromBST4.png"
+            data-srcset="/img/DelectFromBST4.png, /img/DelectFromBST4.png 1.5x, /img/DelectFromBST4.png 2x"
+            data-sizes="auto"
+            alt="/img/DelectFromBST4.png" />
+    </a><figcaption class="image-caption">case4 (<code>image4</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/DelectFromBST5.png" title="/img/DelectFromBST5.png" data-thumbnail="/img/DelectFromBST5.png" data-sub-html="<h2>case5 (image5)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/DelectFromBST5.png"
+            data-srcset="/img/DelectFromBST5.png, /img/DelectFromBST5.png 1.5x, /img/DelectFromBST5.png 2x"
+            data-sizes="auto"
+            alt="/img/DelectFromBST5.png" />
+    </a><figcaption class="image-caption">case5 (<code>image5</code>)</figcaption>
+    </figure>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">DeleteBST</span> <span class="p">(</span><span class="n">BiTree</span> <span class="o">&amp;</span><span class="n">T</span> <span class="p">,</span> <span class="n">keytype</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// If there is an element whose key-word EQ key, delete the element, then return true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">//otherwise return false
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">T</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span> <span class="c1">//The key does not exist
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span><span class="p">(</span><span class="n">EQ</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">.</span><span class="n">key</span><span class="p">))</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">Delete</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> 
+</span></span><span class="line"><span class="cl">	<span class="c1">//Find out the element whose keywork is key
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">LT</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">.</span><span class="n">key</span><span class="p">))</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">DeleteBST</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">,</span><span class="n">key</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">	<span class="k">else</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">DeleteBST</span><span class="p">(</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">,</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">//DeleteBST
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">Delete</span> <span class="p">(</span><span class="n">BiTree</span> <span class="o">&amp;</span><span class="n">p</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// Delete node p from BST, and reconnect its right/left child node 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">q</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">free</span><span class="p">(</span><span class="n">q</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">		<span class="n">q</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">free</span><span class="p">(</span><span class="n">q</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">else</span><span class="p">{</span> 
+</span></span><span class="line"><span class="cl">		<span class="n">q</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">		<span class="k">while</span> <span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">q</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="c1">//s is the predecessor of the node p 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span><span class="p">(</span><span class="n">q</span> <span class="o">!=</span> <span class="n">p</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">q</span><span class="o">-&gt;</span><span class="n">rchild</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span> <span class="c1">//connect the right subtree of q
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">else</span> 
+</span></span><span class="line"><span class="cl">            <span class="n">q</span><span class="o">-&gt;</span><span class="n">lchild</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span> <span class="c1">//connect the left subtree of q
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">free</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">//Delete
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png" title="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png" data-thumbnail="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png" data-sub-html="<h2>case1(image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png"
+            data-srcset="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png 1.5x, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png 2x"
+            data-sizes="auto"
+            alt="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_02.png" />
+    </a><figcaption class="image-caption">case1(<code>image1</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png" title="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png" data-thumbnail="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png" data-sub-html="<h2>case2(image2)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png"
+            data-srcset="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png 1.5x, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png 2x"
+            data-sizes="auto"
+            alt="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_03.png" />
+    </a><figcaption class="image-caption">case2(<code>image2</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png" title="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png" data-thumbnail="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png" data-sub-html="<h2>case3(image3)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png"
+            data-srcset="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png 1.5x, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png 2x"
+            data-sizes="auto"
+            alt="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_04.png" />
+    </a><figcaption class="image-caption">case3(<code>image3</code>)</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png" title="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png" data-thumbnail="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png" data-sub-html="<h2>case4(image4)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png"
+            data-srcset="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png 1.5x, /img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png 2x"
+            data-sizes="auto"
+            alt="/img/06.BST.B3.algorithm.remove/06.BST.B3.algorithm.remove_05.png" />
+    </a><figcaption class="image-caption">case4(<code>image4</code>)</figcaption>
+    </figure>
+<h4 id="avl-tree">AVL Tree</h4>
+<h5 id="tree-balancing">Tree Balancing</h5>
+<p><strong>Binary Search Trees(BST) are designed for fast searching!</strong></p>
+<blockquote>
+<p>But the order of insertion into a BST determines the shape of the tree and hence the efficiency with which tree can be searched.</p>
+</blockquote>
+<blockquote>
+<p>If it grows so that the tree is <strong>as “fat” as possible</strong> (fewest levels) then it can be <strong>searched most</strong> <strong>efficiently</strong>. If the tree grows “lopsided”, with many more items in one subtree than another, then the search efficiency will degrade.</p>
+</blockquote>
+<h6 id="for-avldifferent-in-bst">For AVL(different in BST)</h6>
+<p>An AVL tree is a binary tree that is <strong>height balanced</strong></p>
+<p>$\rightarrow The\ difference\ in\ height\ between\ the\ left\ and\ right\ subtrees\ at\ any\ point\ in\ the\ tree\ is\ restricted\newline$</p>
+<h5 id="balance-factor">Balance Factor</h5>
+<h6 id="definition-3">Definition</h6>
+<p>The balance factor of node x to be the height of x’s left subtree minus the height of its right subtree.</p>
+<p>$balFac(v)=height(lc(v))-height(rc(v))\newline$</p>
+<p>An AVL tree is a BST in which <strong>the balance factor of each node is 0, -1, or 1</strong></p>
+<p>Example</p>
+<figure><a class="lightgallery" href="/img/Sample%20Trees.png" title="/img/Sample Trees.png" data-thumbnail="/img/Sample Trees.png" data-sub-html="<h2>case1(image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Sample%20Trees.png"
+            data-srcset="/img/Sample%20Trees.png, /img/Sample%20Trees.png 1.5x, /img/Sample%20Trees.png 2x"
+            data-sizes="auto"
+            alt="/img/Sample Trees.png" />
+    </a><figcaption class="image-caption">case1(<code>image1</code>)</figcaption>
+    </figure>
+<h5 id="insert">insert</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">AVL</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">insert</span><span class="p">(</span> <span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span> <span class="n">e</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span> <span class="n">e</span> <span class="p">);</span> <span class="k">if</span> <span class="p">(</span> <span class="n">x</span> <span class="p">)</span> <span class="k">return</span> <span class="n">x</span><span class="p">;</span> <span class="c1">//若目标尚不存在
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">xx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BinNode</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">e</span><span class="p">,</span> <span class="n">_hot</span> <span class="p">);</span> <span class="n">_size</span><span class="o">++</span><span class="p">;</span> <span class="c1">//则创建新节点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 此时，若x的父亲_hot增高，则祖父有可能失衡
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">_hot</span><span class="p">;</span> <span class="n">g</span><span class="p">;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="p">)</span> <span class="c1">//从_hot起，逐层检查各代祖先g
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span> <span class="o">!</span> <span class="n">AvlBalanced</span><span class="p">(</span> <span class="o">*</span><span class="n">g</span> <span class="p">)</span> <span class="p">)</span> <span class="p">{</span> <span class="c1">//一旦发现g失衡，则通过调整恢复平衡
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">FromParentTo</span><span class="p">(</span><span class="o">*</span><span class="n">g</span><span class="p">)</span> <span class="o">=</span> <span class="n">rotateAt</span><span class="p">(</span> <span class="n">tallerChild</span><span class="p">(</span> <span class="n">tallerChild</span><span class="p">(</span> <span class="n">g</span> <span class="p">)</span> <span class="p">)</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span> <span class="c1">//局部子树复衡后，高度必然复原；其祖先亦必如此，故调整结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span> <span class="k">else</span> <span class="c1">//否则（g仍平衡）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">updateHeight</span><span class="p">(</span> <span class="n">g</span> <span class="p">);</span> <span class="c1">//只需更新其高度（注意：即便g未失衡，高度亦可能增加）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">xx</span><span class="p">;</span> <span class="c1">//返回新节点位置
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="remove">remove</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="kt">bool</span> <span class="n">AVL</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">remove</span><span class="p">(</span> <span class="k">const</span> <span class="n">T</span> <span class="o">&amp;</span> <span class="n">e</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span> <span class="n">e</span> <span class="p">);</span> <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">x</span> <span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span> <span class="c1">//若目标的确存在
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">removeAt</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">_hot</span> <span class="p">);</span> <span class="n">_size</span><span class="o">--</span><span class="p">;</span> <span class="c1">//则在按BST规则删除之后，_hot及祖先均有可能失衡
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 以下，从_hot出发逐层向上，依次检查各代祖先g
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">_hot</span><span class="p">;</span> <span class="n">g</span><span class="p">;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="o">!</span> <span class="n">AvlBalanced</span><span class="p">(</span> <span class="o">*</span><span class="n">g</span> <span class="p">)</span> <span class="p">)</span> <span class="c1">//一旦发现g失衡，则通过调整恢复平衡
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">g</span> <span class="o">=</span> <span class="n">FromParentTo</span><span class="p">(</span> <span class="o">*</span><span class="n">g</span> <span class="p">)</span> <span class="o">=</span> <span class="n">rotateAt</span><span class="p">(</span> <span class="n">tallerChild</span><span class="p">(</span> <span class="n">tallerChild</span><span class="p">(</span> <span class="n">g</span> <span class="p">)</span> <span class="p">)</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">updateHeight</span><span class="p">(</span> <span class="n">g</span> <span class="p">);</span> <span class="c1">//更新高度（注意：即便g未曾失衡或已恢复平衡，高度均可能降低）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span> <span class="c1">//可能需做过(logn)次调整；无论是否做过调整，全树高度均可能下降
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="nb">true</span><span class="p">;</span> <span class="c1">//删除成功
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="refactoring-34">refactoring-&gt;”3+4”</h5>
+<figure><a class="lightgallery" href="/img/3&#43;4.png" title="/img/3&#43;4.png" data-thumbnail="/img/3&#43;4.png" data-sub-html="<h2>case1(image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/3&#43;4.png"
+            data-srcset="/img/3&#43;4.png, /img/3&#43;4.png 1.5x, /img/3&#43;4.png 2x"
+            data-sizes="auto"
+            alt="/img/3&#43;4.png" />
+    </a><figcaption class="image-caption">case1(<code>image1</code>)</figcaption>
+    </figure>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> 
+</span></span><span class="line"><span class="cl"><span class="n">BST</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">connect34</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">a</span><span class="p">,</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">b</span><span class="p">,</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">c</span><span class="p">,</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T0</span><span class="p">,</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T1</span><span class="p">,</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T2</span><span class="p">,</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T3</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">=</span> <span class="n">T0</span><span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="n">T0</span><span class="p">)</span> <span class="n">T0</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="o">-&gt;</span><span class="n">rc</span> <span class="o">=</span> <span class="n">T1</span><span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="n">T1</span><span class="p">)</span> <span class="n">T1</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">c</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">=</span> <span class="n">T2</span><span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="n">T2</span><span class="p">)</span> <span class="n">T2</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">c</span><span class="o">-&gt;</span><span class="n">rc</span> <span class="o">=</span> <span class="n">T3</span><span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="n">T3</span><span class="p">)</span> <span class="n">T3</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">b</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span> <span class="n">a</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">rc</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">updateHeight</span><span class="p">(</span><span class="n">a</span><span class="p">);</span> <span class="n">updateHeight</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="n">updateHeight</span><span class="p">(</span><span class="n">b</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">removeAt</span> <span class="p">(</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span> <span class="n">hot</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">//实际被摘除的节点，初值同x
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">succ</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="c1">//实际被删除节点的接替者
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">HasLChild</span> <span class="p">(</span> <span class="o">*</span><span class="n">x</span> <span class="p">)</span> <span class="p">)</span> <span class="c1">//若*x的左子树为空，则可
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">succ</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">rc</span><span class="p">;</span> <span class="c1">//直接将*x替换为其右子树
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">HasRChild</span> <span class="p">(</span> <span class="o">*</span><span class="n">x</span> <span class="p">)</span> <span class="p">)</span> <span class="c1">//若右子树为空，则可
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">succ</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">lc</span><span class="p">;</span> <span class="c1">//对称地处理——注意：此时succ != NULL
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">else</span> <span class="p">{</span> <span class="c1">//若左右子树均存在，则选择x的直接后继作为实际被摘除节点，为此需要
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">-&gt;</span><span class="n">succ</span><span class="p">();</span> <span class="c1">//（在右子树中）找到*x的直接后继*w
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">swap</span> <span class="p">(</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span> <span class="n">w</span><span class="o">-&gt;</span><span class="n">data</span> <span class="p">);</span> <span class="c1">//交换*x和*w的数据元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">u</span> <span class="o">=</span> <span class="n">w</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">(</span> <span class="p">(</span> <span class="n">u</span> <span class="o">==</span> <span class="n">x</span> <span class="p">)</span> <span class="o">?</span> <span class="n">u</span><span class="o">-&gt;</span><span class="nl">rc</span> <span class="p">:</span> <span class="n">u</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="p">)</span> <span class="o">=</span> <span class="n">succ</span> <span class="o">=</span> <span class="n">w</span><span class="o">-&gt;</span><span class="n">rc</span><span class="p">;</span> <span class="c1">//隔离节点*w
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="n">hot</span> <span class="o">=</span> <span class="n">w</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span> <span class="c1">//记录实际被删除节点的父亲
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="k">if</span> <span class="p">(</span> <span class="n">succ</span> <span class="p">)</span> <span class="n">succ</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">hot</span><span class="p">;</span> <span class="c1">//并将被删除节点的接替者与hot相联
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="n">release</span> <span class="p">(</span> <span class="n">w</span><span class="o">-&gt;</span><span class="n">data</span> <span class="p">);</span> <span class="n">release</span> <span class="p">(</span> <span class="n">w</span> <span class="p">);</span> <span class="k">return</span> <span class="n">succ</span><span class="p">;</span> <span class="c1">//释放被摘除节点，返回接替者
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="c1">//release()负责释放复杂结构，与算法无直接关系，具体实现详见代码包
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="summary">summary</h5>
+<figure><a class="lightgallery" href="/img/AVL_summary.png" title="/img/AVL_summary.png" data-thumbnail="/img/AVL_summary.png" data-sub-html="<h2>case1(image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/AVL_summary.png"
+            data-srcset="/img/AVL_summary.png, /img/AVL_summary.png 1.5x, /img/AVL_summary.png 2x"
+            data-sizes="auto"
+            alt="/img/AVL_summary.png" />
+    </a><figcaption class="image-caption">case1(<code>image1</code>)</figcaption>
+    </figure>
+<h4 id="b-tree">B-Tree</h4>
+<p>Goals of Indexing</p>
+<ol>
+<li>
+<p>Store large files</p>
+</li>
+<li>
+<p>Support multiple search keys</p>
+</li>
+<li>
+<p>Support efficient insert, delete, and range queries</p>
+</li>
+</ol>
+<p>Difficulties when storing tree index on disk</p>
+<ol>
+<li>Tree must be balanced</li>
+<li>Each path from root to leaf should cover few disk pages</li>
+</ol>
+<p>The B-Tree is now the standard file organization for applications requiring insertion, deletion, and key range searches</p>
+<h5 id="definition-4">Definition</h5>
+<p>B-Tree of order <strong>m</strong> has these properties</p>
+<ol>
+<li>
+<p>The <strong>root</strong> is either a leaf or has at least two children</p>
+</li>
+<li>
+<p>Each node, except for the root and the leaves, has between $\lceil \frac {m}{2} \rceil and\ m$ children</p>
+</li>
+<li>
+<p><strong>The number of Keys in each node</strong>(except for the root) <strong>is</strong> between $\lceil \frac {m}{2} \rceil-1\ and\ m-1\newline$</p>
+</li>
+<li>
+<p>All leaves are at the same level in the tree, so <strong>the tree is always height balanced</strong></p>
+</li>
+</ol>
+<p>Example</p>
+<p>$B-Tree\ m=5\newline$</p>
+<figure><a class="lightgallery" href="/img/B-Tree%20For%20m%20equal%205.png" title="/img/B-Tree For m equal 5.png" data-thumbnail="/img/B-Tree For m equal 5.png" data-sub-html="<h2>case1(image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/B-Tree%20For%20m%20equal%205.png"
+            data-srcset="/img/B-Tree%20For%20m%20equal%205.png, /img/B-Tree%20For%20m%20equal%205.png 1.5x, /img/B-Tree%20For%20m%20equal%205.png 2x"
+            data-sizes="auto"
+            alt="/img/B-Tree For m equal 5.png" />
+    </a><figcaption class="image-caption">case1(<code>image1</code>)</figcaption>
+    </figure>
+<h5 id="application">Application</h5>
+<p>B-Tree node is usually selected to <strong>match the size of a disk block</strong></p>
+<h5 id="b-tree-search">B-Tree Search</h5>
+<p>Search in a B-Tree is similar with search in BST</p>
+<ol>
+<li>
+<p>Search keys in current node. If search key is found, then return record. If current node is a leaf node and key is not found, then report unsuccessful</p>
+</li>
+<li>
+<p>Otherwise, follow the proper branch and repeat the process</p>
+</li>
+</ol>
+<h5 id="b-tree-insertion">B-Tree Insertion</h5>
+<p>To insert value X into a B-tree, there are 3 steps</p>
+<ol>
+<li>
+<p>using the SEARCH procedure for M-way trees (described above) find the leaf node to which X should be added</p>
+</li>
+<li>
+<p>add X to this node in the appropriate place among the values already there. Being a leaf node there are no subtrees to worry about</p>
+</li>
+<li>
+<p>if there are M-1 or fewer values in the node after adding X,then we are finished. If there are M values after adding X, we say the node has <strong>overflowed</strong>.</p>
+<p>To repair this, we <strong>split the node</strong> into three parts:</p>
+<ol>
+<li>
+<p>Left: the first $\frac {M-1}{2}$ values</p>
+</li>
+<li>
+<p>Middle: the middle value $(position\ 1+(\frac {M-1}{2}))\newline$</p>
+</li>
+<li>
+<p>Right: the last $\frac {M-1}{2}$ values</p>
+</li>
+</ol>
+</li>
+</ol>
+<h5 id="b-tree-deletion">B-Tree Deletion</h5>
+<ol>
+<li>
+<p>How many values might there be in this combined node?</p>
+</li>
+<li>
+<p>The parent node contributes 1 value</p>
+</li>
+<li>
+<p>The node that underflowed contributes exactly $\frac {M-1}{2}-1$ values</p>
+</li>
+<li>
+<p>The neighboring node contributes somewhere between $\frac {M-1}{2}\ and\ M-1$ values</p>
+</li>
+</ol>
+<h6 id="case-1">case 1</h6>
+<p>Suppose that the neighboring node contains more than (M-1)/2 values. In this case, the total number of values in the combined node is strictly greater than 1 + ((M-1)/2 - 1) + ((M-1)/2)</p>
+<h6 id="case-2">case 2</h6>
+<p>Suppose, on the other hand, that the neighboring node contains exactly (M-1)/2 values. Then the total number of values in the combined node is 1 + ((M-1)/2 - 1) + ((M-1)/2) = (M-1)。</p>
+<h3 id="hash-table-1">Hash Table</h3>
+<h4 id="what-is-hashing">What is hashing</h4>
+<p>$Linear\ Search\ \rightarrow O(n)\newline$</p>
+<p>$Binary\ Search\rightarrow O(\log_2n)\newline$</p>
+<ol>
+<li>
+<p>Both depend on comparisons of item sought and elements in container</p>
+</li>
+<li>
+<p>Hash tables place data so that the location of an item is determined directly as a function of the item itself</p>
+</li>
+<li>
+<p>With a good hash function, searching a hash table takes O(1) time. that is, it is a constant and does not depend on the number of items stored.</p>
+</li>
+</ol>
+<p>$Address(a_i)=Hash(a_i.key)\newline$</p>
+<p>Here</p>
+<p>$a_i\ is\ an\ element\newline$</p>
+<p>$Address(a_i)\ stores\ the\ address\ of\ a_i\newline$</p>
+<p>$a_i.key\ is\ the\ key\ of\ a_i\ element\newline$</p>
+<div class="mermaid" id="id-4"></div>
+<h4 id="general-idea-1">General Idea</h4>
+<p>One problem with hash tables is collisions:</p>
+<p>$\rightarrow $when more than one item map to the same location in the hash table</p>
+<p>$\downarrow \newline$</p>
+<p>$\rightarrow $Some strategy is needed to resolve such collisions</p>
+<p>The <strong>hash function</strong> and <strong>data set</strong> determine the <strong>number of collisions</strong></p>
+<p>The <strong>strategy</strong> used to handle collisions affect <strong>the performance of searching for an arbitrary item</strong></p>
+<h4 id="hash-function">Hash Function</h4>
+<p>Hashing: The process of mapping a key value to a position in a table</p>
+<p>​	A hash function maps key values to positions in the hash table. It is denoted by <strong>h</strong>.</p>
+<p>​	A hash table is an array that holds the records. It is denoted by <strong>HT</strong></p>
+<p>​	<strong>HT</strong> has <em>m</em> slots, indexed from <em>0</em> to m-1</p>
+<p>For any value <em>K</em> in the key range and hash function <strong>h</strong>, <strong>h</strong>(<em>K</em>)=<em>i</em>, 0&lt;=<em>i</em> &lt;<em>m</em>, such that <strong>HT</strong>[i].key = <em>K</em></p>
+<h5 id="choosing-a-hash-function">Choosing a Hash Function</h5>
+<ol>
+<li>
+<p>A hash function should be EASY and QUICK to compute</p>
+</li>
+<li>
+<p>A hash function MUST return a value within the hash table range</p>
+</li>
+<li>
+<p>To be practical, a hash function SHOULD evenly distribute the records stored among the hash table slots</p>
+</li>
+<li>
+<p>Ideally, the hash function should distribute records with equal probability to all hash table slots. In practice, success depends on distribution of actual records stored</p>
+</li>
+<li>
+<p>If we know nothing about the incoming key distribution, evenly distribute the key range over the hash table slots while avoiding obvious opportunities for clustering</p>
+</li>
+</ol>
+<h5 id="example-2">Example</h5>
+<ol>
+<li>
+<p>$Hash(key)=a * key+b\ [a, b\ are\ constants]\newline$</p>
+</li>
+<li>
+<p><strong>Digital Analysis</strong> <strong>:</strong> All the keys are known in advance. Select <em>m</em> digits from <em>n</em></p>
+</li>
+</ol>
+<blockquote>
+<p>Criterion: Delete the digits having the most skewed distributions</p>
+</blockquote>
+<ol start="3">
+<li>$Hash(key)=key$ % $p\ p \leq m\newline$</li>
+</ol>
+<blockquote>
+<p><strong>Modular arithmetic:</strong> We may convert the key to an integer, divide by the size of the index range, and take the remainder as the result</p>
+<p>Assuming the address range is 0 to m - 1, let p is a prime which is less than/equal m  We can map the keys into addresses with the Hash function</p>
+</blockquote>
+<ol start="4">
+<li>
+<p>Mid-square method: Square the key value, take the middle r bits from the result for a hash table of $2^r$ slots</p>
+</li>
+<li>
+<p>$Hash(key)=\lfloor n * (A * key $ % $1)\rfloor \rightarrow A * key $%$ 1 = A * key - \lfloor A * key\rfloor\newline$</p>
+</li>
+<li>
+<p>Folding</p>
+</li>
+</ol>
+<blockquote>
+<p>Partition the key into several parts</p>
+<p>All parts except for the last one have the same length</p>
+<p>Combine the parts in a convenient way to obtain the hash address</p>
+<p>Two possibilities:</p>
+<blockquote>
+<p>Shift folding</p>
+<p>Folding at the boundaries</p>
+</blockquote>
+</blockquote>
+<h4 id="collisions">Collisions</h4>
+<p>Given: hash function <strong>h</strong> with keys $k_1$ and $k_2$ .$\beta$ is a slot in the hash table</p>
+<p>$If\ h(k_1 ) = \beta = h(k_2), then\ k_1\ and\ k_2\ have\ a\ collision\ at\ \beta\ under\ h\newline$</p>
+<p>Collisions are <strong>inevitable</strong> in most applications</p>
+<p>To use hashing we must</p>
+<ol>
+<li>
+<p>find good hash functions</p>
+</li>
+<li>
+<p>determine how to resolve collisions</p>
+</li>
+</ol>
+<p>Store or search for the record with key K</p>
+<ol>
+<li>
+<p>Compute the table location h(K)</p>
+</li>
+<li>
+<p>Starting with slot <strong>h</strong>(<em>K</em>), locate the record containing key <em>K</em> using (if necessary) a collision resolution policy</p>
+</li>
+</ol>
+<h5 id="collision-resolution">Collision Resolution</h5>
+<p>Collisions are inevitable in most applications, so some strategies are needed to resolve such collisions</p>
+<ol>
+<li>
+<p>Need to be able to place an element when its mapped location is full</p>
+</li>
+<li>
+<p>Need to be able to retrieve the element when it&rsquo;s not placed directly according to the hash function</p>
+</li>
+</ol>
+<p>The goal of collision resolution is to find a free slot in the HT. The new slot is found by a collision resolution policy</p>
+<p>Search must follow the same policy to find records not in their home slots</p>
+<h5 id="closed-hashing">Closed hashing</h5>
+<p>If a collision occurs, alternative slots are tried until an empty slot is found</p>
+<p>Probe sequence : The series of slots visited during insert/search by following a collision resolution policy</p>
+<p>Open Addressing</p>
+<ol>
+<li>
+<p>Linear Probing</p>
+</li>
+<li>
+<p>Quadratic Probing</p>
+</li>
+<li>
+<p>Random Probing</p>
+</li>
+</ol>
+<p>Rehashing</p>
+<h6 id="linear-probing">Linear Probing</h6>
+<p>Linear probing starts with the hash address and searches <strong>sequentially</strong> for the target key or an empty position.</p>
+<p><strong>The array should be considered circular</strong></p>
+<p>So that when the last location is reached, the search proceeds to the first location of the array</p>
+<p>$H_i=(Hash(key)+d_i)\ mod\ m\ (1 \leq i &lt;m)\newline$</p>
+<p>where: Hash (key) is hash function</p>
+<p>m is the length of hash table</p>
+<p>Probe sequence $d_i$ is 1,2,……,m-1 and $d_i = i\newline$</p>
+<p>Problem</p>
+<p><strong>Keys tend to cluster together</strong></p>
+<blockquote>
+<p>Records tend to cluster in the table under linear probing since the probabilities for which slot to use next are not the same for all slots</p>
+</blockquote>
+<p><strong>Adjacent cluster tend to coalesce</strong></p>
+<blockquote>
+<p>If the first hash addresses of two keys are different, but following the same probe sequence, they tend to the same slot, this is called <strong>secondary clustering</strong></p>
+</blockquote>
+<blockquote>
+<p>To avoid secondary clustering, need probe sequence to be a function of the original key value, not just the home position</p>
+</blockquote>
+<p><strong>Increase the search time</strong></p>
+<h6 id="quadratic-probing">Quadratic probing</h6>
+<p>Quadratic probing uses a quadratic function of $i$ as the increment</p>
+<p>$H_i=(Hash(key)+d_i)\ mod\ m\newline$</p>
+<p>$Hash(key)\ is\ hash\ function\newline$</p>
+<p>$m\ is\ the\ length\ of\ hash\ table\newline$</p>
+<p>$Proble\ sequenece\ d_i:1^2, -1^2, 2^2, -2^2, &hellip;q^2, -q^2, q \leq \frac {m-1}{2}\newline$</p>
+<h6 id="random-problem">Random problem</h6>
+<p>The ideal probe function would select the next slot on the probe sequence at random</p>
+<p>$H_i=(Hash(key)+d_i)\ mod\ m\newline$</p>
+<p>Probe sequence is a (random) permutation of the numbers from 1 to M-1: $r_1, r_2, &hellip; r_M\newline$</p>
+<p>$M \leq\ the\ length\ of\ table\ and\ M\ is\ a\ prime\ number\newline$</p>
+<h6 id="rehashing">Rehashing</h6>
+<p>$H_i=ReHash_i(key)\newline$</p>
+<p>$ReHash_i(key)$ is a <strong>different hash function</strong> from Hash(key)</p>
+<p>Try $h_1 (K), h_2 (K), …, h_m(K)$ if collision occurs</p>
+<p>Be sure that all different hash functions $h_i (K)$ are relatively prime to M</p>
+<h5 id="open-hashing">Open Hashing</h5>
+<h6 id="separate-chaining">Separate Chaining</h6>
+<p>Chaining: use a hash table that is an array of linked lists to store the items</p>
+<blockquote>
+<p>The hash table itself can be smaller than the number of records; If the records are large, a chained hash table can save space</p>
+</blockquote>
+<blockquote>
+<p>Collision resolution with chaining is simple. When a collision occurs, we simply insert the new item into the appropriate linked list. Clustering is no problem</p>
+</blockquote>
+<p>Searching such a hash table is straightforward</p>
+<blockquote>
+<p>apply the hash function to the item sought and then use one of the search algorithms for linked lists</p>
+</blockquote>
+<h5 id="analysis-of-hashing">Analysis of Hashing</h5>
+<h6 id="searching-2">Searching</h6>
+<p>To determine if a specified value is in this hash table,apply the hash function to compute the location for this value</p>
+<ol>
+<li>if location is empty, value not in the table</li>
+<li>if location contains the specified value, the search is successful</li>
+<li>if location contains a different value, <em>must rule out</em> <em>collision,</em> begin a “circular” search at this location and continue until either item is found or empty or starting location reached (item not in table)</li>
+</ol>
+<p>Comparison is needed in hash searching because of collision. We can use <strong>ASL</strong> to analyze hashing</p>
+<p>For hashing, the following factors may <strong>affects the efficiency</strong></p>
+<ol>
+<li>
+<p>Hash function: The behavior of the hash function affects the frequency of collisions</p>
+</li>
+<li>
+<p>Collision resolution policy</p>
+</li>
+<li>
+<p>Loading factor ($\alpha$): The load factor of the table is $\alpha = \frac {n}{m}$ , where n positions are occupied out of a total of m positions in the table</p>
+</li>
+</ol>
+<figure><a class="lightgallery" href="/img/Hash_ASL.png" title="/img/Hash_ASL.png" data-thumbnail="/img/Hash_ASL.png" data-sub-html="<h2>case1(image1)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Hash_ASL.png"
+            data-srcset="/img/Hash_ASL.png, /img/Hash_ASL.png 1.5x, /img/Hash_ASL.png 2x"
+            data-sizes="auto"
+            alt="/img/Hash_ASL.png" />
+    </a><figcaption class="image-caption">case1(<code>image1</code>)</figcaption>
+    </figure>
+<h5 id="summary-1">Summary</h5>
+<p>Comparison between Binary Search Trees and Hash Tables</p>
+<ol>
+<li>
+<p>difficult to find the minimum (or maximum) element in a hash table</p>
+</li>
+<li>
+<p>Can not find a range of elements in a hash table</p>
+</li>
+<li>
+<p>$O(\log_2n)$ is not necessarily much more than $O(1)$,since there are no multiplications or divisions by BSTs</p>
+</li>
+<li>
+<p>Sorted input can make BSTs perform poorly</p>
+</li>
+</ol>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/data-structure/">Data Structure</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-11-18</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching" data-hashtags="Data Structure"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-hashtag="Data Structure"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/" data-title="Searching"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/data-structures-and-algorithms/graph/" class="prev" rel="prev" title="Graph"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/data-structures-and-algorithms/sorting/" class="next" rel="next" title="Sorting">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(Search)\nB(Comparison)\nC(Calculation)\nD(Linear Search)\nE(Tree Search)\nF(Hash Search)\nA--\u003eB\nA--\u003eC\nB--\u003eD\nB--\u003eE\nC--\u003eF","id-2":"graph TB\n1((1))\n2((2))\n3((3))\n4((4))\n5((5))\n6((6))\n7((7))\n8((8))\n9((9))\n10((10))\n11((11))\n6--\u003e3\n6--\u003e9\n3--\u003e1\n3--\u003e4\n1--\u003e2\n4--\u003e5\n9--\u003e7\n9--\u003e10\n7--\u003e8\n10--\u003e11","id-3":"graph TB\n53((53))\n17((17))\n9((9))\n45((45))\n23((23))\n78((78))\n65((65))\n87((87))\n81((81))\n94((94))\n53==Searching 23==\u003e17\n53==Searching 88==\u003e78\n17--\u003e9\n17==\u003e45\n45==\u003e23\n78--\u003e65\n78==\u003e87\n87--\u003e81\n87==\u003e94","id-4":"graph LR\nA((Key Set))\nB((Address Set))\nA--hash--\u003eB"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

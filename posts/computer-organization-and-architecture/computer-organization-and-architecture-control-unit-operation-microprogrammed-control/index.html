@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control" />
+<meta property="og:description" content="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control Outline Control Unit Operation Micro-Operations Control of the Processor Hardwired Implementation Microprogrammed Control Basic Concepts Microinstruction Sequencing Microinstruction Execution Control Unit Operation The function of a processor Instruction Fetch and Execute Execute program Interrupts Handling performance differences between CPU and other components I/O Function Inter-working with peripherals Composition of instructions Instructions include opcodes and operands Opcodes Determines what type of" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-01-31T15:20:52+08:00" />
+<meta property="article:modified_time" content="2023-01-31T15:20:52+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control"/>
+<meta name="twitter:description" content="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control Outline Control Unit Operation Micro-Operations Control of the Processor Hardwired Implementation Microprogrammed Control Basic Concepts Microinstruction Sequencing Microinstruction Execution Control Unit Operation The function of a processor Instruction Fetch and Execute Execute program Interrupts Handling performance differences between CPU and other components I/O Function Inter-working with peripherals Composition of instructions Instructions include opcodes and operands Opcodes Determines what type of"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" /><link rel="prev" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" /><link rel="next" href="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Computer Organization and Architecture Control Unit Operation \u0026 Microprogrammed Control",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-control-unit-operation-microprogrammed-control\/"
+        },"genre": "posts","keywords": "Computer Organization and Architecture","wordcount":  4082 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/computer-organization-and-architecture\/computer-organization-and-architecture-control-unit-operation-microprogrammed-control\/","datePublished": "2023-01-31T15:20:52+08:00","dateModified": "2023-01-31T15:20:52+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/computer-organization-and-architecture/"><i class="far fa-folder fa-fw"></i>Computer Organization and Architecture</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-01-31">2023-01-31</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4082 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#control-unit-operation--microprogrammed-control">Control Unit Operation &amp; Microprogrammed Control</a>
+      <ul>
+        <li><a href="#outline">Outline</a></li>
+        <li><a href="#control-unit-operation">Control Unit Operation</a>
+          <ul>
+            <li><a href="#the-function-of-a-processor">The function of a processor</a></li>
+            <li><a href="#composition-of-instructions">Composition of instructions</a></li>
+            <li><a href="#micro-operations">Micro-operations</a>
+              <ul>
+                <li><a href="#fetch">Fetch</a></li>
+              </ul>
+            </li>
+            <li><a href="#flowchart-for-instruction-cycle">Flowchart for instruction cycle</a></li>
+            <li><a href="#functional-requirement">Functional requirement</a></li>
+            <li><a href="#types-of-micro-operation">Types of micro-operation</a></li>
+            <li><a href="#functions-of-control-unit">Functions of control unit</a></li>
+            <li><a href="#model-of-control-unit">Model of control unit</a></li>
+            <li><a href="#internal-organization">Internal organization</a></li>
+            <li><a href="#implementation-of-control-unit">Implementation of control unit</a></li>
+            <li><a href="#control-matrix">Control matrix</a></li>
+            <li><a href="#problems-with-hard-wired">Problems With Hard Wired</a></li>
+            <li><a href="#summary">Summary</a></li>
+          </ul>
+        </li>
+        <li><a href="#microprogrammed-control">Microprogrammed Control</a>
+          <ul>
+            <li><a href="#basic-concepts">Basic Concepts</a></li>
+            <li><a href="#micro-program-word-length">Micro-program Word Length</a></li>
+            <li><a href="#the-control-memory">The control memory</a></li>
+            <li><a href="#control-unit-function">Control Unit Function</a></li>
+            <li><a href="#next-address-decision">Next Address Decision</a></li>
+            <li><a href="#next-address">Next Address</a></li>
+            <li><a href="#simple-summary">Simple summary</a></li>
+            <li><a href="#advantages-and-disadvantages">Advantages and Disadvantages</a></li>
+            <li><a href="#microinstruction-sequencing">Microinstruction Sequencing</a></li>
+            <li><a href="#sequencing-techniques">Sequencing Techniques</a>
+              <ul>
+                <li><a href="#address-generation-time">Address generation time</a></li>
+                <li><a href="#sequencing-techniques-1">Sequencing Techniques</a></li>
+              </ul>
+            </li>
+            <li><a href="#microinstruction-execution">Microinstruction Execution</a></li>
+            <li><a href="#execution-effect">Execution effect</a></li>
+            <li><a href="#summary-1">Summary</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
+<h2 id="control-unit-operation--microprogrammed-control">Control Unit Operation &amp; Microprogrammed Control</h2>
+<h3 id="outline">Outline</h3>
+<ul>
+<li>
+<p>Control Unit Operation</p>
+<ul>
+<li>
+<p>Micro-Operations</p>
+</li>
+<li>
+<p>Control of the Processor</p>
+</li>
+<li>
+<p>Hardwired Implementation</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Microprogrammed Control</p>
+<ul>
+<li>Basic Concepts</li>
+<li>Microinstruction Sequencing</li>
+<li>Microinstruction Execution</li>
+</ul>
+</li>
+</ul>
+<h3 id="control-unit-operation">Control Unit Operation</h3>
+<h4 id="the-function-of-a-processor">The function of a processor</h4>
+<ul>
+<li>
+<p>Instruction Fetch and Execute</p>
+<ul>
+<li>Execute program</li>
+</ul>
+</li>
+<li>
+<p>Interrupts</p>
+<ul>
+<li>Handling performance differences between CPU and other components</li>
+</ul>
+</li>
+<li>
+<p>I/O Function</p>
+<ul>
+<li>Inter-working with peripherals</li>
+</ul>
+</li>
+</ul>
+<h4 id="composition-of-instructions">Composition of instructions</h4>
+<ul>
+<li>
+<p>Instructions include opcodes and operands</p>
+</li>
+<li>
+<p>Opcodes</p>
+<ul>
+<li>Determines what type of operation the instruction does</li>
+</ul>
+</li>
+<li>
+<p>Operands</p>
+<ul>
+<li>
+<p>Determine the object of instruction operation</p>
+</li>
+<li>
+<p>Operands may be in registers, memory, I/O, or immediate</p>
+</li>
+<li>
+<p>Finding operands through addressing mode</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="micro-operations">Micro-operations</h4>
+<ul>
+<li>
+<p>A computer executes a program to complete user specified functions</p>
+<ul>
+<li>
+<p>Program contains many instructions</p>
+</li>
+<li>
+<p>Instruction execution includes several cycles, such as fetch cycle, execution cycle, indirect cycle, etc</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Each cycle has a number of steps</strong></p>
+<ul>
+<li>
+<p><strong>Called micro-operations</strong></p>
+</li>
+<li>
+<p><strong>Each step does very little</strong></p>
+</li>
+<li>
+<p><strong>Atomic operation of CPU</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-1.png" title="/img/Computer Organization and Architecture/chapter15-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-1.png" data-sub-html="<h2>Constituent of program</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-1.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-1.png, /img/Computer%20Organization%20and%20Architecture/chapter15-1.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-1.png" />
+    </a><figcaption class="image-caption"><code>Constituent of program</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>程序的执行是由若干个指令执行组成的</strong></p>
+</li>
+<li>
+<p><strong>每个指令的执行就是一个指令周期</strong></p>
+</li>
+<li>
+<p><strong>指令周期由若干个子周期组成，比如取指周期、执行周期等</strong></p>
+</li>
+<li>
+<p><strong>每个子周期包含若干个更小的操作，这些操作称为微操作</strong></p>
+</li>
+</ul>
+<h5 id="fetch">Fetch</h5>
+<ul>
+<li>
+<p>Program Counter (PC)</p>
+<ul>
+<li>Holds address of next instruction to be fetched</li>
+</ul>
+</li>
+<li>
+<p>Memory Address Register (MAR)</p>
+<ul>
+<li>
+<p>Connected to address bus</p>
+</li>
+<li>
+<p>Specifies address for read or write op</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Memory Buffer Register (MBR)</p>
+<ul>
+<li>
+<p>Connected to data bus</p>
+</li>
+<li>
+<p>Holds data to write or last data read</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Instruction Register (IR)</p>
+<ul>
+<li>Holds last instruction fetched</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Step1</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-2.png" title="/img/Computer Organization and Architecture/chapter15-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-2.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-2.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-2.png, /img/Computer%20Organization%20and%20Architecture/chapter15-2.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-2.png" />
+    </a>
+<ul>
+<li>
+<p><strong>下一个指令的地址是放在PC里</strong></p>
+</li>
+<li>
+<p><strong>MAR是与地址总线连接的唯一寄存器</strong></p>
+</li>
+<li>
+<p><strong>取指的第一步是PC把下一个指令的地址给MAR</strong></p>
+</li>
+<li>
+<p><strong>经过第一步之后，PC寄存器的内容复制到MAR寄存器中</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Step2</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-3.png" title="/img/Computer Organization and Architecture/chapter15-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-3.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-3.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-3.png, /img/Computer%20Organization%20and%20Architecture/chapter15-3.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-3.png" />
+    </a>
+<ul>
+<li>
+<p>MAR收到地址后，把地址放到地址总线上</p>
+</li>
+<li>
+<p>控制单元发一个读命令到控制总线上</p>
+</li>
+<li>
+<p>存储器收到读命令后，根据地址读出指令内容，并放到数据总线</p>
+</li>
+<li>
+<p>数据总线上的数据读到MBR</p>
+</li>
+<li>
+<p>PC中还需要递增一个指令长度，以得到下一个指令的地址</p>
+</li>
+</ul>
+<hr>
+<p><strong>Step3</strong></p>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-4.png" title="/img/Computer Organization and Architecture/chapter15-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-4.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-4.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-4.png, /img/Computer%20Organization%20and%20Architecture/chapter15-4.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-4.png" />
+    </a>
+<ul>
+<li>
+<p>MBR的内容传送给IR</p>
+</li>
+<li>
+<p>传送完成后，MBR就可以释放，用于下一步操作</p>
+</li>
+<li>
+<p>IR中保存的就是下一个需要执行的指令</p>
+</li>
+<li>
+<p>通过这几个微操作，完成了取指</p>
+</li>
+</ul>
+<hr>
+<p><strong>Fetch sequence</strong></p>
+<ul>
+<li>
+<p>取指周期实际上由三步、四个微操作组成。每个微操作都涉及到数据在寄存器之间的流动</p>
+</li>
+<li>
+<p>如果数据的流动是独立的，这些操作可以在同一个时钟周期内完成</p>
+</li>
+<li>
+<p>PC递增微操作，既可以在t2完成，也可以在t3完成</p>
+</li>
+</ul>
+<hr>
+<p><strong>Rules for Micro-operations grouping</strong></p>
+<ul>
+<li>
+<p>Proper sequence must be followed</p>
+<ul>
+<li>MAR &lt;- (PC) must precede MBR &lt;- (memory)</li>
+</ul>
+</li>
+<li>
+<p>Conflicts must be avoided</p>
+<ul>
+<li>
+<p>Must not read &amp; write same register at same time</p>
+</li>
+<li>
+<p>MBR &lt;- (memory) &amp; IR &lt;- (MBR) must not be in same cycle</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Also: PC &lt;- (PC) +1 involves addition</p>
+<ul>
+<li>
+<p>Use ALU</p>
+</li>
+<li>
+<p>May need additional micro-operations</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Indirect cycle</strong></p>
+<ul>
+<li>In indirect addressing, it is necessary to get the address of the operand from the memory first. This process is called indirect cycle</li>
+</ul>
+<hr>
+<p><strong>Interrupt cycle</strong></p>
+<ul>
+<li>
+<p>After instruction processing is completed, check whether there is an interrupt</p>
+</li>
+<li>
+<p>Interrupt cycle needs to complete these operations</p>
+<ul>
+<li>
+<p>The instruction address before the interrupt needs to be saved</p>
+</li>
+<li>
+<p>Get the instruction address of the start of the interrupt handler to the PC</p>
+</li>
+</ul>
+</li>
+<li>
+<p>After the PC gets the interrupt processing address, it enters the index retrieval cycle</p>
+</li>
+</ul>
+<hr>
+<p><strong>Execute cycle</strong></p>
+<ul>
+<li>
+<p>Fetching, indirect and interruption cycle can be determined in advance</p>
+<ul>
+<li>Each cycle contains a fixed sequence of micro operations</li>
+</ul>
+</li>
+<li>
+<p>For execution cycle</p>
+<ul>
+<li>
+<p>Different operation codes correspond to different operations</p>
+</li>
+<li>
+<p>Each operation has a specific micro operation sequence</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="flowchart-for-instruction-cycle">Flowchart for instruction cycle</h4>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-5.png" title="/img/Computer Organization and Architecture/chapter15-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-5.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-5.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-5.png, /img/Computer%20Organization%20and%20Architecture/chapter15-5.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-5.png" />
+    </a>
+<ul>
+<li>
+<p>取指周期后，看是否是间接寻址。如果是间接寻址，进入01间接周期，如果不是，进入执行周期。</p>
+</li>
+<li>
+<p>间接周期后，读取地址，然后进入10执行周期</p>
+</li>
+<li>
+<p>执行周期，根据操作码来确定做什么操作。然后判断是否有中断。如果有中断，进入11中断周期。如果没有，进入00取指周期。</p>
+</li>
+<li>
+<p>中断周期，设置中断，然后进入中断处理程序的取指周期，继续取指</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Control of the Processor</p>
+<ul>
+<li>
+<p>Functional Requirements</p>
+</li>
+<li>
+<p>Control Signals</p>
+</li>
+<li>
+<p>A Control Signals Example</p>
+</li>
+<li>
+<p>Internal Processor Organization</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="functional-requirement">Functional requirement</h4>
+<ul>
+<li>
+<p>Micro-operations are the most basic function of the processor</p>
+</li>
+<li>
+<p>Three elements of the controller include</p>
+<ul>
+<li>
+<p>Basic elements of processor</p>
+</li>
+<li>
+<p>Micro-operations that processor performs</p>
+</li>
+<li>
+<p>How to control</p>
+</li>
+<li>
+<p>ALU</p>
+</li>
+<li>
+<p>Registers</p>
+</li>
+<li>
+<p>Internal data paths</p>
+</li>
+<li>
+<p>External data paths</p>
+</li>
+<li>
+<p>Control Unit</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="types-of-micro-operation">Types of micro-operation</h4>
+<ul>
+<li>
+<p>Micro-operations can be divided into the following four categories</p>
+<ul>
+<li>
+<p>Transfer data between registers</p>
+</li>
+<li>
+<p>Transfer data from register to external</p>
+</li>
+<li>
+<p>Transfer data from external to register</p>
+</li>
+<li>
+<p>Perform arithmetic or logical ops</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="functions-of-control-unit">Functions of control unit</h4>
+<ul>
+<li>
+<p>Operation object and operation type have been determined</p>
+</li>
+<li>
+<p>Function of the controller is to determine how to do it</p>
+<ul>
+<li>
+<p>Sequencing</p>
+</li>
+<li>
+<p>Execution</p>
+</li>
+<li>
+<p>This is done using Control Signals</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="model-of-control-unit">Model of control unit</h4>
+<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-6.png" title="/img/Computer Organization and Architecture/chapter15-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-6.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-6.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-6.png, /img/Computer%20Organization%20and%20Architecture/chapter15-6.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-6.png" />
+    </a>
+<ul>
+<li>
+<p>控制器的输入包括：时钟信号，各种标志，指令寄存器中的指令，来自控制总线的控制信号(中断)</p>
+</li>
+<li>
+<p>控制器的输出包括：CPU内部的控制信号，到控制总线的控制信号</p>
+</li>
+<li>
+<p><strong>控制器内部就是如何根据输入，来生成控制信号</strong></p>
+</li>
+</ul>
+<hr>
+<p><strong>Control signals</strong></p>
+<ul>
+<li>
+<p>Clock</p>
+<ul>
+<li>Provide clock signal for timing of controller</li>
+<li>One micro-instruction (or set of parallel micro-instructions) per clock cycle</li>
+</ul>
+</li>
+<li>
+<p>Instruction register</p>
+<ul>
+<li>
+<p>Op-code for current instruction</p>
+</li>
+<li>
+<p>Addressing mode</p>
+</li>
+<li>
+<p>Determines which micro-instructions are performed</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Flags</p>
+<ul>
+<li>
+<p>State of CPU</p>
+</li>
+<li>
+<p>Results of previous operations</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Control signal from control bus</p>
+<ul>
+<li>
+<p>Interrupts</p>
+</li>
+<li>
+<p>Acknowledgements</p>
+</li>
+</ul>
+</li>
+<li>
+<p>output</p>
+<ul>
+<li>
+<p>Within CPU</p>
+<ul>
+<li>
+<p>Cause data movement</p>
+</li>
+<li>
+<p>Activate specific functions</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Via control bus</p>
+<ul>
+<li>
+<p>To memory，control read or write</p>
+</li>
+<li>
+<p>To I/O modules</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>It generates three types of output control signals</strong></p>
+<ul>
+<li>
+<p>Data paths: the signals control the internal flow of data</p>
+</li>
+<li>
+<p>ALU: the signals control the operation of the ALU</p>
+</li>
+<li>
+<p>System bus: the control unit sends these signals to the control lines of the system bus</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="internal-organization">Internal organization</h4>
+<ul>
+<li>
+<p>CPU adopts single bus structure</p>
+<ul>
+<li>
+<p>All components, including ALU and registers, are connected to the bus</p>
+</li>
+<li>
+<p>A gate is set between each component and the bus to control the data transmission between the component and the bus</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Data transfer to and from external systems bus is controlled by the control signal</p>
+</li>
+<li>
+<p>Temporary registers needed for proper operation of ALU</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-7.png" title="/img/Computer Organization and Architecture/chapter15-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-7.png" data-sub-html="<h2>Internal processor organization</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-7.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-7.png, /img/Computer%20Organization%20and%20Architecture/chapter15-7.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-7.png" />
+    </a><figcaption class="image-caption"><code>Internal processor organization</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>各个寄存器都链接到内部总线上。寄存器和内部总线之间有个逻辑门，用于寄存器和内部总线的连接控制</p>
+</li>
+<li>
+<p>ALU没有内部存储部件。如果ALU的操作涉及2个操作数的话，一个由内部总线得到，另一个必须通过其他的数据源来得到，不能都在内部总线上。需要增加一个Y寄存器，用于临时保存源操作数</p>
+</li>
+<li>
+<p>ALU还需要有一个寄存器，来临时保存输出结果。这个结果不能总线上，因为如果放总线上的话，它又会当作ALU的输入</p>
+</li>
+</ul>
+<h4 id="implementation-of-control-unit">Implementation of control unit</h4>
+<ul>
+<li>
+<p>The control unit implementation can be done by two methods</p>
+<ul>
+<li>
+<p>Hardwired implementation</p>
+</li>
+<li>
+<p>Microprogrammed implementation</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Hardwired implementation: the control unit is a combinational circuit</p>
+<ul>
+<li>The input signals are transferred into a set of output control signals</li>
+</ul>
+</li>
+<li>
+<p>时钟发生器：产生时钟信号，并提供计数器</p>
+</li>
+<li>
+<p>译码器：根据指令寄存器中的指令操作码，生成操作码对应的唯一输出，提供给输出控制单元</p>
+</li>
+<li>
+<p>标志：为控制单元提供相关的标志信号</p>
+</li>
+<li>
+<p>控制单元：是控制器的核心，负责产生控制信号</p>
+</li>
+</ul>
+<h4 id="control-matrix">Control matrix</h4>
+<ul>
+<li>
+<p>Programmable arrays may also be numerous</p>
+</li>
+<li>
+<p>Large control matrices are implemented hierarchically for speed</p>
+</li>
+</ul>
+<h4 id="problems-with-hard-wired">Problems With Hard Wired</h4>
+<ul>
+<li>
+<p>Complex micro-operation logic</p>
+</li>
+<li>
+<p>Difficult to design and test</p>
+</li>
+<li>
+<p>Inflexible design</p>
+</li>
+<li>
+<p>Difficult to add new instructions</p>
+</li>
+</ul>
+<h4 id="summary">Summary</h4>
+<ul>
+<li>
+<p>The instructions are divided into a sequence of stages</p>
+</li>
+<li>
+<p>Fetch, indirect, execute, interrupt</p>
+</li>
+<li>
+<p>Each stage is further divided into a sequence of microoperations</p>
+<ul>
+<li>T1, T2, T3, …</li>
+</ul>
+</li>
+<li>
+<p>Each micro-operation occupies one clock unit</p>
+</li>
+<li>
+<p>The function of the control unit is to produce a sequence of timed control signals to control the data paths and ALU operations</p>
+</li>
+<li>
+<p>The control unit is a combinational circuit that transfers inputs to a group of control signals</p>
+<ul>
+<li>
+<p>Inputs: flags, instruction registers, clock, control signals from system bus</p>
+</li>
+<li>
+<p>Outputs: control signals to system bus and within CPU</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="microprogrammed-control">Microprogrammed Control</h3>
+<h4 id="basic-concepts">Basic Concepts</h4>
+<ul>
+<li>
+<p>Control unit can be implemented by a more flexible technique called microprogrammed control unit</p>
+<ul>
+<li>
+<p>The logic of the control unit is specified by a microprogram</p>
+</li>
+<li>
+<p>Each line in microprogram describes a group of micro-operations in one time，called microinstruction</p>
+</li>
+<li>
+<p>Construct a control word corresponding to this microinstruction</p>
+</li>
+<li>
+<p>The control word determines the opening or closing of all doors</p>
+</li>
+</ul>
+</li>
+<li>
+<p>微指令中包括CPU内控制信号、系统总线控制信号、跳转条件、微指令地址</p>
+</li>
+<li>
+<p>执行这条微指令的效果是，打开CPU内外所有为1的控制线，关闭所有为0的控制线</p>
+</li>
+<li>
+<p>如果条件条件为假，自动执行下一个顺序的微指令</p>
+</li>
+<li>
+<p>如果跳转条件为真，则执行“微指令地址”中对应的微指令</p>
+</li>
+</ul>
+<p><strong>Micro-instruction Types</strong></p>
+<ul>
+<li>
+<p><strong>horizontal microinstruction</strong></p>
+<ul>
+<li>
+<p>水平微指令包括四个部分</p>
+<ul>
+<li>内部控制信号：CPU内的每一个控制线都有相应的1位</li>
+<li>总线控制信号：每一个系统控制总线都有相应的1位</li>
+<li>条件字段：指示转移发生条件的字段</li>
+<li>微指令地址：转移的目标指令地址</li>
+</ul>
+</li>
+<li>
+<p>打开位值为1的控制线，关闭所有位值为0的控制线。执行一个或多个微操作</p>
+</li>
+<li>
+<p>如果跳转条件为假，顺序执行下一个指令。如果跳转条件为真，执行“微指令地址” 指向的微指令</p>
+</li>
+<li>
+<p><strong>Characteristic</strong></p>
+<ul>
+<li>
+<p>Each control line inside the CPU and bus needs to have a separate control bit</p>
+<ul>
+<li>The width of the control word is very large</li>
+</ul>
+</li>
+<li>
+<p>Each line is a separate control bit</p>
+<ul>
+<li>Each control line can be controlled independently</li>
+<li>More kinds of micro operations that can be supported</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>The control lines are controlled by one bit of the control word independently</p>
+<ul>
+<li>The coding of control signal is not compact</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>vertical microinstruction</strong></p>
+<ul>
+<li>
+<p>垂直微指令也包括条件和跳转微指令地址，跟水平微指令类似</p>
+</li>
+<li>
+<p>在控制方面，和水平微指令的每一位对应一个控制线不同，垂直微指令又做了一次编码</p>
+</li>
+<li>
+<p>解决水平微指令的控制字太长的问题</p>
+</li>
+<li>
+<p>编码后，由一个解码器再翻译成控制线的控制信号</p>
+</li>
+<li>
+<p><strong>Characteristic</strong></p>
+<ul>
+<li>
+<p>Width is narrow</p>
+<ul>
+<li>
+<p>n control signals encoded into $\log_2 n$ bits($n \rightarrow 2^n$)</p>
+</li>
+<li>
+<p>Limited number of micro operations supported</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Additional steps required</p>
+<ul>
+<li>External memory word decode is needed</li>
+<li>Identify the exact control line being manipulated</li>
+<li>Send control signal</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="micro-program-word-length">Micro-program Word Length</h4>
+<ul>
+<li>
+<p><strong>Word length is an important factor in microprogram</strong></p>
+</li>
+<li>
+<p><strong>Word length is determined by three factors</strong>\</p>
+<ul>
+<li>
+<p><strong>Maximum number of simultaneous micro-operations supported</strong></p>
+</li>
+<li>
+<p><strong>The way control information is represented or encoded</strong></p>
+</li>
+<li>
+<p><strong>The way in which the next micro-instruction address is specified</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>Compromise</strong></p>
+<ul>
+<li>
+<p>Divide control signals into disjoint groups</p>
+</li>
+<li>
+<p>Implement each group as separate field in memory word</p>
+</li>
+<li>
+<p>Supports reasonable levels of parallelism without too much complexity</p>
+</li>
+</ul>
+<h4 id="the-control-memory">The control memory</h4>
+<ul>
+<li>
+<p>The control words are put into a special memory block called control memory, with each word having a unique address</p>
+</li>
+<li>
+<p>The microinstructions are organized as different routines</p>
+<ul>
+<li>
+<p>The microinstructions in each routine are executed sequentially</p>
+</li>
+<li>
+<p>Each routine ends with a branch instruction points to the next routine</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-8.png" title="/img/Computer Organization and Architecture/chapter15-8.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-8.png" data-sub-html="<h2>Control memory</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-8.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-8.png, /img/Computer%20Organization%20and%20Architecture/chapter15-8.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-8.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-8.png" />
+    </a><figcaption class="image-caption"><code>Control memory</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>存储控制器中存储了取指例程、间接例程、中断例程、执行例程等，这些例程规定了在每个周期内需要执行的微操作序列</p>
+</li>
+<li>
+<p>例程中还规定了在执行结束后转移到下面哪一个例程，也就是指定了周期的执行顺序</p>
+</li>
+<li>
+<p>例如，取指周期后，可能会到间接周期，也可能到执行周期，需要根据取指周期来确定</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter15-9.png" title="/img/Computer Organization and Architecture/chapter15-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter15-9.png" data-sub-html="<h2>Control Unit Microarchitecture</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Computer%20Organization%20and%20Architecture/chapter15-9.png"
+            data-srcset="/img/Computer%20Organization%20and%20Architecture/chapter15-9.png, /img/Computer%20Organization%20and%20Architecture/chapter15-9.png 1.5x, /img/Computer%20Organization%20and%20Architecture/chapter15-9.png 2x"
+            data-sizes="auto"
+            alt="/img/Computer Organization and Architecture/chapter15-9.png" />
+    </a><figcaption class="image-caption"><code>Control Unit Microarchitecture</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>Sequencing logic</strong></p>
+</li>
+<li>
+<p><strong>Control address register</strong></p>
+</li>
+<li>
+<p><strong>Control memory</strong></p>
+</li>
+<li>
+<p><strong>Control buffer register</strong></p>
+</li>
+<li>
+<p>控制存储器：存储微指令</p>
+</li>
+<li>
+<p>控制地址寄存器：包含下一个将要被读取的微指令地址。类似于PC</p>
+</li>
+<li>
+<p>控制缓冲寄存器：微指令由控制存储器读取之后，放到控制缓冲寄存器中。控制缓冲寄存器的左半部分直接和控制线连接，读取微指令直接生成控制信号，控制门的开或关</p>
+</li>
+<li>
+<p>定序逻辑：负责为控制地址寄存器提供地址，并发出读命令</p>
+</li>
+</ul>
+<h4 id="control-unit-function">Control Unit Function</h4>
+<ul>
+<li>
+<p>Sequence logic unit issues read command</p>
+<ul>
+<li>
+<p>Word specified in control address register is read into control buffer register</p>
+</li>
+<li>
+<p>Control buffer register contents generates control signals and next address information</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Sequence logic loads new address into control address register based on next address information from control buffer register and ALU flags</p>
+</li>
+</ul>
+<h4 id="next-address-decision">Next Address Decision</h4>
+<ul>
+<li>
+<p>Sequencing logic needs to determine the next microinstruction</p>
+<ul>
+<li>At the end of each microinstruction, the next microinstruction address is loaded into the control address register</li>
+</ul>
+</li>
+<li>
+<p>Depending on ALU flags and control buffer register</p>
+<ul>
+<li>
+<p>Next microinstruction in sequence</p>
+</li>
+<li>
+<p>Jump to a new routine based on jump instructions</p>
+</li>
+<li>
+<p>Jump to a machine instruction routine</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="next-address">Next Address</h4>
+<ul>
+<li>
+<p>Next microinstruction in sequence</p>
+<ul>
+<li>Add 1 to control address register</li>
+</ul>
+</li>
+<li>
+<p>Jump to new routine based on jump microinstruction</p>
+<ul>
+<li>Load address field of control buffer register into control address register</li>
+</ul>
+</li>
+<li>
+<p>Jump to machine instruction routine</p>
+<ul>
+<li>Load control address register based on opcode in IR</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ol>
+<li>
+<p>指令译码器是将指令寄存器中的操作码翻译成控制寄存器地址</p>
+</li>
+<li>
+<p>控制地址寄存器到控制存储器中找到控制字，并放到控制缓冲寄存器中</p>
+</li>
+<li>
+<p><strong>控制缓冲寄存器进行控制操作。如果是垂直微指令，则需要译码器进行译码后生成控制信号</strong></p>
+</li>
+<li>
+<p>控制信号译码器用于垂直微指令，将控制字翻译成控制线的控制信号，发送到CPU内部和系统总线</p>
+</li>
+<li>
+<p>对于垂直微指令，有一个附加逻辑和时间延迟</p>
+</li>
+<li>
+<p>下一个微指令地址给定序逻辑，以确定执行哪一个微指令</p>
+</li>
+</ol>
+<h4 id="simple-summary">Simple summary</h4>
+<ul>
+<li>
+<p>All the control unit does is generate a set of control signals</p>
+<ul>
+<li>
+<p>Control the opening and closing of each gate</p>
+</li>
+<li>
+<p>Use one control bit to represent the control signal of a door</p>
+</li>
+<li>
+<p>Control bits of all gates constitute control words</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Have a control word for each group of micro-operations in one time</p>
+</li>
+<li>
+<p>The next microinstruction can be specified in the microinstruction and executed conditionally</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>For machine code instruction</p>
+<ul>
+<li>
+<p>It is generally divided into multiple cycles, such as fetch cycle, execution cycle, etc</p>
+</li>
+<li>
+<p>Multiple microoperations need to be completed</p>
+</li>
+<li>
+<p>Each microoperation corresponds to one control word</p>
+</li>
+<li>
+<p>A group of control words realizes the control function of a machine code</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Today’s large microprocessor</p>
+<ul>
+<li>
+<p>Many instructions and associated register-level hardware</p>
+</li>
+<li>
+<p>Many control points to be manipulated</p>
+</li>
+</ul>
+</li>
+<li>
+<p>This results in control memory that</p>
+<ul>
+<li>
+<p>Contains a large number of words，co-responding to the number of instructions to be executed</p>
+</li>
+<li>
+<p>Has a wide word width，due to the large number of control points to be manipulated</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="advantages-and-disadvantages">Advantages and Disadvantages</h4>
+<ul>
+<li>
+<p>Advantages</p>
+<ul>
+<li>
+<p>Simplifies design of control unit</p>
+</li>
+<li>
+<p>Cheaper</p>
+</li>
+<li>
+<p>Less error-prone</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Disadvantages</p>
+<ul>
+<li>
+<p>Additional processing required</p>
+</li>
+<li>
+<p>Slower</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="microinstruction-sequencing">Microinstruction Sequencing</h4>
+<ul>
+<li>
+<p>Microinstruction controller has two basic tasks</p>
+<ul>
+<li>
+<p>Microinstruction sequencing： Get the next microinstruction from the control memory</p>
+</li>
+<li>
+<p>Microinstruction execution : Through control word generates control signal for executing the micro instruction</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Must consider both together</p>
+<ul>
+<li>Affects instruction format and controller timing</li>
+</ul>
+</li>
+</ul>
+<h4 id="sequencing-techniques">Sequencing Techniques</h4>
+<ul>
+<li>
+<p>Two problems must be considered</p>
+<ul>
+<li>
+<p>Size of microinstructions</p>
+</li>
+<li>
+<p>Address generation time</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Size of microinstructions</p>
+<ul>
+<li>The larger the microinstruction, the larger the control memory, and the more expensive</li>
+<li>Size of microinstructions should be reduced</li>
+</ul>
+</li>
+<li>
+<p>Address generation time</p>
+<ul>
+<li>The requirement to execute microinstructions as quickly as possible</li>
+</ul>
+</li>
+</ul>
+<h5 id="address-generation-time">Address generation time</h5>
+<ul>
+<li>
+<p>Determined by instruction register</p>
+<ul>
+<li>Once per cycle, after instruction is fetched</li>
+</ul>
+</li>
+<li>
+<p>Next sequential address</p>
+<ul>
+<li>Use in most cases</li>
+</ul>
+</li>
+<li>
+<p>Branch</p>
+<ul>
+<li>
+<p>Both conditional and unconditional</p>
+</li>
+<li>
+<p>Generally, there is a jump after 3-4 microinstructions</p>
+</li>
+<li>
+<p>Very important</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="sequencing-techniques-1">Sequencing Techniques</h5>
+<ul>
+<li>
+<p>Based on current microinstruction, condition flags, contents of IR, generate control memory address of next microinstruction</p>
+</li>
+<li>
+<p>The jump of microinstructions can be divided into three modes according to the address information format in the microinstructions</p>
+<ul>
+<li>
+<p>Two address fields</p>
+<ul>
+<li>
+<p>对于双地址字段模式，微指令中提供了2个地址字段</p>
+</li>
+<li>
+<p>控制缓冲寄存器读取微指令后，第一部分产生控制信号，第二部分和第三部分是2个地址，这2个地址，加上指令寄存器的内容，连接到一个多路器中。多路器选择一个送到控制地址寄存器中</p>
+</li>
+<li>
+<p>控制地址寄存器通过译码，产生下一个微指令的地址。地址选择的输入是由转移逻辑模块来完成的，它根据微指令中的控制部分，以及标志位，向多路器提供选择信号</p>
+</li>
+<li>
+<p>双地址字段方式比较简单，微指令中有2个地址，需要更多的位</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Single address field</p>
+<ul>
+<li>
+<p>单地址字段方式中，微指令中只有一个地址。下一个地址的选择方法是：</p>
+<ul>
+<li>
+<p>地址字段中指定的地址</p>
+</li>
+<li>
+<p>指令寄存器中的代码</p>
+</li>
+<li>
+<p>下一个顺序地址</p>
+</li>
+</ul>
+</li>
+<li>
+<p>下一个顺序地址是用上一次的控制地址寄存器中的地址+1来得到的</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Variable format</p>
+<ul>
+<li>
+<p>可变格式提供两种不同格式的指令。用1位来标识当前是哪种格式。</p>
+</li>
+<li>
+<p>在一种格式中，所有位都用于产生控制信号。所以，下一个微指令的地址，或者是下一顺序地址，或者是由指令寄存器来指定</p>
+</li>
+<li>
+<p>另一种格式中，有一些位用于启动转移逻辑模块，其余的位来提供地址。这样就可以进行条件或者无条件转移</p>
+</li>
+<li>
+<p>这种方法的缺点是转移微指令需要花费一个时钟周期</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="microinstruction-execution">Microinstruction Execution</h4>
+<ul>
+<li>
+<p>Microinstruction execution is a periodic basic even</p>
+</li>
+<li>
+<p>Each cycle is made up of two events</p>
+<ul>
+<li>
+<p>Fetch</p>
+</li>
+<li>
+<p>Execute</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Fetch</p>
+<ul>
+<li>Get the microinstruction from the control memory according to the generated microinstruction address</li>
+</ul>
+</li>
+<li>
+<p>Execute</p>
+<ul>
+<li>Execute microinstructions and generate control signals</li>
+</ul>
+</li>
+</ul>
+<h4 id="execution-effect">Execution effect</h4>
+<ul>
+<li>
+<p>Effect is to generate control signals</p>
+</li>
+<li>
+<p>Internal</p>
+<ul>
+<li>
+<p>Control signals inside the processor</p>
+</li>
+<li>
+<p>Control the internal components of the processor</p>
+</li>
+</ul>
+</li>
+<li>
+<p>External</p>
+<ul>
+<li>
+<p>Control signals to external control bus or other interface</p>
+</li>
+<li>
+<p>Control disk read-write, I/O read-write etc</p>
+</li>
+</ul>
+</li>
+<li>
+<p>With the function to generate next address</p>
+</li>
+</ul>
+<h4 id="summary-1">Summary</h4>
+<ul>
+<li>
+<p>A microprogrammed control unit is a relatively simple logic circuit that is capable of</p>
+<ul>
+<li>
+<p>Sequencing through microinstructions</p>
+</li>
+<li>
+<p>Generating control signals to execute each microinstruction</p>
+</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/computer-organization-and-architecture/">Computer Organization and Architecture</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-01-31</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control" data-hashtags="Computer Organization and Architecture"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-hashtag="Computer Organization and Architecture"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/" data-title="Computer Organization and Architecture Control Unit Operation &amp; Microprogrammed Control"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/" class="prev" rel="prev" title="Computer Organization and Architecture Instruction Level Parallelism and Superscalar Processors"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/" class="next" rel="next" title="Computer Organization and Architecture Parallel Process &amp; Multicore Computers">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

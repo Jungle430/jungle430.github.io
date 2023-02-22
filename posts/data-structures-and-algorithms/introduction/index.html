@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Introduction - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Introduction" />
+<meta property="og:description" content="Data Structure Introduction Data Define: The set of all the symbols can be processed or stored by a computer Example: A data set in a classroom = { desk 1, desk 2,…chair 1, chair2…,stud 1, stud 2,…}
+Data Element Define: The term data element is an atomic unit of data that has:
+An identification such as a data element name A clear data element definition Example: desk i; chair j; project n…" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-06T22:31:52+08:00" />
+<meta property="article:modified_time" content="2022-11-06T22:31:52+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Introduction"/>
+<meta name="twitter:description" content="Data Structure Introduction Data Define: The set of all the symbols can be processed or stored by a computer Example: A data set in a classroom = { desk 1, desk 2,…chair 1, chair2…,stud 1, stud 2,…}
+Data Element Define: The term data element is an atomic unit of data that has:
+An identification such as a data element name A clear data element definition Example: desk i; chair j; project n…"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" /><link rel="prev" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/tree/" /><link rel="next" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/algorithms-analysis/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Introduction",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/introduction\/"
+        },"genre": "posts","keywords": "Data Structure","wordcount":  444 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/introduction\/","datePublished": "2022-11-06T22:31:52+08:00","dateModified": "2022-11-06T22:31:52+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Introduction</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/data-structure/"><i class="far fa-folder fa-fw"></i>Data Structure</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-11-06">2022-11-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 444 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#data">Data</a></li>
+    <li><a href="#data-element">Data Element</a></li>
+    <li><a href="#data-item">Data item</a></li>
+    <li><a href="#data-object">Data Object</a></li>
+    <li><a href="#structure">Structure</a></li>
+    <li><a href="#data-structure-1">Data Structure</a></li>
+    <li><a href="#class-of-structure">Class of Structure</a></li>
+    <li><a href="#about-algorithm">About algorithm</a></li>
+    <li><a href="#data-type">Data Type</a></li>
+    <li><a href="#abstract-data-type-adt">Abstract Data Type (ADT)</a></li>
+    <li><a href="#kind-of-parameters">Kind of parameters</a></li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="data-structure">Data Structure</h1>
+<h2 id="introduction">Introduction</h2>
+<h2 id="data">Data</h2>
+<blockquote>
+<p>Define: The set of all the symbols can be processed or stored by a computer
+Example: A data set in a classroom = { desk 1, desk 2,…chair 1, chair2…,stud 1, stud 2,…}</p>
+</blockquote>
+<h2 id="data-element">Data Element</h2>
+<blockquote>
+<p>Define: The term data element is an atomic unit
+of data that has:</p>
+<ol>
+<li>An identification such as a data element name</li>
+<li>A clear data element definition</li>
+</ol>
+<p>Example: desk i; chair j; project n…</p>
+</blockquote>
+<h2 id="data-item">Data item</h2>
+<blockquote>
+<p>Define: One smallest indivisible data units</p>
+<p>!!! One data element consists of one or many data items.</p>
+</blockquote>
+<h2 id="data-object">Data Object</h2>
+<blockquote>
+<p>Define: The collection of data elements with same features.</p>
+<p>Example:
+Data Object 1: ={ desk 1, desk 2,…};</p>
+<p>Data Object 2: ={ chair 1, chair 2,…};</p>
+<p>Data Object 3: ={ stud 1, stud 2,…};</p>
+</blockquote>
+<p>On Data Object3, The data of a student is a set of {ID, FirstName, LastName, age}, in a list of student, the list of age = {12, 13, 12, &hellip;}, then -&gt;</p>
+<blockquote>
+<p>Data Element:age</p>
+<p>Data item: 12</p>
+</blockquote>
+<h2 id="structure">Structure</h2>
+<blockquote>
+<p>Relationships between data elements</p>
+</blockquote>
+<h2 id="data-structure-1">Data Structure</h2>
+<blockquote>
+<p>A set of data elements with structure</p>
+</blockquote>
+<p>Data Structure can be defined is math</p>
+<blockquote>
+<p>Data Structure = (D, R)</p>
+<p>D: the set of Data elements</p>
+<p>R: the Relationships of the data elements</p>
+</blockquote>
+<p>DS is formed by two sets:</p>
+<ol>
+<li>Data element set</li>
+<li>Relationship set</li>
+</ol>
+<h2 id="class-of-structure">Class of Structure</h2>
+<ol>
+<li>logic structure -&gt; {Set, Linear, Tree, Graph}</li>
+<li>Physical structure -&gt; Such as a Linear structure use sequence structure or Linked structure ?</li>
+</ol>
+<h2 id="about-algorithm">About algorithm</h2>
+<ol>
+<li>Algorithm design depends on logical structure(Like in math)</li>
+<li>Algorithm implementation depends on how to store
+the DS physical structure</li>
+</ol>
+<h2 id="data-type">Data Type</h2>
+<blockquote>
+<p>Define: A data type is a collection of objects and a set of
+operations that act on those objects.</p>
+</blockquote>
+<p>Example:int, double &hellip; and std::vector&lt;&gt;, std::map&lt;&gt; &hellip;</p>
+<h2 id="abstract-data-type-adt">Abstract Data Type (ADT)</h2>
+<blockquote>
+<p>Define:An abstract data type(ADT) is a data type that is
+organized in such a way that the specification of the
+objects and the operations on the objects is separated
+from the representation of the objects and the
+implementation of the operations.</p>
+</blockquote>
+<p>Conclusion: Consider only the mathematical level, not the actual computer structure</p>
+<blockquote>
+<p>Mathematical definition of ADT：</p>
+</blockquote>
+<ol>
+<li>D：Data object , the set of the data elements</li>
+<li>S：the structure on the object D</li>
+<li>P：Operations performed on the object</li>
+</ol>
+<p>Example:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cm">/*
+</span></span></span><span class="line"><span class="cl"><span class="cm">Data Object, Data relation, Operations
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Complex</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span> <span class="c1">//Data Object
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">real</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">image</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//Data relation:real part and image part in a complex
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">public</span><span class="o">:</span><span class="c1">//Operations
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Add</span><span class="p">(</span><span class="n">Complex</span> <span class="n">Other</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">GetRead</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//.....
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="kind-of-parameters">Kind of parameters</h2>
+<ol>
+<li>Value parameter</li>
+<li>Reference parameter (in c++ is &amp;)</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<ol>
+<li>DS = Data elements + Relationships of data elements</li>
+<li>Data structures + Algorithms = Program</li>
+<li>ADT = DS + Operations</li>
+</ol>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/data-structure/">Data Structure</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-11-06</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction" data-hashtags="Data Structure"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-hashtag="Data Structure"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/" data-title="Introduction"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/data-structures-and-algorithms/tree/" class="prev" rel="prev" title="Tree"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/data-structures-and-algorithms/algorithms-analysis/" class="next" rel="next" title="Algorithms Analysis">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

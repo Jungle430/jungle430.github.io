@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>String - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="String" />
+<meta property="og:description" content="Data Structure String $Structure\rightarrow list$ linked String Arrayed String General Concepts of String $Null\ String(\emptyset)：Nothing\ in\ the\ string, the\ length\ is\ zero.$ $Blank(Space)string：Only\ includes\ one\ or\ more\ blanks(spaces)in\ the\ string.$ $Substring: sub-sequence\ of\ one\ string.$ ADT {
+ADT String {Data Object：D＝{ ai | ai∈CharacterSet,i=1,2,...n, n≥0 } Data Relationship：R1＝{ &lt; ai-1, ai &gt; | ai-1, ai∈D,i=2,...,n } Operation： …… } ADT String
+Operations {
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 StrAssign (&amp;T, chars) //string assignment Initial：chars are character constant." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-06T22:37:05+08:00" />
+<meta property="article:modified_time" content="2022-11-06T22:37:05+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="String"/>
+<meta name="twitter:description" content="Data Structure String $Structure\rightarrow list$ linked String Arrayed String General Concepts of String $Null\ String(\emptyset)：Nothing\ in\ the\ string, the\ length\ is\ zero.$ $Blank(Space)string：Only\ includes\ one\ or\ more\ blanks(spaces)in\ the\ string.$ $Substring: sub-sequence\ of\ one\ string.$ ADT {
+ADT String {Data Object：D＝{ ai | ai∈CharacterSet,i=1,2,...n, n≥0 } Data Relationship：R1＝{ &lt; ai-1, ai &gt; | ai-1, ai∈D,i=2,...,n } Operation： …… } ADT String
+Operations {
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 StrAssign (&amp;T, chars) //string assignment Initial：chars are character constant."/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" /><link rel="prev" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/" /><link rel="next" href="https://Jungle430.github.io/posts/data-structures-and-algorithms/dynamic-programming/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "String",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/string\/"
+        },"genre": "posts","keywords": "Data Structure","wordcount":  936 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/data-structures-and-algorithms\/string\/","datePublished": "2022-11-06T22:37:05+08:00","dateModified": "2022-11-06T22:37:05+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">String</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/data-structure/"><i class="far fa-folder fa-fw"></i>Data Structure</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-11-06">2022-11-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 936 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#string">String</a>
+      <ul>
+        <li><a href="#structurerightarrow-list">$Structure\rightarrow list$</a></li>
+        <li><a href="#general-concepts-of-string">General Concepts of String</a></li>
+        <li><a href="#adt">ADT</a></li>
+        <li><a href="#operations">Operations</a></li>
+        <li><a href="#string-pattern-matching">String Pattern Matching</a>
+          <ul>
+            <li><a href="#forcematch">ForceMatch</a></li>
+            <li><a href="#kmp">KMP</a></li>
+            <li><a href="#optimization-kmp">Optimization KMP</a></li>
+            <li><a href="#supplement">supplement</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="data-structure">Data Structure</h1>
+<h2 id="string">String</h2>
+<h3 id="structurerightarrow-list">$Structure\rightarrow list$</h3>
+<ol>
+<li>linked String</li>
+<li>Arrayed String</li>
+</ol>
+<h3 id="general-concepts-of-string">General Concepts of String</h3>
+<ol>
+<li>$Null\ String(\emptyset)：Nothing\ in\ the\ string, the\ length\ is\ zero.$</li>
+<li>$Blank(Space)string：Only\ includes\ one\ or\ more\ blanks(spaces)in\ the\ string.$</li>
+<li>$Substring: sub-sequence\ of\ one\ string.$</li>
+</ol>
+<h3 id="adt">ADT</h3>
+<p>{</p>
+<pre><code>ADT String {Data Object：D＝{ ai | ai∈CharacterSet,i=1,2,...n, n≥0 }
+Data Relationship：R1＝{ &lt; ai-1, ai &gt; | ai-1, ai∈D,i=2,...,n }
+Operation： ……
+</code></pre>
+<p>} ADT String</p>
+<h3 id="operations">Operations</h3>
+<p>{</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl">    <span class="n">StrAssign</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">T</span><span class="p">,</span> <span class="n">chars</span><span class="p">)</span> <span class="c1">//string assignment
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span><span class="err">：</span><span class="n">chars</span> <span class="n">are</span> <span class="n">character</span> <span class="n">constant</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">assign</span> <span class="n">chars</span> <span class="n">to</span> <span class="n">T</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">StrCopy</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">T</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span> <span class="c1">//String Copy
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span><span class="err">：</span><span class="n">S</span> <span class="n">string</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Copy</span> <span class="n">S</span> <span class="n">string</span> <span class="n">to</span> <span class="n">T</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">DestroyString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Initial</span><span class="err">：</span><span class="n">S</span> <span class="n">String</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Destroy</span> <span class="n">S</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ClearString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Initial</span><span class="err">：</span><span class="n">S</span> <span class="n">String</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Change</span> <span class="n">S</span> <span class="n">into</span> <span class="n">Null</span> <span class="n">string</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">StrEmpty</span> <span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Initial</span><span class="err">：</span><span class="n">S</span> <span class="n">String</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">If</span> <span class="n">S</span> <span class="n">is</span> <span class="n">null</span> <span class="n">string</span><span class="err">，</span><span class="k">return</span> <span class="n">TRUE</span><span class="err">，</span><span class="n">otherwise</span><span class="p">,</span> <span class="k">return</span> <span class="n">FALSE</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">StrCompare</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="c1">//String comparison
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span><span class="err">：</span><span class="n">S</span> <span class="n">and</span> <span class="n">T</span> <span class="n">Strings</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">If</span> <span class="n">S</span><span class="o">&gt;</span><span class="n">T</span><span class="err">，</span><span class="n">the</span> <span class="k">return</span> <span class="n">value</span> <span class="n">is</span> <span class="n">greater</span> <span class="n">than</span> <span class="mi">0</span><span class="err">；</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">S</span><span class="o">=</span><span class="n">T</span><span class="err">，</span><span class="n">the</span> <span class="k">return</span> <span class="n">value</span> <span class="n">is</span> <span class="mi">0</span><span class="err">；</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">S</span><span class="o">&lt;</span><span class="n">T</span><span class="err">，</span><span class="n">the</span> <span class="k">return</span> <span class="n">value</span> <span class="n">is</span> <span class="n">less</span> <span class="n">than</span> <span class="mf">0.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">StrLength</span> <span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="c1">// get string length
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span> <span class="err">：</span><span class="n">S</span> <span class="n">String</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">The</span> <span class="n">number</span> <span class="n">of</span> <span class="n">characters</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Concat</span><span class="p">(</span><span class="o">&amp;</span><span class="n">T</span><span class="p">,</span><span class="n">S1</span><span class="p">,</span><span class="n">S2</span><span class="p">)</span> <span class="c1">//String Concatenation
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span><span class="err">：</span><span class="n">String</span> <span class="n">S1</span> <span class="n">and</span> <span class="n">S2</span><span class="err">。</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Concatenate</span> <span class="n">S1</span> <span class="n">and</span> <span class="n">S2</span> <span class="n">and</span> <span class="n">put</span> <span class="n">the</span> <span class="k">new</span> <span class="n">string</span> <span class="n">into</span> <span class="n">T</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">SubString</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">Sub</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">len</span><span class="p">)</span> <span class="c1">//Get substring
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span><span class="err">：</span><span class="n">String</span> <span class="n">S</span><span class="err">，</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">pos</span> <span class="o">&lt;=</span> <span class="n">StrLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="n">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">len</span> <span class="o">&lt;=</span> <span class="n">StrLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">-</span> <span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Return</span> <span class="n">substring</span> <span class="n">of</span> <span class="n">string</span><span class="p">,</span> <span class="n">which</span> <span class="n">from</span> <span class="n">pos</span> <span class="n">to</span> <span class="n">pos</span> <span class="o">+</span> <span class="n">len</span> <span class="o">-</span> <span class="mi">1</span> <span class="n">position</span> <span class="n">of</span> <span class="n">S</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Index</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="c1">//String index
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span><span class="err">：</span><span class="n">String</span> <span class="n">S</span> <span class="n">and</span> <span class="n">T</span><span class="err">，</span><span class="n">T</span> <span class="n">is</span> <span class="n">non</span><span class="o">-</span><span class="n">empty</span><span class="p">,</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">pos</span> <span class="o">&lt;=</span> <span class="n">StrLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">Output</span><span class="p">:</span> <span class="n">If</span> <span class="n">the</span> <span class="n">there</span> <span class="n">is</span> <span class="n">a</span> <span class="n">substring</span> <span class="n">T</span> <span class="n">in</span> <span class="n">S</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">the</span> <span class="n">position</span> <span class="n">of</span> <span class="n">sub</span><span class="o">-</span><span class="n">string</span> <span class="n">T</span> <span class="n">occurs</span> <span class="n">first</span> <span class="n">time</span> <span class="n">after</span> <span class="n">pos</span><span class="p">,</span> <span class="n">otherwise</span> <span class="k">return</span> <span class="mf">0.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Replace</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span> <span class="c1">//String replacement
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Initial</span><span class="err">：</span><span class="n">String</span> <span class="n">S</span><span class="p">,</span> <span class="n">T</span> <span class="n">and</span> <span class="n">V</span><span class="p">,</span> <span class="n">T</span> <span class="n">is</span> <span class="n">non</span><span class="o">-</span><span class="n">empty</span><span class="p">.</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Replace</span> <span class="n">non</span><span class="o">-</span><span class="n">overlapped</span> <span class="n">substring</span> <span class="n">T</span> <span class="n">of</span> <span class="n">S</span> <span class="n">with</span> <span class="n">V</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">StrInsert</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Initial</span><span class="err">：</span><span class="n">String</span> <span class="n">S</span> <span class="n">and</span> <span class="n">T</span><span class="err">，</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">pos</span> <span class="o">&lt;=</span> <span class="n">StrLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="err">＋</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Insert</span> <span class="n">String</span> <span class="n">T</span> <span class="n">before</span> <span class="n">the</span> <span class="n">pos</span> <span class="n">character</span> <span class="n">of</span> <span class="n">string</span> <span class="n">S</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">StrDelete</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">len</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Initial</span><span class="err">：</span><span class="n">String</span> <span class="n">S</span> <span class="err">，</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">pos</span> <span class="o">&lt;=</span> <span class="n">StrLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">-</span> <span class="n">len</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Output</span><span class="err">：</span><span class="n">Delete</span> <span class="n">a</span> <span class="n">sub</span><span class="o">-</span><span class="n">string</span> <span class="n">with</span> <span class="n">len</span> <span class="n">length</span> <span class="n">from</span> <span class="n">pos</span> <span class="n">character</span> <span class="n">in</span> <span class="n">string</span> <span class="n">S</span><span class="p">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>}</p>
+<blockquote>
+<p>The StrAssign,Strcopy,StrCompare,StrLength,Concat and SubString are called as Minimum Operation Set of string type.</p>
+<p>That is, these operations can not be implemented with other string operations, But the other string operations can be implemented with these 6 basic string operations.</p>
+</blockquote>
+<h3 id="string-pattern-matching">String Pattern Matching</h3>
+<h4 id="forcematch">ForceMatch</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Rank</span> <span class="nf">ForceMatch</span><span class="p">(</span><span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">P</span><span class="p">,</span> <span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">n</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">m</span> <span class="o">=</span> <span class="n">P</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">&amp;&amp;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i</span> <span class="o">-=</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>$n = T.length(),and\ m = P.length(), T=O(mn)$</p>
+<h4 id="kmp">KMP</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="nf">BuildNext</span><span class="p">(</span><span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">P</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">m</span> <span class="o">=</span> <span class="n">P</span><span class="p">.</span><span class="n">length</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">N</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="n">m</span><span class="p">]{};</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">N</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">t</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">P</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="o">?</span> <span class="n">N</span><span class="p">[</span><span class="o">++</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">++</span><span class="nl">t</span> <span class="p">:</span> <span class="n">t</span> <span class="o">=</span> <span class="n">N</span><span class="p">[</span><span class="n">t</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">N</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Rank</span> <span class="nf">KMPFirst</span><span class="p">(</span><span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">P</span><span class="p">,</span> <span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">next</span> <span class="o">=</span> <span class="n">BuildNext</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">n</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">m</span> <span class="o">=</span> <span class="n">P</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">&amp;&amp;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span> <span class="o">=</span> <span class="n">next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span><span class="p">[]</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>$n = T.length(),and\ m = P.length(), T=O(m+n)$</p>
+<h4 id="optimization-kmp">Optimization KMP</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="nf">buildNext</span><span class="p">(</span><span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">P</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">m</span> <span class="o">=</span> <span class="n">P</span><span class="p">.</span><span class="n">length</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">N</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="n">m</span><span class="p">]{};</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">N</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">P</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">t</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">N</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">P</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">?</span> <span class="n">N</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">:</span> <span class="n">t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span>
+</span></span><span class="line"><span class="cl">            <span class="n">t</span> <span class="o">=</span> <span class="n">N</span><span class="p">[</span><span class="n">t</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">N</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Rank</span> <span class="nf">KMPEnd</span><span class="p">(</span><span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">P</span><span class="p">,</span> <span class="k">const</span> <span class="n">String</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">next</span> <span class="o">=</span> <span class="n">buildNext</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">n</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Rank</span> <span class="n">m</span> <span class="o">=</span> <span class="n">P</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">&amp;&amp;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span> <span class="o">=</span> <span class="n">next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span><span class="p">[]</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">i</span> <span class="o">-</span> <span class="n">j</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="supplement">supplement</h4>
+<p>for ppt use python</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">KMP</span><span class="p">(</span><span class="n">Str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Str</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Next</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">j</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Next</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">Str</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">Str</span><span class="p">[</span><span class="n">t</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Next</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">t</span> <span class="o">=</span> <span class="n">Next</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Next</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Next</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Next</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>in list</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">KMP</span><span class="p">(</span><span class="n">Str</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Str</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Next</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_size</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">j</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">Str</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">Str</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">Str</span><span class="p">[</span><span class="n">t</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Next</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">t</span> <span class="o">=</span> <span class="n">Next</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Next</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/data-structure/">Data Structure</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2022-11-06</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String" data-hashtags="Data Structure"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-hashtag="Data Structure"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/data-structures-and-algorithms/string/" data-title="String"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/data-structures-and-algorithms/stack-and-queue/" class="prev" rel="prev" title="Stack and Queue"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/data-structures-and-algorithms/dynamic-programming/" class="next" rel="next" title="Dynamic Programming">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
