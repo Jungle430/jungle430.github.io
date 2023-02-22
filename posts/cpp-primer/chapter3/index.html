@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/cpp-primer\/chapter3\/"
-        },"genre": "posts","keywords": "C\u002b\u002b, C\u002b\u002b Primer","wordcount":  2231 ,
+        },"genre": "posts","keywords": "C\u002b\u002b, C\u002b\u002b Primer","wordcount":  2272 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/cpp-primer\/chapter3\/","datePublished": "2023-02-22T22:31:49+08:00","dateModified": "2023-02-22T22:31:49+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,7 +101,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">《C&#43;&#43; Primer》 字符串，向量和数组</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/c++-primer/"><i class="far fa-folder fa-fw"></i>C++ Primer</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-02-22">2023-02-22</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2231 字</span>&nbsp;
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-02-22">2023-02-22</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2272 字</span>&nbsp;
                     <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
             </div>
             
@@ -392,7 +392,7 @@
     </tr>
 </table> 
 <blockquote>
-<p>为了向后兼容C，C++保留了C的标准库，但是为了更好地符合C++的要求，C++自己又开发出了一套新的标准库，去掉C库中的.h,前面加上c，即&lt;name.h&gt; $\rightarrow$ <cname>，上面<cctype>就是由C中的&lt;ctype.h&gt;衍生过来的，C++库中的函数为了防止与C标准库中的内容发生命名冲突，都在std命名空间中</p>
+<p>为了向后兼容C，C++保留了C的标准库，但是为了更好地符合C++的要求，C++自己又开发出了一套新的标准库，去掉C库中的.h,前面加上c，即&lt;name.h&gt; $\rightarrow$ &lt;cname&gt;，上面&lt;cctype&gt;就是由C中的&lt;ctype.h&gt;衍生过来的，C++库中的函数为了防止与C标准库中的内容发生命名冲突，都在std命名空间中</p>
 </blockquote>
 <ul>
 <li>基于范围的for语句
@@ -440,7 +440,7 @@
 <p>vector也是一种容器(container)</p>
 </li>
 <li>
-<p>vector包含于头文件<vector>中，定义在std命名空间下</p>
+<p>vector包含于头文件&lt;vector&gt;中，定义在std命名空间下</p>
 </li>
 <li>
 <p>vector是类模板，使用时必须声明其类型（其实在Modern C++中编译器也能自己推导一部分了），编译器根据模板创建类或函数函数的过程称为<b>实例化</b>(instantiation),由于C++的分离式编译，<b>自己写模板的时候一定要将声明与实现都写在.h里，不要将实现分离到.cpp中，否则会导致编译失败</b></p>

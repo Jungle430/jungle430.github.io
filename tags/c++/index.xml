@@ -280,7 +280,7 @@
     </tr>
 </table> 
 <blockquote>
-<p>为了向后兼容C，C++保留了C的标准库，但是为了更好地符合C++的要求，C++自己又开发出了一套新的标准库，去掉C库中的.h,前面加上c，即&lt;name.h&gt; $\rightarrow$ <cname>，上面<cctype>就是由C中的&lt;ctype.h&gt;衍生过来的，C++库中的函数为了防止与C标准库中的内容发生命名冲突，都在std命名空间中</p>
+<p>为了向后兼容C，C++保留了C的标准库，但是为了更好地符合C++的要求，C++自己又开发出了一套新的标准库，去掉C库中的.h,前面加上c，即&lt;name.h&gt; $\rightarrow$ &lt;cname&gt;，上面&lt;cctype&gt;就是由C中的&lt;ctype.h&gt;衍生过来的，C++库中的函数为了防止与C标准库中的内容发生命名冲突，都在std命名空间中</p>
 </blockquote>
 <ul>
 <li>基于范围的for语句
@@ -328,7 +328,7 @@
 <p>vector也是一种容器(container)</p>
 </li>
 <li>
-<p>vector包含于头文件<vector>中，定义在std命名空间下</p>
+<p>vector包含于头文件&lt;vector&gt;中，定义在std命名空间下</p>
 </li>
 <li>
 <p>vector是类模板，使用时必须声明其类型（其实在Modern C++中编译器也能自己推导一部分了），编译器根据模板创建类或函数函数的过程称为<b>实例化</b>(instantiation),由于C++的分离式编译，<b>自己写模板的时候一定要将声明与实现都写在.h里，不要将实现分离到.cpp中，否则会导致编译失败</b></p>
