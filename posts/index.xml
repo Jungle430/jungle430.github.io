@@ -177,7 +177,7 @@
 <p>string::size_type类型</p>
 <ul>
 <li>
-<p>string类的size函数返回的是是一个string::size_type类型的值，无符号类型，足以存放下任何<code>string</code>对象的大小</p>
+<p>string类的size函数返回的是是一个string::size_type类型的值，无符号类型，足以存放下任何<code>string</code>对象的大小，下标运算符参数类型也是如此</p>
 </li>
 <li>
 <p>string类以及其他大多数标准库类型都定义了几种配套的类型。<u>这些配套类型体现了标准库类型与机器无关的特性，类型<b>size_type</b>即是其中的一种</u>。标准库会根据运行的机器型号分配适当的类型，我们不需过多关心，如果要看类型在C++11以后可以借助<code>auto</code>和<code>decltype</code>来推断变量类型</p>
@@ -349,6 +349,287 @@
 <ul>
 <li>定义和初始化vector对象</li>
 </ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">初始化vector对象的方法</td>
+	</tr>
+    <tr>
+        <td>vector&ltT&gt v1</td>
+        <td>v1是一个空vector，它潜在的元素是T类型的，执行默认初始化</td>
+    </tr>
+    <tr>
+    	<td>vector&ltT&gt v2(v1)</td>
+        <td>v2中包含有v1所有元素的副本</td>
+    </tr>
+    <tr>
+        <td>vector&ltT&gt v2 = v1</td>
+        <td>等价于v2(v1),v2中包含有v1所有元素的副本</td>
+    </tr>
+    <tr>
+        <td>vector&ltT&gt v3(n, val)</td>
+        <td>v3包含了n个重复元素，每个元素的值都是val</td>
+    </tr>
+    <tr>
+    	<td>vector&ltT&gt v4(n)</td>
+        <td>v4重复包含了n个重复地执行了值初始化的对象（默认初始化）</td>
+    </tr>
+    <tr>
+        <td>vector&ltT&gt v5{a, b, c, ...}</td>
+        <td>v5包含了初始值个数的元素，每个元素都被赋予了相应的初始值(注意使用花括号)</td>
+    </tr>
+    <tr>
+        <td>vector&ltT&gt v5 = {a, b, c, ...}</td>
+        <td>等价于v5{a, b, c, ...}</td>
+    </tr>
+</table>    
+<ul>
+<li>
+<p>圆括号与花括号</p>
+<ul>
+<li>圆括号是提供的值用来构造(construct)vector对象的</li>
+<li>花括号是用来进行列表初始化的(list initialize),初始化过程会尽可能的把花括号内的值当成是元素初始值的列表来处理，只有在<u>无法执行列表初始化时才会考虑其他初始化方式</u> $\Longrightarrow$ 列表内数据与所需元素类型不同</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v1</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span> <span class="c1">// -&gt; {0, 0, 0, 0, 0, 0, 0, 0, 0, 0} 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v2</span><span class="p">{</span><span class="mi">10</span><span class="p">};</span> <span class="c1">// -&gt; {10}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v3</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span> <span class="c1">// -&gt; {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v4</span><span class="p">{</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">};</span> <span class="c1">// -&gt; {10, 1}
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>列表初始化构造失败转为直接构造</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">v5</span><span class="p">{</span><span class="mi">10</span><span class="p">};</span> <span class="c1">//10个默认初始化string
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">v8</span><span class="p">{</span><span class="mi">10</span><span class="p">,</span> <span class="s">&#34;hi&#34;</span><span class="p">};</span> <span class="c1">//10个&#34;hi&#34;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<ul>
+<li>vector有关操作</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">vector支持的操作</td>
+	</tr>
+    <tr>
+        <td>v.empty()</td>
+        <td>返回元素个数是否为空</td>
+    </tr>
+    <tr>
+        <td>v.size()</td>
+        <td>返回元素个数</td>
+    </tr>
+    <tr>
+        <td>v.push_back(t)</td>
+        <td>向v的尾端添加一个值为t的元素</td>
+    </tr>
+    <tr>
+        <td>v[n]</td>
+        <td>下标访问，返回第n个位置上元素的引用</td>
+    </tr>
+    <tr>
+        <td>v1 = v2</td>
+        <td>用v2中元素的拷贝替换v1中的元素</td>
+    </tr>
+    <tr>
+        <td>v1 = {a, b, c...}</td>
+        <td>用列表中的元素拷贝替换v1中的元素</td>
+    </tr>
+    <tr>
+        <td>v1 == v2; v1 != v2</td>
+        <td>判等条件：元素数量相等且对应位置的元素值相等(对象需要重载==和!=运算符)</td>
+    </tr>
+    <tr>
+        <td>&lt, &lt=, &gt, &gt=</td>
+        <td>字典序比较，对象需要重载相应运算符</td>
+    </tr>
+</table> 
+<ul>
+<li>有关使用push_back的建议</li>
+</ul>
+<ol>
+<li>不需要在创建<code>vector</code>时确定其中的元素及其大小，后续使用push_back即可</li>
+<li>在循环体内部包含向<code>vector</code>对象添加元素的操作时，不应该使用<code>foreach</code>循环</li>
+</ol>
+<ul>
+<li>
+<p>size()返回的类型为vector::size_type,同string::size_type,由头文件和机器来决定类型，下标运算符参数类型也是如此(同string)</p>
+</li>
+<li>
+<p>虽然vector可以扩容，但是不能通过下标来添加元素，通过下标访问不存在的元素会产生非常严重的后果，例如缓冲区溢出(<code>buffer overflow</code>),会导致出现安全问题</p>
+</li>
+</ul>
+<h3 id="迭代器介绍与使用">迭代器介绍与使用</h3>
+<ul>
+<li>目的：访问对象中的元素</li>
+<li>迭代器类似于指针类型，<u>也提供了对对象的间接访问</u>，使用迭代器可以访问某个元素，也可以从一个元素移动到另一个元素</li>
+<li>有效与无效迭代器
+<ul>
+<li>有效：迭代器指向<u>某个元素或者容器中尾元素的下一位置</u></li>
+<li>无效：除了上述指向的迭代器都无效</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>获取迭代器：获取迭代器不能使用取地址符，有专门的方法进行获取，容器一般都支持<b>begin</b>和<b>end</b>方法
+<ul>
+<li>begin返回指向第一个元素的迭代器</li>
+<li>end返回指向容器<b>“尾元素的下一位置(one past the end)”的迭代器</b>,这样的迭代器没有什么实际意义，只是一个标记，表示我们已经处理完了容器中的所有元素。end成员返回的迭代器通常被称为<b>尾后迭代器(off-the-end iterator)或尾迭代器(end iterator)</b></li>
+<li><b>如果容器为空，begin和end返回的是同一个迭代器,都是尾后迭代器(可以作为容器的判空手段）</b></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">b</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">e</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table border="2" >
+	<tr>
+		<td colspan="2">标准容器迭代器的运算符</td>
+	</tr>
+    <tr>
+        <td>*iter</td>
+        <td>返回迭代器iter所指元素的引用</td>
+    </tr>
+    <tr>
+        <td>iter->men</td>
+        <td>解引用iter并获得该元素的名为men的成员，等价于(*iter).men</td>
+    </tr>
+    <tr>
+        <td>++iter</td>
+        <td>令iter指示容器中的下一个元素</td>
+    </tr>
+    <tr>
+        <td>--iter</td>
+        <td>令iter指示容器中的下一个元素</td>
+    </tr>
+    <tr>
+        <td>iter1 == iter2; iter1 != iter2</td>
+        <td>判等条件：两个迭代器指示的是同一个元素或者他们是同一个容器的尾后迭代器，则相等；反之则不等</td>
+    </tr>
+</table>    
+<ul>
+<li>试图解引用一个非法迭代器或者尾后迭代器也是危险行为！</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">string</span> <span class="nf">s</span><span class="p">(</span><span class="s">&#34;Some thing&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">!=</span> <span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span> <span class="c1">// -&gt; is empty?
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">it</span> <span class="o">=</span> <span class="n">toupper</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一般循环</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">ii</span> <span class="o">!=</span> <span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">it</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//......
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>大多数标准库容器的迭代器都定义了<code>==</code>和<code>!=</code>，但是它们中的大多数都没有定义<code>&lt;</code>运算符，所以我们使用迭代器是尽量使用<code>==</code>和<code>!=</code></p>
+</li>
+<li>
+<p>迭代器类型</p>
+<ul>
+<li>iterator可读可写</li>
+<li>const_iterator只读</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">it</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">const_iterator</span> <span class="n">it</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>实际使用中使用auto让编译器决定即可</p>
+</li>
+<li>
+<p><code>begin()</code>和<code>end</code>自己决定返回的是否为const，如果必须要用const_iterator,使用<code>cbegin()</code>和<code>cend()</code>即可<code>C++ 11</code></p>
+</li>
+<li>
+<p>注意，凡是使用了迭代器的循环体，都不要向迭代器所属的容器中添加元素，否则可能会造成迭代器失效</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>迭代器运算</li>
+</ul>
+<table border="2" >
+	<tr>
+		<td colspan="2">迭代器运算</td>
+	</tr>
+    <tr>
+        <td>iter + n</td>
+        <td>迭代器加上了一个整数值仍得一个迭代器，迭代器指示的新位置与原来相比向后移动了若干元素</td>
+    </tr>
+    <tr>
+        <td>iter - n</td>
+        <td>迭代器减去了一个整数值仍得一个迭代器，迭代器指示的新位置与原来相比向前移动了若干元素</td>
+    </tr>
+    <tr>
+        <td>iter += n</td>
+        <td>iter = iter + n</td>
+    </tr>
+    <tr>
+        <td>iter -= n</td>
+        <td>iter = iter - n</td>
+    </tr>
+    <tr>
+        <td>iter1 - iter2</td>
+        <td>两个迭代器相减的结果是它们之间的距离，两个迭代器必须是同一个容器的有效迭代器，返回值类型为<b>difference_type(带符号类型)</b></td>
+    </tr>
+    <tr>
+        <td>&gt, &gt=, &lt, &lt=</td>
+        <td>关系运算符，注意两个迭代器必须是同一个容器的有效迭代器</td>
+    </tr>
+</table>    
 ]]></description>
 </item>
 <item>
