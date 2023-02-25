@@ -630,6 +630,196 @@
         <td>关系运算符，注意两个迭代器必须是同一个容器的有效迭代器</td>
     </tr>
 </table>    
+<h3 id="数组">数组</h3>
+<ul>
+<li>编译的时候数组的维度应该是已知的，<b>维度必须是一个常量表达式</b></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span> <span class="c1">// 不是常量表达式
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">unsigned</span> <span class="n">sz</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>  <span class="c1">//常量表达式
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><u>默认情况下，数组中的元素会被默认初始化</u> $\Longrightarrow$ <b>这里注意如果遇到了<code>new</code>和<code>delete</code>相关的一些操作，一定要防止默认初始化改变指针最后导致<code>delete</code>释放内存的时候程序崩溃</b></li>
+</ul>
+<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-3.png" title="/img/C&#43;&#43; Primer/chapter3-3.png" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-3.png" data-sub-html="<h2>HEAP CORRUPTION DETECTED报错说明及解决方案</h2>">
+        
+    </a><figcaption class="image-caption"><a href="https://blog.csdn.net/weixin_44426759/article/details/107194567?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522167729932416800182739726%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=167729932416800182739726&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-107194567-null-null.142%5ev73%5ewechat,201%5ev4%5eadd_ask,239%5ev2%5einsert_chatgpt&amp;utm_term=heap%20corruption%20detected&amp;spm=1018.2226.3001.4187" target="_blank" rel="noopener noreffer">HEAP CORRUPTION DETECTED报错说明及解决方案</a></figcaption>
+    </figure>
+<ul>
+<li>显式初始化 $\Longrightarrow$ 通过列表初始化数组</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">unsigned</span> <span class="n">sz</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">ia1</span><span class="p">[</span><span class="n">sz</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span> <span class="c1">//维度为3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">a3</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span> <span class="c1">// {0, 1, 2, 0, 0} 后面会默认初始化
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">a5</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span> <span class="c1">//错误，初始值过多
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>字符数组
+<ul>
+<li>字符数组可以用字符串字面值进行赋值，但是要注意最后还有一个终止符</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">a</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;Hello world&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">b</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#34;Daniel&#34;</span><span class="p">;</span> <span class="c1">//错误，忽略了最后的&#39;\0&#39;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>不能将数组的内容拷贝给其他数组作为其初始值，也不能用数组为其他数组赋值</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a</span><span class="p">[]{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a2</span><span class="p">[]</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span> <span class="c1">//错误
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">a2</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span> <span class="c1">//错误
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>本质是指针的拷贝，最后容易导致出现内存泄漏和野指针问题，虽然部分编译器支持上述行为，但是为了安全性和通用性，尽量不要出现上述代码</p>
+</blockquote>
+<ul>
+<li>
+<p>阅读数组声明含义：由内向外读</p>
+</li>
+<li>
+<p>数组也可以用基于范围的for循环</p>
+</li>
+<li>
+<p>访问数组元素使用的下标用的类型为<code>size_t</code>，也是一种机器相关类型，头文件C：<b>&lt;stddef.h&gt;</b> $\Longrightarrow$ C++：<b>&lt;cstddef&gt;</b>，但是内置下标运算符也可以使用负数(不同于vector和string)</p>
+</li>
+<li>
+<p>数组的下标访问同样只由程序员负责检查，一定要防止非法访问</p>
+</li>
+<li>
+<p><code>auto</code>返回的是指针,<code>decltype</code>返回的是数组</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//指针迭代器用法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">]{};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">e</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">b</span> <span class="o">=</span> <span class="n">arr</span><span class="p">;</span> <span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">do_something</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>C++11后引入了begin和end函数(定义于&lt;iterator&gt;，可以通过这两个函数获得的指针来模拟迭代器</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">arr</span><span class="p">[]{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">begin</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">begin</span><span class="p">(</span><span class="n">arr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">end</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">end</span><span class="p">(</span><span class="n">arr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(;</span> <span class="n">begin</span> <span class="o">!=</span> <span class="n">end</span><span class="p">;</span> <span class="n">begin</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>两个指针相减的结果类型是<code>ptrdiff_t</code>的机器相关有符号类型，定义于&lt;cstddef&gt;文件中</p>
+</li>
+<li>
+<p>同一数组的两个有效指针可以进行比较</p>
+</li>
+<li>
+<p>C风格的字符串处理函数位于头文件&lt;cstring&gt;中，但是为了方便性和安全性，C++程序中尽量使用std::string</p>
+</li>
+<li>
+<p>C风格的字符串比较实际是在比较字符串数组首地址</p>
+</li>
+<li>
+<p>旧代码接口</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">string</span> <span class="n">s</span> <span class="p">{</span><span class="s">&#34;Hello world&#34;</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//但是在后续由于扩容等机制c_str()的指针可能会失去作用，最好通过s.c_str()拷贝复制一份
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">arr</span><span class="p">[]{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="n">vector</span><span class="p">(</span><span class="n">begin</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span> <span class="n">end</span><span class="p">(</span><span class="n">arr</span><span class="p">));</span> <span class="c1">// -&gt; {0, 1, 2, 3, 4, 5}
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><u>建议：尽量使用标准库而非指针和数组</u></li>
+</ul>
+<blockquote>
+<p>多维数组基于范围的for循环，除了最内层，其他所有循环的控制变量都应该是引用（转化为数组，如果不是引用会转化为指针)</p>
+<p>for (auto &amp;i : arr)</p>
+<p>​	for (auto &amp;j : i)</p>
+<p>​		for (auto k : j) {</p>
+<p>​			do_something(k);</p>
+<p>}</p>
+</blockquote>
+<div id="id-1"><strong>Ending</strong></div>
 ]]></description>
 </item>
 </channel>
