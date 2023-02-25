@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter2\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  5485 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  5771 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter2\/","datePublished": "2022-12-31T19:30:30+08:00","dateModified": "2022-12-31T19:30:30+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter2 操作系统上的程序</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-31">2022-12-31</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5485 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 11 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-31">2022-12-31</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5771 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 12 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -166,6 +166,7 @@
           </ul>
         </li>
         <li><a href="#总结">总结</a></li>
+        <li><a href="#个人的一些补充">个人的一些补充</a></li>
       </ul>
     </li>
   </ul>
@@ -1031,7 +1032,7 @@ $\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target=
 <p>$C = \textrm{compile}(S)\newline$</p>
 <p>编译 (优化) 的正确性 (Soundness):</p>
 <ul>
-<li>S<em>S</em> 与 C<em>C</em> 的可观测行为严格一致
+<li><em>S</em> 与 <em>C</em> 的可观测行为严格一致
 <ul>
 <li>system calls; volatile variable loads/stores; termination</li>
 </ul>
@@ -1532,6 +1533,35 @@ $\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target=
 </ul>
 </li>
 </ul>
+<h3 id="个人的一些补充">个人的一些补充</h3>
+<blockquote>
+<p>Update in 2023-2-25</p>
+</blockquote>
+<p>新学期开课，也上了操作系统，当然，老师念ppt讲的也确实是💩🐴地听不懂，今晚做作业，其中也有有关<b>System call</b>的一些相关问题，于是写了一个最简单的C程序</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后用gdb调试了一下</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter2-17.png" title="/img/Operating System/chapter2-17.png" data-thumbnail="/img/Operating System/chapter2-17.png" data-sub-html="<h2>gdb $\Longrightarrow$ layout asm</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter2-17.png"
+            data-srcset="/img/Operating%20System/chapter2-17.png, /img/Operating%20System/chapter2-17.png 1.5x, /img/Operating%20System/chapter2-17.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter2-17.png" />
+    </a><figcaption class="image-caption">gdb $\Longrightarrow$ <code>layout asm</code></figcaption>
+    </figure>
+<p>忽然对前面这些指令的调用有了些兴趣，&lt;_do_global_dtors_aux&gt;是个啥？&lt;frame_dummy&gt;又是个啥，结果用这些名字找到了一个讲的非常细的博客<a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>，不过内容真的是太多了，先立一个flag，这两周一定要找时间给读一遍，完不成就全部💩🐴</p>
 <p><strong>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</strong></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
