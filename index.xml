@@ -4,9 +4,348 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</lastBuildDate>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 26 Feb 2023 21:02:57 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>Chapter2-部分二刷-个人理解System call</title>
+    <link>https://Jungle430.github.io/posts/operating-system/support1/</link>
+    <pubDate>Sun, 26 Feb 2023 21:02:57 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support1/</guid>
+    <description><![CDATA[<h1 id="二刷部分chapter2-longrightarrow-如何理解system-call">二刷部分Chapter2 $\Longrightarrow$ 如何理解<code>System call</code></h1>
+<h2 id="问题构造最小的hello-world程序">问题：构造最小的”Hello world!”程序</h2>
+<h3 id="基本程序和静态编译">基本程序和静态编译</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello world&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -static hello.c -o hello <span class="o">&amp;&amp;</span> ./hello
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译出来很大(Ubuntu上约900KB)</p>
+<ul>
+<li>如果只编译，不链接，看一下obj文件的反汇编</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc -c hello.c <span class="o">&amp;&amp;</span> objdump -d hello.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">hello.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;main&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">55</span>                   	push   %rbp
+</span></span><span class="line"><span class="cl">   5:	<span class="m">48</span> <span class="m">89</span> e5             	mov    %rsp,%rbp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">48</span> 8d <span class="m">05</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> 	lea    0x0<span class="o">(</span>%rip<span class="o">)</span>,%rax        <span class="c1"># f &lt;main+0xf&gt;</span>
+</span></span><span class="line"><span class="cl">   f:	<span class="m">48</span> <span class="m">89</span> c7             	mov    %rax,%rdi
+</span></span><span class="line"><span class="cl">  12:	b8 <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>       	mov    <span class="nv">$0</span>x0,%eax
+</span></span><span class="line"><span class="cl">  17:	e8 <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>       	call   1c &lt;main+0x1c&gt;
+</span></span><span class="line"><span class="cl">  1c:	b8 <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>       	mov    <span class="nv">$0</span>x0,%eax
+</span></span><span class="line"><span class="cl">  21:	5d                   	pop    %rbp
+</span></span><span class="line"><span class="cl">  22:	c3                   	ret    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>就和普通的函数差不多，只有参数压栈，call和参数出栈的过程
+<ul>
+<li>普通函数<code>fun.c</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">f</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -c fun.c <span class="o">&amp;&amp;</span> objdump -d fun.o 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">fun.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;f&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">55</span>                   	push   %rbp
+</span></span><span class="line"><span class="cl">   5:	<span class="m">48</span> <span class="m">89</span> e5             	mov    %rsp,%rbp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">90</span>                   	nop
+</span></span><span class="line"><span class="cl">   9:	5d                   	pop    %rbp
+</span></span><span class="line"><span class="cl">   a:	c3                   	ret
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>可以看到不链接的话和普通的函数调用过程差不多</p>
+</li>
+<li>
+<p>链接失败！</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">○ → ld hello.o
+</span></span><span class="line"><span class="cl">ld: 警告: 无法找到项目符号 _start<span class="p">;</span> 缺省为 <span class="m">0000000000401000</span>
+</span></span><span class="line"><span class="cl">ld: hello.o: in <span class="k">function</span> <span class="sb">`</span>main<span class="s1">&#39;:
+</span></span></span><span class="line"><span class="cl"><span class="s1">hello.c:(.text+0x18): undefined reference to `printf&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>本来以为找的<code>main</code>，但是它实际上在找<code>_start</code>这个东西？</li>
+</ul>
+<h3 id="那我们就把main改成_start">那我们就把<code>main</code>改成<code>_start</code></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">_start</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello world&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/support1-1.png" title="/img/Operating System/support1-1.png" data-thumbnail="/img/Operating System/support1-1.png" data-sub-html="<h2>ld仍然不予通过-&gt; 找不到printf?</h2>">
+        
+    </a><figcaption class="image-caption"><code>ld仍然不予通过</code>-&gt; 找不到printf?</figcaption>
+    </figure>
+<ul>
+<li>那把printf也给去了</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">_start</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>编译与链接全部成功！</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">○ → gcc -c hello.c <span class="o">&amp;&amp;</span> objdump -d hello.o <span class="o">&amp;&amp;</span> ld hello.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">hello.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;_start&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">55</span>                   	push   %rbp
+</span></span><span class="line"><span class="cl">   5:	<span class="m">48</span> <span class="m">89</span> e5             	mov    %rsp,%rbp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">90</span>                   	nop
+</span></span><span class="line"><span class="cl">   9:	5d                   	pop    %rbp
+</span></span><span class="line"><span class="cl">   a:	c3                   	ret    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>程序很小，只有99个字节</p>
+</li>
+<li>
+<p>但是运行 $\Longrightarrow$ 段错误！</p>
+</li>
+<li>
+<p>但是里面加入while(1)这种死循环就没事了</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>对于没有while(1)的a.out，使用gdb狠狠的拷打调试</li>
+</ul>
+<a class="lightgallery" href="/img/Operating%20System/support1-2.jpg" title="/img/Operating System/support1-2.jpg" data-thumbnail="/img/Operating System/support1-2.jpg">
+        
+    </a>
+<p>这个时候我们看到rsp的地址是合法的，里面的值是1，当执行ret后，rsp将栈顶的值1赋给了pc，gdb显示pc访问了非法位置</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/support1-3.png" title="/img/Operating System/support1-3.png" data-thumbnail="/img/Operating System/support1-3.png" data-sub-html="<h2>🤡呦吼，崩溃了！</h2>">
+        
+    </a><figcaption class="image-caption">🤡呦吼，崩溃了！</figcaption>
+    </figure>
+<ul>
+<li>CPU只会执行指令，该怎么停下来？(mov,add这些指令停不下来)</li>
+<li>需要什么指令让它停下来？ $\Longrightarrow$ <code>System call</code> 也就是管态</li>
+</ul>
+<h3 id="最小的hello-world程序">最小的<code>Hello world</code>程序</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="n">globl</span> <span class="n">_start</span>
+</span></span><span class="line"><span class="cl"><span class="nl">_start</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_write</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span>   <span class="err">#</span> <span class="n">write</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="err">#</span>   <span class="n">fd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">st</span><span class="p">,</span>        <span class="o">%</span><span class="n">rsi</span>   <span class="err">#</span>   <span class="n">buf</span><span class="o">=</span><span class="n">st</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="p">(</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">),</span> <span class="o">%</span><span class="n">rdx</span>   <span class="err">#</span>   <span class="n">count</span><span class="o">=</span><span class="n">ed</span><span class="o">-</span><span class="n">st</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span>                 <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_exit</span><span class="p">,</span>  <span class="o">%</span><span class="n">rax</span>   <span class="err">#</span> <span class="n">exit</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="err">#</span>   <span class="n">status</span><span class="o">=</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span>                 <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">st</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="n">ascii</span> <span class="s">&#34;</span><span class="se">\033</span><span class="s">[01;31mHello, OS World</span><span class="se">\033</span><span class="s">[0m</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">ed</span><span class="p">:</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>它在干什么
+<ul>
+<li>给许多寄存器赋值，然后call了syscall</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/support1-4.png" title="/img/Operating System/support1-4.png" data-thumbnail="/img/Operating System/support1-4.png" data-sub-html="<h2>编译后查看反汇编代码</h2>">
+        
+    </a><figcaption class="image-caption">编译后查看反汇编代码</figcaption>
+    </figure>
+<ul>
+<li>ld链接，编译成功，运行成功！</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">○ → objdump -d a.out <span class="p">|</span> less
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/support1-5.png" title="/img/Operating System/support1-5.png" data-thumbnail="/img/Operating System/support1-5.png" data-sub-html="<h2>查看反汇编代码</h2>">
+        
+    </a><figcaption class="image-caption">查看反汇编代码</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/support1-6.png" title="/img/Operating System/support1-6.png" data-thumbnail="/img/Operating System/support1-6.png" data-sub-html="<h2>man syscall查看syscall的文档</h2>">
+        
+    </a><figcaption class="image-caption"><code>man syscall</code>查看syscall的文档</figcaption>
+    </figure>
+<p>我们会发现，syscall会告诉我们在各种架构的计算机中该如何通过寄存器为syscall传入参数,<code>man syscalls</code>会告诉我们Linux操作系统的接口</p>
+<ul>
+<li>所以程序在怎么执行</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+]]></description>
+</item>
+<item>
     <title>《C&#43;&#43; Primer》 字符串，向量和数组</title>
     <link>https://Jungle430.github.io/posts/cpp-primer/chapter3/</link>
     <pubDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cpp-primer/chapter3/</guid>
@@ -169,7 +508,7 @@
 <pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">        <span class="n">stdLLcout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
@@ -11207,1095 +11546,6 @@ $$</p>
 <p><strong>E-bit=0 is the big endian; if E-bit=1, it is the little endian E-bit=0</strong></p>
 </li>
 </ul>
-]]></description>
-</item>
-<item>
-    <title>Computer Organization and Architecture Computer Aritmetic</title>
-    <link>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-aritmetic/</link>
-    <pubDate>Tue, 24 Jan 2023 15:49:52 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-aritmetic/</guid>
-    <description><![CDATA[<h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
-<h2 id="computer-arithmetic">Computer Arithmetic</h2>
-<h3 id="outline">Outline</h3>
-<ul>
-<li>The Arithmetic and Logic Unit (ALU)</li>
-<li>Integer Representation</li>
-<li>Integer Arithmetic</li>
-<li>Floating-Point Representation</li>
-<li>Floating-Point Arithmetic</li>
-</ul>
-<h3 id="the-arithmetic-and-logic-unit-alu">The Arithmetic and Logic Unit (ALU)</h3>
-<p><strong>Arithmetic &amp; logic unit</strong></p>
-<ul>
-<li>
-<p><strong>Core of computer</strong></p>
-</li>
-<li>
-<p><strong>Everything else in the computer is there to service this unit</strong></p>
-</li>
-<li>
-<p>Does arithmetic and logic calculations</p>
-</li>
-<li>
-<p>Handles integers</p>
-<ul>
-<li>
-<p>May handle floating point (real) numbers</p>
-</li>
-<li>
-<p>May be separate <code>FPU</code> ( maths co-processor)</p>
-</li>
-<li>
-<p>May be on chip separate <code>FPU</code> ( <code>486DX + </code>)</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>ALU input &amp; output</strong></p>
-<ul>
-<li>
-<p>一般CPU内部会有一组寄存器，用于用于临时存放数据</p>
-</li>
-<li>
-<p>控制单元告诉ALU需要做什么操作，同时还控制数据的输入和输出</p>
-</li>
-<li>
-<p>数据由寄存器送给ALU进行运算，运算之后的结果也保存在寄存器中</p>
-</li>
-<li>
-<p>ALU在计算后，会设置一些标志，比如溢出标志等，标志也保存在寄存器中</p>
-</li>
-</ul>
-<h3 id="integer-representation">Integer Representation</h3>
-<ul>
-<li>
-<p>Electronic components generally have only two basic states</p>
-<ul>
-<li>
-<p>Whether there is charge, high and low level</p>
-</li>
-<li>
-<p>Represents 0 and 1</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Computer use 0 &amp; 1 to represent everything</p>
-<ul>
-<li>
-<p>Positive numbers stored in binary</p>
-</li>
-<li>
-<p>e.g. 41=00101001</p>
-</li>
-<li>
-<p>No minus sign</p>
-</li>
-<li>
-<p>No period</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>How to represent negative numbers</strong></p>
-<ul>
-<li>
-<p><strong>Sign-Magnitude</strong></p>
-</li>
-<li>
-<p><strong>Two’s complement</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>unsigned</p>
-<ul>
-<li>
-<p>Use only non-negative integers</p>
-</li>
-<li>
-<p><strong>sign bit does not need</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>sign magnitude</p>
-<ul>
-<li>Sign +magnitude</li>
-</ul>
-</li>
-<li>
-<p>one’s complement</p>
-<ul>
-<li>represent the value by use inverse value of Sign +magnitude</li>
-</ul>
-</li>
-<li>
-<p>two’s complement</p>
-<ul>
-<li>Use two’s complement to express integer</li>
-</ul>
-</li>
-<li>
-<p><strong>biased</strong></p>
-</li>
-</ul>
-<hr>
-<h4 id="sign-magnitude">Sign-magnitude</h4>
-<ul>
-<li>
-<p><strong>Left most bit is sign bit</strong></p>
-</li>
-<li>
-<p><strong>0 means positive</strong></p>
-</li>
-<li>
-<p><strong>1 means negative</strong></p>
-</li>
-</ul>
-<p>$$
-+18=00010010\newline
--18=10010010\newline
-$$</p>
-<hr>
-<p>$$
-A=\begin{cases}
-\sum_{i=0}^{n-2}2^ia_i\ if\ a_{n-1}=0\newline
--\sum_{i=0}^{n-2}2^ia_i\ if\ a_{n-1}=1\newline
-\end{cases}
-$$</p>
-<p>$The\ number\ of\ bits\ is\ n\rightarrow Range: [-(2^{n-1}-1),2^{n-1}-1]\newline$</p>
-<ul>
-<li>
-<p>Problems</p>
-<ul>
-<li>
-<p>Need to consider <strong>both sign and magnitude</strong> in arithmetic</p>
-</li>
-<li>
-<p><strong>Two representations of zero (+0 and -0)</strong></p>
-<ul>
-<li>1000000(-0)</li>
-<li>0000000(+0)</li>
-</ul>
-</li>
-<li>
-<p><strong>Two methods are required to judge 0</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h4 id="ones-complement---">One’s complement ! ! !</h4>
-<ul>
-<li>
-<p>Historically important, and we use this representation to get 2’s complement integers</p>
-</li>
-<li>
-<p><strong>positive integers use the same representation as unsigned</strong></p>
-</li>
-<li>
-<p><strong>Negation is done by taking a bitwise complement of the positive representation</strong></p>
-</li>
-</ul>
-<p>$$
-Example:-3:0011\rightarrow 1100\newline
-&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;\newline
-\begin{align}
-&amp;11100000:a\ negative\ number\newline
-&amp;To\ find\ out\ the\ value,invert\ each\ bit\ 00011111\ is\ +31\ by\ sight,\newline
-&amp;so\ 11100000=-31
-\end{align}
-$$</p>
-<ul>
-<li><strong>The 1’s complement number system using N bits has a range from</strong> $-(2^{N-1}-1)\ to\ +(2^{N-1}-1)\newline$</li>
-</ul>
-<p>$$
-\begin{align}
-&amp;8-bit\ examples\newline
-&amp;1111\ 1110\rightarrow 0000\ 0001\rightarrow -1\newline
-&amp;1111\ 1111\rightarrow 0000\ 0000\rightarrow -0\newline
-&amp;0000\ 0000\rightarrow +0\newline
-&amp;0000\ 0001\rightarrow +1\newline
-\end{align}
-$$</p>
-<ul>
-<li>
-<p><strong>The two forms of zero are represented by</strong></p>
-</li>
-<li>
-<p>$0000\ 0000(all\ zeros)\newline$</p>
-</li>
-<li>
-<p>$1111\ 1111(all\ ones)\newline$</p>
-</li>
-</ul>
-<hr>
-<h4 id="twos-complement---">Two’s complement ! ! !</h4>
-<ul>
-<li>
-<p>Two’s complement is a variation on 1’s complement</p>
-<ul>
-<li><strong>Does NOT have 2 representations for 0</strong></li>
-</ul>
-</li>
-<li>
-<p>negative: (for example -5)</p>
-<ul>
-<li>
-<p>Take the positive value 00101 (+5)</p>
-</li>
-<li>
-<p>Take the 1‘s complement 11010 (-5 in 1’s comp)</p>
-</li>
-<li>
-<p>Add 1: 11011</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>$$
-A=-2^{n-1}a_{n-1}+\sum^{n-2}_{i=0}2^ia_i\newline
-$$</p>
-<p><strong>Benefits</strong></p>
-<ul>
-<li>
-<p>One representation of zero</p>
-</li>
-<li>
-<p>Arithmetic works easily</p>
-</li>
-<li>
-<p>Negating is fairly easy</p>
-</li>
-<li>
-<p>Example: -3</p>
-</li>
-</ul>
-<p>$$
-(3)_{10}=(00000011)_2\newline
-Boolean\ complement\ gives:11111100\newline
-Add\ 1\ to\ LSB:11111101\newline
-$$</p>
-<p>$$
-\begin{align}
-&amp;One\ representation\ of\ zero\newline
-&amp;0=00000000\newline
-&amp;Bitwise\ not=11111111\newline
-&amp;Add\ 1\ to\ LSB:+1\newline
-&amp;Result:1\ 00000000\newline
-&amp;Overflow\ is\ ignored\ so \rightarrow -0=0
-\end{align}
-$$</p>
-<p><strong>Negation Special Case</strong>
-$$
-\begin{align}
-&amp;-128=10000000\newline
-&amp;-(-128)is:\newline
-&amp;1. bitwise\ not:01111111\newline
-&amp;2. Add\ 1\ to\ LSB:+1\newline
-&amp;3. Result:10000000\newline
-&amp;\rightarrow -(-128)=-128\newline
-&amp;??? \rightarrow\ \times\ \newline
-\end{align}
-$$</p>
-<p><strong>In two ‘s complement notation, the range of positive and negative numbers is not completely symmetric</strong></p>
-<p><strong>Range of numbers</strong></p>
-<p>$The\ number\ of\ bits\ is\ n\rightarrow Range: [-2^{n-1},2^{n-1}-1]\newline$</p>
-<h4 id="sign-extension">Sign extension</h4>
-<ul>
-<li>For <strong>sign magnitude number</strong>, simply move the sign bit to the new leftmost position and fill in with zeros</li>
-</ul>
-<p>$$
-+18=00010010 \rightarrow extension : 00000000\ 00010010\newline
--18=10010010 \rightarrow extension : 10000000\ 00010010\newline
-$$</p>
-<ul>
-<li>
-<p>It is not going to work for two’s complement</p>
-</li>
-<li>
-<p>The rule for <strong>two’s complement</strong> number is</p>
-<ul>
-<li>Positive number pack with leading zeros
-$$
-+18=00010010 \rightarrow extension :  00000000\ 00010010\newline
-$$</li>
-<li>Negative numbers pack with leading ones
-$$
--18=10010010 \rightarrow extension : 11111111\ 10010010\newline
-$$</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Characteristics of Two’s Complement</strong></p>
-<table>
-<thead>
-<tr>
-<th>特点</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>范围</td>
-<td>$[-2^{n-1},2^{n-1}-1]$</td>
-</tr>
-<tr>
-<td>0的表示方法</td>
-<td>只有1个0的表示法</td>
-</tr>
-<tr>
-<td>计算方法</td>
-<td>按位取反后，在最后一位加1，可以得到这个数的相反数的补码</td>
-</tr>
-<tr>
-<td>位的扩展</td>
-<td>用符号位进行填充</td>
-</tr>
-<tr>
-<td>溢出规则</td>
-<td>如果2个相同符号的数相加，得到的新数的符号位和原数的符号位不一样，就是溢出</td>
-</tr>
-<tr>
-<td><strong>减法规则</strong></td>
-<td><strong>取减数的补码，然后和被减数相加</strong></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h3 id="integer-arithmetic">Integer Arithmetic</h3>
-<h4 id="addition-and-subtraction">Addition and Subtraction</h4>
-<ul>
-<li>
-<p>Addition</p>
-<ul>
-<li>
-<p>Normal binary addition</p>
-</li>
-<li>
-<p>Monitor sign bit for overflow</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Subtraction</strong></p>
-<ul>
-<li>
-<p><strong>Take twos compliment of subtrahend and add to minuend</strong></p>
-</li>
-<li>
-<p>$a-b=a+(-b)\newline$</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>So only need addition and complement circuits</strong></p>
-</li>
-<li>
-<p>Straight forward approach consists of adding each bit together from right to left and propagating the carry from one bit to the</p>
-</li>
-</ul>
-<p>$$
-\begin{align}
-Example:&amp;\newline
-&amp;-7_{10}+5_{10}=1001_{2}+0101_{2}=1110_{2}=-2_{10}\newline
-&amp;3_{10}+4_{10}=0011_{2}+0100_{2}=0111_{2}=7_{10}\newline
-\end{align}
-$$</p>
-<hr>
-<p><strong>Geometric Depiction of Twos Complement Integers</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-1.png" title="/img/Computer Organization and Architecture/chapter9-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-1.png">
-        
-    </a>
-<ul>
-<li>
-<p>圆周上列出了$4bit$的数表示的16种情况，从0000到1111</p>
-</li>
-<li>
-<p>中间有一个对称轴，一个数的相反数就是它针对中间的对称轴的对称点</p>
-</li>
-<li>
-<p>可以看到1000没有对称点，所以只有-8而没有+8的表示</p>
-</li>
-<li>
-<p>对于加法，就是顺时针移动；而对于减法，就是逆时针移动</p>
-</li>
-<li>
-<p>无论是顺时针移动，还是逆时针移动，如果越过了正负的交接点，就表示有溢出</p>
-</li>
-</ul>
-<hr>
-<p><strong>Judgment of overflow</strong></p>
-<ul>
-<li>
-<p>For different representations, the judgment methods of overflow are different</p>
-</li>
-<li>
-<p>For example: 01111101+01111101 = 1 1111010</p>
-<ul>
-<li>
-<p>For unsigned addition, no overflow</p>
-</li>
-<li>
-<p>For signed addition, overflow</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Another example: 11111101+01111101 = （1）01111010</p>
-<ul>
-<li>
-<p>For unsigned addition, overflow</p>
-</li>
-<li>
-<p>For signed addition, no overflow</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Carry is not a flag to judge overflow</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>No overflow when adding a positive and a negative number</strong></p>
-</li>
-<li>
-<p><strong>No overflow when signs are the same for subtraction</strong></p>
-</li>
-<li>
-<p><strong>Judgment method for two’s complement addition</strong></p>
-<ul>
-<li>
-<p><strong>When two numbers with the same sign are added, the sign bit of the result is opposite, which must be overflow</strong></p>
-</li>
-<li>
-<p><strong>Subtraction is completed by addition, and the method to judge overflow is the same</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Hardware for Addition and Subtraction</strong></p>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-2.png" title="/img/Computer Organization and Architecture/chapter9-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-2.png" data-sub-html="<h2>Hardware</h2>">
-        
-    </a><figcaption class="image-caption"><code>Hardware</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>核心是一个加法器。寄存器A和B是加法器的输入</p>
-</li>
-<li>
-<p>计算的结果保存在寄存器A中，如果有溢出，则溢出标志保存在OF中</p>
-</li>
-<li>
-<p>SW开关控制是加法还是减法。如果是加法，B寄存器的数直接输入到加法器中；如果是减法，则B寄存器的数据通过一个补码器生成它的相反数的补码，再输入到加法器中</p>
-</li>
-</ul>
-<h4 id="multiplication">Multiplication</h4>
-<ul>
-<li>
-<p>Much more complex than addition</p>
-</li>
-<li>
-<p>Multiply each bit of the multiplier by the multiplicand to get the partial product</p>
-</li>
-<li>
-<p>calculation of partial product should also take into account the position of the multiplying digit</p>
-</li>
-<li>
-<p>Add all partial products to get the product</p>
-</li>
-<li>
-<p>It’s similar to our manual multiplication</p>
-</li>
-<li>
-<p>Involves the generation of partial products</p>
-<ul>
-<li>
-<p>Equals 0 when the multiplier bit is 0</p>
-</li>
-<li>
-<p>Equals the multiplicand when the multiplier is 1</p>
-</li>
-<li>
-<p>Easier than decimal multiplication</p>
-</li>
-</ul>
-</li>
-<li>
-<p>The total product is produced by summing the shifted partial products</p>
-</li>
-<li>
-<p><strong>Two n binary number may result in a product of up to 2n bits in length</strong></p>
-</li>
-</ul>
-<p>Example
-$$
-\begin{align}
-&amp;1011\newline
-\times&amp;1101\newline
-&amp;\rule[-10pt]{5cm}{0.03em}\newline
-&amp;1011\newline
-0&amp;000\newline
-10&amp;11\newline
-101&amp;1\newline
-&amp;\rule[-10pt]{5cm}{0.03em}\newline
-&amp;10001111
-\end{align}
-$$
-Note: 结果需要双倍的比特位</p>
-<h5 id="shift-operation--">Shift operation! ! !</h5>
-<ul>
-<li>
-<p>A shift operation is involved in multiplication</p>
-</li>
-<li>
-<p><strong>Any number multiplied by 2 n results the number shifted left by n bits</strong></p>
-<ul>
-<li>
-<p>0000 0001 x 00000010 = 0000 0010</p>
-</li>
-<li>
-<p>0000 0001 x 00000100 = 0000 0100</p>
-</li>
-<li>
-<p>0000 0001 x 00001000 = 0000 1000</p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="unsigned-binary-multiplication">Unsigned binary multiplication</h5>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-3.png" title="/img/Computer Organization and Architecture/chapter9-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-3.png">
-        
-    </a>
-<ul>
-<li>
-<p>核心是一个n位加法器</p>
-</li>
-<li>
-<p>先取乘数的最低位$Q_0$。如果是1，则将被乘数送到加法器中。如果是0，则不进行加法。</p>
-</li>
-<li>
-<p>加法器将A和M相加，然后向右移位。有一个移位的寄存器C，用于保存进位</p>
-</li>
-<li>
-<p><strong>移位后，继续进行</strong>$Q_1$<strong>的判断，然后相加，移位。这样直到所有的Q都计算完成，这样就可以得到无符号的乘法结果</strong></p>
-</li>
-</ul>
-<p>Example</p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-4.png" title="/img/Computer Organization and Architecture/chapter9-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-4.png">
-        
-    </a>
-<ul>
-<li>
-<p>初始值C为0，A寄存器为0，乘数为1101，被乘数位1011</p>
-</li>
-<li>
-<p>先取乘数的最低位$Q_0$。<strong>如果是1，则将被乘数送到加法器中。如果是0，则不进行加法</strong></p>
-</li>
-<li>
-<p>第一步，乘数最后一位是1，A和M相加后，得到A为1011。然后移位(<strong>A最低位移向了Q的最高位，多出来的高位用0来补齐</strong>)，A和Q寄存器就变成了：0101 1110</p>
-</li>
-<li>
-<p>第二步，乘数最后一位是0，A不变，然后移位，A和Q寄存器就变成了：0010 1111</p>
-</li>
-<li>
-<p>第三步，乘数最后一位是1，将A和M相加，得到1101。然后移位，得到A和Q寄存器变成了：0110 1111</p>
-</li>
-<li>
-<p>第四步，乘数最后一位是1，A和M相加，得到10001。产生了一个进位。然后移位，进位也右移到A的最高位。得到A和Q寄存器变成了：1000 1111</p>
-</li>
-</ul>
-<p><strong>Summary</strong></p>
-<ul>
-<li>
-<p>三个寄存器A、Q和M。其中A用于存放结果的高位，初始化为0。Q初始化为乘数，M初始化为被乘数。还有一个进位标志C。n表示计算次数</p>
-</li>
-<li>
-<p>先检查$Q_0$，如果为1，将A和M相加，放到C，A。然后将C、A、Q右移一位。同时n-1，表示完成了1次计算</p>
-</li>
-<li>
-<p>如果n不为0，继续进行$Q_0$的检测和计算。直到n为0</p>
-</li>
-<li>
-<p><strong>结果保存在A和Q中。A为高位，Q为低位</strong></p>
-</li>
-</ul>
-<h5 id="multiplying-negative-numbers--">Multiplying negative numbers! ! !</h5>
-<ul>
-<li>
-<p>Solution 1</p>
-<ul>
-<li>
-<p>Convert to positive if required</p>
-</li>
-<li>
-<p>Multiply as above</p>
-</li>
-<li>
-<p>If signs were different, negate answer</p>
-</li>
-<li>
-<p>Convert to two’s complement</p>
-</li>
-<li>
-<p>It’s the same way we do multiplication. Regardless of the sign bit, multiply, and then determine the sign of the result</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Solution 2</strong></p>
-<ul>
-<li>
-<p><strong>Booth’s algorithm</strong></p>
-</li>
-<li>
-<p><strong>Not only solves the problem, but also improves the efficiency</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="booths-algorithm--">Booth’s algorithm! ! !</h5>
-<ul>
-<li>In particular, consider a positive multiplier consisting of one block of 1s surrounded by 0s</li>
-</ul>
-<p>Example
-$$
-\begin{align}
-M \times (00011110)_2=&amp;M \times (2^4+2^3+2^2+2^1)\newline
-=&amp;M \times (16+8+4+2)\newline
-=&amp;M \times 30\newline
-\end{align}
-$$</p>
-<p>$$
-2^n+2^{N-1}+\dots+2^{n-K}=2^{n+1}-2^{n-K}
-$$</p>
-<p>$$
-\begin{align}
-M \times (00011110)_2&amp;=M \times (2^5-2^1)\newline
-&amp;=M \times 30\newline
-\end{align}
-$$</p>
-<ul>
-<li>
-<p><strong>For a binary number, we cannot require all its 1s to be connected together. What should we do？</strong></p>
-</li>
-<li>
-<p><strong>Use the idea of segmentation. Make the connected 1 into a block</strong></p>
-</li>
-<li>
-<p><strong>If single 1 is surrounded by 0, a single 1 is also a block</strong></p>
-</li>
-</ul>
-<p>$$
-\begin{align}
-M \times (01111010)_2&amp;=M \times (2^6 + 2^5 + 2^4 + 2^3 + 2^1)\newline
-&amp;=M \times (2^7 - 2^3 + 2^2-2^1)\newline
-\end{align}
-$$</p>
-<ul>
-<li>
-<p><strong>Booth’s algorithm makes use of this rule. For continuous 1, it need not calculate, but only at the beginning and end</strong></p>
-</li>
-<li>
-<p><strong>When 10 is encountered , subtraction is performed</strong></p>
-</li>
-<li>
-<p><strong>When 01 is encountered , addition is performed</strong></p>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-5.png" title="/img/Computer Organization and Architecture/chapter9-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-5.png">
-        
-    </a>
-<ul>
-<li><strong>For continuous 1, it only needs to be calculated at the beginning and end to improve the calculation efficiency</strong></li>
-</ul>
-<p>$$
-M \times (01111110)_2=M \times (2^7-2^0)\newline
-$$</p>
-<ul>
-<li><strong>The worst case is that 0 and 1 alternate, so each time you need to calculate</strong></li>
-</ul>
-<p>$$
-M \times (01010101)_2=M \times (2^7-2^6+2^5-2^4+2^3-2^2+2^1-2^0)\newline
-$$</p>
-<hr>
-<p><strong>Diagram of Booth’s algorithm</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-6.png" title="/img/Computer Organization and Architecture/chapter9-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-6.png">
-        
-    </a>
-<ul>
-<li>
-<p>A寄存器保存结果的高位，Q寄存器保存乘数和结果的低位，M寄存器保存被乘数。$Q_{-1}$寄存器保存上一个乘数数字。初始化时A和$Q_{-1}$均为0</p>
-</li>
-<li>
-<p>开始计算，如果$Q_0$和$Q_{-1}$是<strong>11或00</strong>，A和Q以及$Q_{-1}$<strong>不处理</strong>，直接移位</p>
-</li>
-<li>
-<p>如果$Q_0$和$Q_{-1}$是<strong>10，减去</strong>M，然后进行移位</p>
-</li>
-<li>
-<p>如果$Q_0$和$Q_{-1}$是<strong>01</strong>，<strong>加上</strong>M，然后进行移位</p>
-</li>
-<li>
-<p>A、Q和$Q_{-1}$右移的时候，A的最高位往下移位时,<strong>最高位不是补0，而是将原来的最高位保留，也就是保留符号位</strong></p>
-</li>
-<li>
-<p>移位之后，继续判断$Q_0$和$Q_{-1}$，直到所有的位数都处理完毕</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Can the Booth’s algorithm just discussed solve the multiplication problem of negative numbers?</p>
-<ul>
-<li>
-<p>Yes</p>
-</li>
-<li>
-<p>关键点：符号位也进行了移位</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="division">Division</h4>
-<h5 id="division-of-unsigned-binary-integers">Division of unsigned binary integers</h5>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-7.png" title="/img/Computer Organization and Architecture/chapter9-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-7.png">
-        
-    </a>
-<ul>
-<li>
-<p>被除数的高4位都比除数小。到第五位，被除数是10010，比除数大，所以商位为1，然后减去除数，得到部分余数是111，继续下一位。直到被除数的最后一位</p>
-</li>
-<li>
-<p>二进制的长除相对于10进制的长除简单一些。10进制的时候，因为商的每一位可能是0~9，所以我们还需要挨个儿去试，看商的每位是多大</p>
-</li>
-<li>
-<p>对于二进制，商的每一位只能是0或者1，所以只需要对比被除数和除数的大小</p>
-</li>
-<li>
-<p>结果包括商和余数</p>
-</li>
-</ul>
-<p><strong>Flowchart for Unsigned Binary Division</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-8.png" title="/img/Computer Organization and Architecture/chapter9-8.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-8.png">
-        
-    </a>
-<ul>
-<li>
-<p>除数在M寄存器中，被除数放在Q寄存器中。A的初始值为0，保存被除数的部分余数</p>
-</li>
-<li>
-<p>每一次，先将A和Q进行移位，然后检查A和M的大小，<strong>用无符号减法来比较。如果A大于M，当前的余数可以减去M，得到一个商位为1，放在</strong>$Q_0$<strong>。如果A比M小，则</strong>$Q_0$<strong>为0，同时A恢复成减去M之前的值</strong></p>
-</li>
-<li>
-<p>然后继续移位(<strong>A与Q同时进行左移,类比乘法中的整体移位</strong>)并比较。一直到被除数的所有位都用完</p>
-</li>
-<li>
-<p><strong>最后得到的商在Q寄存器中，余数保存在A寄存器中</strong></p>
-</li>
-</ul>
-<h3 id="floating-point-representation">Floating-Point Representation</h3>
-<h4 id="real-numbers">Real numbers</h4>
-<ul>
-<li>
-<p>Real number: number with fractions</p>
-</li>
-<li>
-<p>Could be represent in pure binary</p>
-</li>
-</ul>
-<p>$$
-1001.1010=2^4+2^0+2^{-1}+2^{-3}=9.625
-$$</p>
-<h4 id="scientific-notation">Scientific Notation</h4>
-<ul>
-<li>
-<p>In decimal, large numbers are represented by scientific notation</p>
-</li>
-<li>
-<p>Use a mantissa to multiply by the power of 10</p>
-</li>
-</ul>
-<p>$$
-6.02_{10}\times 10^{23}
-$$</p>
-<ul>
-<li>
-<p>The same in binary</p>
-</li>
-<li>
-<p>Represent a large binary number by multiplying the mantissa and the power of 2</p>
-</li>
-<li>
-<p>Representation consists of three parts: <strong>sign bit, significant value and exponent</strong></p>
-</li>
-</ul>
-<h4 id="floating-point">Floating point</h4>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-9.png" title="/img/Computer Organization and Architecture/chapter9-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-9.png">
-        
-    </a>
-<ul>
-<li>
-<p><strong>Floating point representation</strong></p>
-<ul>
-<li>
-<p><strong>Symbol represented by 0 or 1</strong></p>
-</li>
-<li>
-<p><strong>Exponent of biased notation</strong></p>
-</li>
-<li>
-<p><strong>Valid value, that is, the mantissa of the number</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Binary point is the first place on the right of the highest significant value</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Exponent! ! !</strong></p>
-<ul>
-<li>How to use biased notation?
-<ul>
-<li>For a k bit exponent,the bias is $2^{k-1}-1(exponent\ add\ \underbrace{0111111\dots111}_{k\ bits})\newline$</li>
-<li>actual exponent range is: $[-(2^{k-1}-1),2^{k-1}]\newline$</li>
-<li><strong>The bias is added to the actual exponent to get the stored exponent</strong></li>
-</ul>
-</li>
-</ul>
-<hr>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-10.png" title="/img/Computer Organization and Architecture/chapter9-10.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-10.png">
-        
-    </a>
-<p>Example</p>
-<ul>
-<li>
-<p>$-1.1010001 \times 2^{10100}\newline$</p>
-</li>
-<li>
-<p>Sign: 1</p>
-</li>
-<li>
-<p>Exponent: $\underbrace{01111111}_{bias}+\overbrace{10100}^{exponment}=10010011\newline$</p>
-</li>
-<li>
-<p>Significand: 101 0001 0000 0000 0000 0000</p>
-</li>
-<li>
-<p>The floating point representation for above number: 1 10010011 10100010000000000000000</p>
-</li>
-</ul>
-<h4 id="normalization">Normalization</h4>
-<ul>
-<li>
-<p>To simplify operations on floating-point numbers, it is required to normalize the number</p>
-</li>
-<li>
-<p>How to normalize?</p>
-<ul>
-<li>
-<p>The leftmost bit of the significand is 1</p>
-<ul>
-<li>e.g: $1.xxxxx \times 2^k\newline$</li>
-</ul>
-</li>
-<li>
-<p><strong>Because the most significand bit is always one, it is unnecessary to store this bit – implicit</strong></p>
-</li>
-<li>
-<p><strong>23-bit field is used to store a 24-bit significant</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="floating-point-range-and-accuracy">Floating point range and accuracy</h4>
-<ul>
-<li>
-<p>For a 32 bit number</p>
-<ul>
-<li>8 bit exponent， up to 128</li>
-<li>$+|-2^{128}\approx1.0 \times 10^{39}\newline$</li>
-</ul>
-</li>
-<li>
-<p>Accuracy</p>
-<ul>
-<li>
-<p>The effect of changing <code>lsb</code> of mantissa</p>
-</li>
-<li>
-<p>23 bit mantissa $2^{-23}\approx 1.2 \times 10^{-7}\newline$</p>
-</li>
-<li>
-<p>About 6 decimal places</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Because total bits of floating point numbers is fixed, the range and accuracy are contradictory</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Density of floating point numbers</strong></p>
-<ul>
-<li>
-<p>For fixed-point numbers, the numbers are spaced evenly</p>
-</li>
-<li>
-<p>For float-point notation, the numbers are not evenly spaced</p>
-<ul>
-<li>
-<p>The length of exponent is fixed</p>
-</li>
-<li>
-<p>As the number is getting bigger, the space between two numbers is bigger</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="ieee-754">IEEE 754</h4>
-<ul>
-<li>
-<p>Standard for floating point storage</p>
-</li>
-<li>
-<p>32 and 64 bit standards</p>
-</li>
-<li>
-<p><strong>32 bits standard</strong></p>
-<ul>
-<li><strong>8 bits exponent , 23 bits significand</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>64 bits standard</strong></p>
-<ul>
-<li><strong>11 bits exponent , 52 bits significand</strong></li>
-</ul>
-</li>
-<li>
-<p>Extended formats (both mantissa and exponent) for intermediate results</p>
-</li>
-</ul>
-<h4 id="special-about-ieee-754-formats">Special about IEEE 754 formats</h4>
-<ul>
-<li>
-<p>Extreme value of the exponent to define a particular value</p>
-</li>
-<li>
-<p>Exponent after bias is 2047, that is, all 1, indicating infinity</p>
-</li>
-<li>
-<p>The actual range is smaller than the ideal range</p>
-</li>
-<li>
-<p>For negative, the range is $[-(2-2^{-52}) \times 2^{1023},2^{-1022}]\newline$</p>
-</li>
-<li>
-<p>For positive, the range is $[2^{-1022},(2-2^{-52}) \times 2^{1023}]\newline$</p>
-</li>
-</ul>
-<h3 id="floating-point-arithmetic">Floating-Point Arithmetic</h3>
-<h4 id="floating-point-arithmetic--">Floating point arithmetic +/-</h4>
-<ul>
-<li>
-<p>Addition and subtraction of floating point numbers must first ensure that the exponent are the same</p>
-</li>
-<li>
-<p>How to do this？ Move the binary point position of the valid value of the operand</p>
-</li>
-<li>
-<p><strong>Steps for addition and subtraction floating point numbers</strong></p>
-<ul>
-<li>
-<p><strong>Check for zeros</strong></p>
-</li>
-<li>
-<p><strong>Align significands (adjusting exponents)</strong></p>
-</li>
-<li>
-<p><strong>Add or subtract significands</strong></p>
-</li>
-<li>
-<p><strong>Normalize result</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<p>Example
-$$
-\begin{gather}
-1.011 \times 2^5+1.001 \times 2^3\newline
-Align\ significands \rightarrow 1.001 \times 2^3=0.0101 \times 2^5\newline
-Add\ or\ subtract\ significands \rightarrow 1.001+0.0101=1.1011\newline
-Normalize\ result \rightarrow result=1.1011 \times 2^5\newline
-\end{gather}
-$$
-<strong>FP Addition &amp; Subtraction Flowchart</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-11.png" title="/img/Computer Organization and Architecture/chapter9-11.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-11.png">
-        
-    </a>
-<h4 id="floating-point-arithmetic-timesbackslashdiv">Floating point arithmetic $\times\backslash\div$</h4>
-<ul>
-<li>
-<p>Multiplication and division are simpler than addition and subtraction</p>
-</li>
-<li>
-<p><strong>Steps:</strong></p>
-<ul>
-<li>
-<p><strong>Check for zero</strong></p>
-</li>
-<li>
-<p><strong>Add/subtract exponents</strong></p>
-</li>
-<li>
-<p><strong>Multiply/divide significands (watch sign)</strong></p>
-</li>
-<li>
-<p><strong>Normalize</strong></p>
-</li>
-<li>
-<p><strong>Round</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>All intermediate results should be in double length storage</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Floating point multiplication</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-12.png" title="/img/Computer Organization and Architecture/chapter9-12.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-12.png">
-        
-    </a>
-<p><strong>Floating point division</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter9-13.png" title="/img/Computer Organization and Architecture/chapter9-13.png" data-thumbnail="/img/Computer Organization and Architecture/chapter9-13.png">
-        
-    </a>
-<p>Example:
-$$
-\begin{gather}
-(1.001 \times 2^5) \times (1.001 \times 2^3)\newline
-Check\ for\ zeros:no\ zero\newline
-Add/subtract\ exponents\rightarrow5+3=8=(1000)_2\newline
-Multiply/divide\ significands\rightarrow1.011\times1.001=1.100011\newline
-Normalize\ result \rightarrow result=1.100011 \times 2^8\newline
-Round \rightarrow 1.100011 \times 2^8\approx 1.100 \times 2^8\newline
-\end{gather}
-$$</p>
 ]]></description>
 </item>
 </channel>

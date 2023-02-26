@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Chapter2-部分二刷-个人理解System call - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Chapter2-部分二刷-个人理解System call" />
+<meta property="og:description" content="二刷部分Chapter2 $\Longrightarrow$ 如何理解System call 问题：构造最小的”Hello world!”程序 基本程序和静态编译 1 2 3 4 5 6 #include &lt;stdio.h&gt; int main() { printf(&#34;Hello world&#34;); return" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/operating-system/support1/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-02-26T21:02:57+08:00" />
+<meta property="article:modified_time" content="2023-02-26T21:02:57+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Chapter2-部分二刷-个人理解System call"/>
+<meta name="twitter:description" content="二刷部分Chapter2 $\Longrightarrow$ 如何理解System call 问题：构造最小的”Hello world!”程序 基本程序和静态编译 1 2 3 4 5 6 #include &lt;stdio.h&gt; int main() { printf(&#34;Hello world&#34;); return"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/operating-system/support1/" /><link rel="prev" href="https://Jungle430.github.io/posts/cpp-primer/chapter3/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Chapter2-部分二刷-个人理解System call",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/support1\/"
+        },"genre": "posts","keywords": "Operating System","wordcount":  1050 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/support1\/","datePublished": "2023-02-26T21:02:57+08:00","dateModified": "2023-02-26T21:02:57+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Chapter2-部分二刷-个人理解System call</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-02-26">2023-02-26</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1050 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#问题构造最小的hello-world程序">问题：构造最小的”Hello world!”程序</a>
+      <ul>
+        <li><a href="#基本程序和静态编译">基本程序和静态编译</a></li>
+        <li><a href="#那我们就把main改成_start">那我们就把<code>main</code>改成<code>_start</code></a></li>
+        <li><a href="#最小的hello-world程序">最小的<code>Hello world</code>程序</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="二刷部分chapter2-longrightarrow-如何理解system-call">二刷部分Chapter2 $\Longrightarrow$ 如何理解<code>System call</code></h1>
+<h2 id="问题构造最小的hello-world程序">问题：构造最小的”Hello world!”程序</h2>
+<h3 id="基本程序和静态编译">基本程序和静态编译</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello world&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -static hello.c -o hello <span class="o">&amp;&amp;</span> ./hello
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译出来很大(Ubuntu上约900KB)</p>
+<ul>
+<li>如果只编译，不链接，看一下obj文件的反汇编</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc -c hello.c <span class="o">&amp;&amp;</span> objdump -d hello.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">hello.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;main&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">55</span>                   	push   %rbp
+</span></span><span class="line"><span class="cl">   5:	<span class="m">48</span> <span class="m">89</span> e5             	mov    %rsp,%rbp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">48</span> 8d <span class="m">05</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> 	lea    0x0<span class="o">(</span>%rip<span class="o">)</span>,%rax        <span class="c1"># f &lt;main+0xf&gt;</span>
+</span></span><span class="line"><span class="cl">   f:	<span class="m">48</span> <span class="m">89</span> c7             	mov    %rax,%rdi
+</span></span><span class="line"><span class="cl">  12:	b8 <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>       	mov    <span class="nv">$0</span>x0,%eax
+</span></span><span class="line"><span class="cl">  17:	e8 <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>       	call   1c &lt;main+0x1c&gt;
+</span></span><span class="line"><span class="cl">  1c:	b8 <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>       	mov    <span class="nv">$0</span>x0,%eax
+</span></span><span class="line"><span class="cl">  21:	5d                   	pop    %rbp
+</span></span><span class="line"><span class="cl">  22:	c3                   	ret    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>就和普通的函数差不多，只有参数压栈，call和参数出栈的过程
+<ul>
+<li>普通函数<code>fun.c</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">f</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -c fun.c <span class="o">&amp;&amp;</span> objdump -d fun.o 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">fun.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;f&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">55</span>                   	push   %rbp
+</span></span><span class="line"><span class="cl">   5:	<span class="m">48</span> <span class="m">89</span> e5             	mov    %rsp,%rbp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">90</span>                   	nop
+</span></span><span class="line"><span class="cl">   9:	5d                   	pop    %rbp
+</span></span><span class="line"><span class="cl">   a:	c3                   	ret
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>可以看到不链接的话和普通的函数调用过程差不多</p>
+</li>
+<li>
+<p>链接失败！</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">○ → ld hello.o
+</span></span><span class="line"><span class="cl">ld: 警告: 无法找到项目符号 _start<span class="p">;</span> 缺省为 <span class="m">0000000000401000</span>
+</span></span><span class="line"><span class="cl">ld: hello.o: in <span class="k">function</span> <span class="sb">`</span>main<span class="s1">&#39;:
+</span></span></span><span class="line"><span class="cl"><span class="s1">hello.c:(.text+0x18): undefined reference to `printf&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>本来以为找的<code>main</code>，但是它实际上在找<code>_start</code>这个东西？</li>
+</ul>
+<h3 id="那我们就把main改成_start">那我们就把<code>main</code>改成<code>_start</code></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">_start</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello world&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/support1-1.png" title="/img/Operating System/support1-1.png" data-thumbnail="/img/Operating System/support1-1.png" data-sub-html="<h2>ld仍然不予通过-&gt; 找不到printf?</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/support1-1.png"
+            data-srcset="/img/Operating%20System/support1-1.png, /img/Operating%20System/support1-1.png 1.5x, /img/Operating%20System/support1-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/support1-1.png" />
+    </a><figcaption class="image-caption"><code>ld仍然不予通过</code>-&gt; 找不到printf?</figcaption>
+    </figure>
+<ul>
+<li>那把printf也给去了</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">_start</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>编译与链接全部成功！</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">○ → gcc -c hello.c <span class="o">&amp;&amp;</span> objdump -d hello.o <span class="o">&amp;&amp;</span> ld hello.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">hello.o：     文件格式 elf64-x86-64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Disassembly of section .text:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="m">0000000000000000</span> &lt;_start&gt;:
+</span></span><span class="line"><span class="cl">   0:	f3 0f 1e fa          	endbr64 
+</span></span><span class="line"><span class="cl">   4:	<span class="m">55</span>                   	push   %rbp
+</span></span><span class="line"><span class="cl">   5:	<span class="m">48</span> <span class="m">89</span> e5             	mov    %rsp,%rbp
+</span></span><span class="line"><span class="cl">   8:	<span class="m">90</span>                   	nop
+</span></span><span class="line"><span class="cl">   9:	5d                   	pop    %rbp
+</span></span><span class="line"><span class="cl">   a:	c3                   	ret    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>程序很小，只有99个字节</p>
+</li>
+<li>
+<p>但是运行 $\Longrightarrow$ 段错误！</p>
+</li>
+<li>
+<p>但是里面加入while(1)这种死循环就没事了</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>对于没有while(1)的a.out，使用gdb狠狠的拷打调试</li>
+</ul>
+<a class="lightgallery" href="/img/Operating%20System/support1-2.jpg" title="/img/Operating System/support1-2.jpg" data-thumbnail="/img/Operating System/support1-2.jpg">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/support1-2.jpg"
+            data-srcset="/img/Operating%20System/support1-2.jpg, /img/Operating%20System/support1-2.jpg 1.5x, /img/Operating%20System/support1-2.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/support1-2.jpg" />
+    </a>
+<p>这个时候我们看到rsp的地址是合法的，里面的值是1，当执行ret后，rsp将栈顶的值1赋给了pc，gdb显示pc访问了非法位置</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/support1-3.png" title="/img/Operating System/support1-3.png" data-thumbnail="/img/Operating System/support1-3.png" data-sub-html="<h2>🤡呦吼，崩溃了！</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/support1-3.png"
+            data-srcset="/img/Operating%20System/support1-3.png, /img/Operating%20System/support1-3.png 1.5x, /img/Operating%20System/support1-3.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/support1-3.png" />
+    </a><figcaption class="image-caption">🤡呦吼，崩溃了！</figcaption>
+    </figure>
+<ul>
+<li>CPU只会执行指令，该怎么停下来？(mov,add这些指令停不下来)</li>
+<li>需要什么指令让它停下来？ $\Longrightarrow$ <code>System call</code> 也就是管态</li>
+</ul>
+<h3 id="最小的hello-world程序">最小的<code>Hello world</code>程序</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="n">globl</span> <span class="n">_start</span>
+</span></span><span class="line"><span class="cl"><span class="nl">_start</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_write</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span>   <span class="err">#</span> <span class="n">write</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="err">#</span>   <span class="n">fd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">st</span><span class="p">,</span>        <span class="o">%</span><span class="n">rsi</span>   <span class="err">#</span>   <span class="n">buf</span><span class="o">=</span><span class="n">st</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="p">(</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">),</span> <span class="o">%</span><span class="n">rdx</span>   <span class="err">#</span>   <span class="n">count</span><span class="o">=</span><span class="n">ed</span><span class="o">-</span><span class="n">st</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span>                 <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_exit</span><span class="p">,</span>  <span class="o">%</span><span class="n">rax</span>   <span class="err">#</span> <span class="n">exit</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="err">#</span>   <span class="n">status</span><span class="o">=</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">  <span class="n">syscall</span>                 <span class="err">#</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">st</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="n">ascii</span> <span class="s">&#34;</span><span class="se">\033</span><span class="s">[01;31mHello, OS World</span><span class="se">\033</span><span class="s">[0m</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">ed</span><span class="p">:</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>它在干什么
+<ul>
+<li>给许多寄存器赋值，然后call了syscall</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/support1-4.png" title="/img/Operating System/support1-4.png" data-thumbnail="/img/Operating System/support1-4.png" data-sub-html="<h2>编译后查看反汇编代码</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/support1-4.png"
+            data-srcset="/img/Operating%20System/support1-4.png, /img/Operating%20System/support1-4.png 1.5x, /img/Operating%20System/support1-4.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/support1-4.png" />
+    </a><figcaption class="image-caption">编译后查看反汇编代码</figcaption>
+    </figure>
+<ul>
+<li>ld链接，编译成功，运行成功！</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">○ → objdump -d a.out <span class="p">|</span> less
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/support1-5.png" title="/img/Operating System/support1-5.png" data-thumbnail="/img/Operating System/support1-5.png" data-sub-html="<h2>查看反汇编代码</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/support1-5.png"
+            data-srcset="/img/Operating%20System/support1-5.png, /img/Operating%20System/support1-5.png 1.5x, /img/Operating%20System/support1-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/support1-5.png" />
+    </a><figcaption class="image-caption">查看反汇编代码</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/support1-6.png" title="/img/Operating System/support1-6.png" data-thumbnail="/img/Operating System/support1-6.png" data-sub-html="<h2>man syscall查看syscall的文档</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/support1-6.png"
+            data-srcset="/img/Operating%20System/support1-6.png, /img/Operating%20System/support1-6.png 1.5x, /img/Operating%20System/support1-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/support1-6.png" />
+    </a><figcaption class="image-caption"><code>man syscall</code>查看syscall的文档</figcaption>
+    </figure>
+<p>我们会发现，syscall会告诉我们在各种架构的计算机中该如何通过寄存器为syscall传入参数,<code>man syscalls</code>会告诉我们Linux操作系统的接口</p>
+<ul>
+<li>所以程序在怎么执行</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-02-26</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call" data-hashtags="Operating System"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-hashtag="Operating System"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/operating-system/support1/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/operating-system/support1/" data-title="Chapter2-部分二刷-个人理解System call"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cpp-primer/chapter3/" class="prev" rel="prev" title="《C&#43;&#43; Primer》 字符串，向量和数组"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(计算)\nB(计算 此时意识到需要调用系统的操作 比如显示屏打印 开始/程序结束程序等)\nC(为寄存器赋值也就是传参)\nD(syscall)\nE(继续计算)\nF(继续)\nA--\u003eB--\u003eC--\u003eD--\u003eE--\u003eF"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
