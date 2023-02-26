@@ -338,7 +338,7 @@
     </figure>
 <p>我们会发现，syscall会告诉我们在各种架构的计算机中该如何通过寄存器为syscall传入参数,<code>man syscalls</code>会告诉我们Linux操作系统的接口</p>
 <ul>
-<li>所以程序在怎么执行</li>
+<li>所以程序的执行模式</li>
 </ul>
 <div class="mermaid" id="id-1"></div>
 ]]></description>
