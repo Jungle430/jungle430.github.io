@@ -9,7 +9,7 @@
     <link>https://Jungle430.github.io/posts/operating-system/support1/</link>
     <pubDate>Sun, 26 Feb 2023 21:02:57 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support1/</guid>
     <description><![CDATA[<h1 id="二刷部分chapter2-longrightarrow-如何理解system-call">二刷部分Chapter2 $\Longrightarrow$ 如何理解<code>System call</code></h1>
-<h2 id="问题构造最小的hello-world程序">问题：构造最小的”Hello world!”程序</h2>
+<h2 id="问题构造最小的hello-world程序">问题：构造最小的”Hello world”程序</h2>
 <h3 id="基本程序和静态编译">基本程序和静态编译</h3>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
