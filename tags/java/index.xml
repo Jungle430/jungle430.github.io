@@ -1,0 +1,82 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Java - 标签 - Jungle&#39;s Blog</title>
+        <link>https://Jungle430.github.io/tags/java/</link>
+        <description>Java - 标签 - Jungle&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Tue, 28 Feb 2023 23:59:46 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/java/" rel="self" type="application/rss+xml" /><item>
+    <title>速通BigInteger</title>
+    <link>https://Jungle430.github.io/posts/java/biginteger/</link>
+    <pubDate>Tue, 28 Feb 2023 23:59:46 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/java/biginteger/</guid>
+    <description><![CDATA[<h1 id="速通biginteger">速通BigInteger</h1>
+<ul>
+<li>首先需要导包</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">java.math.BigInteger</span><span class="o">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table border="2" >
+	<tr>
+		<td colspan="2">BigInteger的一些方法</td>
+    </tr>
+    <tr>
+        <td>BigInteger bigInteger = new BigInteger("123456");</td>
+        <td>使用String进行初始化</td>
+    </tr>
+    <tr>
+        <td>abs()</td>
+        <td>返回一个BigInteger。值为当前对象的绝对值</td>
+    </tr>
+    <tr>
+        <td>add(BigInteger)</td>
+        <td>相加:<br>
+            bigInteger = bigInteger.add(new BigInteger("123456"));</td>
+    </tr>
+    <tr>
+        <td>and(BigInteger)</td>
+        <td>二进制AND(&)运算符:<br>
+            bigInteger = bigInteger.and(new BigInteger("123456"));</td>
+    </tr>
+    <tr>
+        <td>andNot(BigInteger)</td>
+        <td>二进制按位与非运算符,等同于and(BigTnteger.not()):<br>
+            bigInteger = bigInteger.andNot(new BigInteger("123456"));</td>
+    </tr>
+    <tr>
+        <td>bitCount()</td>
+        <td>该方法用于返回该BigInteger的<u>补码表示中与符号位不同的位数</u></td>
+    </tr>
+    <tr>
+        <td>bitLength()</td>
+        <td>返回二进制补码表示的长度</td>
+    </tr>
+    <tr>
+        <td>compareTo(BigInteger)</td>
+        <td>返回二者比较结果:小于 -1， 等于 0， 大于 1</td>
+    </tr>
+    <tr>
+        <td>divide(BigInteger)</td>
+        <td>相除，相当于"/"</td>
+    </tr>
+    <tr>
+        <td>divideAndRemainder(BigInteger)</td>
+        <td>返回一个BigInteger数组，第一位是截断结果(/)，第二位是余数(%)</td>
+    </tr>
+    <tr>
+        <td>doubleValue()</td>
+        <td>返回对应的double值</td>
+    </tr>
+    <tr>
+        <td>gcd()</td>
+        <td>gcd(abs(val1), abs(val2)),使用gcd算法</td>
+    </tr>
+</table>    
+]]></description>
+</item>
+</channel>
+</rss>
