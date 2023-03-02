@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  2132 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  2853 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/","datePublished": "2022-12-30T16:27:09+08:00","dateModified": "2022-12-30T16:27:09+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter1 操作系统概述</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2132 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2853 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -137,6 +137,7 @@
                 <li><a href="#并发concurrence">并发(<code>Concurrence</code>)</a></li>
                 <li><a href="#共享sharing">共享(<code>Sharing</code>)</a></li>
                 <li><a href="#虚拟virtual">虚拟(<code>Virtual</code>)</a></li>
+                <li><a href="#异步asynchronism">异步(<code>Asynchronism</code>)</a></li>
               </ul>
             </li>
           </ul>
@@ -444,7 +445,8 @@
 <h3 id="个人补充考试用">个人补充（考试用）</h3>
 <blockquote>
 <p>Update in 2023-03-02 又是🤡+💩🐴的一天</p>
-<p>PPT上面讲了个🐔8️⃣啊，真是给✋整无语了，又没看懂，看点书吧</p>
+<p>PPT上面讲了个🐔8️⃣，真是给✋整无语了，又没看懂，看点书吧</p>
+<p>2023-03-03 0:10 🤡半夜看书，确实是有🅱️<b>IG</b>🧊了</p>
 </blockquote>
 <ul>
 <li>计算机系统自上而下可大致分成四个部分：<b>硬件，操作系统，应用程序和用户</b>（和计组的分层不一样）</li>
@@ -504,7 +506,39 @@
 </ul>
 </li>
 </ul>
+<hr>
 <h5 id="虚拟virtual">虚拟(<code>Virtual</code>)</h5>
+<p><b>虚拟是指把一个物理上的实体变为若干逻辑上的对应物</b>。物理实体（前者）是实际存在的；而后者是虚的，是用户感觉上的事物。<u>用于实现虚拟的技术，称为<b>虚拟技术</b></u>。</p>
+<p>操作系统中利用了多种虚拟技术来实现<u>虚拟处理器，虚拟内存和虚拟外部设备等</u>。</p>
+<ul>
+<li>虚拟处理器技术
+<ul>
+<li><b>虚拟处理器技术是通过多道程序设计技术，采用让<u>多道程序并发执行的方法</u>，来分时使用一个处理器的</b>。此时，<b>虽然只有一个处理器</b>，但它能同时为多个用户服务，<u>使每个终端用户都感觉有一个中央处理器（CPU）在专门为它服务</u>。<u>利用<b>多道程序设计技术</b>把一个物理上的CPU虚拟为多个逻辑上的CPU</u>，称为<b>虚拟处理器</b>。</li>
+</ul>
+</li>
+<li>虚拟存储器技术
+<ul>
+<li>采用虚拟存储器技术将一台机器的物理存储器变为虚拟存储器，以便<b>从逻辑上扩充存储器的容量</b>。当然，这时用户所感觉到的内存容量是虚的。<u>我们把用户感觉到（但实际不存在）的存储器称为<b>虚拟存储器</b></u>。</li>
+</ul>
+</li>
+<li>虚拟设备技术
+<ul>
+<li>采用虚拟设备技术将一台物理$I/O$设备<b>虚拟为多台逻辑上的$I/O$设备</b>，并<u>允许每个用户占用一台逻辑上的$I/O$设备</u>，<b>使原来仅允许在一段时间内由一个用户访问的设备（即临界资源）变为在一段时间内允许多个用户同时访问的共享设备</b>。</li>
+</ul>
+</li>
+<li>操作系统虚拟技术归纳
+<ul>
+<li>时分复用技术 $\Longrightarrow$ 处理器的分时共享</li>
+<li>空分复用技术 $\Longrightarrow$ 虚拟存储器</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h5 id="异步asynchronism">异步(<code>Asynchronism</code>)</h5>
+<ul>
+<li>多道程序环境允许多个程序并发执行，<b>但是由于资源有限。进程的执行并不是一贯到底的，而是走走停停的，它<u>以不可预知的速度向前推进</u>，这就是程序的异步性</b>。</li>
+<li>异步性使得操作系统<b>运行在一种随机的环境下</b>，<u>可能导致进程的产生与时间有关的错误</u>（就像对全局变量的访问顺序不当会导致程序出错一样）。然而，<b>只要运行环境相同，操作系统就须保证多次运行程序后都能获得相同的结果</b>。</li>
+</ul>
 <p><strong>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</strong></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
