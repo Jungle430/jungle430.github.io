@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  2853 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  4179 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/","datePublished": "2022-12-30T16:27:09+08:00","dateModified": "2022-12-30T16:27:09+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter1 操作系统概述</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2853 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4179 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -138,6 +138,25 @@
                 <li><a href="#共享sharing">共享(<code>Sharing</code>)</a></li>
                 <li><a href="#虚拟virtual">虚拟(<code>Virtual</code>)</a></li>
                 <li><a href="#异步asynchronism">异步(<code>Asynchronism</code>)</a></li>
+              </ul>
+            </li>
+            <li><a href="#操作系统的目标和功能">操作系统的目标和功能</a>
+              <ul>
+                <li><a href="#操作系统作为计算机系统资源的管理者">操作系统作为计算机系统资源的管理者</a>
+                  <ul>
+                    <li><a href="#处理机管理">处理机管理</a></li>
+                    <li><a href="#存储器管理">存储器管理</a></li>
+                    <li><a href="#文件管理">文件管理</a></li>
+                    <li><a href="#设备管理">设备管理</a></li>
+                  </ul>
+                </li>
+                <li><a href="#操作系统作为用户与计算机硬件系统之间的接口">操作系统作为用户与计算机硬件系统之间的接口</a>
+                  <ul>
+                    <li><a href="#命令接口">命令接口</a></li>
+                    <li><a href="#程序接口">程序接口</a></li>
+                  </ul>
+                </li>
+                <li><a href="#操作系统实现了对计算机资源的扩充">操作系统实现了对计算机资源的扩充</a></li>
               </ul>
             </li>
           </ul>
@@ -445,7 +464,7 @@
 <h3 id="个人补充考试用">个人补充（考试用）</h3>
 <blockquote>
 <p>Update in 2023-03-02 又是🤡+💩🐴的一天</p>
-<p>PPT上面讲了个🐔8️⃣，真是给✋整无语了，又没看懂，看点书吧</p>
+<p>PPT上面讲了个🐔8️⃣，真是给✌️整无语了，又没看懂，看点书吧</p>
 <p>2023-03-03 0:10 🤡半夜看书，确实是有🅱️<b>IG</b>🧊了</p>
 </blockquote>
 <ul>
@@ -539,7 +558,70 @@
 <li>多道程序环境允许多个程序并发执行，<b>但是由于资源有限。进程的执行并不是一贯到底的，而是走走停停的，它<u>以不可预知的速度向前推进</u>，这就是程序的异步性</b>。</li>
 <li>异步性使得操作系统<b>运行在一种随机的环境下</b>，<u>可能导致进程的产生与时间有关的错误</u>（就像对全局变量的访问顺序不当会导致程序出错一样）。然而，<b>只要运行环境相同，操作系统就须保证多次运行程序后都能获得相同的结果</b>。</li>
 </ul>
-<p><strong>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</strong></p>
+<h4 id="操作系统的目标和功能">操作系统的目标和功能</h4>
+<blockquote>
+<p>Update in 2023-03-03 22:00</p>
+<p>翘课爽玩的一天，✌️在百京就是百京朝阳✌️，逛了万达，不过万达也和老家的商网结构差不多，感觉全🇨🇳的五六层都是一个🅱️🐑，一楼🍎专卖店看了看<b>MacBook Air</b>，🐮魔是真得薄啊，加上类Unix的系统和续航，✌️将来有💸必须狠狠奖励自己一台</p>
+</blockquote>
+<p>比喻</p>
+<div class="mermaid" id="id-1"></div>
+<p>有了工人，机器就能发挥更大的作用，因此工人就成了<b>”扩充机器“</b>。</p>
+<h5 id="操作系统作为计算机系统资源的管理者">操作系统作为计算机系统资源的管理者</h5>
+<h6 id="处理机管理">处理机管理</h6>
+<ul>
+<li><b>在多道程序环境下，处理机的分配和运行都以进程（或线程）为基本单位</b>，因此<u>对处理机的管理可归结为对进程的管理</u>。并发是指在计算机内同时运行多个进程，因此<u>进程何时创建，何时撤销，如何管理，如何避免冲突，合理共享就是进程管理的最主要的任务</u>。进程管理的主要功能包括<b>进程控制，进程同步，进程通信，死锁处理，处理机调度</b>等</li>
+</ul>
+<h6 id="存储器管理">存储器管理</h6>
+<ul>
+<li>存储器管理是为了给多道程序的运行提供良好的环境，方便用户使用及提高内存的利用率，<b>主要包括内存分配与回收，地址映射，内存保护与共享和内存扩充等功能</b></li>
+</ul>
+<h6 id="文件管理">文件管理</h6>
+<ul>
+<li>计算机中的信息都是以文件的形式存在的，操作系统中<b>负责文件管理的部分</b>称为<b>文件系统</b>。<b>文件管理包括文件存储空间的管理，目录管理及文件读写管理和保护等</b>。</li>
+</ul>
+<h6 id="设备管理">设备管理</h6>
+<ul>
+<li><u>设备管理的主要任务是完成用户的$I/O$请求，方便用户使用各种设备，并提高设备的利用率</u>，主要包括<b>缓冲管理，设备分配，设备处理和虚拟设备等功能</b>。</li>
+</ul>
+<p><u>以上工作都由OS负责，用户无需关注</u></p>
+<h5 id="操作系统作为用户与计算机硬件系统之间的接口">操作系统作为用户与计算机硬件系统之间的接口</h5>
+<ul>
+<li>操作系统提供的接口主要分为两类：<b>命令接口，程序接口</b>。</li>
+</ul>
+<h6 id="命令接口">命令接口</h6>
+<ul>
+<li>使用命令接口进行作业控制的主要方式有两种：<u>联机控制方式和脱机控制方式</u></li>
+<li><u>按照作业控制方式的不同</u>，可将命令接口分为<b>联机命令接口</b>和<b>脱机命令接口</b></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><b>联机命令接口</b></p>
+<ul>
+<li>又称<u>交互式命令接口</u>，适用于<b>分时或实时系统的接口</b>。它由一组键盘操作命令组成。<u>用户通过控制台或终端输入操作命令，向系统提出各种服务要求</u>。<b>用户每输入一条命令，控制权就转给操作系统的命令解释程序，然后由<u>命令解释程序</u>解释并执行输入的命令，完成指定的功能。之后，控制权转回控制台或终端</b>，此时用户又可输入下一条命令。联机命令接口可以这样理解：<u>”雇主“说一句话，”工人“做一件事，并作出反馈</u>，这就强调了交互性。<u>（典型<code>Linux</code>的终端<b>群魔乱舞</b>）</u></li>
+</ul>
+</li>
+<li>
+<p><b>脱机命令接口</b></p>
+<ul>
+<li>又称<u>批处理命令接口</u>，适用于<b>批处理系统</b>，它由一组作业控制命令组成。<u>脱机用户不能直接干预作业的运行</u>，而应事先用相应的作业控制命令写成一份作业操作说明说明书，连同作业一起提交给系统。<b>系统调度到该作业时，由系统中的命令解释程序逐条解释执行作业说明书上的命令</b>，从而<b>间接地</b>控制作业地运行。</li>
+</ul>
+</li>
+</ul>
+<h6 id="程序接口">程序接口</h6>
+<ul>
+<li>程序接口由<b>一组系统调用</b>（也称广义指令）组成，<b>用户通过在程序中使用这些系统调用来请求操作系统为其提供服务</b>。</li>
+<li>当前最为流行的是用户图形界面($GUI$)，即图形接口。</li>
+<li>严格来说，<u>图形接口不是操作系统的一部分</u>，但是<b>图形接口所调用的系统调用命令是操作系统的一部分</b>。</li>
+</ul>
+<h5 id="操作系统实现了对计算机资源的扩充">操作系统实现了对计算机资源的扩充</h5>
+<ul>
+<li>没有任何软件支持的计算机称为<b>裸机</b></li>
+<li>操作系统所提供的资源管理功能和方便用户的各种服务功能，将裸机的功能变得更强大，使用变得更方便</li>
+<li>覆盖软件的机器称为<b>扩充机器</b>或<b>虚拟机</b></li>
+<li>”工人“操作机器，机器就有更大的作用，于是”工人“便成了”扩充机器“</li>
+</ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
                 </span></div><div class="post-info-line"><div class="post-info-mod">
@@ -574,4 +656,4 @@ if ('serviceWorker' in navigator) {
 
         <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
                 <i class="fas fa-chevron-up fa-fw"></i>
-            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA(\"计算机：机器(由处理器，存储器，设备，文件几个部件构成)\")\nB(\"操作系统：工人（用来操作机器）\")\nC(\"雇主：使用机器的人\")\nB--控制和协调各个部件的工作--\u003eA\nC--\"通过“接口”发送命令\"--\u003eB"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
