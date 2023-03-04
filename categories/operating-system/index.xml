@@ -4,7 +4,259 @@
         <link>https://Jungle430.github.io/categories/operating-system/</link>
         <description>Operating System - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 26 Feb 2023 21:02:57 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+    <title>Linux x86 Program Start Up or - How the heck do we get to main()?</title>
+    <link>https://Jungle430.github.io/posts/operating-system/support2/</link>
+    <pubDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support2/</guid>
+    <description><![CDATA[<h2 id="概述">概述</h2>
+<ul>
+<li>
+<p>文章介绍了X86系统main函数调用前后的一些细节，并阐述了C程序的<b>构造函数</b>和<b>析构函数</b>，<u>以及<code>.init</code>,<code>.fini</code>,<code>init_array</code>和<code>fini_array</code>各section相对于main函数及彼此的执行顺序。遗憾的是这篇文章是基于32位CPU架构来研究的</u></p>
+</li>
+<li>
+<p>文章对$debug$ <code>main</code>函数之前的代码有一定的帮助效果</p>
+</li>
+<li>
+<p>主要介绍了X86 ELF文件的动态加载过程</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/support2-1.png" title="/img/Operating System/support2-1.png" data-thumbnail="/img/Operating System/support2-1.png" data-sub-html="<h2>总体流程图</h2>">
+        
+    </a><figcaption class="image-caption">总体流程图</figcaption>
+    </figure>
+<h2 id="调用过程分析">调用过程分析</h2>
+<h3 id="main函数的调用">main函数的调用</h3>
+<ul>
+<li>先写一个最简单的C程序prog1.c</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>编译一下</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -ggdb -o prog1 prog1.c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>注：<code>-ggdb</code>的选项作用：生成<code>gdb</code>专用的调试信息，会有一些<code>gdb</code>专用的扩展</p>
+</blockquote>
+<ul>
+<li>然后我们用objdump做一下反汇编</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">objdump -d prog1 &gt; prog1.asm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="从我们终端敲回车到程序被载入执行的过程中发生了什么">从我们终端敲回车到程序被载入执行的过程中发生了什么？</h4>
+<ul>
+<li>当我们从终端输入要运行的程序或者是从有关的<code>gui</code>界面点击相关的button的时候，<b>shell</b>或者<b>gui</b>就会调用<code>execve()</code>。这里不是我们重点关心的地方，简单来说，execve()会设立一个栈，然后将参数<code>argc</code>，<code>argv</code>和<code>envp</code>压入栈中。文件描述符0，1，2（stdin, stdout和stderr）由之前的shell设置，加载器会帮我们完成有关重定位的许多工作，当所有搞定之后，控制权会传递给<code>_start()</code></li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/support2-2.png" title="/img/Operating System/support2-2.png" data-thumbnail="/img/Operating System/support2-2.png" data-sub-html="<h2>shell输入man execve之后的函数声明和所在位置</h2>">
+        
+    </a><figcaption class="image-caption">shell输入<code>man execve</code>之后的函数声明和所在位置</figcaption>
+    </figure>
+<h4 id="_start">_start()</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">080482e0 &lt;_start&gt;:
+</span></span><span class="line"><span class="cl">80482e0:       31 ed                   xor    %ebp,%ebp
+</span></span><span class="line"><span class="cl">80482e2:       5e                      pop    %esi
+</span></span><span class="line"><span class="cl">80482e3:       89 e1                   mov    %esp,%ecx
+</span></span><span class="line"><span class="cl">80482e5:       83 e4 f0                and    $0xfffffff0,%esp
+</span></span><span class="line"><span class="cl">80482e8:       50                      push   %eax
+</span></span><span class="line"><span class="cl">80482e9:       54                      push   %esp
+</span></span><span class="line"><span class="cl">80482ea:       52                      push   %edx
+</span></span><span class="line"><span class="cl">80482eb:       68 00 84 04 08          push   $0x8048400
+</span></span><span class="line"><span class="cl">80482f0:       68 a0 83 04 08          push   $0x80483a0
+</span></span><span class="line"><span class="cl">80482f5:       51                      push   %ecx
+</span></span><span class="line"><span class="cl">80482f6:       56                      push   %esi
+</span></span><span class="line"><span class="cl">80482f7:       68 94 83 04 08          push   $0x8048394
+</span></span><span class="line"><span class="cl">80482fc:       e8 c3 ff ff ff          call   80482c4 &lt;__libc_start_main@plt&gt;
+</span></span><span class="line"><span class="cl">8048301:       f4                      hlt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>任何值<code>xor</code>自身得到的结果都是0。所以<code>xor %ebp,%ebp</code>语句会把<code>%ebp</code>设置为0。ABI（Application Binary Interface specification）推荐这么做，目的是为了标记最外层函数的页帧（frame）</li>
+<li>接下来，从栈中弹出栈顶的值保存到<code>%esi</code>。在最开始的时候我们把<code>argc</code>，<code>argv</code>和<code>envp</code>放到了栈里，所以现在的<code>pop</code>语句会把<code>argc</code>放到<code>%esi</code>中</li>
+<li>这里只是临时保存一下，稍后我们会把它再次压回栈中</li>
+<li>因为我们弹出了<code>argc</code>，所以<code>%ebp</code>现在指向的是<code>argv</code>。<code>mov</code>指令把<code>argv</code>放到了<code>%ecx</code>中，但是并没有移动栈指针</li>
+<li><u>然后，将栈指针和一个可以清除后四位的掩码做<code>and</code>操作。根据当前栈指针的位置不同，栈指针将会向下移动0到15个字节。这么做，保证了任何情况下，栈指针都是16字节的偶数倍对齐的。对齐的目的是保证栈上所有的变量都能够被内存和cache快速的访问</u></li>
+<li><u>要求这么做的是SSE，就是指令都能在单精度浮点数组上工作的那个<b>（扩展指令集）</b></u></li>
+<li>例子：某次运行时，<code>_start</code>函数刚被调用的时候，<code>%esp</code>处于<code>0xbffff770</code>。在我们从栈上弹出<code>argc</code>后，<code>%esp</code>指向<code>0xbffff774</code>。它向高地址移动了（栈向下增长）。当对栈指针执行了<code>and</code>操作后，栈指针回到了<code>0xbffff770</code></li>
+</ul>
+<h4 id="__libc_start_main">__libc_start_main</h4>
+<ul>
+<li>现在，我们把<code>__libc_start_main</code>函数的参数压入栈中。第一个参数<code>%eax</code>被压入栈中，里面保存了无效信息，原因是稍后会有七个参数将被压入栈中，但是为了保证16字节对齐，所以需要第八个参数。这个值也并不会被用到。<code>__libc_start_main</code>是在链接的时候从glibc复制过来的。在glibc的代码中，它位于<code>csu/libc-start.c</code>文件里。<code>__libc_start_main</code>的定义如下</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">__libc_start_main</span><span class="p">(</span>  <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">main</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="o">*</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="o">*</span> <span class="n">ubp_av</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">init</span><span class="p">)</span> <span class="p">(</span><span class="kt">void</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">fini</span><span class="p">)</span> <span class="p">(</span><span class="kt">void</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">rtld_fini</span><span class="p">)</span> <span class="p">(</span><span class="kt">void</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">void</span> <span class="p">(</span><span class="o">*</span> <span class="n">stack_end</span><span class="p">));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/support2-3.jpg" title="/img/Operating System/support2-3.jpg" data-thumbnail="/img/Operating System/support2-3.jpg" data-sub-html="<h2>参数说明</h2>">
+        
+    </a><figcaption class="image-caption">参数说明</figcaption>
+    </figure>
+<ul>
+<li>__libc_csu_fini函数也是从glibc被链接进我们代码的，它的源代码位于csu/elf-init.c中</li>
+</ul>
+<h4 id="环境变量哪里去了">环境变量哪里去了？</h4>
+<ul>
+<li>
+<p>我们并没有获取envp（栈里指向我们环境变量的指针）？它并不是<code>__libc_start_main</code>函数的参数。但是我们知道main函数的原型其实是<code>int main(int argc, char** argv, char** envp)</code>。所以，到底怎么回事？</p>
+</li>
+<li>
+<p>其实，<code>__libc_start_main</code>函数会调用<code>__libc_init_first</code>，这个函数会使用内部信息去找到环境变量（实际上环境变量就位于<code>argv</code>的终止字符null的后面），然后设置一个全局变量<code>__environ</code>，这个全局变量可以被<code>__libc_start_main</code>函数内部任何地方使用，包括调用main函数时。当<code>envp</code>建立了之后，<code>__libc_start_main</code>函数会使用相同的小技巧，越过envp数组之后的<code>NULL</code>字符，获取另一个向量——ELF辅助向量（加载器使用它给进程传递一些信息）</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__libc_init_first</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">arg0</span><span class="p">,</span> <span class="p">...)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">arg0</span><span class="p">,</span> <span class="o">**</span><span class="n">envp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">argv</span><span class="p">[</span><span class="n">argc</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__environ</span> <span class="o">=</span> <span class="n">envp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__libc_init</span> <span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">envp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>运行程序前，设置环境变量<code>LD_SHOW_AUXV=1</code>,可以查看里面的内容</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ <span class="nv">LD_SHOW_AUXV</span><span class="o">=</span><span class="m">1</span> ./prog1
+</span></span><span class="line"><span class="cl">AT_SYSINFO:      0xe62414
+</span></span><span class="line"><span class="cl">AT_SYSINFO_EHDR: 0xe62000
+</span></span><span class="line"><span class="cl">AT_HWCAP:    fpu vme de pse tsc msr pae mce cx8 apic
+</span></span><span class="line"><span class="cl">             mtrr pge mca cmov pat pse36 clflush dts
+</span></span><span class="line"><span class="cl">             acpi mmx fxsr sse sse2 ss ht tm pbe
+</span></span><span class="line"><span class="cl">AT_PAGESZ:       <span class="m">4096</span>
+</span></span><span class="line"><span class="cl">AT_CLKTCK:       <span class="m">100</span>
+</span></span><span class="line"><span class="cl">AT_PHDR:         0x8048034
+</span></span><span class="line"><span class="cl">AT_PHENT:        <span class="m">32</span>
+</span></span><span class="line"><span class="cl">AT_PHNUM:        <span class="m">8</span>
+</span></span><span class="line"><span class="cl">AT_BASE:         0x686000
+</span></span><span class="line"><span class="cl">AT_FLAGS:        0x0
+</span></span><span class="line"><span class="cl">AT_ENTRY:        0x80482e0
+</span></span><span class="line"><span class="cl">AT_UID:          <span class="m">1002</span>
+</span></span><span class="line"><span class="cl">AT_EUID:         <span class="m">1002</span>
+</span></span><span class="line"><span class="cl">AT_GID:          <span class="m">1000</span>
+</span></span><span class="line"><span class="cl">AT_EGID:         <span class="m">1000</span>
+</span></span><span class="line"><span class="cl">AT_SECURE:       <span class="m">0</span>
+</span></span><span class="line"><span class="cl">AT_RANDOM:       0xbff09acb
+</span></span><span class="line"><span class="cl">AT_EXECFN:       ./prog1
+</span></span><span class="line"><span class="cl">AT_PLATFORM:     i686
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>各种各样的信息。<code>AT_ENTRY</code>是<code>_start</code>的地址，还有我们的UID、有效UID和GID</p>
+</li>
+<li>
+<p><b>__libc_start_main功能总结</b></p>
+<ul>
+<li>处理关于setuid、setgid程序的安全问题</li>
+<li>启动线程</li>
+<li>把<code>fini</code>函数和<code>rtld_fini</code>函数作为参数传递给<code>at_exit</code>调用，使它们在<code>at_exit</code>里被调用，从而完成用户程序和加载器的调用结束之后的清理工作</li>
+<li>调用其<code>init</code>参数</li>
+<li>调用<code>main</code>函数，并把<code>argc</code>和<code>argv</code>参数、环境变量传递给它</li>
+<li>调用<code>exit</code>函数，并将main函数的返回值传递给它</li>
+</ul>
+</li>
+</ul>
+<h2 id="相关参考资料">相关参考资料</h2>
+<ul>
+<li>参考文章
+<ul>
+<li><a href="http://dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()? by Patrick Horgan》</a></li>
+<li><a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>（已与作者沟通，同意部分转载）</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Chapter2-部分二刷-个人理解System call</title>
     <link>https://Jungle430.github.io/posts/operating-system/support1/</link>
     <pubDate>Sun, 26 Feb 2023 21:02:57 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support1/</guid>
@@ -3135,9 +3387,15 @@ $\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target=
 </li>
 </ul>
 <h3 id="个人的一些补充">个人的一些补充</h3>
-<blockquote>
-<p>Update in 2023-2-25</p>
-</blockquote>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-3" class=""></div></div>
+</div>
+        </div>
+    </div>
 <p>新学期开课，也上了操作系统，当然，老师念ppt讲的也确实是💩🐴地听不懂，今晚做作业，其中也有有关<b>System call</b>的一些相关问题，于是写了一个最简单的C程序</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -3157,7 +3415,19 @@ $\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target=
     </a><figcaption class="image-caption">gdb $\Longrightarrow$ <code>layout asm</code></figcaption>
     </figure>
 <p>忽然对前面这些指令的调用有了些兴趣，&lt;_do_global_dtors_aux&gt;是个啥？&lt;frame_dummy&gt;又是个啥，结果用这些名字找到了一个讲的非常细的博客<a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>，不过内容真的是太多了，先立一个flag，这两周一定要找时间给读一遍，完不成就全部💩🐴</p>
-<p><strong>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</strong></p>
+<hr>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-4" class=""></div></div>
+</div>
+        </div>
+    </div>
+<p>看了一部分该文章，太长了，先看一小半，因为是32位的老版本Linux，很多东西不能完全复现</p>
+<p>$\Longrightarrow$ <a href="https://jungle430.github.io/posts/operating-system/support2/" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()?》</a></p>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>
 <item>
