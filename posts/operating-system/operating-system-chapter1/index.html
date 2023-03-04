@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  4179 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  5750 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/","datePublished": "2022-12-30T16:27:09+08:00","dateModified": "2022-12-30T16:27:09+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter1 操作系统概述</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4179 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5750 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 12 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -157,6 +157,23 @@
                   </ul>
                 </li>
                 <li><a href="#操作系统实现了对计算机资源的扩充">操作系统实现了对计算机资源的扩充</a></li>
+              </ul>
+            </li>
+            <li><a href="#操作系统历史-1">操作系统历史</a>
+              <ul>
+                <li><a href="#手工操作阶段此时没有操作系统">手工操作阶段（此时没有操作系统）</a></li>
+                <li><a href="#批处理阶段操作系统开始出现">批处理阶段（操作系统开始出现）</a>
+                  <ul>
+                    <li><a href="#单道批处理操作系统">单道批处理操作系统</a></li>
+                    <li><a href="#多道批处理程序">多道批处理程序</a></li>
+                  </ul>
+                </li>
+                <li><a href="#分时操作系统">分时操作系统</a></li>
+                <li><a href="#实时操作系统">实时操作系统</a></li>
+                <li><a href="#网络操作系统">网络操作系统</a></li>
+                <li><a href="#分布式计算机系统">分布式计算机系统</a></li>
+                <li><a href="#个人计算机系统">个人计算机系统</a></li>
+                <li><a href="#总结">总结</a></li>
               </ul>
             </li>
           </ul>
@@ -598,7 +615,7 @@
 <li>
 <p><b>联机命令接口</b></p>
 <ul>
-<li>又称<u>交互式命令接口</u>，适用于<b>分时或实时系统的接口</b>。它由一组键盘操作命令组成。<u>用户通过控制台或终端输入操作命令，向系统提出各种服务要求</u>。<b>用户每输入一条命令，控制权就转给操作系统的命令解释程序，然后由<u>命令解释程序</u>解释并执行输入的命令，完成指定的功能。之后，控制权转回控制台或终端</b>，此时用户又可输入下一条命令。联机命令接口可以这样理解：<u>”雇主“说一句话，”工人“做一件事，并作出反馈</u>，这就强调了交互性。<u>（典型<code>Linux</code>的终端<b>群魔乱舞</b>）</u></li>
+<li>又称<u>交互式命令接口</u>，适用于<b>分时或实时系统的接口</b>。它由一组键盘操作命令组成。<u>用户通过控制台或终端输入操作命令，向系统提出各种服务要求</u>。<b>用户每输入一条命令，控制权就转给操作系统的命令解释程序，然后由<u>命令解释程序</u>解释并执行输入的命令，完成指定的功能。之后，控制权转回控制台或终端</b>，此时用户又可输入下一条命令。联机命令接口可以这样理解：<u>”雇主“说一句话，”工人“做一件事，并作出反馈</u>，这就强调了交互性。<u>（典型<code>Linux</code>的终端<b>群魔乱舞</b> $\Longrightarrow$ <code>shell</code>是命令解析器）</u></li>
 </ul>
 </li>
 <li>
@@ -610,7 +627,7 @@
 </ul>
 <h6 id="程序接口">程序接口</h6>
 <ul>
-<li>程序接口由<b>一组系统调用</b>（也称广义指令）组成，<b>用户通过在程序中使用这些系统调用来请求操作系统为其提供服务</b>。</li>
+<li>程序接口由<b>一组系统调用</b>（也称<b>广义指令</b>）组成，<b>用户通过在程序中使用这些系统调用来请求操作系统为其提供服务</b>。</li>
 <li>当前最为流行的是用户图形界面($GUI$)，即图形接口。</li>
 <li>严格来说，<u>图形接口不是操作系统的一部分</u>，但是<b>图形接口所调用的系统调用命令是操作系统的一部分</b>。</li>
 </ul>
@@ -621,6 +638,132 @@
 <li>覆盖软件的机器称为<b>扩充机器</b>或<b>虚拟机</b></li>
 <li>”工人“操作机器，机器就有更大的作用，于是”工人“便成了”扩充机器“</li>
 </ul>
+<hr>
+<ul>
+<li>
+<p>总结：操作系统是对<b>计算机资源</b>进行管理的<b>软件</b></p>
+</li>
+<li>
+<p>补充：计算机开机后，操作系统最终被加载到<b>RAM</b></p>
+</li>
+</ul>
+<h4 id="操作系统历史-1">操作系统历史</h4>
+<blockquote>
+<p>Update in 2023-03-04</p>
+<p>昨天太™️累了，朝阳和西土城来回折腾加上录一下午节目给✌️整的浑身都是酸痛的，不给✌️录志愿百京✌️就鲨了你们所有人的🏇</p>
+<p>今天直接😴🅱️🅱️了，一觉淦到1️⃣2️⃣点，到食堂狠狠地炫了🍜，下午把第一章给看完</p>
+</blockquote>
+<h5 id="手工操作阶段此时没有操作系统">手工操作阶段（此时没有操作系统）</h5>
+<p>一切都得<b>人工干预</b></p>
+<ul>
+<li>两个突出的缺点
+<ul>
+<li><b>用户独占全机</b>，虽然不会出现因为资源已被其他用户占用而等待的现象，<b>但资源利用率低</b></li>
+<li><b>CPU等待手工操作</b>，CPU的利用不充分</li>
+</ul>
+</li>
+</ul>
+<h5 id="批处理阶段操作系统开始出现">批处理阶段（操作系统开始出现）</h5>
+<h6 id="单道批处理操作系统">单道批处理操作系统</h6>
+<ul>
+<li>系统对作业的处理是成批进行的，但内存中始终保持一道作业</li>
+<li>目的：解决人机矛盾以及CPU和I/O设备速率不匹配</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>特征</p>
+<ul>
+<li>自动性：磁带上的作业能自动地逐个运行，无须人工干预</li>
+<li>顺序性：磁带上的各道作业顺序地进入内存，<b>各道作业完成顺序与它们进入内存的顺序在正常情况下应完全相同</b></li>
+<li>单道性：内存中仅有一道程序运行，当该程序<b>完成</b>或<b>发生异常情况</b>时，才换入其后续程序进入内存运行</li>
+</ul>
+</li>
+<li>
+<p>问题：单道程序<b>运行期间</b>发出输入/输出请求后，高速的CPU需要处于等待低速的I/O完成的状态</p>
+</li>
+</ul>
+<h6 id="多道批处理程序">多道批处理程序</h6>
+<ul>
+<li>
+<p>多道程序设计技术允许多个程序同时进入内存并允许它们<b>在CPU中交替地运行</b>，<u>这些程序共享系统中的各种硬/软件资源</u></p>
+</li>
+<li>
+<p>当一道程序因I/O请求而暂停运行时，CPU便立即转去运行另一道程序 $\Longrightarrow$ 实现系统各部件之间的<b>并行工作</b>，让系统各个组成部分的都尽量去“忙”，提高效率</p>
+</li>
+<li>
+<p>特点</p>
+<ul>
+<li><b>多道</b>：计算机内存中同时存放多道相互独立的程序</li>
+<li><b>宏观上并行</b>：同时进入系统的多道程序都处于运行过程中，即它们先后开始各自的运行，但都未运行完毕</li>
+<li><b>微观上串行</b>：<u>内存中的多道程序轮流占有CPU，交替执行</u></li>
+</ul>
+</li>
+<li>
+<p>面临的问题</p>
+<ul>
+<li>如何分配处理器</li>
+<li>多道程序内存的分配问题</li>
+<li>I/O设备如何分配</li>
+<li>如何组织和存放大量的程序和数据，以方便用户使用并保证其安全性与一致性</li>
+</ul>
+</li>
+<li>
+<p>优点：资源利用率高，系统吞吐量大</p>
+</li>
+<li>
+<p>缺点：用户响应时间较长；<b>不提供人机交互能力</b>，<u>用户即不能了解自己的程序的运行情况，又不能控制计算机</u></p>
+</li>
+</ul>
+<h5 id="分时操作系统">分时操作系统</h5>
+<ul>
+<li>将处理器的运行时间切成很短的时间片，按照时间片把处理器分配给各联机作业使用</li>
+<li><u>若某个作业在分配给它的时间片内不能完成计算，则暂时停止该作业的运行，将处理器分配给其他作业使用，等待下一轮运行</u></li>
+<li><u>由于计算机运行很快，作业轮转地也很快，所以每个用户都感觉自己在独占一台计算机</u></li>
+<li>多个用户通过终端与主机进行交互而互不干扰，<b>实现分时的关键就是如何使用户能与自己的作业进行交互</b></li>
+<li>分时操作系统支持多道程序设计，但是与<b>多道批处理相比不同的是分时操作系统支持人机交互</b></li>
+<li>特征
+<ul>
+<li>同时性（多路性）：允许多个终端用户同时使用一台计算机</li>
+<li>交互性：用户可以通过终端与计算机交互</li>
+<li>独立性：系统中多个用户可以彼此独立的操作，互不干扰</li>
+<li>及时性：用户请求能在很短时间内获得响应</li>
+</ul>
+</li>
+</ul>
+<h5 id="实时操作系统">实时操作系统</h5>
+<p><b>有时间限制</b></p>
+<ul>
+<li>硬实时系统：某个动作<b>必须绝对地在规定的时刻（或规定的时间范围内）发生</b>，如飞行器的飞行自动控制系统</li>
+<li>软实时系统：能够<b>接受偶尔违反时间规定</b>且不会引起任何永久性损害，入订票系统，银行管理系统</li>
+</ul>
+<h5 id="网络操作系统">网络操作系统</h5>
+<p>通过计算机网络将各台计算机有机地联合起来，特点是网络中各种资源的共享及各台计算机之间的通信</p>
+<h5 id="分布式计算机系统">分布式计算机系统</h5>
+<ul>
+<li>系统中任意两台计算机通过通信方式交换信息，系统中每台计算机都具有同等地位（没有主机和从机）</li>
+<li>每台计算机上的资源都能为所有用户共享，系统中的任意台计算机都可以构成一个子系统，而且还能重构</li>
+<li>任何工作都可以分布在几台计算机上，由它们并行工作，协同完成</li>
+<li>用于管理分布式计算机系统的操作系统称为<b>分布式计算机系统</b>
+<ul>
+<li>特点：分布性和并行性</li>
+<li>与网络操作系统本质不同：分布式操作系统中的若干计算机<u>相互协同完成同一任务</u></li>
+</ul>
+</li>
+</ul>
+<h5 id="个人计算机系统">个人计算机系统</h5>
+<p>主要为办公和游戏而生，主流：windows,macOS,linux</p>
+<h5 id="总结">总结</h5>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-18.png" title="/img/Operating System/chapter1-18.png" data-thumbnail="/img/Operating System/chapter1-18.png" data-sub-html="<h2>OS发展历史</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter1-18.png"
+            data-srcset="/img/Operating%20System/chapter1-18.png, /img/Operating%20System/chapter1-18.png 1.5x, /img/Operating%20System/chapter1-18.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter1-18.png" />
+    </a><figcaption class="image-caption">OS发展历史</figcaption>
+    </figure>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
