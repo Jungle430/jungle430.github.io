@@ -593,6 +593,18 @@
 <li>所以程序的执行模式</li>
 </ul>
 <div class="mermaid" id="id-1"></div>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>感谢<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-2" class=""></div></div>
+<p>感谢jyy互助群里<b>zweix</b>大佬提供的<a href="https://github.com/zweix123/jyyslide-md" target="_blank" rel="noopener noreffer">
+jyyslide-md</a></p>
+<p>使用过程中发现因为Windows很烂的编码问题始终会出现gbk解码错误的error，和<b>zweix</b>大佬差不多沟通了大半个下午，由于懒得给vscode配环境直接改成手动print看数据🤣，感觉就是命令行传参编码的问题，最后终于找到了解决方法😆，只能说Windows这个编码设置也是没谁了。</p>
+</div>
+        </div>
+    </div>
 ]]></description>
 </item>
 <item>
@@ -3908,6 +3920,91 @@ $\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target=
         
     </a><figcaption class="image-caption">OS发展历史</figcaption>
     </figure>
+<h4 id="操作系统运行环境">操作系统运行环境</h4>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-2" class=""></div></div>
+<p>睡过头了，下午接着写。马上收尾，晚上写💩🎠的英语作业</div>
+        </div>
+    </div>
+<h5 id="处理器的运行模式">处理器的运行模式</h5>
+<ul>
+<li>
+<p>指令分类</p>
+<ul>
+<li>特权指令：<b>指不允许用户直接使用的指令</b>，如I/O指令，置中断指令等</li>
+<li>非特权指令：<b>指允许用户直接使用的指令</b>，它不能直接访问系统中的软硬件资源，仅限于访问用户的地址空间，<b>这也是为了防止用户程序对系统造成破坏</b></li>
+</ul>
+</li>
+<li>
+<p>CPU的运行模式</p>
+<ul>
+<li><b>用户态</b>（目态）：只能执行非特权指令，<u>用户自编程序运行在用户态</u></li>
+<li><b>核心态</b>（管态，内核态）：能够执行特权指令，<b>切换到用户态的指令也是特权指令</b>，<u>操作系统内核程序运行在核心态</u></li>
+</ul>
+</li>
+</ul>
+<h5 id="操作系统内核">操作系统内核</h5>
+<ul>
+<li>内核是计算机配置的底层软件，它管理着各种资源，$应用程序 \xleftrightarrow{内核} 硬件$，主要包括4方面内容
+<ul>
+<li>时钟管理：<u>操作系统需要通过时钟管理来向用户提供标准的系统时间</u>。另外，<b>通过时钟的中断管理，可以实现进程的切换</b>。</li>
+<li>中断机制：键盘或鼠标的信息输入，进程的管理和调度，系统功能的调用，设备驱动，文件访问等，无不依赖于中断机制。可以说，<b>现在操作系统是靠中断驱动的软件</b>。
+<ul>
+<li>中断机制中，<b>只有一小部分功能属于内核</b>，它们负责<u>保护和恢复中断现场的信息</u>，转移控制权到相关的处理程序。这样可以<u>减少中断的处理时间，提高系统的并行处理能力</u>。</li>
+</ul>
+</li>
+<li>原语（Atomic Operation）：按照层次结构设计的操作系统，底层必然是一些<u>可被调用的公共小程序</u>，它们各自完成一个规定的操作。它们的特点如下
+<ul>
+<li><b>处于操作系统的最底层，是最接近硬件的一部分</b></li>
+<li>这些程序的运行具有原子性，<b>其操作只能一气呵成</b>（出于系统安全性和便于管理考虑）$\Longrightarrow$ 类比Java里面的<code>lock()</code>和<code>synchronized</code></li>
+<li><u>运行时间较短，而且调用频繁</u></li>
+<li><b>定义原语：关闭中断，让所有动作不可分割地完成后再打开中断。</b></li>
+<li>例子：<u>系统中的设备驱动，CPU切换，进程通信等功能中的<b>部分操作</b>都可定义为原语</u></li>
+</ul>
+</li>
+<li>系统控制的数据结构及处理：系统中用来登记状态信息的数据结构有很多，如作业控制块，进程控制块等。为了实现有效的管理，系统需要一些基本的操作，常见的操作有一下3种：
+<ul>
+<li><b>进程管理</b>：进程状态管理，进程调度和分派，创建和撤销进程控制块等</li>
+<li><b>存储器管理</b>：存储器的空间分配和回收，内存信息保护程序，代码对换程序等</li>
+<li><b>设备管理</b>：缓冲区管理，设备分配和回收等</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="中断和异常">中断和异常</h4>
+<ul>
+<li>
+<p>定义</p>
+<ul>
+<li>中断(Interruption)：也称<b>外中断</b>，<b>是指来自CPU执行指令外部的事件</b>，通常用于信息输入/出，如设备发出的I/O结束中断，表示设备输入/出处理已经完成。<u>时钟中断，表示一个固定的时间片已到，让处理机处理计时，启动定时运行的任务等</u>。</li>
+<li>异常(Exception)：也称<b>内中断</b>，是指来自<b>CPU执行指令内部的事件</b>，<u>如程序的非法操作码，地址越界，运算溢出，虚拟系统的缺页及专门的陷入指令等引起的事件</u>。<b>异常不能被屏蔽</b>，一旦出现，就应立即处理。</li>
+</ul>
+</li>
+<li>
+<p>联系与区别</p>
+</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<ul>
+<li>处理过程：复习计组</li>
+</ul>
+<h4 id="系统调用">系统调用</h4>
+<ul>
+<li>大致分类
+<ul>
+<li>设备管理</li>
+<li>文件管理</li>
+<li>进程控制</li>
+<li>进程通信</li>
+<li>内存管理</li>
+</ul>
+</li>
+</ul>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>

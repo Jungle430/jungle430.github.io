@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  5750 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  6943 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/","datePublished": "2022-12-30T16:27:09+08:00","dateModified": "2022-12-30T16:27:09+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter1 操作系统概述</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5750 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 12 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6943 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 14 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -176,6 +176,14 @@
                 <li><a href="#总结">总结</a></li>
               </ul>
             </li>
+            <li><a href="#操作系统运行环境">操作系统运行环境</a>
+              <ul>
+                <li><a href="#处理器的运行模式">处理器的运行模式</a></li>
+                <li><a href="#操作系统内核">操作系统内核</a></li>
+              </ul>
+            </li>
+            <li><a href="#中断和异常">中断和异常</a></li>
+            <li><a href="#系统调用">系统调用</a></li>
           </ul>
         </li>
       </ul>
@@ -764,6 +772,91 @@
             alt="/img/Operating System/chapter1-18.png" />
     </a><figcaption class="image-caption">OS发展历史</figcaption>
     </figure>
+<h4 id="操作系统运行环境">操作系统运行环境</h4>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-2" class=""></div></div>
+<p>睡过头了，下午接着写。马上收尾，晚上写💩🎠的英语作业</div>
+        </div>
+    </div>
+<h5 id="处理器的运行模式">处理器的运行模式</h5>
+<ul>
+<li>
+<p>指令分类</p>
+<ul>
+<li>特权指令：<b>指不允许用户直接使用的指令</b>，如I/O指令，置中断指令等</li>
+<li>非特权指令：<b>指允许用户直接使用的指令</b>，它不能直接访问系统中的软硬件资源，仅限于访问用户的地址空间，<b>这也是为了防止用户程序对系统造成破坏</b></li>
+</ul>
+</li>
+<li>
+<p>CPU的运行模式</p>
+<ul>
+<li><b>用户态</b>（目态）：只能执行非特权指令，<u>用户自编程序运行在用户态</u></li>
+<li><b>核心态</b>（管态，内核态）：能够执行特权指令，<b>切换到用户态的指令也是特权指令</b>，<u>操作系统内核程序运行在核心态</u></li>
+</ul>
+</li>
+</ul>
+<h5 id="操作系统内核">操作系统内核</h5>
+<ul>
+<li>内核是计算机配置的底层软件，它管理着各种资源，$应用程序 \xleftrightarrow{内核} 硬件$，主要包括4方面内容
+<ul>
+<li>时钟管理：<u>操作系统需要通过时钟管理来向用户提供标准的系统时间</u>。另外，<b>通过时钟的中断管理，可以实现进程的切换</b>。</li>
+<li>中断机制：键盘或鼠标的信息输入，进程的管理和调度，系统功能的调用，设备驱动，文件访问等，无不依赖于中断机制。可以说，<b>现在操作系统是靠中断驱动的软件</b>。
+<ul>
+<li>中断机制中，<b>只有一小部分功能属于内核</b>，它们负责<u>保护和恢复中断现场的信息</u>，转移控制权到相关的处理程序。这样可以<u>减少中断的处理时间，提高系统的并行处理能力</u>。</li>
+</ul>
+</li>
+<li>原语（Atomic Operation）：按照层次结构设计的操作系统，底层必然是一些<u>可被调用的公共小程序</u>，它们各自完成一个规定的操作。它们的特点如下
+<ul>
+<li><b>处于操作系统的最底层，是最接近硬件的一部分</b></li>
+<li>这些程序的运行具有原子性，<b>其操作只能一气呵成</b>（出于系统安全性和便于管理考虑）$\Longrightarrow$ 类比Java里面的<code>lock()</code>和<code>synchronized</code></li>
+<li><u>运行时间较短，而且调用频繁</u></li>
+<li><b>定义原语：关闭中断，让所有动作不可分割地完成后再打开中断。</b></li>
+<li>例子：<u>系统中的设备驱动，CPU切换，进程通信等功能中的<b>部分操作</b>都可定义为原语</u></li>
+</ul>
+</li>
+<li>系统控制的数据结构及处理：系统中用来登记状态信息的数据结构有很多，如作业控制块，进程控制块等。为了实现有效的管理，系统需要一些基本的操作，常见的操作有一下3种：
+<ul>
+<li><b>进程管理</b>：进程状态管理，进程调度和分派，创建和撤销进程控制块等</li>
+<li><b>存储器管理</b>：存储器的空间分配和回收，内存信息保护程序，代码对换程序等</li>
+<li><b>设备管理</b>：缓冲区管理，设备分配和回收等</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="中断和异常">中断和异常</h4>
+<ul>
+<li>
+<p>定义</p>
+<ul>
+<li>中断(Interruption)：也称<b>外中断</b>，<b>是指来自CPU执行指令外部的事件</b>，通常用于信息输入/出，如设备发出的I/O结束中断，表示设备输入/出处理已经完成。<u>时钟中断，表示一个固定的时间片已到，让处理机处理计时，启动定时运行的任务等</u>。</li>
+<li>异常(Exception)：也称<b>内中断</b>，是指来自<b>CPU执行指令内部的事件</b>，<u>如程序的非法操作码，地址越界，运算溢出，虚拟系统的缺页及专门的陷入指令等引起的事件</u>。<b>异常不能被屏蔽</b>，一旦出现，就应立即处理。</li>
+</ul>
+</li>
+<li>
+<p>联系与区别</p>
+</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<ul>
+<li>处理过程：复习计组</li>
+</ul>
+<h4 id="系统调用">系统调用</h4>
+<ul>
+<li>大致分类
+<ul>
+<li>设备管理</li>
+<li>文件管理</li>
+<li>进程控制</li>
+<li>进程通信</li>
+<li>内存管理</li>
+</ul>
+</li>
+</ul>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
@@ -799,4 +892,4 @@ if ('serviceWorker' in navigator) {
 
         <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
                 <i class="fas fa-chevron-up fa-fw"></i>
-            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA(\"计算机：机器(由处理器，存储器，设备，文件几个部件构成)\")\nB(\"操作系统：工人（用来操作机器）\")\nC(\"雇主：使用机器的人\")\nB--控制和协调各个部件的工作--\u003eA\nC--\"通过“接口”发送命令\"--\u003eB"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/typeit/typeit.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA(\"计算机：机器(由处理器，存储器，设备，文件几个部件构成)\")\nB(\"操作系统：工人（用来操作机器）\")\nC(\"雇主：使用机器的人\")\nB--控制和协调各个部件的工作--\u003eA\nC--\"通过“接口”发送命令\"--\u003eB","id-2":"Update in 2023-03-05","id-3":"graph LR\nA(中断)\nB(内部异常)\nC(\"外部中断（硬件）\")\nD(\"故障(Fault)\")\nE(\"自陷(Trap)\")\nF(\"终止(Abort) 硬件中断\")\nG(可屏蔽中断 INTR)\nH(不可屏蔽中断 NMI)\nI(软件中断)\nA----B\nA----C\nB----D\nB----E\nB----F\nC----G\nC----H\nD----I\nE----I"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50},"typeit":{"cursorChar":"","cursorSpeed":1000,"data":{"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script src="/js/theme.min.js"></script></body></html>
