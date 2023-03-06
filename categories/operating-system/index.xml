@@ -4,7 +4,312 @@
         <link>https://Jungle430.github.io/categories/operating-system/</link>
         <description>Operating System - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter4 理解并发程序执行</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</link>
+    <pubDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-1" class=""></div></div>
+<p>晚上看的，<b>Peterson</b>算法好™️的👨，证明等过两天有时间给看了</div>
+        </div>
+    </div>
+<h2 id="理解并发程序执行">理解并发程序执行</h2>
+<h3 id="复习">复习</h3>
+<ul>
+<li>一般程序执行</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<p>线程的栈帧会用一个<code>list</code>来存放</p>
+<ul>
+<li>多线程</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<p>T1,T2随机来回转换执行</p>
+<ul>
+<li><b>并发程序 = 多个执行流、共享内存的<u>状态机</u></b></li>
+</ul>
+<h3 id="画状态机理解并发程序">画状态机理解并发程序</h3>
+<blockquote>
+<p><u>互斥：保证两个线程不能同时执行一段代码</u></p>
+</blockquote>
+<ul>
+<li>插入 “神秘代码”，使得 <a href="https://jyywiki.cn/pages/OS/2022/demos/sum.c" target="_blank" rel="noopener noreffer">sum.c</a> (或者任意其他代码) 能够正常工作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 神秘代码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 神秘代码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>可以通过<code>__sync_synchronize();</code>来保证原子操作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">__sync_synchronize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 或 int t = x;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__sync_synchronize</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="失败的尝试">失败的尝试</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">locked</span> <span class="o">!=</span> <span class="n">UNLOCK</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// critical section
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>原因</p>
+<ul>
+<li>看到的状态到真正做下一件事之间的状态是否被人改了？（<u>看到的东西仅仅只是一个历史，离做还有几个周期，而做是根据这个<b>“历史”</b>的状态来决定的</u>）$\Longrightarrow$ 和人眼看着东西对比，人眼是<b>一直在看的</b>，而CPU并行执行程序的时候，看这个指令执行完了之后可能CPU会去执行另一个线程的几条指令，这种情况下相当于这个人<b>看完后闭上眼睛等了几秒</b>，然后根据几秒前所看的东西来判断自己要干啥，<b>可是这个东西在前几秒可能已经让另一个线程的某些指令改过了</b></li>
+<li>处理器默认不保证 load + store 的原子性（单操作可以保证）</li>
+</ul>
+</li>
+<li>
+<p>一种失败的情况</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define N 100000000
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define LOCK 1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UNLOCK 0
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>  <span class="c1">//T2在这个时候也执行到了locked != UNLOCK的判断，而lock = LOCK,T2也进去了，没锁住！
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">locked</span> <span class="o">!=</span> <span class="n">UNLOCK</span><span class="p">)</span> <span class="p">{</span> <span class="c1">//&lt;--------------------------------
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>                                        <span class="c1">//  |
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>                                                    <span class="c1">//  |  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>         <span class="c1">//T1执行到了这里 此时locked = LOCK-|
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;sum = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="正确性不明的奇怪尝试-peterson-算法">正确性不明的奇怪尝试 (<code>Peterson</code> 算法)</h4>
+<p>A 和 B 争用厕所的包厢</p>
+<ul>
+<li>
+<p>想进入包厢之前，A/B 都要先举起自己的旗子</p>
+<ul>
+<li>A 确认旗子举好以后，往厕所门上贴上 <b>“B 正在使用”</b> 的标签</li>
+<li>B 确认旗子举好以后，往厕所门上贴上 <b>“A 正在使用”</b> 的标签</li>
+</ul>
+</li>
+<li>
+<p>然后<b>如果对方的旗子举起来，且门上的名字不是自己</b>，等待</p>
+<ul>
+<li>否则可以进入包厢</li>
+</ul>
+</li>
+<li>
+<p><b>出包厢后，放下自己的旗子</b></p>
+</li>
+<li>
+<p>示例代码：<a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-simple.c" target="_blank" rel="noopener noreffer">peterson-simple.c</a></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define A 1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define B 2
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">atomic_int</span> <span class="n">nested</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">atomic_long</span> <span class="n">count</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">long</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="k">volatile</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TA</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=1 */</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=2 */</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">B</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=3 */</span> <span class="k">while</span> <span class="p">(</span><span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">turn</span> <span class="o">==</span> <span class="n">B</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=4 */</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TB</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=1 */</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=2 */</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=3 */</span> <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">turn</span> <span class="o">==</span> <span class="n">A</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=4 */</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
+]]></description>
+</item>
+<item>
     <title>Linux x86 Program Start Up or - How the heck do we get to main()?</title>
     <link>https://Jungle430.github.io/posts/operating-system/support2/</link>
     <pubDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support2/</guid>
@@ -249,8 +554,15 @@
 <ul>
 <li>参考文章
 <ul>
-<li><a href="http://dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()? by Patrick Horgan》</a></li>
-<li><a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>（已与作者沟通，同意部分转载）</li>
+<li>
+<p><a href="http://dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()? by Patrick Horgan》</a></p>
+</li>
+<li>
+<p><a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>（已与作者沟通，同意部分转载）</p>
+</li>
+<li>
+<p><a href="https://www.gnu.org/software/hurd/glibc/startup.html" target="_blank" rel="noopener noreffer">《How libc startup in a process works》</a></p>
+</li>
 </ul>
 </li>
 </ul>

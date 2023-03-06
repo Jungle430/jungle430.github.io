@@ -4,9 +4,314 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</lastBuildDate>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>Operating System Chapter4 理解并发程序执行</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</link>
+    <pubDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-1" class=""></div></div>
+<p>晚上看的，<b>Peterson</b>算法好™️的👨，证明等过两天有时间给看了</div>
+        </div>
+    </div>
+<h2 id="理解并发程序执行">理解并发程序执行</h2>
+<h3 id="复习">复习</h3>
+<ul>
+<li>一般程序执行</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<p>线程的栈帧会用一个<code>list</code>来存放</p>
+<ul>
+<li>多线程</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<p>T1,T2随机来回转换执行</p>
+<ul>
+<li><b>并发程序 = 多个执行流、共享内存的<u>状态机</u></b></li>
+</ul>
+<h3 id="画状态机理解并发程序">画状态机理解并发程序</h3>
+<blockquote>
+<p><u>互斥：保证两个线程不能同时执行一段代码</u></p>
+</blockquote>
+<ul>
+<li>插入 “神秘代码”，使得 <a href="https://jyywiki.cn/pages/OS/2022/demos/sum.c" target="_blank" rel="noopener noreffer">sum.c</a> (或者任意其他代码) 能够正常工作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 神秘代码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 神秘代码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>可以通过<code>__sync_synchronize();</code>来保证原子操作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">__sync_synchronize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 或 int t = x;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__sync_synchronize</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="失败的尝试">失败的尝试</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">locked</span> <span class="o">!=</span> <span class="n">UNLOCK</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// critical section
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>原因</p>
+<ul>
+<li>看到的状态到真正做下一件事之间的状态是否被人改了？（<u>看到的东西仅仅只是一个历史，离做还有几个周期，而做是根据这个<b>“历史”</b>的状态来决定的</u>）$\Longrightarrow$ 和人眼看着东西对比，人眼是<b>一直在看的</b>，而CPU并行执行程序的时候，看这个指令执行完了之后可能CPU会去执行另一个线程的几条指令，这种情况下相当于这个人<b>看完后闭上眼睛等了几秒</b>，然后根据几秒前所看的东西来判断自己要干啥，<b>可是这个东西在前几秒可能已经让另一个线程的某些指令改过了</b></li>
+<li>处理器默认不保证 load + store 的原子性（单操作可以保证）</li>
+</ul>
+</li>
+<li>
+<p>一种失败的情况</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define N 100000000
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define LOCK 1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define UNLOCK 0
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>  <span class="c1">//T2在这个时候也执行到了locked != UNLOCK的判断，而lock = LOCK,T2也进去了，没锁住！
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">locked</span> <span class="o">!=</span> <span class="n">UNLOCK</span><span class="p">)</span> <span class="p">{</span> <span class="c1">//&lt;--------------------------------
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>                                        <span class="c1">//  |
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>                                                    <span class="c1">//  |  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>         <span class="c1">//T1执行到了这里 此时locked = LOCK-|
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;sum = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="正确性不明的奇怪尝试-peterson-算法">正确性不明的奇怪尝试 (<code>Peterson</code> 算法)</h4>
+<p>A 和 B 争用厕所的包厢</p>
+<ul>
+<li>
+<p>想进入包厢之前，A/B 都要先举起自己的旗子</p>
+<ul>
+<li>A 确认旗子举好以后，往厕所门上贴上 <b>“B 正在使用”</b> 的标签</li>
+<li>B 确认旗子举好以后，往厕所门上贴上 <b>“A 正在使用”</b> 的标签</li>
+</ul>
+</li>
+<li>
+<p>然后<b>如果对方的旗子举起来，且门上的名字不是自己</b>，等待</p>
+<ul>
+<li>否则可以进入包厢</li>
+</ul>
+</li>
+<li>
+<p><b>出包厢后，放下自己的旗子</b></p>
+</li>
+<li>
+<p>示例代码：<a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-simple.c" target="_blank" rel="noopener noreffer">peterson-simple.c</a></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define A 1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define B 2
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">atomic_int</span> <span class="n">nested</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">atomic_long</span> <span class="n">count</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">long</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="k">volatile</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TA</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=1 */</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=2 */</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">B</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=3 */</span> <span class="k">while</span> <span class="p">(</span><span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">turn</span> <span class="o">==</span> <span class="n">B</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=4 */</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TB</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=1 */</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=2 */</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=3 */</span> <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">turn</span> <span class="o">==</span> <span class="n">A</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=4 */</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
+]]></description>
+</item>
+<item>
     <title>Linux x86 Program Start Up or - How the heck do we get to main()?</title>
     <link>https://Jungle430.github.io/posts/operating-system/support2/</link>
     <pubDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support2/</guid>
@@ -251,8 +556,15 @@
 <ul>
 <li>参考文章
 <ul>
-<li><a href="http://dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()? by Patrick Horgan》</a></li>
-<li><a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>（已与作者沟通，同意部分转载）</li>
+<li>
+<p><a href="http://dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()? by Patrick Horgan》</a></p>
+</li>
+<li>
+<p><a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>（已与作者沟通，同意部分转载）</p>
+</li>
+<li>
+<p><a href="https://www.gnu.org/software/hurd/glibc/startup.html" target="_blank" rel="noopener noreffer">《How libc startup in a process works》</a></p>
+</li>
 </ul>
 </li>
 </ul>
@@ -6910,1916 +7222,6 @@ $$</p>
 </li>
 <li>
 <p>Pentium II and later Pentium models do incorporate some RISC characteristics</p>
-</li>
-</ul>
-</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>Computer Organization and Architecture Processor Structure and Function</title>
-    <link>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-processor-structure-and-function/</link>
-    <pubDate>Sat, 28 Jan 2023 14:20:25 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-processor-structure-and-function/</guid>
-    <description><![CDATA[<h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
-<h2 id="processor-structure-and-function">Processor Structure and Function</h2>
-<h3 id="outline">Outline</h3>
-<ul>
-<li>
-<p>Processor Organization</p>
-</li>
-<li>
-<p>Register Organization</p>
-</li>
-<li>
-<p>Instruction Cycle</p>
-</li>
-<li>
-<p>Instruction Pipelining</p>
-</li>
-</ul>
-<h3 id="processor-organization">Processor Organization</h3>
-<ul>
-<li>
-<p>A CPU must be able to</p>
-<ul>
-<li>
-<p>Fetch instruction from memory</p>
-</li>
-<li>
-<p>Decode the instruction to determine what action to do</p>
-</li>
-<li>
-<p>Fetch data</p>
-</li>
-<li>
-<p>Process data</p>
-</li>
-<li>
-<p>Write data</p>
-</li>
-</ul>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-1.png" title="/img/Computer Organization and Architecture/chapter12-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-1.png">
-        
-    </a>
-<ul>
-<li>
-<p>CPU必须要能够暂时保存一些数据，以对数据进行处理</p>
-</li>
-<li>
-<p>CPU需要记住下一个指令的位置，这样才能在当前指令执行完成之后，能到找到下一个指令</p>
-</li>
-<li>
-<p>处理过程中需要能够保存指令和数据</p>
-</li>
-<li>
-<p><strong>CPU包括ALU，CU，还需要有一组存储部件——寄存器</strong></p>
-</li>
-<li>
-<p>CPU通过一组系统总线和计算机的其他部件进行连接。系统总线包括控制总线、数据总线和地址总线</p>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-2.png" title="/img/Computer Organization and Architecture/chapter12-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-2.png">
-        
-    </a>
-<ul>
-<li>
-<p><strong>CPU的内部总线把ALU、寄存器和CU连在一起，完成数据在寄存器和ALU的传送</strong></p>
-</li>
-<li>
-<p>控制单元对寄存器、内部总线和ALU进行控制，控制各个部件按照指令要求完成相应的处理</p>
-</li>
-<li>
-<p>在ALU内部，还包括各种更小的组件，例如状态标志，移位器，求补器，以及算术和布尔逻辑等</p>
-</li>
-</ul>
-<h3 id="register-organization">Register Organization</h3>
-<ul>
-<li>
-<p>CPU must have some working space (temporary storage)</p>
-<ul>
-<li>Called registers</li>
-</ul>
-</li>
-<li>
-<p>Number and function vary between processor designs</p>
-</li>
-<li>
-<p><strong>One of the major design decisions</strong></p>
-</li>
-<li>
-<p><strong>Top level of memory hierarchy</strong></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Registers in the CPU Including two types</strong></p>
-<ul>
-<li>
-<p><strong>User-visible registers</strong></p>
-</li>
-<li>
-<p><strong>Reduce access to main memory and improve instruction processing efficiency by optimizing the use of registers</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Control and status registers</strong></p>
-<ul>
-<li>
-<p><strong>Used by control unit</strong></p>
-</li>
-<li>
-<p><strong>Control the operation of the CPU and the execution of the program by the privileged operating system</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="user-visible-registers">User-visible registers</h4>
-<ul>
-<li>
-<p>User visible registers can be divided into four categories according to its purpose</p>
-<ul>
-<li>
-<p><strong>General purpose: assigned to various purposes</strong></p>
-</li>
-<li>
-<p><strong>Data: for data retention only</strong></p>
-</li>
-<li>
-<p><strong>Address: used for some addressing mode</strong></p>
-</li>
-<li>
-<p><strong>Condition codes: also called flag register, it stores some flags of operation results</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="general-purpose-registers">General purpose registers</h5>
-<ul>
-<li>
-<p>True general purpose</p>
-<ul>
-<li>Registers and opcodes are orthogonal in the instruction set</li>
-<li>Registers can be arbitrarily matched with opcodes</li>
-</ul>
-</li>
-<li>
-<p><strong>Restricted general registers</strong></p>
-<ul>
-<li><strong>Specially used for floating point number or stack operation</strong></li>
-</ul>
-</li>
-<li>
-<p>In some cases, general registers can be used for addressing</p>
-<ul>
-<li>Register indirect addressing</li>
-<li>Displacement addressing</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Data register</p>
-<ul>
-<li><strong>It can only be used for store data, not for addressing</strong></li>
-<li><strong>Accumulator</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>Addressing register</strong></p>
-<ul>
-<li>
-<p><strong>Used for a specific addressing mode</strong></p>
-</li>
-<li>
-<p><strong>Segment pointer</strong></p>
-</li>
-<li>
-<p><strong>Index register</strong></p>
-</li>
-<li>
-<p><strong>Stack pointer</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>General or Specialized</strong></p>
-<ul>
-<li>
-<p>Whether registers are general or special affects the design of instruction sets</p>
-</li>
-<li>
-<p><strong>Specialized</strong></p>
-<ul>
-<li>
-<p><strong>Opcode can implicitly use a register group or a register</strong></p>
-</li>
-<li>
-<p><strong>Smaller instructions</strong></p>
-</li>
-<li>
-<p><strong>Less flexibility</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>General purpose</strong></p>
-<ul>
-<li>
-<p><strong>Increase flexibility and programmer options</strong></p>
-</li>
-<li>
-<p><strong>Increase instruction size &amp; complexity</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>More registers require more bits to specify registers in instructions</p>
-</li>
-<li>
-<p>Fewer registers require more memory access</p>
-</li>
-<li>
-<p>Too many registers does not reduce memory references remarkably and takes up processor real estate</p>
-<ul>
-<li>Between 8-32 is appropriate</li>
-</ul>
-</li>
-<li>
-<p><strong>Using register files with RISC makes use of using more registers</strong></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Address register: large enough to hold full address</p>
-</li>
-<li>
-<p>Data address: large enough to hold full word</p>
-</li>
-<li>
-<p><strong>Sometimes combine two data registers to hold double length data</strong></p>
-<ul>
-<li><strong>In C language, there is a double integer and a long integer, both of which are two words long</strong></li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Condition code registers</strong></p>
-<ul>
-<li>
-<p><strong>Also called flag registers, some of which are visible to users</strong></p>
-</li>
-<li>
-<p><strong>After operating,CPU set the condition bit according to the result</strong></p>
-<ul>
-<li>
-<p>After arithmetic operation, positive, negative, zero or overflow may occur</p>
-</li>
-<li>
-<p>These conditions will be set in</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Programs are allowed to read the condition code and perform</p>
-</li>
-<li>
-<p>Condition code cannot be modified by the program</p>
-</li>
-</ul>
-<hr>
-<p><strong>Control &amp; status registers</strong></p>
-<ul>
-<li>
-<p>Four registers are essential to instruction execution</p>
-<ul>
-<li>
-<p>Program Counter (PC)</p>
-</li>
-<li>
-<p>Instruction Register (IR)</p>
-</li>
-<li>
-<p>Memory Address Register (MAR)</p>
-</li>
-<li>
-<p>Memory Buffer Register (MBR)</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Not all processors have MAR and MBR. However, the system still needs registers similar to these two registers</p>
-</li>
-</ul>
-<hr>
-<p><strong>Program status word</strong></p>
-<ul>
-<li>
-<p>The PSW contains status information</p>
-</li>
-<li>
-<p>The flags include</p>
-<ul>
-<li>
-<p>Sign, zero, carry, equal, overflow</p>
-</li>
-<li>
-<p>interrupt enable/disable</p>
-</li>
-<li>
-<p>Supervisor: indicates whether the CPU is executing in supervisor or user mode</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Supervisor mode</strong></p>
-<ul>
-<li>
-<p>Not available to user programs</p>
-</li>
-<li>
-<p>Used by operating system(<strong>System call</strong>)</p>
-</li>
-<li>
-<p>Certain privileged instructions can be executed only in supervisor mode</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Other status and control registers</strong></p>
-<ul>
-<li>
-<p>Other additional status and control registers</p>
-<ul>
-<li>
-<p>Pointer register to process control block</p>
-</li>
-<li>
-<p>Interrupt vector register in vector interrupt computer</p>
-</li>
-<li>
-<p>System stack pointer</p>
-</li>
-<li>
-<p>Page table pointer register in virtual memory</p>
-</li>
-<li>
-<p>I/O operation related registers</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Control and status registers design elements</p>
-<ul>
-<li>Need to support the operating system</li>
-<li>Storage location in registers and memory</li>
-</ul>
-</li>
-</ul>
-<h3 id="instruction-cycle">Instruction Cycle</h3>
-<ul>
-<li>
-<p><strong>Instruction cycle includes fetching cycle and execution cycle</strong></p>
-</li>
-<li>
-<p><strong>In execution cycle, first decode to get the operation type of the instruction</strong></p>
-</li>
-<li>
-<p><strong>If instruction has operands, get the operand specifier in the instruction</strong></p>
-<ul>
-<li>
-<p><strong>Immediate</strong></p>
-</li>
-<li>
-<p><strong>Register</strong></p>
-</li>
-<li>
-<p><strong>Direct addressing: memory access once</strong></p>
-</li>
-<li>
-<p><strong>Indirect addressing: may requires more memory accesses</strong></p>
-<ul>
-<li><strong>Also called “indirect cycle”</strong></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Instruction cycle with indirect</strong></p>
-<div class="mermaid" id="id-1"></div>
-<ul>
-<li>
-<p>指令周期包括取指周期和执行周期，还可能包括间接周期和中断周期</p>
-</li>
-<li>
-<p>取指后，通过译码确定是否包含需要间接寻址的操作数，如果有，进入间接周期</p>
-</li>
-<li>
-<p>当前指令执行完成之后，检查是否有中断。如果有，进入中断周期</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-3.png" title="/img/Computer Organization and Architecture/chapter12-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-3.png" data-sub-html="<h2>Instruction Cycle(with Interrupts - State Diagram)</h2>">
-        
-    </a><figcaption class="image-caption">Instruction Cycle(with Interrupts - State Diagram)</figcaption>
-    </figure>
-<ul>
-<li>
-<p>指令周期中，先取指，然后进行指令操作译码</p>
-</li>
-<li>
-<p>如果涉及到操作数，进行操作数地址计算，然后取操作数</p>
-</li>
-<li>
-<p>之后进行数据操作。操作结果如果要保存到存储器中，需要计算操作数的地址，然后保存</p>
-</li>
-<li>
-<p>在这条指令执行完成之后，检测是否有中断。如果没有中断，继续执行下一条指令。如果有中断，就按照中断的处理规则，进行中断处理</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-4.png" title="/img/Computer Organization and Architecture/chapter12-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-4.png" data-sub-html="<h2>Indirect cycle</h2>">
-        
-    </a><figcaption class="image-caption">Indirect cycle</figcaption>
-    </figure>
-<ul>
-<li>
-<p>间接寻址过程中，由于操作数地址需要通过计算得到，所以在取操作数的过程中，可能会存在多次访问存储器的情况</p>
-</li>
-<li>
-<p>取操作数和存结果的过程中，都可能会存在间接周期</p>
-</li>
-</ul>
-<hr>
-<p><strong>Data flow (instruction fetch)</strong></p>
-<ul>
-<li>
-<p>Depends on CPU design</p>
-</li>
-<li>
-<p>Fetch inn general</p>
-<ul>
-<li>
-<p>PC contains address of next instruction</p>
-</li>
-<li>
-<p>Address moved to MAR</p>
-</li>
-<li>
-<p>Address placed on address bus</p>
-</li>
-<li>
-<p>Control unit requests memory read</p>
-</li>
-<li>
-<p>Result placed on data bus, copied to MBR, then to IR</p>
-</li>
-<li>
-<p>Meanwhile PC incremented by 1</p>
-</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-5.png" title="/img/Computer Organization and Architecture/chapter12-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-5.png" data-sub-html="<h2>Data flow(fetch diagram)</h2>">
-        
-    </a><figcaption class="image-caption"><code>Data flow(fetch diagram)</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>刚开始，下一个地址在PC中</p>
-</li>
-<li>
-<p>地址给MAR</p>
-</li>
-<li>
-<p>地址放到数据总线上</p>
-</li>
-<li>
-<p>控制单元发起读控制</p>
-</li>
-<li>
-<p>存储器把数据，也就是指令内容，放到数据总线上</p>
-</li>
-<li>
-<p>MBR读取数据总线内容，然后把指令给IR</p>
-</li>
-<li>
-<p>控制单元还需要让PC+1，指向下一个指令</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>IR is examined</p>
-</li>
-<li>
-<p><strong>If there is no indirect addressing, enter the execution cycle</strong></p>
-</li>
-<li>
-<p><strong>If indirect addressing, indirect cycle is performed</strong></p>
-<ul>
-<li>
-<p>Rightmost N bits of MBR transferred to MAR</p>
-</li>
-<li>
-<p>Control unit requests memory read</p>
-</li>
-<li>
-<p>Result (address of operand) moved to MBR</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Data flow (execute)</strong></p>
-<ul>
-<li>
-<p>May take many forms</p>
-</li>
-<li>
-<p>Depends on instruction being executed</p>
-</li>
-<li>
-<p>May include</p>
-<ul>
-<li>
-<p>Memory read/write</p>
-</li>
-<li>
-<p>Input/Output</p>
-</li>
-<li>
-<p>Register transfers</p>
-</li>
-<li>
-<p>ALU operations</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Data flow (interrupt)</strong></p>
-<ul>
-<li>
-<p>Simple and predictable</p>
-</li>
-<li>
-<p><strong>Current PC saved to allow resumption after interrupt</strong></p>
-<ul>
-<li>
-<p>Contents of PC copied to MBR</p>
-</li>
-<li>
-<p>Special memory location (e.g. stack pointer) loaded to MAR</p>
-</li>
-<li>
-<p>MBR written to memory</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>PC loaded with address of interrupt handling routine</strong></p>
-</li>
-<li>
-<p>Interrupt handler first instruction fetched</p>
-</li>
-</ul>
-<h3 id="instruction-pipelining">Instruction Pipelining</h3>
-<p><strong>Why need pipeline?</strong></p>
-<ul>
-<li>
-<p>Development of computer application requires continuous improvement of processing capacity</p>
-</li>
-<li>
-<p>The development of integrated circuit, clock frequency, registers, cache, etc. have reduced the instruction processing time and improved the processing ability</p>
-</li>
-<li>
-<p><strong>More and more difficult to solve problems by simply relying on the performance of hardware</strong></p>
-</li>
-<li>
-<p><strong>The goal is the execution efficiency of instructions</strong></p>
-</li>
-<li>
-<p><strong>Better organization is needed to improve the efficiency of instruction execution</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>What is pipeline? ！ ！ ！</strong></p>
-<ul>
-<li>
-<p><strong>The working mode of factory assembly line is used for reference</strong></p>
-<ul>
-<li>
-<p><strong>Divide the execution of instructions into several stages</strong></p>
-</li>
-<li>
-<p><strong>Different stages of multiple instructions can be processed in parallel</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Although execution time of each instruction is not shortened, the execution time of a group of instructions is shortened due to the parallel method</strong></p>
-</li>
-<li>
-<p><strong>This is the basic idea of instruction pipeline</strong></p>
-</li>
-</ul>
-<h4 id="prefetch">Prefetch</h4>
-<ul>
-<li>
-<p>Before pipelining, next instruction is taken after current instruction is executed</p>
-</li>
-<li>
-<p>With pipelining, more than one instruction in different stages of the pipeline</p>
-</li>
-<li>
-<p>How to get instructions is a problem</p>
-<ul>
-<li>
-<p><strong>Fetch accessing main memory</strong></p>
-</li>
-<li>
-<p><strong>Execution usually does not access memory</strong></p>
-</li>
-<li>
-<p><strong>Fetch next instruction during execution of current instruction</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Called instruction prefetch</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Advantage</strong></p>
-<ul>
-<li>
-<p>During execution of an instruction, a new instruction has entered the pipeline</p>
-</li>
-<li>
-<p><strong>After current instruction is executed, it can be executed immediately</strong></p>
-<ul>
-<li>
-<p>Next instruction has finished fetching</p>
-</li>
-<li>
-<p><strong>Save time for fetching</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Accessing memory is required for fetching</strong></p>
-<ul>
-<li>
-<p>If cache hits, take it directly</p>
-</li>
-<li>
-<p>If cache missing, access memory</p>
-</li>
-</ul>
-</li>
-<li>
-<p>In fact, the instruction cycle is divided into more detailed stages, more pipeline stages, and more overlapping and efficient instruction execution stages</p>
-</li>
-</ul>
-<hr>
-<p><strong>Which instruction is Prefetched?</strong></p>
-<ul>
-<li>
-<p>Which instruction is appropriate for prefetching?</p>
-</li>
-<li>
-<p><strong>Next instruction of the current instruction?</strong></p>
-<ul>
-<li>
-<p><strong>If it is executed sequentially, no problem</strong></p>
-</li>
-<li>
-<p><strong>If there is a transition, the next instruction needs to be determined according to the conditions</strong></p>
-</li>
-<li>
-<p><strong>Hard to predict</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Does a misprediction in prefetching affect correctness?</strong></p>
-<ul>
-<li>
-<p><strong>No, prefetched data at a “mis-predicted” address is simply not used</strong></p>
-</li>
-<li>
-<p><strong>There is no need for state recovery</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Basics characteristics</strong></p>
-<ul>
-<li>
-<p>In modern systems, prefetching is usually done in cache block granularity</p>
-</li>
-<li>
-<p>Prefetching is a technique that can reduce both</p>
-<ul>
-<li>
-<p>Miss rate</p>
-</li>
-<li>
-<p>Miss latency</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Prefetching can be done by</strong></p>
-<ul>
-<li><strong>Hardware</strong></li>
-<li><strong>Compiler</strong></li>
-<li><strong>Programmer</strong></li>
-</ul>
-</li>
-</ul>
-<h4 id="prefetching-the-four-questions">Prefetching: the four questions</h4>
-<ul>
-<li>
-<p>What</p>
-<ul>
-<li>What addresses to prefetch</li>
-</ul>
-</li>
-<li>
-<p>When</p>
-<ul>
-<li>When to initiate a prefetch request</li>
-</ul>
-</li>
-<li>
-<p>Where</p>
-<ul>
-<li>Where to place the prefetched data</li>
-</ul>
-</li>
-<li>
-<p>How</p>
-<ul>
-<li>Software, hardware, execution-based, cooperative</li>
-</ul>
-</li>
-</ul>
-<h4 id="two-stage-instruction-pipeline">Two stage instruction pipeline</h4>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-6.png" title="/img/Computer Organization and Architecture/chapter12-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-6.png">
-        
-    </a>
-<ul>
-<li>
-<p>简单的指令过程就是串行处理，取指-执行-取指-执行，效率低</p>
-</li>
-<li>
-<p>采用两阶段流水线后，在当前指令的执行过程中，进行下一个指令的取指</p>
-</li>
-<li>
-<p>如果当前指令执行完成后，下一个指令不是预取的，需要重新取指</p>
-</li>
-<li>
-<p>取指和执行指令的时间重叠，节省了时间</p>
-</li>
-<li>
-<p>但是由于取指和执行指令的时间需要不一样，所以执行速度不能翻倍</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-7.png" title="/img/Computer Organization and Architecture/chapter12-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-7.png" data-sub-html="<h2>Instruction pipelining</h2>">
-        
-    </a><figcaption class="image-caption"><code>Instruction pipelining</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>两阶段流水线的执行过程</p>
-</li>
-<li>
-<p><strong>上一条指令的执行阶段和下一条指令的取指阶段在时间上是重叠的</strong></p>
-</li>
-<li>
-<p>每个指令的总体执行时间没有缩短，部指令的执行时间缩短了</p>
-</li>
-<li>
-<p>如果取指和执行时间相同，那么流水线的执行时间是串行执行的一半，性能提升一倍</p>
-</li>
-</ul>
-<h4 id="improved-performance">Improved performance</h4>
-<ul>
-<li>
-<p><strong>But not doubled</strong></p>
-<ul>
-<li>
-<p><strong>Fetch usually shorter than execution</strong></p>
-</li>
-<li>
-<p>Instruction execution process is complex and time-consuming</p>
-</li>
-<li>
-<p><strong>Execution time determines the improvement effect</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Jump or branch instruction</p>
-<ul>
-<li>
-<p><strong>means that prefetched instructions are not the required instructions</strong></p>
-</li>
-<li>
-<p><strong>Get the actual instructions according to the results</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Add more stages to improve performance</strong></p>
-</li>
-</ul>
-<h4 id="improve-concurrency">improve concurrency</h4>
-<ul>
-<li>
-<p>Goal: More concurrency → Higher instruction throughput</p>
-</li>
-<li>
-<p><strong>Method: When an instruction is using some resources in its processing phase, process other instructions on idle resources</strong></p>
-<ul>
-<li>
-<p>Fetch next instruction when an instruction is being decoded</p>
-</li>
-<li>
-<p>Decode an instruction when an instruction is being executed</p>
-</li>
-<li>
-<p>Execute the next instruction when current instruction is accessing memory</p>
-</li>
-<li>
-<p>When an instruction is writing its result into the register file, access data memory for the next instruction</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="summary">Summary</h4>
-<ul>
-<li>
-<p>Analogy: “Assembly line processing” of instructions</p>
-</li>
-<li>
-<p>Pipeline the execution of multiple instructions</p>
-<ul>
-<li>
-<p><strong>Divide the instruction processing cycle into distinct “stages” of processing</strong></p>
-</li>
-<li>
-<p>Ensure there are enough hardware resources to process one instruction in each stage</p>
-</li>
-<li>
-<p>Process a different instruction in each stage</p>
-</li>
-<li>
-<p>Instructions are executed in the order of program</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Benefit: Increases instruction processing throughput</strong></p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-8.png" title="/img/Computer Organization and Architecture/chapter12-8.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-8.png" data-sub-html="<h2>execution of four independent add</h2>">
-        
-    </a><figcaption class="image-caption">execution of four independent add</figcaption>
-    </figure>
-<ul>
-<li>
-<p>加法指令流水线</p>
-</li>
-<li>
-<p>整个指令分为4个阶段：取指，译码，执行，写结果，均为t</p>
-</li>
-<li>
-<p>采用4阶段流水线，每个阶段完全独立，n个指令，需要$nt+3t$的时间</p>
-</li>
-<li>
-<p>基本上是$\frac {1}{4}$的时间</p>
-</li>
-</ul>
-<h4 id="in-practice">In practice</h4>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-9.png" title="/img/Computer Organization and Architecture/chapter12-9.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-9.png">
-        
-    </a>
-<ul>
-<li>
-<p>烘干衣服需要2个时间单位，这样，如果完全串行，需要20个时间单位</p>
-</li>
-<li>
-<p>采用流水线后，有等待烘干机的时间</p>
-</li>
-<li>
-<p>4件衣服需要11个时间单位</p>
-</li>
-<li>
-<p>理论上的速度为非流水线的$2.5$倍</p>
-</li>
-<li>
-<p><strong>最慢的步骤决定了整个系统的吞吐量</strong></p>
-</li>
-</ul>
-<h5 id="how">How</h5>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-10.png" title="/img/Computer Organization and Architecture/chapter12-10.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-10.png">
-        
-    </a>
-<ul>
-<li>
-<p>烘干机成为整个系统的瓶颈</p>
-</li>
-<li>
-<p>补充资源，配置2个烘干机</p>
-</li>
-<li>
-<p>下一个衣服洗完后，不需要等待上一个衣服的烘干，用另一台烘干机</p>
-</li>
-<li>
-<p>关键环节增加资源，使得整个吞吐量回到之前的情况</p>
-</li>
-<li>
-<p>代价就是配置额外的资源</p>
-</li>
-</ul>
-<h4 id="goal">Goal</h4>
-<ul>
-<li>
-<p>Increase instruction throughput with little increase in cost</p>
-<ul>
-<li>
-<p><strong>Process instructions in the order required by the program</strong></p>
-</li>
-<li>
-<p><strong>Hardware cost cannot be increased too much</strong></p>
-</li>
-<li>
-<p>Instruction throughput can be greatly increased</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="an-ideal-pipeline">An ideal pipeline</h4>
-<ul>
-<li>
-<p><strong>Repetition of identical operations</strong></p>
-<ul>
-<li>
-<p><strong>Same operation, different operation objects</strong></p>
-</li>
-<li>
-<p>Automobiles of the same model can be produced on one assembly line</p>
-</li>
-<li>
-<p><strong>Different operations require different steps, which affects the operation of the pipeline</strong></p>
-</li>
-<li>
-<p>The production of automobiles and motorcycles requires different steps and cannot be put on the same assembly line</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Operating objects are independent of each other</strong></p>
-<ul>
-<li>
-<p><strong>There is no dependency between each operation object</strong></p>
-</li>
-<li>
-<p>For example, there is no relationship between cars produced on the assembly line</p>
-</li>
-<li>
-<p><strong>Operating objects with sequential dependencies affect each other during parallel operations</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>A complete operation can be decomposed into several sub operations</p>
-<ul>
-<li>
-<p><strong>Each sub operation takes the same time</strong></p>
-</li>
-<li>
-<p><strong>Each sub operation requires independent resources and does not share resources</strong></p>
-</li>
-<li>
-<p>If sub operation requires different time, some sub operations must wait</p>
-</li>
-<li>
-<p>Resource sharing leads to resource contention</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>For the pipeline design of instructions, we divide the execution of instructions into six stages</p>
-<ul>
-<li>
-<p><strong>Fetch instruction(FI)</strong></p>
-</li>
-<li>
-<p><strong>Decode instruction(DI)</strong></p>
-</li>
-<li>
-<p><strong>Calculate operands(CO)</strong></p>
-</li>
-<li>
-<p><strong>Fetch operands(FO)</strong></p>
-</li>
-<li>
-<p><strong>Execute instructions(EI)</strong></p>
-</li>
-<li>
-<p><strong>Write result(WO)</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Overlap these operations</strong></p>
-</li>
-</ul>
-<h4 id="timing-of-pipeline">Timing of pipeline</h4>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-11.png" title="/img/Computer Organization and Architecture/chapter12-11.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-11.png">
-        
-    </a>
-<ul>
-<li>
-<p>理想的指令流水线的执行过程</p>
-</li>
-<li>
-<p><strong>指令执行分为6个阶段，相互之间不共享资源</strong></p>
-</li>
-<li>
-<p>按照流水线的方式来执行，从第六个时间单位开始，每个时间单位都会有1个指令完成执行</p>
-</li>
-<li>
-<p>指令数量足够多时，执行效率为原来的6倍</p>
-</li>
-</ul>
-<h4 id="summary-1">Summary</h4>
-<ul>
-<li>
-<p>The total execution time for each individual instruction is not changed by pipelining</p>
-<ul>
-<li>It still takes an instruction cycle to make it all the way through the processor</li>
-</ul>
-</li>
-<li>
-<p>Pipelining doesn&rsquo;t speed up instruction execution time</p>
-</li>
-<li>
-<p>It does speed up program execution time by increasing the number of instructions finished per unit time</p>
-</li>
-</ul>
-<h4 id="branch-in-a-pipeline">Branch in a pipeline</h4>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-12.png" title="/img/Computer Organization and Architecture/chapter12-12.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-12.png">
-        
-    </a>
-<ul>
-<li>
-<p>指令1和2的执行都是正常的</p>
-</li>
-<li>
-<p>指令3在时间片8时，需要跳转到指令15的执行</p>
-</li>
-<li>
-<p>指令4-7已经完成的处理作废</p>
-</li>
-<li>
-<p>需要重新开始指令15的取指</p>
-</li>
-<li>
-<p><strong>第9到第12时间片，没有指令完成执行，称为分支惩罚</strong></p>
-</li>
-<li>
-<p><strong>分支越多，分支惩罚就越多，整个程序的指令吞吐率就越低</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Six stage instruction pipeline</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-13.png" title="/img/Computer Organization and Architecture/chapter12-13.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-13.png">
-        
-    </a>
-<ul>
-<li>
-<p>第一步是取指，之后是指令译码，并计算操作数地址</p>
-</li>
-<li>
-<p><strong>此时，需要判断指令是否是无条件转移，如果是，那么更新PC，并清空流水线，继续开始取指</strong></p>
-</li>
-<li>
-<p><strong>如果不转移，正常执行指令，取操作数，然后执行指令，并写操作数</strong></p>
-</li>
-<li>
-<p><strong>判断是否进行分支，或者是否有中断。如果是，那么和无条件分支一样，更改PC，清空流水线，继续往下执行后续指令</strong></p>
-</li>
-</ul>
-<h4 id="other-factors">Other factors</h4>
-<ul>
-<li>
-<p>Data transmission between different parts takes time</p>
-</li>
-<li>
-<p>Theoretically, the more stages, the higher the efficiency of instruction execution</p>
-<ul>
-<li>
-<p>The more stages are divided, the more complex the control between stages will be</p>
-</li>
-<li>
-<p><strong>Latching delay, buffering between phases takes a certain time</strong></p>
-</li>
-<li>
-<p>Need reasonable design</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Speedup factors with instruction pipelining</strong></p>
-<ul>
-<li>假定总共需要执行n条指令，采用的流水线段数为k，那么使用指令流水线相对于不使用流水线的加速比的定义是</li>
-</ul>
-<p>$$
-S_k=\frac {nk}{k+n-1}
-$$</p>
-<ul>
-<li>
-<p>随着指令数的增加，加速比趋向于流水线的阶段</p>
-</li>
-<li>
-<p>指令数越多，加速比越接近理论上的加速比。而随着段数的增加，加速比增加缓慢</p>
-</li>
-<li>
-<p>流水线段数能带来更好的潜在加速比，但同时也带来很多问题。比如分支时需要清空流水线，段间延时也需要考虑</p>
-</li>
-</ul>
-<h4 id="analysis-of-instruction-pipeline">Analysis of instruction pipeline</h4>
-<ul>
-<li>What are the characteristics of an ideal pipeline?
-<ul>
-<li>
-<p>Repetition of identical operations</p>
-</li>
-<li>
-<p>Operating objects are independent of each other</p>
-</li>
-<li>
-<p>A complete operation can be decomposed into several sub operations</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Identical operations … NOT!</strong></p>
-<ul>
-<li>
-<p><strong>different instructions → not all need the same stages</strong></p>
-</li>
-<li>
-<p>Forcing different instructions to go through the same pipe stages</p>
-</li>
-<li>
-<p><strong>Some pipeline stages are idle</strong></p>
-</li>
-<li>
-<p><strong>Leading to a waste of time, called external fragmentation</strong></p>
-</li>
-</ul>
-<hr>
-<p><strong>Independent operations &hellip; NOT!</strong></p>
-<ul>
-<li>
-<p><strong>instructions are not independent of each other</strong></p>
-</li>
-<li>
-<p>Need to detect and resolve inter-instruction dependencies to ensure the pipeline provides correct results</p>
-</li>
-<li>
-<p>Pipeline stalls frequently due to branch</p>
-</li>
-<li>
-<p>Poor operation of the pipeline</p>
-</li>
-</ul>
-<hr>
-<p><strong>Uniform sub-operations &hellip; NOT!</strong></p>
-<ul>
-<li>
-<p><strong>different pipeline stages → not the same latency</strong></p>
-</li>
-<li>
-<p>Need to force each stage to be controlled by the same clock</p>
-</li>
-<li>
-<p><strong>Some pipe stages are too fast but all take the same clock cycle time</strong></p>
-</li>
-<li>
-<p><strong>These wasted time are called internal fragmentation</strong></p>
-</li>
-</ul>
-<hr>
-<h4 id="issues-in-pipeline-design">Issues in pipeline design</h4>
-<ul>
-<li>
-<p>Reasonably divide the stages of instructions</p>
-<ul>
-<li>
-<p><strong>How many stages is the instruction cycle divided into?</strong></p>
-</li>
-<li>
-<p>what is done in each stage</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Handling exceptions, interrupts</p>
-</li>
-<li>
-<p>Keeping the pipeline correct, moving, and full</p>
-<ul>
-<li>
-<p>Data dependences</p>
-</li>
-<li>
-<p>Control dependences</p>
-</li>
-<li>
-<p>Resource conflict</p>
-</li>
-<li>
-<p>Long-latency (or multi-cycle) operations</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Causes of pipeline stalls</strong></p>
-<ul>
-<li>
-<p><strong>Pipeline stall: A condition when the pipeline stops moving</strong></p>
-</li>
-<li>
-<p>Causes of stall</p>
-<ul>
-<li>Resource contention</li>
-<li>Dependences between instructions, including data dependence and control dependence</li>
-<li>Long-latency (multi-cycle) operations</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Dependences and Their Types</strong></p>
-<ul>
-<li>
-<p>Also called “hazard” or “pipeline bubble”</p>
-</li>
-<li>
-<p>Dependences dictate ordering requirements between instructions</p>
-</li>
-<li>
-<p>Two types</p>
-<ul>
-<li>
-<p>Data dependence</p>
-</li>
-<li>
-<p>Control dependence</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Resource contention is sometimes called resource dependence</strong></p>
-</li>
-<li>
-<p><strong>When dependency occurs, the pipeline will be suspended, which is called pipeline adventure</strong></p>
-</li>
-</ul>
-<h4 id="resource-hazards">Resource hazards</h4>
-<ul>
-<li>
-<p><strong>Two (or more) instructions in pipeline need same resource</strong></p>
-<ul>
-<li>
-<p><strong>Executed in serial rather than parallel for part of pipeline</strong></p>
-</li>
-<li>
-<p><strong>Also called <em>structural hazard</em></strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>It is caused by unreasonable structure or insufficient resources</p>
-<ul>
-<li>Such as using the same register</li>
-</ul>
-</li>
-<li>
-<p><strong>The solution is generally to increase available resources, such as adding a dryer in the previous example</strong></p>
-</li>
-</ul>
-<p><strong>Example</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-14.png" title="/img/Computer Organization and Architecture/chapter12-14.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-14.png">
-        
-    </a>
-<ul>
-<li>
-<p>第3个时钟周期，$I_1$需要读取内存取操作数，同时$I_3$也需要取指</p>
-</li>
-<li>
-<p>两个指令读需要读存储器，发生资源冲突</p>
-</li>
-<li>
-<p>$I_3$需要空一个时钟周期，等到第4个时钟周期的时候，才去取指</p>
-</li>
-<li>
-<p>因为资源冲突而浪费了1个时钟周期</p>
-</li>
-<li>
-<p>如果只有一个$ALU$，执行指令也可能会冲突</p>
-</li>
-</ul>
-<h4 id="handling-resource-contention">Handling resource contention</h4>
-<ul>
-<li>
-<p><strong>Solution 1: Eliminate the cause of contention</strong></p>
-<ul>
-<li>
-<p>Duplicate the resource or increase its throughput</p>
-</li>
-<li>
-<p>E.g., use separate instruction and data memories (caches)</p>
-</li>
-<li>
-<p>E.g., use multiple ports for memory structures</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Solution 2: Detect the resource contention and stall one</strong></p>
-<ul>
-<li>Need to decide which one to stop</li>
-</ul>
-</li>
-</ul>
-<h4 id="data-hazards">Data hazards</h4>
-<ul>
-<li>
-<p>Conflict in access of an operand</p>
-<ul>
-<li>E.g. ,both instructions access a particular memory or register operand</li>
-</ul>
-</li>
-<li>
-<p><strong>If two instructions are executed serially in strict order, that is one instruction executes after the finish of the previous instruction execution. No problem</strong></p>
-</li>
-<li>
-<p><strong>If in a pipeline, operand value could be updated so as to produce different result from strict sequential execution</strong></p>
-</li>
-<li>
-<p><strong>Data Hazard is caused by the conflict of access to the same operand location</strong></p>
-</li>
-</ul>
-<hr>
-<h4 id="types-of-data-hazard">Types of data hazard</h4>
-<ul>
-<li>
-<p>Types of data dependences：</p>
-<ul>
-<li>
-<p><strong>read after write</strong></p>
-<ul>
-<li><strong>Called “True dependence ”</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>write after read</strong></p>
-<ul>
-<li><strong>Called “Anti dependence ”</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>write after write</strong></p>
-<ul>
-<li><strong>Called “Output dependence”</strong></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="true-dependency">True dependency</h5>
-<ul>
-<li>
-<p><strong>Read after write (RAW), or true dependency</strong></p>
-<ul>
-<li>
-<p><strong>An instruction modifies a register or memory location</strong></p>
-</li>
-<li>
-<p><strong>Succeeding instruction reads data in that location</strong></p>
-</li>
-<li>
-<p><strong>Hazard occurs if read takes place before write complete</strong></p>
-</li>
-<li>
-<p><strong>What needs to be read by succeeding instruction is the modified data</strong></p>
-</li>
-<li>
-<p><strong>After the pipeline is adopted, the read data becomes the data before writing</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-15.png" title="/img/Computer Organization and Architecture/chapter12-15.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-15.png">
-        
-    </a>
-<ul>
-<li>
-<p>第一个指令需要写$r_3$</p>
-</li>
-<li>
-<p>第二个指令需要读$r_3$</p>
-</li>
-<li>
-<p>第二个指令<strong>必须要等第一个指令执行完成之后并写了</strong>$r_3$，才能完成读操作数的指令，否则读取的$r_3$不是需要的数</p>
-</li>
-</ul>
-<h5 id="anti-dependence">Anti dependence</h5>
-<ul>
-<li>
-<p><strong>Write after read (WAR), or anti-dependency</strong></p>
-</li>
-<li>
-<p><strong>An instruction reads a register or memory location</strong></p>
-</li>
-<li>
-<p><strong>Succeeding instruction writes to location</strong></p>
-</li>
-<li>
-<p><strong>Hazard occur if write completes before read takes place</strong></p>
-</li>
-<li>
-<p><strong>The data of the first instruction read operation is incorrect</strong></p>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-16.png" title="/img/Computer Organization and Architecture/chapter12-16.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-16.png">
-        
-    </a>
-<ul>
-<li>
-<p>第一个指令读$r_1$</p>
-</li>
-<li>
-<p>第二个指令写$r_1$</p>
-</li>
-<li>
-<p>如果先执行了第二个指令，那么结果也不正确</p>
-</li>
-<li>
-<p>在超标量中会出现这种情况</p>
-</li>
-</ul>
-<h5 id="output-dependence">Output dependence</h5>
-<ul>
-<li>
-<p><strong>Write after write (WAW), or output dependency</strong></p>
-<ul>
-<li>
-<p><strong>Two instructions both write to same location</strong></p>
-</li>
-<li>
-<p><strong>Hazard if writes take place in reverse of order intended sequence</strong></p>
-</li>
-<li>
-<p><strong>The data to be stored is the data written by the second instruction</strong></p>
-</li>
-<li>
-<p><strong>In the pipeline, the data actually saved is the data written by the first instruction</strong></p>
-</li>
-<li>
-<p><strong>Data of memory or register is not required</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-17.png" title="/img/Computer Organization and Architecture/chapter12-17.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-17.png">
-        
-    </a>
-<ul>
-<li>
-<p>第一个执行写$r_3$</p>
-</li>
-<li>
-<p>第三个指令也写$r_3$</p>
-</li>
-<li>
-<p>如果第三个指令先执行了，也结果不正确</p>
-</li>
-<li>
-<p>在超标量中会出现这种情况</p>
-</li>
-</ul>
-<h4 id="how-1">How?</h4>
-<ul>
-<li>
-<p>True dependences always need to be obeyed because they constitute true dependence on a value</p>
-</li>
-<li>
-<p><strong>True dependences always need to be obeyed because they constitute true dependence on a value</strong></p>
-</li>
-<li>
-<p><strong>Anti and output dependences exist due to limited number of architectural registers</strong></p>
-<ul>
-<li><strong>They are dependence on a name, not a value</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>Without special hardware and specific avoidance algorithms, results in inefficient pipeline usage</strong></p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-18.png" title="/img/Computer Organization and Architecture/chapter12-18.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-18.png" data-sub-html="<h2>Data hazard diagram</h2>">
-        
-    </a><figcaption class="image-caption"><code>Data hazard diagram</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>在第五个时钟周期，加法指令写EAX</p>
-</li>
-<li>
-<p>第四个时钟周期，减法要用EAX</p>
-</li>
-<li>
-<p>如果第二个指令不等待，那取的EAX还是最早的EAX，不是加法的结果</p>
-</li>
-<li>
-<p>所以减法指令需要停顿2个时钟周期，到第六个时钟周期才会去取操作数</p>
-</li>
-<li>
-<p>浪费了2个时钟周期</p>
-</li>
-</ul>
-<h4 id="method-of-handle">Method of handle</h4>
-<ul>
-<li>
-<p>True dependences are more interesting</p>
-<ul>
-<li><strong>Actual interdependence between data，requires waiting</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>Anti and output dependences are easier to handle</strong></p>
-<ul>
-<li>
-<p><strong>It’s all about writing</strong></p>
-</li>
-<li>
-<p><strong>Use more registers</strong></p>
-</li>
-<li>
-<p><strong>Use different registers to eliminate possible correlation</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Some fundamental ways of handling true dependences</p>
-<ul>
-<li>
-<p>Detect and wait until value is available in register file</p>
-</li>
-<li>
-<p>Detect and eliminate the dependence at the software level</p>
-<ul>
-<li>
-<p>Register renaming</p>
-</li>
-<li>
-<p>Discussed later</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Predict the needed value(s), execute “speculatively”, and verify</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="control-dependence">Control dependence</h4>
-<ul>
-<li>
-<p>Also called “control hazard”“branch hazard”</p>
-</li>
-<li>
-<p>A Special Case of Data Dependence</p>
-</li>
-<li>
-<p>Occurs when the pipeline makes a wrong judgment on branch transfer</p>
-</li>
-<li>
-<p>Brings instructions into pipeline that must subsequently be discarded</p>
-</li>
-<li>
-<p>The pipeline cannot run with full load</p>
-</li>
-</ul>
-<h5 id="solve">solve</h5>
-<ul>
-<li>
-<p><strong>Multiple Streams</strong></p>
-</li>
-<li>
-<p><strong>Prefetch Branch Target</strong></p>
-</li>
-<li>
-<p><strong>Loop buffer</strong></p>
-</li>
-<li>
-<p><strong>Branch prediction</strong></p>
-</li>
-<li>
-<p><strong>Delayed branching</strong></p>
-</li>
-</ul>
-<h6 id="multiple-streams">Multiple streams</h6>
-<ul>
-<li>
-<p>Have two pipelines for each branch</p>
-<ul>
-<li>Prefetch each branch into a separate pipeline</li>
-</ul>
-</li>
-<li>
-<p>Finally, determine which pipeline to use according to the branching conditions</p>
-</li>
-<li>
-<p>Shortcoming</p>
-<ul>
-<li>
-<p>Leads to bus &amp; register contention</p>
-</li>
-<li>
-<p>Multiple branches lead to further pipelines being needed</p>
-</li>
-</ul>
-</li>
-</ul>
-<h6 id="prefetch-branch-target">Prefetch branch target</h6>
-<ul>
-<li>Target of branch is prefetched in addition to instructions following branch</li>
-<li>It is not executed after prefetching, but fetching and decoding</li>
-<li>Keep target until branch is executed</li>
-<li>It can save the time of fetching and decoding</li>
-<li>Used by IBM 360/91</li>
-</ul>
-<h6 id="loop-buffer">Loop buffer</h6>
-<ul>
-<li>
-<p>Very fast memory</p>
-</li>
-<li>
-<p>Contains n instructions taken in the most recent order</p>
-</li>
-<li>
-<p>When a branch may occur, first check whether the transfer target is in the buffer</p>
-</li>
-<li>
-<p><strong>Very good for small loops or jumps</strong></p>
-</li>
-</ul>
-<h6 id="branch-prediction">Branch prediction</h6>
-<ul>
-<li>
-<p>There are two types of branch predictions</p>
-<ul>
-<li>
-<p>Static branch predictions: the branch does not depend on the execution history</p>
-</li>
-<li>
-<p>Dynamic branch prediction: the branch depends on the execution history</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Static branching</p>
-<ul>
-<li>
-<p>Predict never taken</p>
-</li>
-<li>
-<p>Predict always taken</p>
-</li>
-<li>
-<p>Predict by Opcode</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Dynamic branching</p>
-<ul>
-<li>
-<p>Taken/not taken switch</p>
-</li>
-<li>
-<p>Branch history table</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Static branch prediction</strong></p>
-<ul>
-<li>
-<p><strong>Predict never taken</strong></p>
-<ul>
-<li>
-<p><strong>Assume that jump will not happen</strong></p>
-</li>
-<li>
-<p><strong>Always fetch next instruction</strong></p>
-</li>
-<li>
-<p><strong>68020 &amp; VAX 11/780</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Predict always taken</strong></p>
-<ul>
-<li>
-<p><strong>Assume that jump will happen</strong></p>
-</li>
-<li>
-<p><strong>Always fetch target instruction</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>“Predict always taken ” are most used</strong></p>
-</li>
-<li>
-<p>Predict by Opcode</p>
-<ul>
-<li>
-<p>Some instructions are more likely to result in a jump than others</p>
-</li>
-<li>
-<p>Can get up to 75% success</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Dynamic branch prediction</strong></p>
-<ul>
-<li>
-<p><strong>Record the history of conditional branch instructions in a program</strong></p>
-</li>
-<li>
-<p>Taken/not taken switch: One or more bits are used to indicate recent history of the instruction</p>
-<ul>
-<li>
-<p><strong>The branching decision is depended on these bits</strong></p>
-</li>
-<li>
-<p><strong>Based on previous history</strong></p>
-</li>
-<li>
-<p><strong>Good for loops</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Branch history table</strong></p>
-<ul>
-<li>
-<p>If Predict branch，target address can only be obtained by decoding instructions</p>
-<ul>
-<li>
-<p>A waiting time is required</p>
-</li>
-<li>
-<p>How to improve efficiency?</p>
-</li>
-</ul>
-</li>
-<li>
-<p>A storage area called branch target buffer is designed</p>
-<ul>
-<li>
-<p>Also called branch history table</p>
-</li>
-<li>
-<p>It records information related to branch transfer, including branch instruction address, transfer history bit, and target address information</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Target address information</p>
-<ul>
-<li>
-<p>Can be target instruction</p>
-<ul>
-<li>
-<p>Use this instruction directly</p>
-</li>
-<li>
-<p>Less time</p>
-</li>
-<li>
-<p>It will take up more space</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Can be the target instruction address</p>
-<ul>
-<li>
-<p>Less space</p>
-</li>
-<li>
-<p>More time</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Whether to save time or space depends on the specific situation</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="branch-history-table">Branch history table</h4>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter12-19.png" title="/img/Computer Organization and Architecture/chapter12-19.png" data-thumbnail="/img/Computer Organization and Architecture/chapter12-19.png">
-        
-    </a>
-<ul>
-<li>
-<p>预测转移后，指令预取的时候，先去转移历史表中查询</p>
-<ul>
-<li>
-<p>如果有的话，根据指令状态进行预测，可能是目标地址，或者是下一顺序地址</p>
-</li>
-<li>
-<p>如果不匹配，顺序取下一个指令</p>
-</li>
-</ul>
-</li>
-<li>
-<p>分支指令执行时，根据实际是否发生了转移，更新转移历史表中的状态位</p>
-</li>
-<li>
-<p>如果条件分支指令不在表中的时候，需要把指令加到这个表中，同时需要替换到当前表中的一项。替换方法可以采用很多种方法，<strong>类似于cache的替换策略</strong></p>
-</li>
-<li>
-<p>转移历史表动态自动维护</p>
-</li>
-</ul>
-<hr>
-<p><strong>Correlation-based prediction</strong></p>
-<ul>
-<li>
-<p>The execution effect of the branch history table in the loop statement is good</p>
-</li>
-<li>
-<p>In more complex structures, branch instruction directly correlates with that of related branches instruction</p>
-</li>
-<li>
-<p><strong>A method called Correlation-based branch history is proposed</strong></p>
-<ul>
-<li><strong>Create a global branch history table</strong></li>
-<li><strong>Predict by combining global and current branch instructions</strong></li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><strong>Delayed Branch</strong></p>
-<ul>
-<li>
-<p>A method of instruction rearrangement</p>
-</li>
-<li>
-<p><strong>Delayed branches need to calculate the impact of branches and determine which instructions are not affected before prefetching unwanted instructions</strong></p>
-<ul>
-<li>
-<p><strong>Execute such an instruction immediately after the branch instruction</strong></p>
-</li>
-<li>
-<p><strong>The execution of this instruction keeps the pipeline in a full rotation state, and the clock cycle will not be wasted due to waiting</strong></p>
 </li>
 </ul>
 </li>

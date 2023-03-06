@@ -249,8 +249,15 @@
 <ul>
 <li>参考文章
 <ul>
-<li><a href="http://dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()? by Patrick Horgan》</a></li>
-<li><a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>（已与作者沟通，同意部分转载）</li>
+<li>
+<p><a href="http://dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()? by Patrick Horgan》</a></p>
+</li>
+<li>
+<p><a href="https://luomuxiaoxiao.com/?p=516" target="_blank" rel="noopener noreffer">《Linux X86 程序启动 – main函数是如何被执行的？——落木萧萧的博客》</a>（已与作者沟通，同意部分转载）</p>
+</li>
+<li>
+<p><a href="https://www.gnu.org/software/hurd/glibc/startup.html" target="_blank" rel="noopener noreffer">《How libc startup in a process works》</a></p>
+</li>
 </ul>
 </li>
 </ul>
