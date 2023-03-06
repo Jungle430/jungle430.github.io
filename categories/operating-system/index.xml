@@ -4005,6 +4005,40 @@ $\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target=
 </ul>
 </li>
 </ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-19.png" title="/img/Operating System/chapter1-19.png" data-thumbnail="/img/Operating System/chapter1-19.png" data-sub-html="<h2>两种状态的切换</h2>">
+        
+    </a><figcaption class="image-caption">两种状态的切换</figcaption>
+    </figure>
+<blockquote>
+<p>由用户态进入核心态，不仅状态需要切换，而且<b>所用的堆栈也可能需要从用户堆栈切换为系统堆栈</b>，<u>但这个系统堆栈也是属于该进程的</u></p>
+</blockquote>
+<h5 id="宏内核">宏内核</h5>
+<p>也称单内核或大内核，是指<b>将系统的主要功能模块都作为一个紧密联系的整体运行在核心态</b>，从而为用户程序提供高性能的系统服务。因为<u>各管理模块之间共享信息，能有效利用相互之间的有效特性，所以具有无可比拟的性能优势</u>。</p>
+<h5 id="微内核">微内核</h5>
+<p>由于宏内核过于庞大，所以有了微内核构架，讲内核中最基本的功能保留在内核，而将那些不需要在核心态执行的功能移到用户态执行，从而降低内核设计复杂性。</p>
+<ul>
+<li>基本功能
+<ul>
+<li>进程（线程）管理</li>
+<li>低级存储器管理</li>
+<li>中断和陷入处理</li>
+</ul>
+</li>
+</ul>
+<h4 id="操作系统引导">操作系统引导</h4>
+<ol>
+<li>激活CPU</li>
+<li>硬件自检</li>
+<li>加载带有操作系统的硬盘</li>
+<li>加载主引导记录MBR</li>
+<li>扫描硬盘分区表</li>
+<li>加载分区引导记录PBR</li>
+</ol>
+<h4 id="虚拟机">虚拟机</h4>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-20.png" title="/img/Operating System/chapter1-20.png" data-thumbnail="/img/Operating System/chapter1-20.png" data-sub-html="<h2>虚拟机两种模式</h2>">
+        
+    </a><figcaption class="image-caption">虚拟机两种模式</figcaption>
+    </figure>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>

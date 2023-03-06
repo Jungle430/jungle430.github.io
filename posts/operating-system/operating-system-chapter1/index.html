@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  6943 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  7279 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter1\/","datePublished": "2022-12-30T16:27:09+08:00","dateModified": "2022-12-30T16:27:09+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter1 操作系统概述</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6943 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 14 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-12-30">2022-12-30</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 7279 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 15 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -183,7 +183,14 @@
               </ul>
             </li>
             <li><a href="#中断和异常">中断和异常</a></li>
-            <li><a href="#系统调用">系统调用</a></li>
+            <li><a href="#系统调用">系统调用</a>
+              <ul>
+                <li><a href="#宏内核">宏内核</a></li>
+                <li><a href="#微内核">微内核</a></li>
+              </ul>
+            </li>
+            <li><a href="#操作系统引导">操作系统引导</a></li>
+            <li><a href="#虚拟机">虚拟机</a></li>
           </ul>
         </li>
       </ul>
@@ -857,6 +864,52 @@
 </ul>
 </li>
 </ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-19.png" title="/img/Operating System/chapter1-19.png" data-thumbnail="/img/Operating System/chapter1-19.png" data-sub-html="<h2>两种状态的切换</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter1-19.png"
+            data-srcset="/img/Operating%20System/chapter1-19.png, /img/Operating%20System/chapter1-19.png 1.5x, /img/Operating%20System/chapter1-19.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter1-19.png" />
+    </a><figcaption class="image-caption">两种状态的切换</figcaption>
+    </figure>
+<blockquote>
+<p>由用户态进入核心态，不仅状态需要切换，而且<b>所用的堆栈也可能需要从用户堆栈切换为系统堆栈</b>，<u>但这个系统堆栈也是属于该进程的</u></p>
+</blockquote>
+<h5 id="宏内核">宏内核</h5>
+<p>也称单内核或大内核，是指<b>将系统的主要功能模块都作为一个紧密联系的整体运行在核心态</b>，从而为用户程序提供高性能的系统服务。因为<u>各管理模块之间共享信息，能有效利用相互之间的有效特性，所以具有无可比拟的性能优势</u>。</p>
+<h5 id="微内核">微内核</h5>
+<p>由于宏内核过于庞大，所以有了微内核构架，讲内核中最基本的功能保留在内核，而将那些不需要在核心态执行的功能移到用户态执行，从而降低内核设计复杂性。</p>
+<ul>
+<li>基本功能
+<ul>
+<li>进程（线程）管理</li>
+<li>低级存储器管理</li>
+<li>中断和陷入处理</li>
+</ul>
+</li>
+</ul>
+<h4 id="操作系统引导">操作系统引导</h4>
+<ol>
+<li>激活CPU</li>
+<li>硬件自检</li>
+<li>加载带有操作系统的硬盘</li>
+<li>加载主引导记录MBR</li>
+<li>扫描硬盘分区表</li>
+<li>加载分区引导记录PBR</li>
+</ol>
+<h4 id="虚拟机">虚拟机</h4>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-20.png" title="/img/Operating System/chapter1-20.png" data-thumbnail="/img/Operating System/chapter1-20.png" data-sub-html="<h2>虚拟机两种模式</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter1-20.png"
+            data-srcset="/img/Operating%20System/chapter1-20.png, /img/Operating%20System/chapter1-20.png 1.5x, /img/Operating%20System/chapter1-20.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter1-20.png" />
+    </a><figcaption class="image-caption">虚拟机两种模式</figcaption>
+    </figure>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
