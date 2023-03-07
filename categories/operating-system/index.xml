@@ -110,7 +110,7 @@
 <p>原因</p>
 <ul>
 <li>看到的状态到真正做下一件事之间的状态是否被人改了？（<u>看到的东西仅仅只是一个历史，离做还有几个周期，而做是根据这个<b>“历史”</b>的状态来决定的</u>）$\Longrightarrow$ 和人眼看着东西对比，人眼是<b>一直在看的</b>，而CPU并行执行程序的时候，看这个指令执行完了之后可能CPU会去执行另一个线程的几条指令，这种情况下相当于这个人<b>看完后闭上眼睛等了几秒</b>，然后根据几秒前所看的东西来判断自己要干啥，<b>可是这个东西在前几秒可能已经让另一个线程的某些指令改过了</b></li>
-<li>处理器默认不保证 load + store 的原子性（单操作可以保证）</li>
+<li><b>处理器默认不保证 load + store 的原子性（单操作可以保证）</b></li>
 </ul>
 </li>
 <li>
@@ -309,7 +309,6 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h4 id="petersons-protocol-verified-">Peterson&rsquo;s Protocol Verified 🎖</h4>
-<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <div class="details admonition tip open">
         <div class="details-summary admonition-title">
             <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
@@ -566,6 +565,15 @@
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="自动-画状态机理解并发程序">(自动) 画状态机理解并发程序</h3>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><div class="typeit"><div id="id-5" class=""></div></div>
+<p>体育课累歇逼了，晚上给看完</div>
+        </div>
+    </div>
 <ul>
 <li>
 <p>并发算法的设计困境</p>
@@ -981,7 +989,208 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
-<li>后面跟着model的参数脚本即可</li>
+<li>
+<p>后面跟着model的参数脚本即可</p>
+</li>
+<li>
+<p>为什么输出模式这么反人类 $\Longrightarrow$ 因为输出是给程序看的，后面的python脚本可以写一些lambda表达式来提取信息 $\Longrightarrow$ 加到后期的工具<a href="http://jyywiki.cn/pages/OS/2022/demos/visualize.py" target="_blank" rel="noopener noreffer">visualize.py</a>，直接可视化（很像之前<b>zweix</b>大佬的<a href="https://github.com/zweix123/jyyslide-md" target="_blank" rel="noopener noreffer">jyyslide-md</a>）的markdown转html的感觉很像</p>
+</li>
+<li>
+<p>安装相关模块，除了pip的以外Linux的机器上要安装graphviz</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt install graphviz
+</span></span><span class="line"><span class="cl">pip install graphviz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>然后通过管道通信和重定向</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">python3 model-checker.py peterson-flag.py <span class="p">|</span> python3 visualize.py &gt; a.html
+</span></span><span class="line"><span class="cl">open a.html
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><a href="https://github.com/Jungle430/check-for-NJU-OS" target="_blank" rel="noopener noreffer">一个checker的demo</a></p>
+<h4 id="代码导读python-generator">代码导读：Python Generator</h4>
+<p>死循环也能返回？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">numbers</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="n">init</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">n</span> <span class="o">+=</span> <span class="n">step</span>
+</span></span><span class="line"><span class="cl">        <span class="k">yield</span> <span class="n">n</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">generator</span> <span class="nb">object</span> <span class="n">numbers</span> <span class="n">at</span> <span class="mh">0x107f873c0</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>yield</code>让死循环返回，但又<b>不是完全返回</b></li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter4-1.png" title="/img/Operating System/chapter4-1.png" data-thumbnail="/img/Operating System/chapter4-1.png" data-sub-html="<h2>效果 $\Longrightarrow$ g就是一个状态机</h2>">
+        
+    </a><figcaption class="image-caption">效果 $\Longrightarrow$ g就是一个<code>状态机</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>文章<a href="https://blog.csdn.net/mieleizhi0522/article/details/82142856" target="_blank" rel="noopener noreffer">《python中yield的用法详解——最简单，最清晰的解释》</a></p>
+</li>
+<li>
+<p>这里就模仿了线程的执行<u>使用<code>yield</code>的特性</u></p>
+</li>
+</ul>
+<h4 id="model-checker-实现">Model Checker: 实现</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Mutex</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">T1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">==</span> <span class="s1">&#39;🔒&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;🔒&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="o">...</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">thread_state</span> <span class="o">=</span> <span class="n">mutex_obj</span><span class="p">()</span><span class="o">.</span><span class="n">T1</span><span class="p">()</span> 
+</span></span><span class="line"><span class="cl"><span class="n">thread_state</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span> <span class="c1"># 单步执行一行; see: execute()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="model-checker-实现-contd">Model Checker: 实现 (cont&rsquo;d)</h4>
+<p>什么是状态空间？</p>
+<ul>
+<li>所有可能的状态机执行序列</li>
+<li><code>BFS</code> 生成，合并重复状态</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">[0]      T1
+</span></span><span class="line"><span class="cl">[1]      T2
+</span></span><span class="line"><span class="cl">[0,0]    T1 -&gt; T1
+</span></span><span class="line"><span class="cl">[0,1]    T1 -&gt; T2
+</span></span><span class="line"><span class="cl">[0,0,0]  T1 -&gt; T1 -&gt; T1
+</span></span><span class="line"><span class="cl">[0,0,1]  T1 -&gt; T1 -&gt; T2
+</span></span><span class="line"><span class="cl">[0,1,0]  T1 -&gt; T2 -&gt; T1
+</span></span><span class="line"><span class="cl">...      ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="model-checking-和工具的故事">Model Checking 和工具的故事</h3>
+<blockquote>
+<p>Model checking is a method for formally verifying finite-state systems——只要能为系统建立模型，就能用 prove by brute-force 证明正确/找到错误。</p>
+</blockquote>
+<p>Model checker 的一切就是状态机！</p>
+<ul>
+<li>Safety: 红色的状态不可到达
+<ul>
+<li><em>G</em>(<em>V</em>,<em>E</em>) 上的可达性问题</li>
+</ul>
+</li>
+<li>(Strong) Liveness: 从任意状态出发，都能到达绿/蓝色状态
+<ul>
+<li><em>G</em>(<em>V</em>,<em>E</em>) 上的什么问题？</li>
+</ul>
+</li>
+<li>如何展示这个状态机？</li>
+<li>如何能避免无效的探索？</li>
+</ul>
+<h4 id="更多的-model-checker">更多的 Model Checker</h4>
+<p>真实程序的状态空间太大？</p>
+<ul>
+<li><a href="https://dl.acm.org/doi/abs/10.1145/263699.263717" target="_blank" rel="noopener noreffer">Model checking for programming languages using VeriSoft</a> (POPL'97, 第一个 “software model checker”)</li>
+<li><a href="https://dl.acm.org/doi/10.5555/1855741.1855760" target="_blank" rel="noopener noreffer">Finding and reproducing Heisenbugs in concurrent programs</a> (OSDI'08, Small Scope Hypothesis 🪳🪳🪳)</li>
+<li><a href="https://dl.acm.org/doi/10.1145/1189256.1189259" target="_blank" rel="noopener noreffer">Using model checking to find serious file system errors</a> (OSDI'04, Best Paper 🏅，可以用在不并发的系统上)</li>
+</ul>
+<hr>
+<p>不满足于简单的内存模型？</p>
+<ul>
+<li><a href="https://dl.acm.org/doi/abs/10.1145/3445814.3446748" target="_blank" rel="noopener noreffer">VSync: Push-button verification and optimization for synchronization primitives on weak memory models</a> (ASPLOS'21, Distinguished Paper 🏅)</li>
+</ul>
+<h3 id="总结">总结</h3>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 如何理解各种并发程序？</li>
+</ul>
+<hr>
+<p>Take-away message</p>
+<ul>
+<li>并发程序 = 状态机
+<ul>
+<li>线程共享内存</li>
+<li>每一步非确定选择线程执行</li>
+</ul>
+</li>
+<li>画状态机就对了
+<ul>
+<li>当然，用工具帮你画 (model checker)</li>
+</ul>
+</li>
 </ul>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
