@@ -1438,6 +1438,220 @@
 </ul>
 </li>
 </ul>
+<h4 id="__libc_csu_init">__libc_csu_init</h4>
+<ul>
+<li><code>__libc_start_main</code>函数的<code>init</code>参数被设置成了<code>__libc_csu_init</code>函数，它也是被链接进我们代码的。它来源于glibc源代码中的csu/elf-init.c。其C代码如下（原代码只不过多了一些#ifdef）：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__libc_csu_init</span> <span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">_init</span> <span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">const</span> <span class="n">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">__init_array_end</span> <span class="o">-</span> <span class="n">__init_array_start</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">(</span><span class="o">*</span><span class="n">__init_array_start</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">envp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>功能：<b>用户应用程序的构造函数</b></p>
+</li>
+<li>
+<p><code>__libc_csu_init</code>函数相当重要，因为它是我们<b>可执行程序的构造函数</b></p>
+<ul>
+<li>？？？这不是C++，哪里来的构造函数？？？ $\Longrightarrow$ 构造函数和析构函数的概念并非属于C++，它诞生早于C++</li>
+<li>对于任意的可执行程序都可以有一个C函数的<b>构造函数</b><code>__libc_csu_init</code>和C函数的<b>析构函数</b><code>__libc_csu_fini</code>。<u>在构造函数内部，可执行程序会找到全局C函数组成的构造函数集，并且调用它们</u>。（任何一个C程序都是可以有构造函数集的） $\Longrightarrow$ <u>the executable will look for global C level constructors and call any that it finds. It&rsquo;s possible for a C program to also have these</u>（原文）</li>
+</ul>
+</li>
+<li>
+<p><code>__libc_csu_init</code>函数的反汇编代码</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">080483a0 &lt;__libc_csu_init&gt;:
+</span></span><span class="line"><span class="cl"> 80483a0:       55                      push   %ebp
+</span></span><span class="line"><span class="cl"> 80483a1:       89 e5                   mov    %esp,%ebp
+</span></span><span class="line"><span class="cl"> 80483a3:       57                      push   %edi
+</span></span><span class="line"><span class="cl"> 80483a4:       56                      push   %esi
+</span></span><span class="line"><span class="cl"> 80483a5:       53                      push   %ebx
+</span></span><span class="line"><span class="cl"> 80483a6:       e8 5a 00 00 00          call   8048405 &lt;__i686.get_pc_thunk.bx&gt;
+</span></span><span class="line"><span class="cl"> 80483ab:       81 c3 49 1c 00 00       add    $0x1c49,%ebx
+</span></span><span class="line"><span class="cl"> 80483b1:       83 ec 1c                sub    $0x1c,%esp
+</span></span><span class="line"><span class="cl"> 80483b4:       e8 bb fe ff ff          call   8048274 &lt;_init&gt;
+</span></span><span class="line"><span class="cl"> 80483b9:       8d bb 20 ff ff ff       lea    -0xe0(%ebx),%edi
+</span></span><span class="line"><span class="cl"> 80483bf:       8d 83 20 ff ff ff       lea    -0xe0(%ebx),%eax
+</span></span><span class="line"><span class="cl"> 80483c5:       29 c7                   sub    %eax,%edi
+</span></span><span class="line"><span class="cl"> 80483c7:       c1 ff 02                sar    $0x2,%edi
+</span></span><span class="line"><span class="cl"> 80483ca:       85 ff                   test   %edi,%edi
+</span></span><span class="line"><span class="cl"> 80483cc:       74 24                   je     80483f2 &lt;__libc_csu_init+0x52&gt;
+</span></span><span class="line"><span class="cl"> 80483ce:       31 f6                   xor    %esi,%esi
+</span></span><span class="line"><span class="cl"> 80483d0:       8b 45 10                mov    0x10(%ebp),%eax
+</span></span><span class="line"><span class="cl"> 80483d3:       89 44 24 08             mov    %eax,0x8(%esp)
+</span></span><span class="line"><span class="cl"> 80483d7:       8b 45 0c                mov    0xc(%ebp),%eax
+</span></span><span class="line"><span class="cl"> 80483da:       89 44 24 04             mov    %eax,0x4(%esp)
+</span></span><span class="line"><span class="cl"> 80483de:       8b 45 08                mov    0x8(%ebp),%eax
+</span></span><span class="line"><span class="cl"> 80483e1:       89 04 24                mov    %eax,(%esp)
+</span></span><span class="line"><span class="cl"> 80483e4:       ff 94 b3 20 ff ff ff    call   *-0xe0(%ebx,%esi,4)
+</span></span><span class="line"><span class="cl"> 80483eb:       83 c6 01                add    $0x1,%esi
+</span></span><span class="line"><span class="cl"> 80483ee:       39 fe                   cmp    %edi,%esi
+</span></span><span class="line"><span class="cl"> 80483f0:       72 de                   jb     80483d0 &lt;__libc_csu_init+0x30&gt;
+</span></span><span class="line"><span class="cl"> 80483f2:       83 c4 1c                add    $0x1c,%esp
+</span></span><span class="line"><span class="cl"> 80483f5:       5b                      pop    %ebx
+</span></span><span class="line"><span class="cl"> 80483f6:       5e                      pop    %esi
+</span></span><span class="line"><span class="cl"> 80483f7:       5f                      pop    %edi
+</span></span><span class="line"><span class="cl"> 80483f8:       5d                      pop    %ebp
+</span></span><span class="line"><span class="cl"> 80483f9:       c3                      ret
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="这个函数都做了什么">这个函数都做了什么？</h5>
+<h6 id="get_pc_truck函数">get_pc_truck函数</h6>
+<ul>
+<li>该函数是给位置无关码使用的。设置它们可以让位置无关码正常工作。为了让它们工作，基址寄存器（%ebp）需要知道<code>GLOBAL_OFFSET_TABLE</code>。其部分代码如下</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">push %ebx
+</span></span><span class="line"><span class="cl">call __get_pc_thunk_bx
+</span></span><span class="line"><span class="cl">add  $_GLOBAL_OFFSET_TABLE_,%ebx
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">__get_pc_thunk_bx:
+</span></span><span class="line"><span class="cl">movel (%esp),%ebx
+</span></span><span class="line"><span class="cl">return
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>过程分析</p>
+<ul>
+<li>
+<p>调用<code>__get_pc_thunk_bx</code>时，像所有其他函数调用一样，将下一条指令的地址压入栈中（计组：保存上一级程序的<b>PC</b>）。这样，当函数返回时，就会继续执行下条指令</p>
+</li>
+<li>
+<p>在<code>__get_pc_thunk_bx</code>中，我们将返回地址从栈中复制到<code>%ebx</code>中。当返回的时候，下条指令会把<code>_GLOBAL_OFFSET_TABLE_</code>加到<code>%ebx</code>上去（前3句）</p>
+</li>
+<li>
+<p>其中<code>_GLOBAL_OFFSET_TABLE_</code>代表了当前地址和位置无关码使用的<code>GOT(global offset table)</code>的差值</p>
+</li>
+<li>
+<p>在<code>GOT</code>中保存了我们想访问的变量的指针的集合，<b>并且我们只需要知道数据在这个表中的偏移量就行</b></p>
+</li>
+<li>
+<p>加载器会为我们修改这个表里面的地址。对于函数来讲，也有一个类似的表（PLT）</p>
+</li>
+<li>
+<p><u>汇编里面这么编写实在是太烦人了，但是，在C或者C++中，你可以将-pic参数传递给编译器，它将会自动帮你完成这个工作</u><b>（你知道你不用关心这个事情就可以了（md就怕自己再™️钻牛角尖））</b></p>
+</li>
+</ul>
+</li>
+<li>
+<p>和64位有关的区别</p>
+</li>
+</ul>
+<blockquote>
+<p><em>上述·get_pc_truck·函数的主要目的其实是获取变量对应的GOT，以通过它获取变量真正的值。之所以这么写，是因为在32位系统里，没有类似于rip的寄存器，因此并不能直接获取当前指令的地址，而在64位系统里就不用这种小技巧了</em></p>
+<ul>
+<li>
+<p>有关阅读</p>
+<ul>
+<li>
+<p><a href="https://blog.csdn.net/mw_nice/article/details/100022610" target="_blank" rel="noopener noreffer">《Linux中的GOT和PLT到底是个啥？》</a> （原来的博客寄了，在CSDN找到了转载）</p>
+</li>
+<li>
+<p><a href="https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html" target="_blank" rel="noopener noreffer">《PLT and GOT - the key to code sharing and dynamic libraries》</a> （英文原文）</p>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h6 id="剩下的循环在干什么">剩下的循环在干什么？</h6>
+<ul>
+<li>现在我们只要记住：<b>翻译的不好，这里建议看原文</b></li>
+</ul>
+<blockquote>
+<p>For now, just remember that it calls any C level initializers for our program.</p>
+</blockquote>
+<p>中文翻译版：</p>
+<blockquote>
+<p><b>它调用了用户程序中所有用C代码编写的<code>initializers</code></b></p>
+</blockquote>
+<ul>
+<li>中文这个版本容易让人看跑了，这个C代码不一定是自己编写的，只要是<b>C level</b>级别的<b>initializers</b>（后面有预处理，链接，中译容易让人看跑）</li>
+</ul>
+<h4 id="_init函数分析">_init函数分析</h4>
+<h5 id="调用">调用</h5>
+<ul>
+<li>当加载器将控制权交给<code>_start</code>函数之后，<code>_start</code>函数将会调用<code>__libc_start_main</code>函数，<code>__libc_start_main</code>函数会调用<code>__libc_csu_init</code>函数, <code>__libc_csu_init</code>函数会调用<code>_init</code>函数</li>
+</ul>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>End in 2023-03-08 0:44</p>
+<p>这种真🐔8️⃣👨的文章真是看点就看不下去了，明天概率论，先睡</p>
+<p>某<a href="https://daonan233.github.io" target="_blank" rel="noopener noreffer">55</a>今天玩了5h ⚪，晚上卸载之后🎠自己是<b>S</b>🅱️，只能说是dinner行为了吧</p>
+</div>
+        </div>
+    </div>
 <h2 id="相关参考资料">相关参考资料</h2>
 <ul>
 <li>参考文章
