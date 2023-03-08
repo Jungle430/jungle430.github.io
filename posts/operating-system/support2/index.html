@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/support2\/"
-        },"genre": "posts","keywords": "Operating System, Linux","wordcount":  4087 ,
+        },"genre": "posts","keywords": "Operating System, Linux","wordcount":  9338 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/support2\/","datePublished": "2023-03-04T15:47:02+08:00","dateModified": "2023-03-04T15:47:02+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Linux x86 Program Start Up or - How the heck do we get to main()?</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-04">2023-03-04</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4087 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-04">2023-03-04</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 9338 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 19 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -133,13 +133,45 @@
             </li>
             <li><a href="#_init函数分析">_init函数分析</a>
               <ul>
+                <li><a href="#源码">源码</a></li>
                 <li><a href="#调用">调用</a></li>
+                <li><a href="#_init函数起始于常规的c函数调用"><code>_init</code>函数起始于常规的C函数调用</a></li>
+              </ul>
+            </li>
+            <li><a href="#gmon_start函数分析">gmon_start函数分析</a>
+              <ul>
+                <li><a href="#生成profilehttpsenwikipediaorgwikiprofiling_computer_programming文件">生成<a href="https://en.wikipedia.org/wiki/Profiling_(computer_programming)">profile</a>文件</a></li>
+              </ul>
+            </li>
+            <li><a href="#frame_dummy函数分析">frame_dummy函数分析</a></li>
+            <li><a href="#_do_global_ctors_aux-longrightarrow-finally-were-getting-constructive"><code>_do_global_ctors_aux</code> $\Longrightarrow$ Finally we&rsquo;re getting constructive!</a>
+              <ul>
+                <li><a href="#example">Example</a></li>
+                <li><a href="#源码-1">源码</a></li>
+                <li><a href="#对应的汇编">对应的汇编</a></li>
+                <li><a href="#函数最开始的部分">函数最开始的部分</a></li>
+                <li><a href="#循环之前的设置">循环之前的设置</a></li>
+                <li><a href="#and-finally-the-epilogue">And finally the epilogue</a></li>
+                <li><a href="#使用gdb检测prog2">使用gdb检测prog2</a></li>
+              </ul>
+            </li>
+            <li><a href="#回到__libc_csu_init__">回到<code>__libc_csu_init__</code></a>
+              <ul>
+                <li><a href="#这是另一个函数的循环调用">这是另一个函数的循环调用</a></li>
+              </ul>
+            </li>
+            <li><a href="#程序将返回__libc_start_main__">程序将返回<code>__libc_start_main__</code></a>
+              <ul>
+                <li><a href="#exit函数运行了更多的循环">exit()函数运行了更多的循环</a></li>
               </ul>
             </li>
           </ul>
         </li>
+        <li><a href="#这个程序把上面所有的过程联系了起来">这个程序，把上面所有的过程联系了起来</a></li>
       </ul>
     </li>
+    <li><a href="#回顾">回顾</a></li>
+    <li><a href="#总结">总结</a></li>
     <li><a href="#相关参考资料">相关参考资料</a></li>
   </ul>
 </nav></div>
@@ -597,7 +629,50 @@
 <li>中文这个版本容易让人看跑了，这个C代码不一定是自己编写的，只要是<b>C level</b>级别的<b>initializers</b>（后面有预处理，链接，中译容易让人看跑）</li>
 </ul>
 <h4 id="_init函数分析">_init函数分析</h4>
-<h5 id="调用">调用</h5>
+<h5 id="源码">源码</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">08048274 &lt;_init&gt;:
+</span></span><span class="line"><span class="cl"> 8048274:       55                      push   %ebp
+</span></span><span class="line"><span class="cl"> 8048275:       89 e5                   mov    %esp,%ebp
+</span></span><span class="line"><span class="cl"> 8048277:       53                      push   %ebx
+</span></span><span class="line"><span class="cl"> 8048278:       83 ec 04                sub    $0x4,%esp
+</span></span><span class="line"><span class="cl"> 804827b:       e8 00 00 00 00          call   8048280 &lt;_init+0xc&gt;
+</span></span><span class="line"><span class="cl"> 8048280:       5b                      pop    %ebx
+</span></span><span class="line"><span class="cl"> 8048281:       81 c3 74 1d 00 00       add    $0x1d74,%ebx        (.got.plt)
+</span></span><span class="line"><span class="cl"> 8048287:       8b 93 fc ff ff ff       mov    -0x4(%ebx),%edx
+</span></span><span class="line"><span class="cl"> 804828d:       85 d2                   test   %edx,%edx
+</span></span><span class="line"><span class="cl"> 804828f:       74 05                   je     8048296 &lt;_init+0x22&gt;
+</span></span><span class="line"><span class="cl"> 8048291:       e8 1e 00 00 00          call   80482b4 &lt;__gmon_start__@plt&gt;
+</span></span><span class="line"><span class="cl"> 8048296:       e8 d5 00 00 00          call   8048370 &lt;frame_dummy&gt;
+</span></span><span class="line"><span class="cl"> 804829b:       e8 70 01 00 00          call   8048410 &lt;__do_global_ctors_aux&gt;
+</span></span><span class="line"><span class="cl"> 80482a0:       58                      pop    %eax
+</span></span><span class="line"><span class="cl"> 80482a1:       5b                      pop    %ebx
+</span></span><span class="line"><span class="cl"> 80482a2:       c9                      leave
+</span></span><span class="line"><span class="cl"> 80482a3:       c3                      ret
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="调用">调用</h5>
 <ul>
 <li>当加载器将控制权交给<code>_start</code>函数之后，<code>_start</code>函数将会调用<code>__libc_start_main</code>函数，<code>__libc_start_main</code>函数会调用<code>__libc_csu_init</code>函数, <code>__libc_csu_init</code>函数会调用<code>_init</code>函数</li>
 </ul>
@@ -612,6 +687,810 @@
 </div>
         </div>
     </div>
+<h5 id="_init函数起始于常规的c函数调用"><code>_init</code>函数起始于常规的C函数调用</h5>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Update in 2023-03-08 10:04</p>
+<p>睡醒了，感觉看了能有一半多了，今天再看点</p>
+</div>
+        </div>
+    </div>
+<ul>
+<li>
+<p>如果想要详细了解C函数调用规范，请阅读<a href="http://dbp-consulting.com/tutorials/debugging/basicAsmDebuggingGDB.html" target="_blank" rel="noopener noreffer">《Basic Assembler Debugging with GDB》</a></p>
+</li>
+<li>
+<p>大致过程</p>
+<ul>
+<li>调用者的基址寄存器（<code>%ebp</code>）会被保存到栈里(8048274)</li>
+<li>当前函数的基址寄存器（<code>%ebp</code>）会<b>指向栈顶</b>(8048275)</li>
+<li>然后，<b>保留4个字节空间</b>(8048278) $\Longrightarrow$ <u>更好的解释是push之后<code>%esp</code>要sub $0x4 来保证栈指针仍然指向栈顶（栈向下增长）</u></li>
+<li>这个过程和调用<code>get_pc_trunk</code>非常像</li>
+</ul>
+</li>
+<li>
+<p>要大致了解一下stack和function调用的关系，阅读文章<a href="https://blog.csdn.net/max_ii_min/article/details/116047509?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522167824270516800182771276%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=167824270516800182771276&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-116047509-null-null.142%5ev73%5ewechat,201%5ev4%5eadd_ask,239%5ev2%5einsert_chatgpt&amp;utm_term=esp%E5%AF%84%E5%AD%98%E5%99%A8&amp;spm=1018.2226.3001.4187" target="_blank" rel="noopener noreffer">《汇编-栈帧-寄存器esp, ebp》</a></p>
+</li>
+<li>
+<p>如果你仔细看的话，发现调用的是下一条指令的地址？？？啥操作？？？</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"> 804827b:       e8 00 00 00 00          call   8048280 &lt;_init+0xc&gt;
+</span></span><span class="line"><span class="cl"> 8048280:       5b                      pop    %ebx
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>给人感觉这就是在顺序执行，不过你要用函数调用的压栈出栈来干什么？
+<ul>
+<li>$\Longrightarrow$ <b>当前的地址被压入了栈中。然后通过弹出栈操作，又把它放到了<code>%ebx</code>中，之后就可以用它来设置访问全局访问表了(.got.plt)</b></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"> 8048277:       53                      push   %ebx
+</span></span><span class="line"><span class="cl"> 8048278:       83 ec 04                sub    $0x4,%esp
+</span></span><span class="line"><span class="cl"> 804827b:       e8 00 00 00 00          call   8048280 &lt;_init+0xc&gt;
+</span></span><span class="line"><span class="cl"> 8048280:       5b                      pop    %ebx
+</span></span><span class="line"><span class="cl"> 8048281:       81 c3 74 1d 00 00       add    $0x1d74,%ebx        (.got.plt)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="gmon_start函数分析">gmon_start函数分析</h4>
+<h5 id="生成profilehttpsenwikipediaorgwikiprofiling_computer_programming文件">生成<a href="https://en.wikipedia.org/wiki/Profiling_%28computer_programming%29" target="_blank" rel="noopener noreffer">profile</a>文件</h5>
+<ul>
+<li><code>gmon_start</code>函数。如果它是空的，我们跳过它，不调用它。否则，调用它来设置profiling。该函数调用一个例程开始profiling，并且调用<code>at_exit</code>去调用另一个程序运行,并且在运行结束的时候生成gmon.out</li>
+</ul>
+<blockquote>
+<p><em>为了优化软件中频繁调用的部分，从而提高程序整体执行的效率，我们可以在使用gcc编译的时候加上</em> <code>-pg</code><em>标志。这样在程序运行结束的时候会生成一个记录程序运行状态的文件叫做</em><code>gmon.out</code><em>。然后，我们可以使用一个名为</em><code>gprof</code><em>的GNU profiler工具来分析该文件从而获得程序各部分的运行时间，来反映其运行性能</em></p>
+<p>相关文章：<a href="https://developer.ibm.com/" target="_blank" rel="noopener noreffer">《Home IBM Developer》</a></p>
+</blockquote>
+<h4 id="frame_dummy函数分析">frame_dummy函数分析</h4>
+<ul>
+<li><u>无论那种情况（前面函数的执行情况）</u>(原文是In either case)，下一步我们将调用<code>frame_dummy</code>函数</li>
+<li><code>frame_dummy</code>函数的目的是调用<code>__register_frame_info</code>函数，但是，调用<code>frame_dummy</code>是为了给上述函数设置参数。这么做的目的是为了在出错时设置<code>unwinding stack frames</code> $\Longrightarrow$ 不是本次重点，想了解请阅读<a href="https://stackoverflow.com/questions/2331316/what-is-stack-unwinding" target="_blank" rel="noopener noreffer">《What is stack unwinding?》</a></li>
+</ul>
+<h4 id="_do_global_ctors_aux-longrightarrow-finally-were-getting-constructive"><code>_do_global_ctors_aux</code> $\Longrightarrow$ Finally we&rsquo;re getting constructive!</h4>
+<ul>
+<li>如果在调用main函数之前，你的程序出了问题，你很可能需要看看这个函数。当然，这里存放了全局C++对象的构造函数，但是，这里也能存放其他东西。</li>
+</ul>
+<h5 id="example">Example</h5>
+<ul>
+<li>我们把prog1.c修改为prog2.c</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__attribute__</span> <span class="p">((</span><span class="n">constructor</span><span class="p">))</span> <span class="n">a_constructor</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span><span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><code>void __attribute__ ((constructor)) a_constructor()</code>：它告诉GCC：链接器应该在<code>__do_global_ctors_aux</code>使用的表里创建一个指针指向这里</p>
+</li>
+<li>
+<p><code>__FUNCTION__</code>被编译器替换成了当前函数的名字</p>
+</li>
+<li>
+<p>运行</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ./prog2
+</span></span><span class="line"><span class="cl">a_constructor
+</span></span><span class="line"><span class="cl">main
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>反编译看一下<code>_init</code>的汇编（自己的Linux上面编不出来的可以看一下<a href="https://stackoverflow.com/questions/27900834/do-global-ctors-aux-not-shown-in-objdump" target="_blank" rel="noopener noreffer">《__do_global_ctors_aux not shown in objdump》</a>，不过看文章就行了）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">08048290 &lt;_init&gt;:
+</span></span><span class="line"><span class="cl"> 8048290:       55                      push   %ebp
+</span></span><span class="line"><span class="cl"> 8048291:       89 e5                   mov    %esp,%ebp
+</span></span><span class="line"><span class="cl"> 8048293:       53                      push   %ebx
+</span></span><span class="line"><span class="cl"> 8048294:       83 ec 04                sub    $0x4,%esp
+</span></span><span class="line"><span class="cl"> 8048297:       e8 00 00 00 00          call   804829c &lt;_init+0xc&gt;
+</span></span><span class="line"><span class="cl"> 804829c:       5b                      pop    %ebx
+</span></span><span class="line"><span class="cl"> 804829d:       81 c3 58 1d 00 00       add    $0x1d58,%ebx
+</span></span><span class="line"><span class="cl"> 80482a3:       8b 93 fc ff ff ff       mov    -0x4(%ebx),%edx
+</span></span><span class="line"><span class="cl"> 80482a9:       85 d2                   test   %edx,%edx
+</span></span><span class="line"><span class="cl"> 80482ab:       74 05                   je     80482b2 &lt;_init+0x22&gt;
+</span></span><span class="line"><span class="cl"> 80482ad:       e8 1e 00 00 00          call   80482d0 &lt;__gmon_start__@plt&gt;
+</span></span><span class="line"><span class="cl"> 80482b2:       e8 d9 00 00 00          call   8048390 &lt;frame_dummy&gt;
+</span></span><span class="line"><span class="cl"> 80482b7:       e8 94 01 00 00          call   8048450 &lt;__do_global_ctors_aux&gt;
+</span></span><span class="line"><span class="cl"> 80482bc:       58                      pop    %eax
+</span></span><span class="line"><span class="cl"> 80482bd:       5b                      pop    %ebx
+</span></span><span class="line"><span class="cl"> 80482be:       c9                      leave
+</span></span><span class="line"><span class="cl"> 80482bf:       c3                      ret
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>我们可以看到，上述的地址和prog1的地址略微有所不同。<u>这些有差异的地址似乎相对于prog1移动了28个字节</u>。<b>这里，有两个函数：<code>&quot;a_constructor&quot;</code>（加上结束符一共14个字节）、<code>&quot;main&quot;</code>（加上结束符一共5个字节）和两个格式化字符串<code>&quot;%s\n&quot;</code>（2*4个字节，加上一个1字节的换行符和终止符），所以14 + 5 + 4 + 4 = 27？ 似乎还差一个</b>。不管怎样，这只是个猜想，我就不仔细研究了。然后我们就要跳入到<code>__do_global_ctors_aux</code>函数中去，看看到底发生了什么。</li>
+</ul>
+<h5 id="源码-1">源码</h5>
+<ul>
+<li>位于GCC源码中的gcc/crtstuff.c里</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">__do_global_ctors_aux</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">func_ptr</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">__CTOR_END__</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="o">*</span><span class="n">p</span> <span class="o">!=</span> <span class="p">(</span><span class="n">func_ptr</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">p</span><span class="o">--</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>如上所示，p的值被初始化成<code>__CTOR_END__</code>减去一个字节。这是一种指针算法
+<ul>
+<li><b>如果指针指向一个函数，在这种情况下，-1表示向上移动一个指针或者说4个字节</b>。<u>We&rsquo;ll see that in the assembler as well. While the pointer doesn&rsquo;t have a value of -1 (cast to a pointer), we&rsquo;ll call the function we&rsquo;re pointing at, and then back the pointer up again</u></li>
+<li>这个指针数组起始于-1，并且包含若干个函数指针</li>
+</ul>
+</li>
+</ul>
+<h5 id="对应的汇编">对应的汇编</h5>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">08048450 &lt;__do_global_ctors_aux&gt;:
+</span></span><span class="line"><span class="cl"> 8048450:       55                      push   %ebp
+</span></span><span class="line"><span class="cl"> 8048451:       89 e5                   mov    %esp,%ebp
+</span></span><span class="line"><span class="cl"> 8048453:       53                      push   %ebx
+</span></span><span class="line"><span class="cl"> 8048454:       83 ec 04                sub    $0x4,%esp
+</span></span><span class="line"><span class="cl"> 8048457:       a1 14 9f 04 08          mov    0x8049f14,%eax
+</span></span><span class="line"><span class="cl"> 804845c:       83 f8 ff                cmp    $0xffffffff,%eax
+</span></span><span class="line"><span class="cl"> 804845f:       74 13                   je     8048474 &lt;__do_global_ctors_aux+0x24&gt;
+</span></span><span class="line"><span class="cl"> 8048461:       bb 14 9f 04 08          mov    $0x8049f14,%ebx
+</span></span><span class="line"><span class="cl"> 8048466:       66 90                   xchg   %ax,%ax
+</span></span><span class="line"><span class="cl"> 8048468:       83 eb 04                sub    $0x4,%ebx
+</span></span><span class="line"><span class="cl"> 804846b:       ff d0                   call   *%eax
+</span></span><span class="line"><span class="cl"> 804846d:       8b 03                   mov    (%ebx),%eax
+</span></span><span class="line"><span class="cl"> 804846f:       83 f8 ff                cmp    $0xffffffff,%eax
+</span></span><span class="line"><span class="cl"> 8048472:       75 f4                   jne    8048468 &lt;__do_global_ctors_aux+0x18&gt;
+</span></span><span class="line"><span class="cl"> 8048474:       83 c4 04                add    $0x4,%esp
+</span></span><span class="line"><span class="cl"> 8048477:       5b                      pop    %ebx
+</span></span><span class="line"><span class="cl"> 8048478:       5d                      pop    %ebp
+</span></span><span class="line"><span class="cl"> 8048479:       c3                      ret
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="函数最开始的部分">函数最开始的部分</h5>
+<ul>
+<li>函数最开始的部分依然遵从了C函数正常的调用惯例（保存调用者的栈基址寄存器，设置当前函数的栈基址寄存器），本函数中还增加了一点：额外把<code>%ebx</code>保存到了栈中，因为这个函数后面会使用到它。同时，我们也为（C代码中的）指针p保留了空间。你可能注意到了，即使我们在栈上为其开辟了空间，但是从未使用这部分空间。<b>取而代之的是，<code>p</code>将会保存到<code>%ebx</code>中，<code>*p</code>会保存到<code>%eax</code>中</b>。$\Longrightarrow$ 注意看前面_init的汇编，函数执行完栈里面弹出来的东西，在本函数的汇编里面没找到 （ⓜ️D，真TM难找）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"> 80482b7:       e8 94 01 00 00          call   8048450 &lt;__do_global_ctors_aux&gt;
+</span></span><span class="line"><span class="cl"> 80482bc:       58                      pop    %eax
+</span></span><span class="line"><span class="cl"> 80482bd:       5b                      pop    %ebx
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="循环之前的设置">循环之前的设置</h5>
+<ul>
+<li>看起来编译器做了一些优化，编译器并没有直接“加载<code>__CTOR_END__</code>，然后将其值减去1，再查找它指向的内容”，而是直接加载<code>*(__CTOR_END__ - 1)</code>，这是一个立即数<code>0x8049f14</code>（注意，<code>$0x8049f14</code>意思是一个立即数，而不带<code>$</code>，只写<code>0x8049f14</code>的意思是这个地址指向的内容）。这个数里面的内容被直接放到了%eax中，然后立刻比较%eax和-1，如果相等，则跳转到地址0x8048474，回收栈，弹出我们保存在栈里的内容，函数调用结束，返回。</li>
+<li>假设在函数表中至少有一个值，立即数<code>0x8049f14</code>被存放到<code>%ebx</code>，也就是函数指针<code>p</code>，然后执行指令<code>xchg %ax,%ax</code>，这是什么鬼？$\Downarrow$</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"> 8048461:       bb 14 9f 04 08          mov    $0x8049f14,%ebx
+</span></span><span class="line"><span class="cl"> 8048466:       66 90                   xchg   %ax,%ax
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><b>原来这是X86 16或者32位里的一个nop（No Operation）语句。它什么也不做，只是占据了一个指令周期，起一个占位符作用而已。在这种情况下，使循环开始于<code>8048468</code>，而不是<code>8048466</code>。<u>这么做的好处是使循环开始的地方以4字节对齐，这样整个循环将会极大可能的被保存到一个cache line里，而不会被分成两段，从而起到加速执行的作用</u></b> （这段感觉编译器好🐮🅱️啊）</li>
+<li>接下来，将<code>%ebx</code>减去4，从而为下一次循环做好准备，调用<code>%eax</code>里保存的地址对应的函数，然后将下一个函数指针移至<code>%eax</code>中，并且和-1比较，如果不等于-1，再次调回到上述循环</li>
+</ul>
+<h5 id="and-finally-the-epilogue">And finally the epilogue</h5>
+<p>Otherwise we fall through into our function epilogue and return to <strong>_init</strong>, which immediately falls through into its epilogue and returns to <strong><strong>libc_csu_init</strong></strong>. Bet you forgot all about him. There&rsquo;s still a loop to deal with there but first&ndash;</p>
+<h5 id="使用gdb检测prog2">使用gdb检测prog2</h5>
+<ul>
+<li><b>GDB总是显示你将要执行的下一行或者下一条指令</b></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ !gdb
+</span></span><span class="line"><span class="cl">gdb prog2
+</span></span><span class="line"><span class="cl">Reading symbols from /home/patrick/src/asm/prog2...done.
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> <span class="nb">set</span> disassemble-next-line on
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> b *0x80482b7
+</span></span><span class="line"><span class="cl">Breakpoint <span class="m">1</span> at 0x80482b7
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>运行调试器，打开<code>disassemble-next-line</code>，这样它就会总是显示下一条将要执行的指令的汇编代码，然后我们在<code>_init</code>函数将要调用<code>__do_global_ctors_aux</code>函数的地方设置一个断点</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> r
+</span></span><span class="line"><span class="cl">Starting program: /home/patrick/src/asm/prog2 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Breakpoint 1, 0x080482b7 in _init <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080482b7 &lt;_init+39&gt;:    e8 <span class="m">94</span> <span class="m">01</span> <span class="m">00</span> <span class="m">00</span> call   0x8048450 &lt;__do_global_ctors_aux&gt;
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> si
+</span></span><span class="line"><span class="cl">0x08048450 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048450 &lt;__do_global_ctors_aux+0&gt;:     <span class="m">55</span> push   %ebp
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>输入<code>r</code>继续运行程序，到达断点处。再输入<code>si</code>单步执行指令，现在我们进入了<code>__do_global_ctors_aux</code>函数内部。后面你会看到若干次我并没输入任何指令，但是GDB却继续执行，这是因为我只是按了回车而已，GDB默认会重复上条指令。所以，如果我按下回车，GDB将会按照输入<code>si</code>继续执行</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span>
+</span></span><span class="line"><span class="cl">0x08048451 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048451 &lt;__do_global_ctors_aux+1&gt;:     <span class="m">89</span> e5  mov    %esp,%ebp
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048453 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048453 &lt;__do_global_ctors_aux+3&gt;:     <span class="m">53</span> push   %ebx
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048454 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048454 &lt;__do_global_ctors_aux+4&gt;:     <span class="m">83</span> ec <span class="m">04</span>   sub    <span class="nv">$0</span>x4,%esp
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048457 in __do_global_ctors_aux <span class="o">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>好的，现在我们已经执行完程序最开始的部分，接下来将要执行真正的代码了。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048457 &lt;__do_global_ctors_aux+7&gt;:     a1 <span class="m">14</span> 9f <span class="m">04</span> <span class="m">08</span> mov    0x8049f14,%eax
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x0804845c in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x0804845c &lt;__do_global_ctors_aux+12&gt;:    <span class="m">83</span> f8 ff   cmp    <span class="nv">$0</span>xffffffff,%eax
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> p/x <span class="nv">$eax</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$1</span> <span class="o">=</span> 0x80483b4
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>我想知道加载完指针之后会是什么样，所以输入了<code>p/x $eax</code>，意思是以十六进制的形式打印寄存器<code>%eax</code>的内容。它不等于-1，所以我们假定程序将继续执行循环。现在由于我的最后一条指令是print指令，所以我不能按回车继续执行了，下次我就得输入<code>si</code>了</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> si
+</span></span><span class="line"><span class="cl">0x0804845f in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x0804845f &lt;__do_global_ctors_aux+15&gt;:    <span class="m">74</span> <span class="m">13</span>  je     0x8048474 &lt;__do_global_ctors_aux+36&gt;
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048461 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048461 &lt;__do_global_ctors_aux+17&gt;:    bb <span class="m">14</span> 9f <span class="m">04</span> <span class="m">08</span> mov    <span class="nv">$0</span>x8049f14,%ebx
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048466 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048466 &lt;__do_global_ctors_aux+22&gt;:    <span class="m">66</span> <span class="m">90</span>  xchg   %ax,%ax
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048468 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048468 &lt;__do_global_ctors_aux+24&gt;:    <span class="m">83</span> eb <span class="m">04</span>   sub    <span class="nv">$0</span>x4,%ebx
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x0804846b in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x0804846b &lt;__do_global_ctors_aux+27&gt;:    ff d0  call   *%eax
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">a_constructor <span class="o">()</span> at prog2.c:3
+</span></span><span class="line"><span class="cl"><span class="m">3</span>   void __attribute__ <span class="o">((</span>constructor<span class="o">))</span> a_constructor<span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080483b4 &lt;a_constructor+0&gt;:     <span class="m">55</span> push   %ebp
+</span></span><span class="line"><span class="cl">   0x080483b5 &lt;a_constructor+1&gt;:     <span class="m">89</span> e5  mov    %esp,%ebp
+</span></span><span class="line"><span class="cl">   0x080483b7 &lt;a_constructor+3&gt;:     <span class="m">83</span> ec <span class="m">18</span>   sub    <span class="nv">$0</span>x18,%esp
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>这部分代码很有意思。我们一步步调用来看看。现在我们已经进入了我们自己写的函数<code>a_constructor</code>。因为GDB是能看到我们的源代码的，所以它在下一行给出了我们源码。又因为我打开了<code>disassemble-next-line</code>，所以它也会给出对应的汇编代码。这个例子中输出了函数最开始的部分，对应了函数的声明，所以我们得到了三行汇编。有意思吧？现在，我输入<code>n</code>命令，这个时候我们写的<code>prinf</code>就会被调用了。第一个n跳过了程序最开始的部分，第二个n执行prinf，第三个n执行了函数的结尾部分。如果你想知道为什么你需要在函数最开始和结束部分做些处理的话，现在，你使用GDB的单步调试应该能知道答案了吧。</p>
+</li>
+<li>
+<p>之前，我们已经把<code>a_constructor</code>字符串的地址作为<code>printf</code>的参数保存到了栈里，因为编译器足够的智能，发现实际上<code>puts</code>函数才是我们想要的，所以它调用了<code>puts</code>函数。</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(gdb) n
+</span></span><span class="line"><span class="cl">4       printf(&#34;%s\n&#34;, __FUNCTION__);
+</span></span><span class="line"><span class="cl">=&gt; 0x080483ba &lt;a_constructor+6&gt;:     c7 04 24 a5 84 04 08   movl   $0x80484a5,(%esp)
+</span></span><span class="line"><span class="cl">   0x080483c1 &lt;a_constructor+13&gt;:    e8 2a ff ff ff call   0x80482f0 &lt;puts@plt&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>因为我们正在运行中来调试程序，所以我们看到了a_constructor打印出了上面的内容。后括号}对应了函数的结尾部分</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> n
+</span></span><span class="line"><span class="cl">a_constructor
+</span></span><span class="line"><span class="cl"><span class="m">5</span>   <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080483c6 &lt;a_constructor+18&gt;:    c9 leave  
+</span></span><span class="line"><span class="cl">   0x080483c7 &lt;a_constructor+19&gt;:    c3 ret 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>有关<code>leave</code>指令实际操作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"> movl %ebp, %esp
+</span></span><span class="line"><span class="cl"> popl %ebp
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>继续执行，我们就退出了函数，并返回了调用函数。这里我又不得不输入<code>si</code>了：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> n
+</span></span><span class="line"><span class="cl">0x0804846d in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x0804846d &lt;__do_global_ctors_aux+29&gt;:    8b <span class="m">03</span>  mov    <span class="o">(</span>%ebx<span class="o">)</span>,%eax
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> si
+</span></span><span class="line"><span class="cl">0x0804846f in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x0804846f &lt;__do_global_ctors_aux+31&gt;:    <span class="m">83</span> f8 ff   cmp    <span class="nv">$0</span>xffffffff,%eax
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048472 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048472 &lt;__do_global_ctors_aux+34&gt;:    <span class="m">75</span> f4  jne    0x8048468 &lt;__do_global_ctors_aux+24&gt;
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> p/x <span class="nv">$eax</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$2</span> <span class="o">=</span> 0xffffffff
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>我比较好奇，并且再次看了一下：这次，我们的函数指针指向了-1，所以，程序退出了循环</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> si
+</span></span><span class="line"><span class="cl">0x08048474 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048474 &lt;__do_global_ctors_aux+36&gt;:    <span class="m">83</span> c4 <span class="m">04</span>   add    <span class="nv">$0</span>x4,%esp
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048477 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048477 &lt;__do_global_ctors_aux+39&gt;:    5b pop    %ebx
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048478 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048478 &lt;__do_global_ctors_aux+40&gt;:    5d pop    %ebp
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x08048479 in __do_global_ctors_aux <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x08048479 &lt;__do_global_ctors_aux+41&gt;:    c3 ret    
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x080482bc in _init <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080482bc &lt;_init+44&gt;:    <span class="m">58</span> pop    %eax
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>我们现在退回到了<code>_init</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x080482bd in _init <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080482bd &lt;_init+45&gt;:    5b pop    %ebx
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x080482be in _init <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080482be &lt;_init+46&gt;:    c9 leave  
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x080482bf in _init <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080482bf &lt;_init+47&gt;:    c3 ret    
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> 
+</span></span><span class="line"><span class="cl">0x080483f9 in __libc_csu_init <span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt; 0x080483f9 &lt;__libc_csu_init+25&gt;:  8d bb 1c ff ff ff  lea    -0xe4<span class="o">(</span>%ebx<span class="o">)</span>,%edi
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> q
+</span></span><span class="line"><span class="cl">A debugging session is active.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Inferior <span class="m">1</span> <span class="o">[</span>process 17368<span class="o">]</span> will be killed.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Quit anyway? <span class="o">(</span>y or n<span class="o">)</span> y
+</span></span><span class="line"><span class="cl">$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="回到__libc_csu_init__">回到<code>__libc_csu_init__</code></h4>
+<ul>
+<li>源码</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__libc_csu_init</span> <span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">_init</span> <span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">const</span> <span class="n">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">__init_array_end</span> <span class="o">-</span> <span class="n">__init_array_start</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">(</span><span class="o">*</span><span class="n">__init_array_start</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">envp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="这是另一个函数的循环调用">这是另一个函数的循环调用</h5>
+<ul>
+<li><code>__init__</code>数组里面是什么呢？你肯定不会想到。你也可以在这个阶段自定义代码。这时刚刚从运行我们自定义的构造函数的<code>_init</code>函数返回，这意味着，在这个数组里面的内容将会在构造函数完成之后运行。你能通过某种方式告诉编译器你想在这个阶段运行某个你自定义的函数。这个函数也会收到和main函数相同的参数</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">section</span><span class="p">(</span><span class="s">&#34;.init_array&#34;</span><span class="p">)))</span> <span class="n">typeof</span><span class="p">(</span><span class="n">init</span><span class="p">)</span> <span class="o">*</span><span class="n">__init</span> <span class="o">=</span> <span class="n">init</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="程序将返回__libc_start_main__">程序将返回<code>__libc_start_main__</code></h4>
+<ul>
+<li>它调用了我们的main函数，然后把main函数的返回值传递给exit()函数</li>
+</ul>
+<h5 id="exit函数运行了更多的循环">exit()函数运行了更多的循环</h5>
+<ul>
+<li>exit()函数按照注册顺序依次运行了在at_exit()中注册的函数。然后会运行另外一个循环，这次的循环是在<code>__fini_</code>数组中定义的。在运行完这些函数之后，就会调用析构函数。</li>
+</ul>
+<h3 id="这个程序把上面所有的过程联系了起来">这个程序，把上面所有的过程联系了起来</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">preinit</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">fini</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">section</span><span class="p">(</span><span class="s">&#34;.init_array&#34;</span><span class="p">)))</span> <span class="n">typeof</span><span class="p">(</span><span class="n">init</span><span class="p">)</span> <span class="o">*</span><span class="n">__init</span> <span class="o">=</span> <span class="n">init</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">section</span><span class="p">(</span><span class="s">&#34;.preinit_array&#34;</span><span class="p">)))</span> <span class="n">typeof</span><span class="p">(</span><span class="n">preinit</span><span class="p">)</span> <span class="o">*</span><span class="n">__preinit</span> <span class="o">=</span> <span class="n">preinit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">section</span><span class="p">(</span><span class="s">&#34;.fini_array&#34;</span><span class="p">)))</span> <span class="n">typeof</span><span class="p">(</span><span class="n">fini</span><span class="p">)</span> <span class="o">*</span><span class="n">__fini</span> <span class="o">=</span> <span class="n">fini</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span>  <span class="nf">__attribute__</span> <span class="p">((</span><span class="n">constructor</span><span class="p">))</span> <span class="n">constructor</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__attribute__</span> <span class="p">((</span><span class="n">destructor</span><span class="p">))</span> <span class="n">destructor</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">my_atexit</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">my_atexit2</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FUNCTION__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="n">atexit</span><span class="p">(</span><span class="n">my_atexit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> <span class="n">atexit</span><span class="p">(</span><span class="n">my_atexit2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>编译并运行这个函数（这里我将其命名为hooks.c），输出如下：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ./hooks
+</span></span><span class="line"><span class="cl">preinit
+</span></span><span class="line"><span class="cl">constructor
+</span></span><span class="line"><span class="cl">init
+</span></span><span class="line"><span class="cl">my_atexit2
+</span></span><span class="line"><span class="cl">my_atexit
+</span></span><span class="line"><span class="cl">fini
+</span></span><span class="line"><span class="cl">destructor
+</span></span><span class="line"><span class="cl">$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="回顾">回顾</h2>
+<ul>
+<li>还是这张图</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/support2-1.png" title="/img/Operating System/support2-1.png" data-thumbnail="/img/Operating System/support2-1.png" data-sub-html="<h2>总体流程图</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/support2-1.png"
+            data-srcset="/img/Operating%20System/support2-1.png, /img/Operating%20System/support2-1.png 1.5x, /img/Operating%20System/support2-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/support2-1.png" />
+    </a><figcaption class="image-caption">总体流程图</figcaption>
+    </figure>
+<h2 id="总结">总结</h2>
+<ul>
+<li>汇编真TM难分析</li>
+<li>由于是32位的老Linux，所以没能在自己的虚拟机上面复现</li>
+<li>涉及编译和链接的过程，应该去补<a href="https://luomuxiaoxiao.com/?p=137" target="_blank" rel="noopener noreffer">《计算机原理系列之三 ——– 如何编译目标文件》</a>这篇文章</li>
+</ul>
 <h2 id="相关参考资料">相关参考资料</h2>
 <ul>
 <li>参考文章
