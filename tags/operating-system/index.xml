@@ -4,7 +4,261 @@
         <link>https://Jungle430.github.io/tags/operating-system/</link>
         <description>Operating System - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/operating-system/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 08 Mar 2023 17:23:11 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/operating-system/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter5 并发控制：互斥</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</link>
+    <pubDate>Wed, 08 Mar 2023 17:23:11 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Update in 2023-03-08 17:30</p>
+<p>继续看，并发真™️👨</p>
+</div>
+        </div>
+    </div>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>状态机、状态机、状态机</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 如何在多处理器上实现线程互斥？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>自旋锁的实现</li>
+<li>互斥锁的实现</li>
+</ul>
+<h2 id="共享内存上的互斥">共享内存上的互斥</h2>
+<h3 id="回顾并发编程">回顾：并发编程</h3>
+<p>理解并发的工具</p>
+<ul>
+<li>线程 = 人 (大脑能完成局部存储和计算)</li>
+<li>共享内存 = 物理世界 (物理世界天生并行)</li>
+<li>一切都是状态机</li>
+</ul>
+<h3 id="回顾互斥算法">回顾：互斥算法</h3>
+<p>互斥 (mutual exclusion)，“互相排斥”</p>
+<ul>
+<li>实现 <code>lock_t</code> 数据结构和 <code>lock/unlock</code> API:</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">lock_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<p>一把 “排他性” 的锁——对于锁对象 <code>lk</code></p>
+<ul>
+<li>如果某个线程持有锁，则其他线程的 <code>lock</code> 不能返回</li>
+</ul>
+<h3 id="在共享内存上实现互斥">在共享内存上实现互斥</h3>
+<p>失败的尝试</p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/mutex-bad.py" target="_blank" rel="noopener noreffer">mutex-bad.py</a></li>
+</ul>
+<hr>
+<p>(部分) 成功的尝试</p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-barrier.c" target="_blank" rel="noopener noreffer">peterson-barrier.c</a></li>
+</ul>
+<hr>
+<p>实现互斥的根本困难：不能同时读/写共享内存</p>
+<ul>
+<li>load (环顾四周) 的时候不能写，只能 “看一眼就把眼睛闭上”
+<ul>
+<li>看到的东西马上就过时了</li>
+</ul>
+</li>
+<li>store (改变物理世界状态) 的时候不能读，只能 “闭着眼睛动手”
+<ul>
+<li>也不知道把什么改成了什么</li>
+</ul>
+</li>
+<li>这是<del>简单、粗暴 (稳定)、有效</del>的《操作系统》课</li>
+</ul>
+<h2 id="自旋锁-spin-lock">自旋锁 (Spin Lock)</h2>
+<h3 id="解决问题的两种方法">解决问题的两种方法</h3>
+<blockquote>
+<p>提出算法、解决问题 (Dekker/Peterson/&hellip;&rsquo;s Protocols)</p>
+</blockquote>
+<p>或者……</p>
+<blockquote>
+<p>改变假设 (软件不够，硬件来凑$\Longrightarrow$ x86架构的风格，软件指令做不好直接写一个指令集让硬件这么做hhh)</p>
+</blockquote>
+<hr>
+<p>假设硬件能为我们提供一条 “瞬间完成” 的读 + 写指令</p>
+<ul>
+<li>请所有人闭上眼睛，看一眼 (load)，然后贴上标签 (store)
+<ul>
+<li>如果多人同时请求，硬件选出一个 “胜者”</li>
+<li>“败者” 要等 “胜者” 完成后才能继续执行</li>
+</ul>
+</li>
+</ul>
+<h3 id="x86-原子操作lock-指令前缀">x86 原子操作：<code>LOCK</code> 指令前缀</h3>
+<p>例子：<a href="https://jyywiki.cn/pages/OS/2022/demos/sum-atomic.c" target="_blank" rel="noopener noreffer"><code>sum-atomic.c</code></a></p>
+<ul>
+<li><code>sum = 200000000</code></li>
+</ul>
+<hr>
+<p>Atomic exchange (load + store)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">xchg</span><span class="p">(</span><span class="k">volatile</span> <span class="kt">int</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">newval</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span> <span class="p">(</span><span class="s">&#34;lock xchg %0, %1&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="s">&#34;+m&#34;</span><span class="p">(</span><span class="o">*</span><span class="n">addr</span><span class="p">),</span> <span class="s">&#34;=a&#34;</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">:</span> <span class="s">&#34;1&#34;</span><span class="p">(</span><span class="n">newval</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><b>重点就是asm内联汇编那句，这里是“一气呵成”的</b></p>
+</li>
+<li>
+<p>更多的原子指令：<a href="https://en.cppreference.com/w/cpp/header/stdatomic.h" target="_blank" rel="noopener noreffer">stdatomic.h</a> (C11)</p>
+</li>
+</ul>
+<h3 id="用-xchg-实现互斥">用 <code>xchg</code> 实现互斥</h3>
+<ul>
+<li>xchg在之前的<a href="https://jungle430.github.io/posts/operating-system/support2" target="_blank" rel="noopener noreffer">文章</a>中有提到过</li>
+</ul>
+<p>如何协调宿舍若干位同学上厕所问题？</p>
+<ul>
+<li>在厕所门口放一个桌子 (共享变量)
+<ul>
+<li>初始时，桌上是 🔑</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>实现互斥的协议</p>
+<ul>
+<li>想上厕所的同学 (一条 xchg 指令)
+<ul>
+<li>天黑请闭眼</li>
+<li>看一眼桌子上有什么 (🔑 或 🔞)</li>
+<li>把 🔞 放到桌上 (覆盖之前有的任何东西)</li>
+<li>天亮请睁眼；看到 🔑 才可以进厕所哦</li>
+</ul>
+</li>
+<li>出厕所的同学
+<ul>
+<li>把 🔑 放到桌上</li>
+</ul>
+</li>
+</ul>
+<h3 id="实现互斥自旋锁">实现互斥：自旋锁</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">table</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">got</span> <span class="o">=</span> <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">table</span><span class="p">,</span> <span class="n">NOPE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">got</span> <span class="o">==</span> <span class="n">NOPE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">got</span> <span class="o">==</span> <span class="n">YES</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">table</span><span class="p">,</span> <span class="n">YES</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span> <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>重要的还是xchg这个东西，保证那一步是原子性的，就没有其他事情了</li>
+</ul>
+<h3 id="实现互斥自旋锁-contd">实现互斥：自旋锁 (cont&rsquo;d)</h3>
+<p>并发编程：千万小心</p>
+<ul>
+<li>做详尽的测试 (在此省略，你们做 Labs 就知道了)</li>
+<li>尽可能地证明 (<a href="https://jyywiki.cn/pages/OS/2022/demos/model-checker.py" target="_blank" rel="noopener noreffer">model-checker.py</a> 和 <a href="https://jyywiki.cn/pages/OS/2022/demos/spinlock.py" target="_blank" rel="noopener noreffer">spinlock.py</a>)</li>
+</ul>
+<hr>
+<p>原子指令的模型</p>
+<ul>
+<li>保证之前的 store 都写入内存</li>
+<li>保证 load/store 不与原子指令乱序</li>
+</ul>
+<h3 id="原子指令的诞生bus-lock-80486">原子指令的诞生：Bus Lock (80486)</h3>
+<ul>
+<li>486 (20-50MHz) 就支持 <code>dual-socket</code> 了</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter5-1.jpg" title="/img/Operating System/chapter5-1.jpg" data-thumbnail="/img/Operating System/chapter5-1.jpg" data-sub-html="<h2>80486</h2>">
+        
+    </a><figcaption class="image-caption">80486</figcaption>
+    </figure>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>如果CPU1需要执行<code>add x, 1</code>，那么需要分成3步</p>
+<ul>
+<li>从memory里面load</li>
+<li>再把这个值add 1之后先放入一个内部的寄存器里</li>
+<li>再store把m的值写回内存里</li>
+</ul>
+</li>
+<li>
+<p>为什么486时代会诞生LOCK这样的指令呢？</p>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter4 理解并发程序执行</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</link>
     <pubDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</guid>

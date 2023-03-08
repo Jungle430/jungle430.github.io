@@ -4,7 +4,261 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 08 Mar 2023 17:23:11 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter5 并发控制：互斥</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</link>
+    <pubDate>Wed, 08 Mar 2023 17:23:11 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Update in 2023-03-08 17:30</p>
+<p>继续看，并发真™️👨</p>
+</div>
+        </div>
+    </div>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>状态机、状态机、状态机</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 如何在多处理器上实现线程互斥？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>自旋锁的实现</li>
+<li>互斥锁的实现</li>
+</ul>
+<h2 id="共享内存上的互斥">共享内存上的互斥</h2>
+<h3 id="回顾并发编程">回顾：并发编程</h3>
+<p>理解并发的工具</p>
+<ul>
+<li>线程 = 人 (大脑能完成局部存储和计算)</li>
+<li>共享内存 = 物理世界 (物理世界天生并行)</li>
+<li>一切都是状态机</li>
+</ul>
+<h3 id="回顾互斥算法">回顾：互斥算法</h3>
+<p>互斥 (mutual exclusion)，“互相排斥”</p>
+<ul>
+<li>实现 <code>lock_t</code> 数据结构和 <code>lock/unlock</code> API:</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">lock_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<p>一把 “排他性” 的锁——对于锁对象 <code>lk</code></p>
+<ul>
+<li>如果某个线程持有锁，则其他线程的 <code>lock</code> 不能返回</li>
+</ul>
+<h3 id="在共享内存上实现互斥">在共享内存上实现互斥</h3>
+<p>失败的尝试</p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/mutex-bad.py" target="_blank" rel="noopener noreffer">mutex-bad.py</a></li>
+</ul>
+<hr>
+<p>(部分) 成功的尝试</p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-barrier.c" target="_blank" rel="noopener noreffer">peterson-barrier.c</a></li>
+</ul>
+<hr>
+<p>实现互斥的根本困难：不能同时读/写共享内存</p>
+<ul>
+<li>load (环顾四周) 的时候不能写，只能 “看一眼就把眼睛闭上”
+<ul>
+<li>看到的东西马上就过时了</li>
+</ul>
+</li>
+<li>store (改变物理世界状态) 的时候不能读，只能 “闭着眼睛动手”
+<ul>
+<li>也不知道把什么改成了什么</li>
+</ul>
+</li>
+<li>这是<del>简单、粗暴 (稳定)、有效</del>的《操作系统》课</li>
+</ul>
+<h2 id="自旋锁-spin-lock">自旋锁 (Spin Lock)</h2>
+<h3 id="解决问题的两种方法">解决问题的两种方法</h3>
+<blockquote>
+<p>提出算法、解决问题 (Dekker/Peterson/&hellip;&rsquo;s Protocols)</p>
+</blockquote>
+<p>或者……</p>
+<blockquote>
+<p>改变假设 (软件不够，硬件来凑$\Longrightarrow$ x86架构的风格，软件指令做不好直接写一个指令集让硬件这么做hhh)</p>
+</blockquote>
+<hr>
+<p>假设硬件能为我们提供一条 “瞬间完成” 的读 + 写指令</p>
+<ul>
+<li>请所有人闭上眼睛，看一眼 (load)，然后贴上标签 (store)
+<ul>
+<li>如果多人同时请求，硬件选出一个 “胜者”</li>
+<li>“败者” 要等 “胜者” 完成后才能继续执行</li>
+</ul>
+</li>
+</ul>
+<h3 id="x86-原子操作lock-指令前缀">x86 原子操作：<code>LOCK</code> 指令前缀</h3>
+<p>例子：<a href="https://jyywiki.cn/pages/OS/2022/demos/sum-atomic.c" target="_blank" rel="noopener noreffer"><code>sum-atomic.c</code></a></p>
+<ul>
+<li><code>sum = 200000000</code></li>
+</ul>
+<hr>
+<p>Atomic exchange (load + store)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">xchg</span><span class="p">(</span><span class="k">volatile</span> <span class="kt">int</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">newval</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span> <span class="p">(</span><span class="s">&#34;lock xchg %0, %1&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="s">&#34;+m&#34;</span><span class="p">(</span><span class="o">*</span><span class="n">addr</span><span class="p">),</span> <span class="s">&#34;=a&#34;</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">:</span> <span class="s">&#34;1&#34;</span><span class="p">(</span><span class="n">newval</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><b>重点就是asm内联汇编那句，这里是“一气呵成”的</b></p>
+</li>
+<li>
+<p>更多的原子指令：<a href="https://en.cppreference.com/w/cpp/header/stdatomic.h" target="_blank" rel="noopener noreffer">stdatomic.h</a> (C11)</p>
+</li>
+</ul>
+<h3 id="用-xchg-实现互斥">用 <code>xchg</code> 实现互斥</h3>
+<ul>
+<li>xchg在之前的<a href="https://jungle430.github.io/posts/operating-system/support2" target="_blank" rel="noopener noreffer">文章</a>中有提到过</li>
+</ul>
+<p>如何协调宿舍若干位同学上厕所问题？</p>
+<ul>
+<li>在厕所门口放一个桌子 (共享变量)
+<ul>
+<li>初始时，桌上是 🔑</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>实现互斥的协议</p>
+<ul>
+<li>想上厕所的同学 (一条 xchg 指令)
+<ul>
+<li>天黑请闭眼</li>
+<li>看一眼桌子上有什么 (🔑 或 🔞)</li>
+<li>把 🔞 放到桌上 (覆盖之前有的任何东西)</li>
+<li>天亮请睁眼；看到 🔑 才可以进厕所哦</li>
+</ul>
+</li>
+<li>出厕所的同学
+<ul>
+<li>把 🔑 放到桌上</li>
+</ul>
+</li>
+</ul>
+<h3 id="实现互斥自旋锁">实现互斥：自旋锁</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">table</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">got</span> <span class="o">=</span> <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">table</span><span class="p">,</span> <span class="n">NOPE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">got</span> <span class="o">==</span> <span class="n">NOPE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">got</span> <span class="o">==</span> <span class="n">YES</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">table</span><span class="p">,</span> <span class="n">YES</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span> <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>重要的还是xchg这个东西，保证那一步是原子性的，就没有其他事情了</li>
+</ul>
+<h3 id="实现互斥自旋锁-contd">实现互斥：自旋锁 (cont&rsquo;d)</h3>
+<p>并发编程：千万小心</p>
+<ul>
+<li>做详尽的测试 (在此省略，你们做 Labs 就知道了)</li>
+<li>尽可能地证明 (<a href="https://jyywiki.cn/pages/OS/2022/demos/model-checker.py" target="_blank" rel="noopener noreffer">model-checker.py</a> 和 <a href="https://jyywiki.cn/pages/OS/2022/demos/spinlock.py" target="_blank" rel="noopener noreffer">spinlock.py</a>)</li>
+</ul>
+<hr>
+<p>原子指令的模型</p>
+<ul>
+<li>保证之前的 store 都写入内存</li>
+<li>保证 load/store 不与原子指令乱序</li>
+</ul>
+<h3 id="原子指令的诞生bus-lock-80486">原子指令的诞生：Bus Lock (80486)</h3>
+<ul>
+<li>486 (20-50MHz) 就支持 <code>dual-socket</code> 了</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter5-1.jpg" title="/img/Operating System/chapter5-1.jpg" data-thumbnail="/img/Operating System/chapter5-1.jpg" data-sub-html="<h2>80486</h2>">
+        
+    </a><figcaption class="image-caption">80486</figcaption>
+    </figure>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>如果CPU1需要执行<code>add x, 1</code>，那么需要分成3步</p>
+<ul>
+<li>从memory里面load</li>
+<li>再把这个值add 1之后先放入一个内部的寄存器里</li>
+<li>再store把m的值写回内存里</li>
+</ul>
+</li>
+<li>
+<p>为什么486时代会诞生LOCK这样的指令呢？</p>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter4 理解并发程序执行</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</link>
     <pubDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</guid>
@@ -7892,1277 +8146,6 @@ $$</p>
 </li>
 <li>
 <p>Through superscalar pipeline, multiple pipelines can run at the same time to achieve truly parallel operation at the instruction level</p>
-</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>Computer Organization and Architecture Reduced Instruction Set Computers</title>
-    <link>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-reduced-instruction-set-computers/</link>
-    <pubDate>Sun, 29 Jan 2023 16:34:59 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-reduced-instruction-set-computers/</guid>
-    <description><![CDATA[<h1 id="computer-organization-and-architecture">Computer Organization and Architecture</h1>
-<h2 id="reduced-instruction-set-computers">Reduced Instruction Set Computers</h2>
-<h3 id="outline">Outline</h3>
-<ul>
-<li>
-<p>Register and instruction architecture</p>
-</li>
-<li>
-<p>Reduced Instruction Set Architecture</p>
-</li>
-<li>
-<p>The Use of a Large Register File</p>
-</li>
-<li>
-<p>Compiler-Based Register Optimization</p>
-</li>
-<li>
-<p><code>RISC</code> Pipelining</p>
-</li>
-<li>
-<p><code>RISC</code> Versus <code>CISC</code> Controversy</p>
-</li>
-</ul>
-<h3 id="register-and-instruction-architecture">Register and instruction architecture</h3>
-<p><strong>Major advanced in computers</strong></p>
-<ul>
-<li>
-<p><strong>The family concept</strong></p>
-<ul>
-<li>
-<p>IBM System/360 1964，DEC PDP-8</p>
-</li>
-<li>
-<p><strong>Separates architecture from implementation</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Microprogrammed control unit</strong></p>
-<ul>
-<li>
-<p>Idea by Wilkes 1951,Produced by IBM S/360 1964</p>
-</li>
-<li>
-<p><strong>Easier controller design and implementation</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Cache</strong></p>
-<ul>
-<li>
-<p>IBM S/360 model 85 1969</p>
-</li>
-<li>
-<p><strong>Greatly improves the performance of computer</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Microprocessors</strong></p>
-<ul>
-<li>
-<p>Intel 4004 1971</p>
-</li>
-<li>
-<p><strong>Reduced the size of the computer</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Pipelining</strong></p>
-<ul>
-<li>
-<p><strong>Introducing parallelism into instruction execution</strong></p>
-</li>
-<li>
-<p><strong>Greatly improves instruction throughput</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Multiple processors</strong></p>
-<ul>
-<li>
-<p><strong>Multiple processors combine to form a new architecture</strong></p>
-</li>
-<li>
-<p><strong>Further improve the processing capacity of the computer</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>RISC</strong></p>
-<ul>
-<li>
-<p>Major challenges to traditional CPU</p>
-</li>
-<li>
-<p>It has been widely used</p>
-</li>
-<li>
-<p>Learn from RISC and be widely used in different fields</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Solid State RAM</p>
-<ul>
-<li>Access speed is much faster than mechanical hard disk</li>
-<li>Greatly improves the computer’s I/O performance</li>
-</ul>
-</li>
-</ul>
-<h4 id="register-and-isas">Register and ISAs</h4>
-<ul>
-<li>
-<p>Accumulators</p>
-<ul>
-<li>
-<p>Early stored-program computers had <strong>one</strong> register</p>
-</li>
-<li>
-<p>Very inconvenient to use</p>
-</li>
-<li>
-<p>Requires a memory-based operand-addressing mode in instruction</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>Example</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ADD 200
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><strong>Add the accumulator to the word in memory at address 200</strong></p>
-</li>
-<li>
-<p>Place the sum back in the accumulator</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Next step, more registers…</p>
-<ul>
-<li>
-<p>Dedicated registers</p>
-<ul>
-<li>
-<p>separate accumulators for multiply or divide instructions</p>
-</li>
-<li>
-<p>op-of-stack pointer</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Extended Accumulator</p>
-<ul>
-<li>Increase bits of register</li>
-<li>Increase the number of registers</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>More flexible</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Next step, more registers…</p>
-<ul>
-<li>General-purpose registers
-<ul>
-<li>Registers can be used for any purpose E.g. MIPS, ARM, x86</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Instruction architecture</p>
-<ul>
-<li>
-<p><em>Register-memory</em> architectures</p>
-<ul>
-<li><strong>One operand may be in memory</strong> (i.e. 80386 processors)</li>
-</ul>
-</li>
-<li>
-<p><em>Register-register</em> architectures (load-store)</p>
-<ul>
-<li><strong>All operands must be in registers</strong> E.g. MIPS, ARM</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="comparison-of-processors">Comparison of processors</h4>
-<ul>
-<li>
-<p>指令数量、长度、寻址方式等方面，CISC明显高于RISC</p>
-</li>
-<li>
-<p>RISC和超标量的通用寄存器数量比CISC要多</p>
-</li>
-<li>
-<p>RISC和超标量一般采用硬布线控制，所以没有配置控制存储器</p>
-</li>
-</ul>
-<h3 id="reduced-instruction-set-architecture">Reduced Instruction Set Architecture</h3>
-<h4 id="cisc">CISC</h4>
-<ul>
-<li>
-<p><strong>CISC&ndash;Complex Instruction Set Computer</strong></p>
-</li>
-<li>
-<p>With the development of computer technology, an instruction set design concept is proposed</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>The gap between high-level programming languages and instruction sets is growing</p>
-<ul>
-<li>
-<p><strong>Need more complex compilers to translate high-level languages</strong></p>
-</li>
-<li>
-<p><strong>A high-level language statement requires multiple instructions to complete，low execution efficiency</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>CISC proposed by instruction set designer</p>
-<ul>
-<li>
-<p><strong>Provides more types of instructions, and even uses a single instruction to implement complex high-level language statements</strong></p>
-</li>
-<li>
-<p><strong>Provide more addressing modes to meet the needs of high-level languages for various addressing</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="characteristics-of-cisc">Characteristics of CISC</h5>
-<ul>
-<li>
-<p>There are many kinds of instruction opcodes</p>
-<ul>
-<li>The opcode of X86 is 1-2 bytes</li>
-</ul>
-</li>
-<li>
-<p>Variable instruction length</p>
-<ul>
-<li>The instruction length of X86 is 1-16 bytes</li>
-</ul>
-</li>
-<li>
-<p>Various addressing modes</p>
-<ul>
-<li><strong>X86 has 9 addressing modes</strong>, such as base address proportional index band offset</li>
-</ul>
-</li>
-</ul>
-<h5 id="ideal-effect-of-cisc">Ideal effect of CISC</h5>
-<ul>
-<li>
-<p><strong>Compilers are easy to write</strong></p>
-<ul>
-<li>
-<p>The instruction set provides many types of instructions</p>
-</li>
-<li>
-<p>The compiler can use the most appropriate instructions to translate statements in high-level languages. Less instructions after compilation and less space</p>
-</li>
-<li>
-<p>The instruction set provides rich addressing modes</p>
-</li>
-<li>
-<p>Meet the requirements of high-level language for flexible addressing mode</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Improve the execution efficiency of high-level language statements</p>
-<ul>
-<li>
-<p>It used to require multiple instructions to complete statements in a high-level language, but now it can be completed with one instruction, and some high-level language statements can be implemented at the hardware level</p>
-</li>
-<li>
-<p>Instruction level addressing mode to help implement complex instructions</p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="instruction-execution-characteristics">Instruction execution characteristics</h5>
-<ul>
-<li>
-<p>Operations performed</p>
-<ul>
-<li>Functions that can be completed by CPU and interaction with memory</li>
-</ul>
-</li>
-<li>
-<p>Operands used</p>
-<ul>
-<li>Type and frequency of operands，which determine the organization and addressing mode of the storage system</li>
-</ul>
-</li>
-<li>
-<p>Execution sequencing</p>
-<ul>
-<li>Control function and pipeline organization</li>
-</ul>
-</li>
-</ul>
-<h6 id="operations">Operations</h6>
-<ul>
-<li>
-<p>It is best to optimize the most used and time-consuming statements</p>
-</li>
-<li>
-<p>Assignments</p>
-<ul>
-<li>Movement of data</li>
-</ul>
-</li>
-<li>
-<p>Condition(Loop and IF)</p>
-<ul>
-<li>Sequence control</li>
-</ul>
-</li>
-<li>
-<p>Procedure call-return</p>
-<ul>
-<li>Very time consuming</li>
-</ul>
-</li>
-<li>
-<p><strong>过程调用和返回是典型的高级语言程序中最耗时的操作</strong></p>
-</li>
-<li>
-<p><strong>循环语句、条件语句和幅值语句也占很大的比重</strong></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>Operands
-<ul>
-<li>
-<p>主要是局部标量变量</p>
-</li>
-<li>
-<p>优化方向应集中于本地变量的存储和访问</p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="procedure-calls">Procedure calls</h5>
-<ul>
-<li>
-<p><strong>Very time consuming</strong></p>
-<ul>
-<li>
-<p>Depends on number of parameters passed</p>
-</li>
-<li>
-<p>Depends on level of nesting</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Characteristics</p>
-<ul>
-<li>
-<p>Number of parameter is mostly less than 6</p>
-</li>
-<li>
-<p>Most variables are local</p>
-</li>
-<li>
-<p>Most programs do not do a lot of calls followed by lots of returns</p>
-</li>
-</ul>
-</li>
-<li>
-<p>It further explains that operand access is highly localized</p>
-</li>
-</ul>
-<h5 id="summary">Summary</h5>
-<ul>
-<li>
-<p>Assignment statement</p>
-<ul>
-<li>
-<p>high proportion, valuable to improve efficiency</p>
-</li>
-<li>
-<p>Need to access cache or storage</p>
-</li>
-<li>
-<p>Use register access to reduce memory access and improve efficiency</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Condition and procedure calls</p>
-<ul>
-<li>
-<p>time consuming, high proportion, valuable to improve efficiency</p>
-</li>
-<li>
-<p>Influence the execution of the pipeline</p>
-</li>
-<li>
-<p>Design a better pipeline to reduce the impact of transfer statements on the water line</p>
-</li>
-</ul>
-</li>
-</ul>
-<p><strong>单纯依靠提供接近于高级语言的指令并不一定能提高典型语句的执行效率</strong></p>
-<hr>
-<ul>
-<li>
-<p><strong>Ideal 1 of CISC: Compilers are easy to write</strong></p>
-</li>
-<li>
-<p>Implementation method: complex instruction</p>
-</li>
-<li>
-<p>Compiler simplification?</p>
-<ul>
-<li>
-<p>Because of strict requirements of instruction design，compiler needs high-level language strictly meet the instruction</p>
-</li>
-<li>
-<p>The compiler needs to optimize machine instructions to reduce the length of generated machine code and meet the requirements of pipeline operation. This is also difficult to achieve for complex instructions Optimization more difficult</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Ideal 2 of CISC: smaller programs</strong></p>
-</li>
-<li>
-<p>Implementation method: mores instruction</p>
-</li>
-<li>
-<p>Smaller programs?</p>
-<ul>
-<li>
-<p>Program looks using less memory</p>
-</li>
-<li>
-<p>Memory is now cheap</p>
-</li>
-<li>
-<p>May not occupy less bits, just look shorter in symbolic form</p>
-</li>
-<li>
-<p>More instructions require longer op-codes</p>
-</li>
-<li>
-<p>CISC has no fewer machine instructions than RISC</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Ideal 3 of CISC: high efficiency</strong></p>
-</li>
-<li>
-<p>Implementation method: more instructions and more addressing mode</p>
-</li>
-<li>
-<p>Faster programs?</p>
-<ul>
-<li>
-<p>Compiler bias towards use of simpler instructions</p>
-</li>
-<li>
-<p>CISC need more complex control unit</p>
-</li>
-<li>
-<p>Microprogram control store larger</p>
-</li>
-<li>
-<p>Simple instructions take longer to execute</p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="conclusion">Conclusion</h5>
-<ul>
-<li>
-<p>The goal CISC hopes to achieve is actually contradictory to the way CISC realizes it</p>
-</li>
-<li>
-<p>Target: improve operational efficiency by optimizing the most frequently used and time-consuming functions</p>
-</li>
-<li>
-<p>Following methods may be better choices</p>
-<ul>
-<li>
-<p>More registers to reduce memory access</p>
-</li>
-<li>
-<p>Careful design of pipeline to improve the efficiency of the pipeline</p>
-</li>
-<li>
-<p>Careful designed simple instruction set to improve the efficiency of instruction execution</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="risc">RISC</h4>
-<ul>
-<li>
-<p>RISC: Reduced Instruction Set Computer</p>
-</li>
-<li>
-<p>Key features</p>
-<ul>
-<li>
-<p><strong>Large number of general purpose registers</strong></p>
-</li>
-<li>
-<p><strong>Compiler technology to optimize register use</strong></p>
-</li>
-<li>
-<p><strong>Limited and simple instruction set</strong></p>
-</li>
-<li>
-<p><strong>Emphasis on optimising the instruction pipeline</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<p><strong>Main contributors of RISC</strong></p>
-<ul>
-<li>
-<p>John Cocke: IBM</p>
-<ul>
-<li>Influences: Known as “the father of RISC Architecture”. Turing Award Recipient and National Medal of Science</li>
-</ul>
-</li>
-<li>
-<p>Dave Patterson: UC Berkeley</p>
-<ul>
-<li>Influences: Sun SPARC from his achievements</li>
-</ul>
-</li>
-<li>
-<p>John L. Hennessy: Stanford</p>
-<ul>
-<li>Influences: In 1984, MIPS (Microprocessor without interlocked pipelined stages) was founded</li>
-</ul>
-</li>
-</ul>
-<h5 id="typical-features-of-risc">Typical features of RISC</h5>
-<ul>
-<li>
-<p><strong>Simplified instruction set</strong></p>
-<ul>
-<li>
-<p><strong>Standardized, fixed length</strong> instruction format (ARM instructions are all 32-bit)</p>
-</li>
-<li>
-<p><strong>Limited operation types, only 8-bit operation code</strong></p>
-</li>
-<li>
-<p><strong>Fetching and decoding instruction become easier</strong></p>
-</li>
-<li>
-<p>One instruction per machine cycle</p>
-</li>
-<li>
-<p>Hardwired design (no microcode)</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Use registers whenever possible</p>
-<ul>
-<li>
-<p>Except for load/save instructions, other instructions are for register operations</p>
-</li>
-<li>
-<p><strong>Data operations can only be performed in registers</strong></p>
-</li>
-<li>
-<p><strong>Memory access has only three addressing modes</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Better pipeline design</strong></p>
-<ul>
-<li>
-<p>Instruction pipeline is carefully designed to better meet the impact of conditional branches and procedure calls on the flow pipeline</p>
-</li>
-<li>
-<p><strong>Each instruction is conditionally executed, which can reduce branches</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="influence-of-risc-concept">Influence of RISC concept</h5>
-<ul>
-<li>
-<p><strong>RISC&rsquo;s design concept gave birth to a series of new computer architectures</strong></p>
-<ul>
-<li>Simplified pipeline design on RISC instruction set is becoming more and more attractive</li>
-</ul>
-</li>
-<li>
-<p><strong>RISC and CISC learn from each other</strong></p>
-<ul>
-<li>
-<p>Make up for the disadvantage of CISC pipeline implementation</p>
-</li>
-<li>
-<p>RISC is also learning from CISC, and both sides are learning from each other</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Current situation</strong></p>
-</li>
-<li>
-<p>With the development of architecture and microelectronics technology, the so-called disadvantage of CISC in structure is gradually reduced</p>
-</li>
-<li>
-<p>RISC&rsquo;s theory of superiority has gradually died down, and RISC camp has been losing ground</p>
-</li>
-</ul>
-<blockquote>
-<p>Focus on the design and implementation of micro structures and physics, and explore the possibilities buried in operating systems, compilers and upper applications</p>
-</blockquote>
-<h5 id="summary-1">Summary</h5>
-<ul>
-<li>
-<p>The number of available registers greatly influenced the <strong>instruction set architecture (ISA)</strong></p>
-</li>
-<li>
-<p>Complex Instruction Set Computers were very complex</p>
-</li>
-<li>
-<p><strong>CISC was necessary</strong></p>
-<ul>
-<li>
-<p>The processor of X86 architecture dominates the server and desktop market</p>
-</li>
-<li>
-<p>X86 draws many advantages from RISC</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>RISC is still widely concerned and applied</strong></p>
-<ul>
-<li>
-<p><strong>ARM occupies a major share of the embedded market</strong></p>
-</li>
-<li>
-<p><strong>Mobile phones, tablets PC and various sensors in daily life mostly adopt ARM architecture</strong></p>
-</li>
-<li>
-<p><strong>ARM borrows a bit from both RISC and CISC</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="the-use-of-a-large-register-file">The Use of a Large Register File</h3>
-<ul>
-<li>
-<p>Target: Keep frequently accessed operands in registers</p>
-</li>
-<li>
-<p>Software solution</p>
-<ul>
-<li>
-<p>Require compiler to allocate registers</p>
-</li>
-<li>
-<p>Allocate based on most used variables in a given time</p>
-</li>
-<li>
-<p>Requires sophisticated program analysis</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Hardware solution</p>
-<ul>
-<li>
-<p>Have more registers</p>
-</li>
-<li>
-<p>Thus more variables will be in registers</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="how-and-problem">How and problem?</h4>
-<ul>
-<li>
-<p>Limited number of registers requires reasonable use, and the locality principle provides the possibility</p>
-<ul>
-<li>
-<p>Store local scalar variables in registers</p>
-</li>
-<li>
-<p>Reduces memory access</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Every procedure (function) call changes locality</strong></p>
-<ul>
-<li>
-<p>Parameters must be passed</p>
-</li>
-<li>
-<p>Results must be returned</p>
-</li>
-<li>
-<p>Variables from calling programs must be restored</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="register-windows">Register windows</h4>
-<ul>
-<li>
-<p><strong>Characteristics of procedure call</strong></p>
-<ul>
-<li>
-<p><strong>Only few parameters</strong></p>
-</li>
-<li>
-<p><strong>Limited range of depth of call</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Divide the available registers into several small registers set</strong></p>
-<ul>
-<li>
-<p><strong>Calls switch to a different set of registers</strong></p>
-</li>
-<li>
-<p><strong>Returns switch back to a previously used set of registers</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Set of registers called register windows</strong></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Three areas within a register set</strong></p>
-<ul>
-<li>
-<p><strong>Parameter registers</strong></p>
-</li>
-<li>
-<p><strong>Local registers</strong></p>
-</li>
-<li>
-<p><strong>Temporary registers</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Temporary registers from one set overlap parameter registers from the next</strong></p>
-<ul>
-<li><strong>This allows parameter passing without moving data</strong></li>
-</ul>
-</li>
-<li>
-<p><strong>At any time, only one register window is visible</strong></p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter13-1.png" title="/img/Computer Organization and Architecture/chapter13-1.png" data-thumbnail="/img/Computer Organization and Architecture/chapter13-1.png" data-sub-html="<h2>Overlapping register windows</h2>">
-        
-    </a><figcaption class="image-caption"><code>Overlapping register windows</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>本级的临时变量寄存器和下一级的参数寄存器在物理上是同一个，在传递参数时，不需要移动数据</p>
-</li>
-<li>
-<p>程序中过程的调用和返回的数量不确定，所以寄存器窗口应该足够多，以保证所有的过程调用都能用到</p>
-</li>
-<li>
-<p>由于寄存器的数量有限，只能保证少数最近的过程能够使用寄存器。更早的过程调用还是需要保存到存储器中。当嵌套深度减少的时候，再将数据从存储器恢复到寄存器中</p>
-</li>
-<li>
-<p>这种方式称为<strong>环形缓冲窗口</strong></p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter13-2.png" title="/img/Computer Organization and Architecture/chapter13-2.png" data-thumbnail="/img/Computer Organization and Architecture/chapter13-2.png" data-sub-html="<h2>Circular buffer diagram</h2>">
-        
-    </a><figcaption class="image-caption"><code>Circular buffer diagram</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p><strong>寄存器窗口以一种部分重叠的形式形成一个环形。当环形寄存器窗口都充满了后，再有过程调用，把最早的寄存器窗口保存到存储器</strong></p>
-</li>
-<li>
-<p>调用时，移动当前窗口指针以显示当前活动的寄存器窗口</p>
-</li>
-<li>
-<p><strong>如果所有窗口都在使用中，将生成一个中断，并将最早的窗口（调用嵌套中最远的窗口）保存到内存中</strong></p>
-</li>
-<li>
-<p>保存的窗口指针标识最近保存在内存中的窗口</p>
-</li>
-<li>
-<p>当过程返回的时候，CWP会回退一个。当CWP回退到和SWP一样的时候，就会引起一个中断，导致保存到存储器中的寄存器窗口恢复</p>
-</li>
-<li>
-<p>嵌套层数不会太深，所以一般不会保存到存储器中</p>
-</li>
-</ul>
-<h4 id="global-variables">Global variables</h4>
-<ul>
-<li>
-<p>Allocated by the compiler to memory</p>
-<ul>
-<li>
-<p><strong>Inefficient for frequently accessed variables</strong></p>
-</li>
-<li>
-<p><strong>Frequent access to memory, low efficiency</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>A set of registers for global variables</strong></p>
-<ul>
-<li>
-<p><strong>compiler determines which global variables can be placed in global registers</strong></p>
-</li>
-<li>
-<p><strong>Replacement is also determined by the compiler</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="registers-v-cache">Registers v cache</h4>
-<ul>
-<li>
-<p>Cache</p>
-<ul>
-<li>Inserting cache between processor and memory can solve the problem of speed difference</li>
-</ul>
-</li>
-<li>
-<p>Register</p>
-<ul>
-<li>organized in the form of windows, which is similar to a small fast buffer. It stores a subset of all variables that may be used many times</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>寄存器组中保存的是所有局部标量变量。cache保存的是最近使用过的标量变量</p>
-</li>
-<li>
-<p>寄存器组中保存的是个别的变量。cache中保存的是内存中的一个块</p>
-</li>
-<li>
-<p>寄存器组方案中，需要编译器来决定全局变量的保存。cache中则是根据最近使用原则进行管理</p>
-</li>
-<li>
-<p>寄存器的数据保存或者恢复，依赖的是过程调用嵌套的深度。cache根据替换算法进行替换</p>
-</li>
-<li>
-<p>寄存器组采用的是寄存器寻址。cache采用的是内存寻址</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>The register saves time because all local scalar variables are retained</p>
-<ul>
-<li>Not efficient use of space, because not all procedures will need the full window space allocated to them</li>
-</ul>
-</li>
-<li>
-<p>The cache may make more efficient use of space because it stores necessary data dynamically</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter13-3.png" title="/img/Computer Organization and Architecture/chapter13-3.png" data-thumbnail="/img/Computer Organization and Architecture/chapter13-3.png" data-sub-html="<h2>Register access</h2>">
-        
-    </a><figcaption class="image-caption"><code>Register access</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>要访问基于窗口的寄存器组中的一个标量变量，需要给出窗口号和一个寄存器号</p>
-</li>
-<li>
-<p>通过一个相对简单的译码器，就可以得到对应的寄存器，读出这个数据</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter13-4.png" title="/img/Computer Organization and Architecture/chapter13-4.png" data-thumbnail="/img/Computer Organization and Architecture/chapter13-4.png" data-sub-html="<h2>Cache access</h2>">
-        
-    </a><figcaption class="image-caption"><code>Cache access</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>对于cache访问，需要生成一个完整的地址，操作的复杂度和寻址方式有关</p>
-</li>
-<li>
-<p>进行对比，看数据是否命中</p>
-</li>
-<li>
-<p>如果命中，就可以读取数据</p>
-</li>
-<li>
-<p>如果没有命中，那么就需要先替换cache行，然后才能得到数据</p>
-</li>
-</ul>
-<h3 id="compiler-based-register-optimization">Compiler-Based Register Optimization</h3>
-<ul>
-<li>
-<p><strong>HLL programs have no explicit references to registers</strong></p>
-</li>
-<li>
-<p><strong>Optimizing use is up to compiler</strong></p>
-<ul>
-<li>
-<p>Assign symbolic or virtual register to each candidate variable</p>
-</li>
-<li>
-<p>Map symbolic registers to real registers</p>
-</li>
-<li>
-<p>Symbolic registers that do not overlap can share real registers</p>
-</li>
-<li>
-<p>If you run out of real registers，some variables use memory</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>The essence is to judge which data needs to be put in the register at any time</strong></p>
-</li>
-</ul>
-<h4 id="graph-coloring">Graph coloring</h4>
-<ul>
-<li>
-<p>Symbol registers is more than register</p>
-</li>
-<li>
-<p>determine which symbol registers can use the actual registers</p>
-</li>
-<li>
-<p><strong>Using Graph Coloring of topology</strong></p>
-<ul>
-<li>
-<p>Given a graph of nodes and edges</p>
-</li>
-<li>
-<p>Assign a colour to each node</p>
-</li>
-<li>
-<p>Adjacent nodes have different colours</p>
-</li>
-<li>
-<p>Use minimum number of colours</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Nodes are symbolic registers</p>
-</li>
-<li>
-<p>Two registers that are live in the same program fragment are joined by an edge</p>
-</li>
-<li>
-<p>Try to colour the graph with <em>n</em> colours, where <em>n</em> is the number of real registers</p>
-</li>
-<li>
-<p>Nodes that can not be coloured are placed in memory</p>
-</li>
-</ul>
-<hr>
-<p><strong>Graph colouring approach</strong></p>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter13-5.png" title="/img/Computer Organization and Architecture/chapter13-5.png" data-thumbnail="/img/Computer Organization and Architecture/chapter13-5.png">
-        
-    </a>
-<ul>
-<li>
-<p>构造无向图：A和BC在时间上有重叠，A和BC有连线；B和所有的节点都有时间重叠，B和所有的节点都有连线。C和ABD有时间上的重叠，C和ABD有连线</p>
-</li>
-<li>
-<p>从A开始，给A赋一个灰色，B和C必须要和A不一样，并且B和C也不能一样，给B附一个顺斜杠，C赋一个反斜杠。D节点和BC相连，和A不相连，D点可以用灰色。E节点和BD相连，E可以用C的颜色。F和BED相连，而BDE分别是正斜杠、灰色和反斜杠，F必须要用到第四个颜色</p>
-</li>
-<li>
-<p>如果物理寄存器只有3个的话，那么F就需要保存到存储器中了，通过加载和保存来处理</p>
-</li>
-</ul>
-<h4 id="large-register-vs-compiler">Large Register vs Compiler</h4>
-<ul>
-<li>
-<p>When the number of registers is small, the effect will be better by optimizing the registers</p>
-</li>
-<li>
-<p>When the number of registers is large, the effect of register optimization will not be very good</p>
-</li>
-<li>
-<p>Optimization of registers is mainly for the case of a small number of registers</p>
-</li>
-</ul>
-<h3 id="risc-pipelining">RISC Pipelining</h3>
-<ul>
-<li>
-<p>Most instructions are register to register</p>
-</li>
-<li>
-<p>Two phases of execution</p>
-<ul>
-<li>
-<p>I: Instruction fetch</p>
-</li>
-<li>
-<p>E: Execute</p>
-<ul>
-<li>ALU operation with register input and output</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>For load and store</p>
-<ul>
-<li>
-<p>I: Instruction fetch</p>
-</li>
-<li>
-<p>E: Execute: Calculate memory address</p>
-</li>
-<li>
-<p>D: Register to memory or memory to register operation</p>
-</li>
-</ul>
-</li>
-</ul>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter13-6.png" title="/img/Computer Organization and Architecture/chapter13-6.png" data-thumbnail="/img/Computer Organization and Architecture/chapter13-6.png">
-        
-    </a>
-<a class="lightgallery" href="/img/Computer%20Organization%20and%20Architecture/chapter13-7.png" title="/img/Computer Organization and Architecture/chapter13-7.png" data-thumbnail="/img/Computer Organization and Architecture/chapter13-7.png">
-        
-    </a>
-<ul>
-<li>
-<p>图a是没有采用流水线技术，完全按照顺序来执行</p>
-</li>
-<li>
-<p><strong>图b是采用两阶段流水线的执行情况。由于同时只能有1个存储器访问，取指和存储会冲突，导致取指会延后一个时钟周期</strong></p>
-</li>
-<li>
-<p>存储器的访问限制导致了时钟周期的浪费</p>
-</li>
-<li>
-<p>如果存储支持2个访问，可以用三阶段流水线</p>
-</li>
-<li>
-<p>指令相关性：Add rC$\leftarrow$rA+rB，指令需要的操作数为rA和rB。而第二条指令要到第四个时钟周期才能得到rB。所以要插入一个空指令NOOP</p>
-</li>
-<li>
-<p>指令执行阶段，通常涉及到寄存器的读和ALU的操作，把E阶段进一步分为E1和E2。其中E1阶段完成寄存器的读，而E2阶段则完成ALU操作和寄存器的写操作</p>
-</li>
-<li>
-<p>使用四阶段流水线来提高效率。但同样需要考虑相关性问题</p>
-</li>
-</ul>
-<h4 id="optimization-of-pipelining">Optimization of Pipelining</h4>
-<ul>
-<li>
-<p>Dependency of data and branch will disrupt the pipeline and affect the efficiency</p>
-</li>
-<li>
-<p>Two methods: Delayed branch, Loop Unrolling</p>
-</li>
-<li>
-<p>Delayed branch</p>
-<ul>
-<li>
-<p>Branch instruction affects only the instructions that follow it</p>
-</li>
-<li>
-<p>This following instruction is the delay slot</p>
-</li>
-<li>
-<p><strong>Arrange a useful instruction to replace the NOOP instruction</strong></p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="delayed-branch">delayed branch</h4>
-<ul>
-<li>
-<p><strong>Calculate result of branch before unusable instructions pre-fetched</strong></p>
-<ul>
-<li>
-<p><strong>Instructions that are not affected by branches are immediately followed by branch</strong></p>
-</li>
-<li>
-<p><strong>Keeps pipeline full while fetching new instruction stream</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Not as good for superscalar</strong></p>
-<ul>
-<li>
-<p>Multiple instructions need to execute in delay slot</p>
-</li>
-<li>
-<p>Instruction dependence problems</p>
-</li>
-<li>
-<p>Often use branch prediction</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Problem: How do you find instructions to fill the delay slots?</p>
-<ul>
-<li>
-<p>Branch must be independent of delay slot instructions</p>
-</li>
-<li>
-<p>Unconditional branch: Easier to find instructions to fill the delay slot</p>
-</li>
-<li>
-<p>Conditional branch: Condition computation should not depend on instructions in delay slots → difficult to fill the delay slot</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="advantage">Advantage</h4>
-<ul>
-<li>
-<p>Keeps the pipeline full with useful instructions in a simple way assuming</p>
-<ul>
-<li>
-<p>Number of delay slots = number of instructions to keep the pipeline full before the branch resolves</p>
-</li>
-<li>
-<p>All delay slots can be filled with useful instructions</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="disadvantage">Disadvantage</h4>
-<ul>
-<li>
-<p>Not easy to fill the delay slots (even with a 2-stage pipeline)</p>
-<ul>
-<li>
-<p>Number of delay slots increases with pipeline depth, superscalar execution width</p>
-</li>
-<li>
-<p>Number of delay slots should be variable with variable latency operations</p>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="another-method-loop-unrolling">Another method-Loop Unrolling</h4>
-<ul>
-<li>
-<p>Replicate body of loop a number of times</p>
-<ul>
-<li>Iterate loop fewer times</li>
-<li>Reduces loop overhead</li>
-<li>Increases instruction parallelism</li>
-</ul>
-</li>
-<li>
-<p>During the execution of the loop body, because of the locality principle, some data can be used for many times, which can reduce the number of times to access the</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fortran" data-lang="fortran"><span class="line"><span class="cl"><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">end do</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>原始的循环是要做一个一维数组的变化。循环体中有一个语句需要执行</p>
-</li>
-<li>
-<p>把这个循环体进行拆解，变成了2个语句，一个循环体执行了2个迭代操作</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fortran" data-lang="fortran"><span class="line"><span class="cl"><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">end do</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>2个指令可以并行进行。原来每次循环需要访问3次存储器，现在相当于2次循环只需要访问4次存储器，降低了存储器访问的次数</li>
-</ul>
-<h3 id="risc-versus-cisc-controversy">RISC Versus CISC Controversy</h3>
-<ul>
-<li>
-<p>Not clear cut</p>
-<ul>
-<li>
-<p>RISC designs may benefit from the inclusion of some CISC features and that</p>
-</li>
-<li>
-<p>CISC designs may benefit from the inclusion of some RISC features</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Many designs borrow from both philosophies</p>
-<ul>
-<li>
-<p>PowerPC are no longer “pure” RISC</p>
-</li>
-<li>
-<p>Pentium II and later Pentium models do incorporate some RISC characteristics</p>
-</li>
-</ul>
 </li>
 </ul>
 ]]></description>
