@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter5\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  1124 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  3617 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter5\/","datePublished": "2023-03-08T17:23:11+08:00","dateModified": "2023-03-08T17:23:11+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter5 并发控制：互斥</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-08">2023-03-08</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1124 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-08">2023-03-08</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3617 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -124,10 +124,34 @@
       <ul>
         <li><a href="#解决问题的两种方法">解决问题的两种方法</a></li>
         <li><a href="#x86-原子操作lock-指令前缀">x86 原子操作：<code>LOCK</code> 指令前缀</a></li>
-        <li><a href="#用-xchg-实现互斥">用 <code>xchg</code> 实现互斥</a></li>
+        <li><a href="#用-xchg-实现互斥也就是自旋锁的本质实现过程">用 <code>xchg</code> 实现互斥（也就是自旋锁的本质实现过程）</a></li>
         <li><a href="#实现互斥自旋锁">实现互斥：自旋锁</a></li>
         <li><a href="#实现互斥自旋锁-contd">实现互斥：自旋锁 (cont&rsquo;d)</a></li>
-        <li><a href="#原子指令的诞生bus-lock-80486">原子指令的诞生：Bus Lock (80486)</a></li>
+        <li><a href="#原子指令的诞生bus-lock-80486">原子指令的诞生：Bus Lock (80486)</a>
+          <ul>
+            <li><a href="#负担">负担</a></li>
+          </ul>
+        </li>
+        <li><a href="#lock-指令的现代实现">Lock 指令的现代实现</a></li>
+        <li><a href="#risc-v-另一种原子操作的设计">RISC-V: 另一种原子操作的设计</a></li>
+        <li><a href="#load-reservedstore-conditional-lrsc">Load-Reserved/Store-Conditional (LR/SC)</a>
+          <ul>
+            <li><a href="#compare-and-swap-的-lrsc-实现">Compare-and-Swap 的 LR/SC 实现</a></li>
+            <li><a href="#lrsc-的硬件实现">LR/SC 的硬件实现</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#互斥锁-mutex-lock">互斥锁 (Mutex Lock)</a>
+      <ul>
+        <li><a href="#自旋锁的缺陷">自旋锁的缺陷</a></li>
+        <li><a href="#scalability-性能的新维度">Scalability: 性能的新维度</a></li>
+        <li><a href="#自旋锁的使用场景">自旋锁的使用场景</a>
+          <ul>
+            <li><a href="#使用场景操作系统内核的并发数据结构-短临界区">使用场景：操作系统内核的并发数据结构 (短临界区)</a></li>
+          </ul>
+        </li>
+        <li><a href="#实现线程--长临界区的互斥">实现线程 + 长临界区的互斥</a></li>
       </ul>
     </li>
   </ul>
@@ -271,7 +295,7 @@
 <p>更多的原子指令：<a href="https://en.cppreference.com/w/cpp/header/stdatomic.h" target="_blank" rel="noopener noreffer">stdatomic.h</a> (C11)</p>
 </li>
 </ul>
-<h3 id="用-xchg-实现互斥">用 <code>xchg</code> 实现互斥</h3>
+<h3 id="用-xchg-实现互斥也就是自旋锁的本质实现过程">用 <code>xchg</code> 实现互斥（也就是自旋锁的本质实现过程）</h3>
 <ul>
 <li>xchg在之前的<a href="https://jungle430.github.io/posts/operating-system/support2" target="_blank" rel="noopener noreffer">文章</a>中有提到过</li>
 </ul>
@@ -359,6 +383,17 @@
 <li>保证 load/store 不与原子指令乱序</li>
 </ul>
 <h3 id="原子指令的诞生bus-lock-80486">原子指令的诞生：Bus Lock (80486)</h3>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Update in 2023-03-09 10:00</p>
+<p>早起开完SB大会，✋接着看</p>
+<p>咖啡机里面的咖啡真提神，估计下午毛概得狠狠睡一把</p>
+</div>
+        </div>
+    </div>
 <ul>
 <li>486 (20-50MHz) 就支持 <code>dual-socket</code> 了</li>
 </ul>
@@ -383,7 +418,512 @@
 </ul>
 </li>
 <li>
-<p>为什么486时代会诞生LOCK这样的指令呢？</p>
+<p>为什么486时代会诞生<b>LOCK</b>这样的指令呢？</p>
+<ul>
+<li>因为涉及了两个CPU面对同一个memory的状况，所以需要对memory进行lock的操作</li>
+</ul>
+</li>
+<li>
+<p>设计方法</p>
+<ul>
+<li>x86的指令集有指令的前缀（比如<code>rep</code>），我们让<code>lock</code>也变成一个<b>指令前缀</b></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">lock + |指令|
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><u>当CPU开始读指令的时候，它会先读到lock指令，这个时候就上锁（也即是对应的CPU拿到了总线的锁）</u></li>
+<li><u>等到CPU拿到总线的锁之后，它会再执行后面的部分</u></li>
+<li><u>把有关指令执行完成之后再把锁释放掉</u></li>
+</ul>
+<h4 id="负担">负担</h4>
+<ul>
+<li><b>今天的CPU与memory之间都有各自的cache，而且cache已经和CPU集成在一个元件上面了，而且是多级cache</b></li>
+<li><b>486时代仅仅只有外面的一块cache（而且这块cache在主板上），所以说只要CPU拿到了总线🔒的控制权，就把自己和外面的一切隔离开了</b></li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>
+<p><b>多级cache会使得lock变得很麻烦</b></p>
+</li>
+<li>
+<p>例子：一个数据在两个CPU的cache里面都有副本</p>
+</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<ul>
+<li><b>这个时候如果CPU1要lock访问m的话，就要将cache21里面的m副本“踢掉”</b> $\Longrightarrow$ 也就是今天inter一个很大的历史包袱：缓存的一致性 $\Longrightarrow$ 解决方案：将所有的cache用总线连接起来</li>
+</ul>
+<div class="mermaid" id="id-4"></div>
+<ul>
+<li>一旦其中有一个数据需要被lock，那么总线需要遍历一遍所有CPU的cache，如果发现了该数据的副本，就要将该数据从其他CPU的cache里面“踢掉”，<b>这是很浪费时间的</b></li>
+</ul>
+<h3 id="lock-指令的现代实现">Lock 指令的现代实现</h3>
+<p>在 L1 cache 层保持一致性 (ring/mesh bus)</p>
+<ul>
+<li>相当于每个 cache line 有分别的锁</li>
+<li>store(x) 进入 L1 缓存即保证对其他处理器可见
+<ul>
+<li>但要小心 store buffer 和乱序执行</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>L1 cache line 根据状态进行协调</p>
+<ul>
+<li>M (Modified), 脏值</li>
+<li>E (Exclusive), 独占访问</li>
+<li>S (Shared), 只读共享</li>
+<li>I (Invalid), 不拥有 cache line</li>
+</ul>
+<h3 id="risc-v-另一种原子操作的设计">RISC-V: 另一种原子操作的设计</h3>
+<p>考虑常见的原子操作：</p>
+<ul>
+<li>atomic test-and-set
+<ul>
+<li><code>reg = load(x); if (reg == XX) { store(x, YY); }</code></li>
+</ul>
+</li>
+<li>lock xchg
+<ul>
+<li><code>reg = load(x); store(x, XX);</code></li>
+</ul>
+</li>
+<li>lock add
+<ul>
+<li><code>t = load(x); t++; store(x, t);</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><b>它们的本质都是</b></p>
+<ol>
+<li>load</li>
+<li>exec (处理器本地寄存器的运算)</li>
+<li>store</li>
+</ol>
+<h3 id="load-reservedstore-conditional-lrsc">Load-Reserved/Store-Conditional (LR/SC)</h3>
+<ul>
+<li>LR: 在内存上标记 reserved (盯上你了)，中断、其他处理器写入都会导致标记消除
+<ul>
+<li><b>我先读，读完之后在这个物品上面做一个标记</b></li>
+<li><b>标记一直在物品上，同时在做本地的计算</b></li>
+<li><b>本地计算算完了，该写了</b></li>
+<li><b>写的时候要先检测标记，只有标记还在的时候才可以写，否则返回fail，只能再次尝试重新上锁写入</b></li>
+</ul>
+</li>
+<li><u>本地内存的计算不重要，重要的是<b>共享内存的计算</b></u></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">lr.w rd, (rs1)
+</span></span><span class="line"><span class="cl">  rd = M[rs1]
+</span></span><span class="line"><span class="cl">  reserve M[rs1]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<ul>
+<li>SC: 如果 “盯上” 未被解除，则写入</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sc.w rd, rs2, (rs1)
+</span></span><span class="line"><span class="cl">  if still reserved:
+</span></span><span class="line"><span class="cl">    M[rs1] = rs2
+</span></span><span class="line"><span class="cl">    rd = 0
+</span></span><span class="line"><span class="cl">  else:
+</span></span><span class="line"><span class="cl">    rd = nonzero
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="compare-and-swap-的-lrsc-实现">Compare-and-Swap 的 LR/SC 实现</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">cas</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cmp_val</span><span class="p">,</span> <span class="kt">int</span> <span class="n">new_val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">old_val</span> <span class="o">=</span> <span class="o">*</span><span class="n">addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">old_val</span> <span class="o">==</span> <span class="n">cmp_val</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">addr</span> <span class="o">=</span> <span class="n">new_val</span><span class="p">;</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cas:
+</span></span><span class="line"><span class="cl">  lr.w  t0, (a0)       # Load original value.
+</span></span><span class="line"><span class="cl">  bne   t0, a1, fail   # Doesn’t match, so fail.
+</span></span><span class="line"><span class="cl">  sc.w  t0, a2, (a0)   # Try to update.
+</span></span><span class="line"><span class="cl">  bnez  t0, cas        # Retry if store-conditional failed.
+</span></span><span class="line"><span class="cl">  li a0, 0             # Set return to success.
+</span></span><span class="line"><span class="cl">  jr ra                # Return.
+</span></span><span class="line"><span class="cl">fail:
+</span></span><span class="line"><span class="cl">  li a0, 1             # Set return to failure.
+</span></span><span class="line"><span class="cl">  jr ra                # Return
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>lr，sc还可以检测🔒的拥堵程度</li>
+</ul>
+<h4 id="lrsc-的硬件实现">LR/SC 的硬件实现</h4>
+<ul>
+<li>
+<p>BOOM (Berkeley Out-of-Order Processor)</p>
+</li>
+<li>
+<p><a href="https://github.com/riscv-boom/riscv-boom" target="_blank" rel="noopener noreffer">riscv-boom</a></p>
+</li>
+<li>
+<p><a href="https://github.com/riscv-boom/riscv-boom/blob/master/src/main/scala/lsu/dcache.scala#L655" target="_blank" rel="noopener noreffer">lsu/dcache.scala</a></p>
+</li>
+<li>
+<p>留意s2_sc_fail的条件</p>
+<ul>
+<li>s2 是流水线 Stage 2</li>
+</ul>
+</li>
+<li>
+<p>(yzh 扒出的代码)</p>
+</li>
+</ul>
+<h2 id="互斥锁-mutex-lock">互斥锁 (Mutex Lock)</h2>
+<h3 id="自旋锁的缺陷">自旋锁的缺陷</h3>
+<ul>
+<li>
+<p>性能问题 (0)</p>
+<ul>
+<li>自旋 (共享变量) 会触发<b>处理器间的缓存同步，延迟增加（总线遍历cache踢副本）</b></li>
+</ul>
+</li>
+<li>
+<p>性能问题 (1)</p>
+<ul>
+<li>
+<p>除了进入临界区的线程，其他处理器上的线程都在空转<b>（看自旋锁的实现代码，没有拿到🔒的线程在空转死循环）</b></p>
+<ul>
+<li>会造成多CPU机器利用率过低的问题（就有🔒的在工作）</li>
+</ul>
+</li>
+<li>
+<p><b>争抢锁的处理器越多，利用率越低</b></p>
+</li>
+</ul>
+</li>
+<li>
+<p>性能问题 (2)</p>
+<ul>
+<li>获得自旋锁的线程<b>可能被操作系统切换出去（出现在单CPU时间片轮转的条件下，轮转时间片导致拿🔒的线程休眠，相当于你拿着🔒回宿舍睡觉，全教室的人只能等着你 $\Longrightarrow$ 还在死循环里面空转）</b>
+<ul>
+<li>操作系统不 “感知” 线程在做什么</li>
+<li>(但为什么不能呢？) $\Longrightarrow$ 课后思考</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><b>实现 100% 的资源浪费</b></p>
+</li>
+</ul>
+<div class="mermaid" id="id-5"></div>
+<h3 id="scalability-性能的新维度">Scalability: 性能的新维度</h3>
+<blockquote>
+<p><u>同一份计算任务，时间 (CPU cycles) 和空间 (mapped memory) 会随处理器数量的增长而变化</u>。</p>
+<p><b>注意和数据结构里面的计算数据量n区别，这里面衡量的标准是依据处理器的数量而定的</b></p>
+</blockquote>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/sum-scalability.c" target="_blank" rel="noopener noreffer">sum-scalability.c</a>，<a href="https://jyywiki.cn/pages/OS/2022/demos/stat.py" target="_blank" rel="noopener noreffer">stat.py</a></li>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/thread-sync.h" target="_blank" rel="noopener noreffer">thread-sync.h</a></li>
+<li>严谨的统计很难
+<ul>
+<li>CPU 动态功耗（散热跟不上只能做一峰⌚真👨（悲 ）</li>
+<li>系统中的其他进程</li>
+<li>……</li>
+</ul>
+</li>
+<li><a href="https://www.cse.unsw.edu.au/~gernot/benchmarking-crimes.html" target="_blank" rel="noopener noreffer">Benchmarking crimes</a></li>
+</ul>
+<p>sum-scalability.c，里面用的就是<b>自旋锁</b>，在自旋锁的保护下执行sum++</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread-sync.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define N 10000000
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="n">spinlock_t</span> <span class="n">lock</span> <span class="o">=</span> <span class="n">SPIN_INIT</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">n</span><span class="p">,</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">nthread</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">n</span> <span class="o">=</span> <span class="n">N</span> <span class="o">/</span> <span class="n">nthread</span><span class="p">;</span> <span class="c1">//nthread是线程数量，n就是平摊下来每个线程要执行的sum++（也就是🔒）的数量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nthread</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">sum</span> <span class="o">==</span> <span class="n">n</span> <span class="o">*</span> <span class="n">nthread</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>自旋锁的实现(来自<code>thread-sync.h</code>)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">spin_lock</span><span class="p">(</span><span class="n">spinlock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">intptr_t</span> <span class="n">value</span> <span class="o">=</span> <span class="n">atomic_xchg</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">spin_unlock</span><span class="p">(</span><span class="n">spinlock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">atomic_xchg</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Update in 2023-03-09 15:20</p>
+<p>绷不住直接😪了，睡醒继续</p>
+</div>
+        </div>
+    </div>
+<ul>
+<li>运行</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc sum-scalability.c -O2 -lpthread
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 2023-03-09 15:25:37 ⌚  jungle-virtual-machine in ~/chapter5
+</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real    0m0.043s
+</span></span><span class="line"><span class="cl">user    0m0.016s
+</span></span><span class="line"><span class="cl">sys     0m0.021s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 2023-03-09 15:25:40 ⌚  jungle-virtual-machine in ~/chapter5
+</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real    0m0.229s
+</span></span><span class="line"><span class="cl">user    0m0.337s
+</span></span><span class="line"><span class="cl">sys     0m0.071s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 2023-03-09 15:25:44 ⌚  jungle-virtual-machine in ~/chapter5
+</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">4</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real    0m0.337s
+</span></span><span class="line"><span class="cl">user    0m0.393s
+</span></span><span class="line"><span class="cl">sys     0m0.166s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 2023-03-09 15:26:21 ⌚  jungle-virtual-machine in ~/chapter5
+</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">32</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real    0m1.316s
+</span></span><span class="line"><span class="cl">user    0m2.176s
+</span></span><span class="line"><span class="cl">sys     0m0.288s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 2023-03-09 15:26:35 ⌚  jungle-virtual-machine in ~/chapter5
+</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">32</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">real    0m1.230s
+</span></span><span class="line"><span class="cl">user    0m2.040s
+</span></span><span class="line"><span class="cl">sys     0m0.255s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>现象：<b>同样的工作量，线程越多，效率越低</b></li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter5-2.jpg" title="/img/Operating System/chapter5-2.jpg" data-thumbnail="/img/Operating System/chapter5-2.jpg" data-sub-html="<h2>图像</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter5-2.jpg"
+            data-srcset="/img/Operating%20System/chapter5-2.jpg, /img/Operating%20System/chapter5-2.jpg 1.5x, /img/Operating%20System/chapter5-2.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter5-2.jpg" />
+    </a><figcaption class="image-caption">图像</figcaption>
+    </figure>
+<h3 id="自旋锁的使用场景">自旋锁的使用场景</h3>
+<ul>
+<li><b>两个重要的约束</b>
+<ul>
+<li>临界区几乎不“拥堵”$\Longrightarrow$ <b>几乎就只有一个线程进入临界区</b> $\Longrightarrow$ 这样争抢🔒的状况就会很少</li>
+<li>持有自旋锁时禁止执行流切换 $\Longrightarrow$ 翻译成上面的人话就是禁止拿着🔒回宿舍😴 $\Longrightarrow$ <b>但是，我们的应用程序是做不到这一点的（如果应用程序能够防止自己在时间片轮转的时候被切出去，那么一个while(1);就能让电脑崩溃，操作系统是绝对禁止这样的事情的）</b></li>
+</ul>
+</li>
+</ul>
+<h4 id="使用场景操作系统内核的并发数据结构-短临界区">使用场景：操作系统内核的并发数据结构 (短临界区)</h4>
+<ul>
+<li><b>操作系统可以关闭中断和抢占</b> $\Longrightarrow$ 这就是和应用程序不一样的地方
+<ul>
+<li>保证锁的持有者在很短的时间内可以释放锁</li>
+</ul>
+</li>
+<li>(如果是虚拟机呢&hellip;😂)
+<ul>
+<li>PAUSE 指令会触发 VM Exit $\Longrightarrow$ 防止有故障把物理机给卡死</li>
+</ul>
+</li>
+<li>但依旧很难做好
+<ul>
+<li><a href="https://www.usenix.org/conference/osdi10/analysis-linux-scalability-many-cores" target="_blank" rel="noopener noreffer">An analysis of Linux scalability to many cores</a> (OSDI'10) （10年paper，吐槽Linux内核的自旋锁有多烂）</li>
+</ul>
+</li>
+</ul>
+<h3 id="实现线程--长临界区的互斥">实现线程 + 长临界区的互斥</h3>
+<blockquote>
+<p>作业那么多，与其干等 Online Judge 发布，不如把自己 (CPU) 让给其他作业 (线程) 执行？</p>
+<p>说白了就是有事情卡住了就去干别的，别就瞎🐔8️⃣干等着这一件事（这也就是比自旋锁强的地方）</p>
+</blockquote>
+<p>“让” 不是 C 语言代码可以做到的 (C 代码只能计算)</p>
+<ul>
+<li>
+<p>把锁的实现放到操作系统里就好啦！$\Longrightarrow$ 系统调用</p>
+<ul>
+<li>
+<p><code>syscall(SYSCALL_lock, &amp;lk);</code></p>
+<ul>
+<li><b>试图获得 <code>lk</code>，但如果失败，就切换到其他线程</b></li>
+</ul>
+</li>
+<li>
+<p><code>syscall(SYSCALL_unlock, &amp;lk);</code></p>
+</li>
+<li>
+<p><b>释放 <code>lk</code>，如果有等待锁的线程就唤醒</b></p>
+</li>
+</ul>
 </li>
 </ul>
 </div><div class="post-footer" id="post-footer">
@@ -419,4 +959,4 @@ if ('serviceWorker' in navigator) {
 
         <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
                 <i class="fas fa-chevron-up fa-fw"></i>
-            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA(CPU1)\nB(CPU2)\nC(Memory)\nA----C\nB----C"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA(CPU1)\nB(CPU2)\nC(Memory)\nA----C\nB----C","id-2":"graph TB\nA(CPU1)\nB(CPU2)\nC(cache11)\nD(cache21)\nE(Memory)\nF(cache12)\nG(cache22)\nA----C----F----E\nB----D----G----E","id-3":"graph TB\nA(CPU1)\nB(CPU2)\nC(cache11)\nD(cache21)\nE(Memory)\nF(cache12)\nG(cache22)\nH(m)\nA----C----F----E\nB----D----G----E\nH----C\nH----D","id-4":"graph\nA(CPU1)\nB(CPU2)\nC(CPU3)\nD(CPU4)\nA----B----C----D----A","id-5":"graph LR\nA(T1)\nB(T2)\nC(T3)\nD(\"🔒\")\nD----A\nE(Sleep)\nA--\u003eB--\u003eC\nA----\u003eE"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
