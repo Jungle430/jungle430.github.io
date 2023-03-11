@@ -17,7 +17,7 @@
 <meta name="application-name" content="Jungle&#39;s blog">
 <meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" /><link rel="prev" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" /><link rel="prev" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/" /><link rel="next" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter6/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter5\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  6659 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  7068 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter5\/","datePublished": "2023-03-08T17:23:11+08:00","dateModified": "2023-03-08T17:23:11+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter5 并发控制：互斥</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-08">2023-03-08</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6659 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 14 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-08">2023-03-08</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 7068 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 15 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -1445,6 +1445,12 @@
 <p><b>在没有竞争的场景下，锁的获取和释放性能都非常高，不需要内核的参与，仅仅是通过用户空间的原子操作来修改futex word的状态即可</b>。在有竞争的场景下，如果线程无法获取futex锁，那么把自己放入到 wait queue中（陷入内核，有系统调用的开销），而在owner task释放锁的时候，如果检测到有竞争（等待队列中有阻塞任务），就会通过系统调用来唤醒等待队列中的任务，使其恢复执行，继续去持锁。如果没有竞争，那么也无需陷入内核。</p>
 <p>摘自：<a href="https://zhuanlan.zhihu.com/p/568678633" target="_blank" rel="noopener noreffer">《什么是futex？》</a></p>
 </blockquote>
+<blockquote>
+<p>Futex（Fast Userspace Mutex）是一种用户空间锁，它是Linux内核提供的一种同步原语，用于控制多个进程或线程之间的访问共享资源。Futex主要用于实现更高级别的同步原语，例如条件变量和读写锁。Futex提供了一种低开销的锁机制，当锁被持有时，它可以避免将线程或进程阻塞在内核空间。</p>
+<p>在Futex中，锁的状态保存在用户空间中，而不是内核空间中，当线程或进程需要获取锁时，它会尝试将锁的状态从“未锁定”改为“锁定”状态。如果成功，线程或进程就可以访问共享资源。如果锁已被其他线程或进程占用，则它将在用户空间内忙等待，直到锁被释放。</p>
+<p>Futex还支持一些其他的操作，例如等待一个特定的值或比较并交换值，这些操作可以用于实现条件变量和读写锁等高级别的同步原语。由于Futex的低开销和高效性，它成为了Linux系统中许多高级别同步原语的基础。</p>
+<p>来自<a href="https://openai.com/blog/chatgpt" target="_blank" rel="noopener noreffer">ChatGPT</a></p>
+</blockquote>
 <ul>
 <li>
 <p><b>如果我们仔细观察就会发现，futex调用的数量远远小于lock和unlock的数量</b></p>
@@ -1633,7 +1639,7 @@
 <ul>
 <li>futex (7), futex (2)</li>
 <li><a href="https://lwn.net/Articles/360699/" target="_blank" rel="noopener noreffer">A futex overview and update</a> (LWN)</li>
-<li><a href="https://jyywiki.cn/pages/OS/manuals/futexes-are-tricky.pdf" target="_blank" rel="noopener noreffer">Futexes are tricky</a> (论 model checker 的重要性) $\Longrightarrow$ <u>同时也提示我们从最简单的写起，千万不要觉得自己行就装🖊</u></li>
+<li><a href="https://jyywiki.cn/pages/OS/manuals/futexes-are-tricky.pdf" target="_blank" rel="noopener noreffer">Futexes are tricky</a> (论 model checker 的重要性) $\Longrightarrow$ <u>同时也提示我们从最简单的写起，千万不要觉得自己行就装🖊搞大的</u></li>
 <li>(我们不讲并发算法)</li>
 </ul>
 <h2 id="总结">总结</h2>
@@ -1652,6 +1658,7 @@
 </li>
 <li>Fast/slow paths: 性能优化的重要途径</li>
 </ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
                 </span></div><div class="post-info-line"><div class="post-info-mod">
@@ -1659,7 +1666,8 @@
             </div><div class="post-info-mod"></div>
         </div><div class="post-info-share">
             <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥" data-hashtags="Operating System"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-hashtag="Operating System"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/" data-title="Operating System Chapter5 并发控制：互斥"><i class="fab fa-evernote fa-fw"></i></a></span>
-        </div></div><div class="post-nav"><a href="/posts/operating-system/operating-system-chapter4/" class="prev" rel="prev" title="Operating System Chapter4 理解并发程序执行"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+        </div></div><div class="post-nav"><a href="/posts/operating-system/operating-system-chapter4/" class="prev" rel="prev" title="Operating System Chapter4 理解并发程序执行"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/operating-system/operating-system-chapter6/" class="next" rel="next" title="Operating System Chapter6 并发控制：同步">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
 </div></article></div>
             </main>
             <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>

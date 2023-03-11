@@ -4,7 +4,940 @@
         <link>https://Jungle430.github.io/categories/operating-system/</link>
         <description>Operating System - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 08 Mar 2023 17:23:11 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 10 Mar 2023 20:32:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter6 并发控制：同步</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter6/</link>
+    <pubDate>Fri, 10 Mar 2023 20:32:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter6/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Update in 2023-03-10 20:48</p>
+<p>在洲的提醒下，✋才发现原来租国外电话号那个网站可以有访问<a href="https://openai.com/blog/chatgpt" target="_blank" rel="noopener noreffer">ChatGPT</a>的教程，之前首尔线和美国线都因为反IP给ban了，这网站都没仔细看，真是血亏</p>
+<p>下午问ChatGPT一个一个问题，不得感叹：牛逼滴狠呐！</p>
+<p>只能说有了它，写作业瞬间轻松了十倍甚至九倍（赞赏</p>
+</div>
+        </div>
+    </div>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>互斥：自旋锁、互斥锁、futex</li>
+<li><del>是时候面对真正的并发编程了</del></li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: <b>如何在多处理器上协同多个线程完成任务？</b></li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>典型的同步问题：<b>生产者-消费者</b>；哲学家吃饭</li>
+<li>同步的实现方法：信号量、条件变量</li>
+</ul>
+<h2 id="线程同步">线程同步</h2>
+<h3 id="同步-synchronization">同步 (Synchronization)</h3>
+<ul>
+<li>
+<p><b>两个或两个以上随时间变化的量在变化过程中保持一定的<u>相对关系</u></b></p>
+</li>
+<li>
+<p>iPhone/iCloud 同步 (手机 vs 电脑 vs 云端)</p>
+</li>
+<li>
+<p>变速箱同步器 (合并快慢速齿轮)</p>
+</li>
+<li>
+<p>同步电机 (转子与磁场速度一致)</p>
+</li>
+<li>
+<p>同步电路 (所有触发器在边沿同时触发)</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><b>异步 (Asynchronous) = 不同步</b>
+<ul>
+<li>上述很多例子都有异步版本 (异步电机、异步电路、异步线程)</li>
+</ul>
+</li>
+</ul>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Update in 2023-03-11 14:00</p>
+<p>乌班图打赢复活赛成功（赞赏！$\Longrightarrow$ 大爹复活博客<a href="https://blog.csdn.net/ningmengzhihe/article/details/127295333" target="_blank" rel="noopener noreffer">《GParted给ubuntu系统磁盘resize大小时候出现cannot resize read-only file system解决办法》</a>（十分甚至九分的牛逼</p>
+<p>昨晚打只狼打上头了，一觉睡到中午（可以重开了</p>
+<p>下午继续拿着乌班图听课（喜</p>
+</div>
+        </div>
+    </div>
+<h3 id="并发程序中的同步">并发程序中的同步</h3>
+<ul>
+<li>
+<p><b>并发程序的步调很难保持 “<font color="red">完全</font>一致”</b></p>
+<ul>
+<li><b>线程同步：<font color="red">在某个时间点共同达到互相已知的状态</font></b>，（先整完的等另一个</li>
+</ul>
+</li>
+<li>
+<p>再次把线程想象成我们自己</p>
+<ul>
+<li>NPY：等我洗个头就出门/等我打完这局游戏就来</li>
+<li>舍友：等我修好这个 bug 就吃饭</li>
+<li>导师：等我出差回来就讨论这个课题</li>
+<li>jyy：<del>等我成为卷王就躺平</del>
+<ul>
+<li><font color="red"><b>“先到先等”</b></font></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>目标：写线程模拟上面的过程，比如A线程代表你打游戏，B线程代表你舍友修bug，这两个线程要做的是在你打完游戏，舍友修完bug之后一起去干饭</p>
+</li>
+</ul>
+<h3 id="生产者-消费者问题学废你就赢了">生产者-消费者问题：学废你就赢了</h3>
+<blockquote>
+<p><b><font color="red">99% 的实际并发问题都可以用生产者-消费者解决。</font></b></p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tproduce</span><span class="p">()</span> <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;(&#34;</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tconsume</span><span class="p">()</span> <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;)&#34;</span><span class="p">);</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在 <code>printf</code> 前后增加代码，使得打印的括号序列满足</p>
+<ul>
+<li>一定是某个合法括号序列的<b>前缀</b></li>
+<li>括号<b>嵌套的深度</b>不超过$n$
+<ul>
+<li>$n=3$, <code>((())())(((</code> 合法</li>
+<li>$n=3$, <code>(((())))</code>, <code>(()))</code> 不合法</li>
+</ul>
+</li>
+<li>同步
+<ul>
+<li><b>等到有空位（嵌套层数不多）再打印左括号</b></li>
+<li><b>等到能配对时再打印右括号</b></li>
+</ul>
+</li>
+</ul>
+<h4 id="生产者-消费者问题分析">生产者-消费者问题：分析</h4>
+<ul>
+<li>
+<p>为什么叫 “生产者-消费者” 而不是 “括号问题”？</p>
+<ul>
+<li>
+<p><b>左括号：生产资源 (任务)、放入队列</b></p>
+</li>
+<li>
+<p><b>右括号：从队列取出资源 (任务) 执行</b></p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>能否用互斥锁实现括号问题？</p>
+<ul>
+<li>左括号：嵌套深度 (队列) 不足$n$时才能打印</li>
+<li>右括号：嵌套深度 (队列) &gt; 1时才能打印</li>
+</ul>
+</li>
+<li>
+<p><font color="red">当然是等到满足条件时再打印了</font>：<a href="https://jyywiki.cn/pages/OS/2022/demos/pc.c" target="_blank" rel="noopener noreffer">pc.c</a></p>
+<ul>
+<li><font color="red">用互斥锁保持条件成立</font></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread-sync.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">mutex_t</span> <span class="n">lk</span> <span class="o">=</span> <span class="n">MUTEX_INIT</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tproduce</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;(&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tconsume</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">count</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">n</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">setbuf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tproduce</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tconsume</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>压力测试的检查当然不能少：<a href="https://jyywiki.cn/pages/OS/2022/demos/pc-check.py" target="_blank" rel="noopener noreffer">pc-check.py</a> $\Longrightarrow$ <b>学一门脚本语言来做自动化检测（很重要！），总比$OJ$给你报错你不知道错在哪里好很多</b></li>
+<li>少面向OJ编程（真正的project没有这玩意儿）</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-1.png" title="/img/Operating System/chapter6-1.png" data-thumbnail="/img/Operating System/chapter6-1.png" data-sub-html="<h2>有时间看一看</h2>">
+        
+    </a><figcaption class="image-caption">有时间看一看</figcaption>
+    </figure>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sys</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="n">count</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100000</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">:</span> <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span><span class="p">:</span> <span class="n">count</span> <span class="o">-=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">count</span> <span class="o">&lt;=</span> <span class="n">limit</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1"> Ok.&#39;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>Model checker 当然也不能少 (留作习题)</p>
+</li>
+<li>
+<p>管道通信+自动化脚本检测</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"> 2023-03-11 15:21:02 ⌚  jungle-virtual-machine in ~/chapter6
+</span></span><span class="line"><span class="cl">○ → ./pc <span class="m">3</span> <span class="p">|</span> python3 pc-check.py <span class="m">3</span>
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 2023-03-11 15:23:26 ⌚  jungle-virtual-machine in ~/chapter6
+</span></span><span class="line"><span class="cl">○ → ./pc <span class="m">3</span> <span class="p">|</span> python3 pc-check.py <span class="m">2</span>
+</span></span><span class="line"><span class="cl">Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+</span></span><span class="line"><span class="cl">  File <span class="s2">&#34;/home/jungle/chapter6/pc-check.py&#34;</span>, line 9, in &lt;module&gt;
+</span></span><span class="line"><span class="cl">    assert <span class="m">0</span> &lt;<span class="o">=</span> count &lt;<span class="o">=</span> limit
+</span></span><span class="line"><span class="cl">AssertionError
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="条件变量万能同步方法">条件变量：万能同步方法</h2>
+<h3 id="同步问题分析">同步问题：分析</h3>
+<blockquote>
+<p>任何同步问题都<b><font color="red">有先来先等待的条件</font></b></p>
+</blockquote>
+<ul>
+<li>
+<p>线程 join (<a href="https://jyywiki.cn/pages/OS/2022/demos/thread.h" target="_blank" rel="noopener noreffer">thread.h</a>, <a href="https://jyywiki.cn/pages/OS/2022/demos/sum.c" target="_blank" rel="noopener noreffer">sum.c</a>)</p>
+<ul>
+<li>等所有线程结束后继续执行，否则等待</li>
+</ul>
+</li>
+<li>
+<p>NPY 的例子</p>
+<ul>
+<li>打完游戏且洗完头后继续执行 <code>date()</code>，否则等待</li>
+</ul>
+</li>
+<li>
+<p>生产者/消费者问题</p>
+<ul>
+<li>左括号：深度$k &lt; n$时<code>printf</code>，否则等待</li>
+<li>右括号：$k &gt; 0$时<code>printf</code>，否则等待
+<ul>
+<li>再看一眼 <a href="https://jyywiki.cn/pages/OS/2022/demos/pc.c" target="_blank" rel="noopener noreffer">pc.c</a> $\Longrightarrow$ thread每次停下来都要执行“<b>上🔒 $\rightarrow$ <b><font color="orange">让我看看！</font></b>(资源，好康的东西) $\rightarrow$ 执行或解🔒</b>”（代码：<code>retry:mutex_lock(&amp;lk);if (count == 0) {mutex_unlock(&amp;lk);goto retry;}</code>）浪费了时间，能不能优化掉“<b>上🔒 $\rightarrow$ <b><font color="orange">让我看看！</font></b>$\rightarrow$ 执行或解🔒</b>”的时间？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-2.png" title="/img/Operating System/chapter6-2.png" data-thumbnail="/img/Operating System/chapter6-2.png" data-sub-html="<h2>jyy的thread库通过ChatGPT看起来舒服多了</h2>">
+        
+    </a><figcaption class="image-caption">jyy的thread库通过ChatGPT看起来舒服多了</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-3.png" title="/img/Operating System/chapter6-3.png" data-thumbnail="/img/Operating System/chapter6-3.png" data-sub-html="<h2>join也告诉你在干啥了</h2>">
+        
+    </a><figcaption class="image-caption">join也告诉你在干啥了</figcaption>
+    </figure>
+<ul>
+<li>
+<p>目前理解：<code>join() = while(!terminated_all);</code></p>
+</li>
+<li>
+<p>我们想要做的：<b>将“上🔒 $\rightarrow$ <b><font color="orange">让我看看！</font></b>$\rightarrow$ 执行或解🔒”变成“看完了，资源不对，那就睡觉（悲”</b>（代码：<code>mutex_lock(&amp;lk);if (count == 0){mutex_unlock_and_sleep(&amp;lk);}</code>），也就是“半自旋”$\Longrightarrow$ 休眠</p>
+<ul>
+<li>同时，另一个thread在执行<b>完该做的任务后要叫醒休眠的线程</b></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">printf</span><span class="p">(</span><span class="s">&#34;(&#34;</span><span class="p">);</span> <span class="c1">//finish my work
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">wake_up</span><span class="p">(</span><span class="n">other_thread</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="conditional-variables-条件变量-cv">Conditional Variables (条件变量, CV)</h3>
+<ul>
+<li>
+<p>条件变量 API</p>
+<ul>
+<li>wait(cv, mutex) 💤
+<ul>
+<li>调用时必须保证已经获得 mutex</li>
+<li>释放 mutex、进入睡眠状态</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>signal/notify(cv) 💬 私信：走起</p>
+<ul>
+<li>如果有线程正在等待 cv，则唤醒其中一个线程</li>
+</ul>
+</li>
+<li>
+<p>broadcast/notifyAll(cv) 📣 所有人：走起</p>
+<ul>
+<li>唤醒全部正在等待 cv 的线程（呃呃呃，原来去年cyd的Java教的就是这玩意啊，🐮魔差点写死✌）</li>
+</ul>
+</li>
+</ul>
+<h3 id="条件变量实现生产者-消费者">条件变量：实现生产者-消费者</h3>
+<ul>
+<li>改良代码</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tproduce</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="n">n</span><span class="p">)</span> <span class="n">cond_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;(&#34;</span><span class="p">);</span> <span class="n">count</span><span class="o">++</span><span class="p">;</span> <span class="n">cond_signal</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tconsume</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">cond_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;)&#34;</span><span class="p">);</span> <span class="n">count</span><span class="o">--</span><span class="p">;</span> <span class="n">cond_signal</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>压力测试：<a href="https://jyywiki.cn/pages/OS/2022/demos/pc-cv.c" target="_blank" rel="noopener noreffer">pc-cv.c</a>；模型检验：<a href="https://jyywiki.cn/pages/OS/2022/demos/pc-cv.py" target="_blank" rel="noopener noreffer">pc-cv.py</a></p>
+<ul>
+<li>(Small scope hypothesis)</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-4.png" title="/img/Operating System/chapter6-4.png" data-thumbnail="/img/Operating System/chapter6-4.png" data-sub-html="<h2>我自己的疑问</h2>">
+        
+    </a><figcaption class="image-caption">我自己的疑问</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-5.png" title="/img/Operating System/chapter6-5.png" data-thumbnail="/img/Operating System/chapter6-5.png" data-sub-html="<h2>继续提问</h2>">
+        
+    </a><figcaption class="image-caption">继续提问</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-6.png" title="/img/Operating System/chapter6-6.png" data-thumbnail="/img/Operating System/chapter6-6.png" data-sub-html="<h2>继续提问</h2>">
+        
+    </a><figcaption class="image-caption">继续提问</figcaption>
+    </figure>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/pc-cv.c" target="_blank" rel="noopener noreffer">pc-cv.c</a></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread-sync.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">mutex_t</span> <span class="n">lk</span> <span class="o">=</span> <span class="n">MUTEX_INIT</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">cond_t</span> <span class="n">cv</span> <span class="o">=</span> <span class="n">COND_INIT</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tproduce</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">cond_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;(&#34;</span><span class="p">);</span> <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cond_signal</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tconsume</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">pthread_cond_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;)&#34;</span><span class="p">);</span> <span class="n">count</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cond_signal</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">n</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">setbuf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tproduce</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tconsume</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>观察</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tproduce</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tconsume</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><code>i &lt; 1</code>的时候没问题，而<code>i &lt; 8</code>的时候就出了问题</p>
+</li>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/pc-cv.py" target="_blank" rel="noopener noreffer">pc-cy.py</a></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ProducerConsumer</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">locked</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">waits</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">tryacquire</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">locked</span><span class="p">,</span> <span class="n">seen</span> <span class="o">=</span> <span class="s1">&#39;🔒&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">seen</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">tp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">():</span> <span class="k">pass</span> <span class="c1"># mutex_lock()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="c1"># cond_wait</span>
+</span></span><span class="line"><span class="cl">                <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">+</span> <span class="s1">&#39;1&#39;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">while</span> <span class="s1">&#39;1&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">:</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">                <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">():</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># cond_signal</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">()</span> <span class="c1"># mutex_unlock()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">tc1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">():</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">+</span> <span class="s1">&#39;2&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="s1">&#39;2&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">:</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">():</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">tc2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">():</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">+</span> <span class="s1">&#39;3&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="s1">&#39;3&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">:</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">():</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_negative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">:</span> <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">ch</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span><span class="p">:</span> <span class="n">count</span> <span class="o">-=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>过程解读（上面的pc-cv.c）</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>从生成者开始往下走，<b>一个生成材料生成成功，而消费过程执行了两次</b> $\Longrightarrow$ 寄了！</p>
+<ul>
+<li><b>为什么呢：同类唤醒了同类，这是错误的</b></li>
+<li><b>需要两个条件变量，保证只能唤醒异类</b>，课后自己阅读相关材料</li>
+</ul>
+</li>
+<li>
+<p><a href="https://github.com/Jungle430/check-for-NJU-OS/blob/main/pc-cv.html" target="_blank" rel="noopener noreffer">可视化</a></p>
+</li>
+</ul>
+<h3 id="条件变量正确的打开方式">条件变量：正确的打开方式</h3>
+<ul>
+<li>需要<b><font color="red">等待条件满足时</font></b></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">cond</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">mutex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="n">assert</span><span class="p">(</span><span class="n">cond</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 互斥锁保证了在此期间条件 cond 总是成立
+</span></span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><b><font color="red">其他线程条件可能被满足时</font></b></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">broadcast</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>修改 <a href="https://jyywiki.cn/pages/OS/2022/demos/pc-cv.c" target="_blank" rel="noopener noreffer">pc-cv.c</a> 和 <a href="https://jyywiki.cn/pages/OS/2022/demos/pc-cv.py" target="_blank" rel="noopener noreffer">pc-cv.py</a> $if \rightarrow while\ and\ signal \rightarrow boardcast\newline$</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-8.png" title="/img/Operating System/chapter6-8.png" data-thumbnail="/img/Operating System/chapter6-8.png" data-sub-html="<h2>两者区别</h2>">
+        
+    </a><figcaption class="image-caption">两者区别</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-9.png" title="/img/Operating System/chapter6-9.png" data-thumbnail="/img/Operating System/chapter6-9.png" data-sub-html="<h2>为什么要唤醒全部线程的原因。总算搞明白为什么之前只改$if \rightarrow while$的情况下程序会卡死</h2>">
+        
+    </a><figcaption class="image-caption">为什么要唤醒全部线程的原因。总算搞明白为什么之前只改$if \rightarrow while$的情况下程序会卡死</figcaption>
+    </figure>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">2023-03-11 20:47:45 ⌚  jungle-virtual-machine in ~/chapter6
+</span></span><span class="line"><span class="cl">○ → ./pc-cv <span class="m">3</span> <span class="p">|</span> python3 pc-check.py <span class="m">3</span>
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span><span class="line"><span class="cl"><span class="m">100000</span> Ok.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>运行成功！</li>
+<li>问大爹ChatGPT</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter6-7.png" title="/img/Operating System/chapter6-7.png" data-thumbnail="/img/Operating System/chapter6-7.png" data-sub-html="<h2>if是假睡眠，只能睡一次，下一次就会苏醒，而while才是真睡眠，只有条件满足时才苏醒</h2>">
+        
+    </a><figcaption class="image-caption"><code>if</code>是<b>假睡眠</b>，只能睡一次，下一次就会苏醒，而<code>while</code>才是<b>真睡眠</b>，只有条件满足时才苏醒</figcaption>
+    </figure>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">pthread_mutex_t</span> <span class="n">lock</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">pthread_cond_t</span> <span class="n">cond</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">data</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="o">*</span><span class="nf">thread_func</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">data</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pthread_cond_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cond</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Thread %d: data = %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">arg</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_t</span> <span class="n">tid1</span><span class="p">,</span> <span class="n">tid2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_mutex_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_cond_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cond</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tid1</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">thread_func</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tid2</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">thread_func</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">data</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_cond_signal</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cond</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_join</span><span class="p">(</span><span class="n">tid1</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_join</span><span class="p">(</span><span class="n">tid2</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_mutex_destroy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pthread_cond_destroy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cond</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="条件变量实现并行计算">条件变量：实现并行计算</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">job</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">run</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">job</span> <span class="o">*</span><span class="n">job</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="o">!</span> <span class="p">(</span><span class="n">job</span> <span class="o">=</span> <span class="n">get_job</span><span class="p">())</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">mutex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">job</span><span class="o">-&gt;</span><span class="n">run</span><span class="p">(</span><span class="n">job</span><span class="o">-&gt;</span><span class="n">arg</span><span class="p">);</span> <span class="c1">// 不需要持有锁
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                      <span class="c1">// 可以生成新的 job
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                      <span class="c1">// 注意回收分配的资源
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>下面开始将最长公共子串的dp算法，视频断了，这个之前博客里面有<a href="https://jungle430.github.io/posts/data-structures-and-algorithms/dynamic-programming/#longest-common-subsequence-by-dynamic-programming" target="_blank" rel="noopener noreffer">《Dynamic Programming》</a>回去复习</li>
+</ul>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Pause<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content"><p>Pause in 2023-03-11 21:30</p>
+<p>感觉这节课内容好™️的多，已经不是仅仅就限制于一个一个算法了，难滴很呐（！</p>
+<p>今天先听到这罢，不过收获也是很多，去年cyd的Java上面讲的Thread那些东西终于开始理解了，而不是像当时那样在宿舍瞎🐔8️⃣写一个一个Thread（怒</p>
+<p>感谢<a href="https://github.com/derecknowayback" target="_blank" rel="noopener noreffer">Dereck Chen</a>推荐的两篇有关<code>xv6</code>锁的文章<a href="https://zhuanlan.zhihu.com/p/352699414" target="_blank" rel="noopener noreffer">《Chapter 6: Locking》</a>，<a href="https://zhuanlan.zhihu.com/p/353400345" target="_blank" rel="noopener noreffer">《Chapter 6.5: More Tools, Examples and Deadlocks》</a>，一定找时间好好看</p>
+<p>感谢洲帮我找到了用台湾线上<a href="https://openai.com/blog/chatgpt" target="_blank" rel="noopener noreffer">ChatGPT</a>的方法（大喜，之前首尔线和美国线被ban了导致后面都没用上（悲</p>
+</div>
+        </div>
+    </div>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter5 并发控制：互斥</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</link>
     <pubDate>Wed, 08 Mar 2023 17:23:11 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</guid>
@@ -1276,6 +2209,12 @@
 <p><b>在没有竞争的场景下，锁的获取和释放性能都非常高，不需要内核的参与，仅仅是通过用户空间的原子操作来修改futex word的状态即可</b>。在有竞争的场景下，如果线程无法获取futex锁，那么把自己放入到 wait queue中（陷入内核，有系统调用的开销），而在owner task释放锁的时候，如果检测到有竞争（等待队列中有阻塞任务），就会通过系统调用来唤醒等待队列中的任务，使其恢复执行，继续去持锁。如果没有竞争，那么也无需陷入内核。</p>
 <p>摘自：<a href="https://zhuanlan.zhihu.com/p/568678633" target="_blank" rel="noopener noreffer">《什么是futex？》</a></p>
 </blockquote>
+<blockquote>
+<p>Futex（Fast Userspace Mutex）是一种用户空间锁，它是Linux内核提供的一种同步原语，用于控制多个进程或线程之间的访问共享资源。Futex主要用于实现更高级别的同步原语，例如条件变量和读写锁。Futex提供了一种低开销的锁机制，当锁被持有时，它可以避免将线程或进程阻塞在内核空间。</p>
+<p>在Futex中，锁的状态保存在用户空间中，而不是内核空间中，当线程或进程需要获取锁时，它会尝试将锁的状态从“未锁定”改为“锁定”状态。如果成功，线程或进程就可以访问共享资源。如果锁已被其他线程或进程占用，则它将在用户空间内忙等待，直到锁被释放。</p>
+<p>Futex还支持一些其他的操作，例如等待一个特定的值或比较并交换值，这些操作可以用于实现条件变量和读写锁等高级别的同步原语。由于Futex的低开销和高效性，它成为了Linux系统中许多高级别同步原语的基础。</p>
+<p>来自<a href="https://openai.com/blog/chatgpt" target="_blank" rel="noopener noreffer">ChatGPT</a></p>
+</blockquote>
 <ul>
 <li>
 <p><b>如果我们仔细观察就会发现，futex调用的数量远远小于lock和unlock的数量</b></p>
@@ -1464,7 +2403,7 @@
 <ul>
 <li>futex (7), futex (2)</li>
 <li><a href="https://lwn.net/Articles/360699/" target="_blank" rel="noopener noreffer">A futex overview and update</a> (LWN)</li>
-<li><a href="https://jyywiki.cn/pages/OS/manuals/futexes-are-tricky.pdf" target="_blank" rel="noopener noreffer">Futexes are tricky</a> (论 model checker 的重要性) $\Longrightarrow$ <u>同时也提示我们从最简单的写起，千万不要觉得自己行就装🖊</u></li>
+<li><a href="https://jyywiki.cn/pages/OS/manuals/futexes-are-tricky.pdf" target="_blank" rel="noopener noreffer">Futexes are tricky</a> (论 model checker 的重要性) $\Longrightarrow$ <u>同时也提示我们从最简单的写起，千万不要觉得自己行就装🖊搞大的</u></li>
 <li>(我们不讲并发算法)</li>
 </ul>
 <h2 id="总结">总结</h2>
@@ -1483,6 +2422,7 @@
 </li>
 <li>Fast/slow paths: 性能优化的重要途径</li>
 </ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>
 <item>
