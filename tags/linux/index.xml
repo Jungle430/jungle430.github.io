@@ -74,6 +74,10 @@
         
     </a><figcaption class="image-caption">shell输入<code>man execve</code>之后的函数声明和所在位置</figcaption>
     </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/support2-4.png" title="/img/Operating System/support2-4.png" data-thumbnail="/img/Operating System/support2-4.png" data-sub-html="<h2>evnp</h2>">
+        
+    </a><figcaption class="image-caption"><code>evnp</code></figcaption>
+    </figure>
 <h4 id="_start">_start()</h4>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
