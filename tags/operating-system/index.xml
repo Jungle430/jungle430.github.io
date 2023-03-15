@@ -4,7 +4,190 @@
         <link>https://Jungle430.github.io/tags/operating-system/</link>
         <description>Operating System - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 10 Mar 2023 20:32:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/operating-system/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 15 Mar 2023 13:26:02 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/operating-system/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter7 真实世界的并发编程</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter7/</link>
+    <pubDate>Wed, 15 Mar 2023 13:26:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter7/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>并发编程的基本工具：线程库、互斥和同步</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 什么样的任务是需要并行/并发的？它们应该如何实现？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>高性能计算中的并发编程</li>
+<li>数据中心里的并发编程</li>
+<li>我们身边的并发编程</li>
+</ul>
+<h2 id="高性能计算中的并发编程">高性能计算中的并发编程</h2>
+<ul>
+<li><a href="https://dl.acm.org/doi/10.1145/359327.359336" target="_blank" rel="noopener noreffer">CRAY-1 Supercomputer</a>, 1976 @ 138 MFLOPS, SIMD Processor</li>
+</ul>
+<h3 id="高性能计算程序特点">高性能计算程序：特点</h3>
+<blockquote>
+<p>“A technology that harnesses the power of supercomputers or computer clusters to solve complex problems requiring massive computation.” (IBM)</p>
+</blockquote>
+<ul>
+<li>
+<p>以计算为中心</p>
+<ul>
+<li>
+<p>系统模拟：天气预报、能源、分子生物学</p>
+</li>
+<li>
+<p>人工智能：神经网络训练</p>
+</li>
+<li>
+<p>矿厂：纯粹的 hash 计算</p>
+</li>
+<li>
+<p><a href="http://www.hpc100.cn/top100/20/" target="_blank" rel="noopener noreffer">HPC-China 100</a></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="高性能计算主要挑战">高性能计算：主要挑战</h3>
+<p>计算任务如何分解</p>
+<ul>
+<li>
+<p>计算图需要容易并行化</p>
+<ul>
+<li>机器-线程两级任务分解</li>
+</ul>
+</li>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"> <span class="o">*</span> <span class="k">if</span> <span class="n">array1</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="n">array2</span><span class="p">[</span><span class="n">y</span><span class="p">],</span><span class="n">we</span> <span class="n">can</span> <span class="n">know</span> <span class="n">that</span> <span class="n">it</span> <span class="n">is</span> <span class="n">form</span> <span class="n">the</span> <span class="s">&#34;decreasing and conquer&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="o">*</span> <span class="n">so</span> <span class="n">we</span> <span class="n">should</span> <span class="n">make</span> <span class="n">matrix</span><span class="p">[</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">y</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl"> <span class="o">*</span> <span class="k">else</span> <span class="n">array1</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">!=</span> <span class="n">array2</span><span class="p">[</span><span class="n">y</span><span class="p">],</span><span class="n">we</span> <span class="n">can</span> <span class="n">know</span> <span class="n">that</span> <span class="n">it</span> <span class="n">is</span> <span class="n">form</span> <span class="n">the</span> <span class="s">&#34;divide and conquer&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="o">*</span> <span class="n">so</span> <span class="n">we</span> <span class="n">should</span> <span class="n">make</span> <span class="n">matrix</span><span class="p">[</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">y</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">matrix</span><span class="p">[</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>计算图</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter7-1.jpg" title="/img/Operating System/chapter7-1.jpg" data-thumbnail="/img/Operating System/chapter7-1.jpg" data-sub-html="<h2>计算图（看依赖关系，表明了计算的顺序限制）</h2>">
+        
+    </a><figcaption class="image-caption">计算图（看依赖关系，表明了计算的顺序限制）</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter7-2.jpg" title="/img/Operating System/chapter7-2.jpg" data-thumbnail="/img/Operating System/chapter7-2.jpg" data-sub-html="<h2>看成有向图进行拓扑排序，确定计算顺序。可以看出矩阵规模小的时候并行度很低，不如单线程计算。但是矩阵规模大的时候就要考虑并行计算了</h2>">
+        
+    </a><figcaption class="image-caption">看成有向图进行拓扑排序，确定计算顺序。<br>可以看出矩阵规模小的时候并行度很低，不如单线程计算。但是矩阵规模大的时候就要考虑并行计算了</figcaption>
+    </figure>
+<ul>
+<li>
+<p>生产者-消费者解决一切</p>
+<ul>
+<li><a href="https://hpc-tutorials.llnl.gov/mpi/" target="_blank" rel="noopener noreffer">MPI</a> - “a specification for the developers and users of message passing libraries”, <a href="https://www.openmp.org/" target="_blank" rel="noopener noreffer">OpenMP</a> - “multi-platform shared-memory parallel programming in C/C++ and Fortran”</li>
+</ul>
+</li>
+<li>
+<p><a href="https://web.mit.edu/dimitrib/www/pdc.html" target="_blank" rel="noopener noreffer">Parallel and Distributed Computation: Numerical Methods</a>（与高性能计算有关）</p>
+</li>
+</ul>
+<p>线程间如何通信</p>
+<ul>
+<li>通信不仅发生在节点/线程之间，还发生在任何共享内存访问</li>
+<li>还记得被 <a href="https://jyywiki.cn/pages/OS/2022/demos/mem-ordering.c" target="_blank" rel="noopener noreffer">mem-ordering.c</a> 支配的恐惧吗？</li>
+</ul>
+<p><font color="red"><b>模拟计算：现实中的物理世界就是并发的</b></font></p>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/mandelbrot.c" target="_blank" rel="noopener noreffer">mandelbrot.c</a> (embarrassingly parallel)<font color="orange">环境有点难配，这个程序在kali上面的运行速度要比乌班图快</font>。线程数越多，运行速度越快。而且我们会发现线程会将区域划分，然后只负责自己那一部分的区域。（由于区域间没有关联，这个问题很容易进行划分和并行）</p>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter7-3.png" title="/img/Operating System/chapter7-3.png" data-thumbnail="/img/Operating System/chapter7-3.png" data-sub-html="<h2>最终效果</h2>">
+        
+    </a><figcaption class="image-caption">最终效果</figcaption>
+    </figure>
+<h2 id="数据中心里的并发编程">数据中心里的并发编程</h2>
+<h3 id="数据中心程序特点">数据中心程序：特点</h3>
+<blockquote>
+<p>“A network of computing and storage resources that enable the delivery of shared applications and data.” (CISCO)</p>
+</blockquote>
+<p>以数据 (存储) 为中心</p>
+<ul>
+<li>从互联网搜索 (Google)、社交网络 (Facebook/Twitter) 起家</li>
+<li>支撑各类互联网应用：微信/QQ/支付宝/游戏/网盘/……</li>
+</ul>
+<p>算法/系统对 HPC 和数据中心的意义</p>
+<ul>
+<li>你有 1,000,000 台服务器</li>
+<li>如果一个算法/实现能快 1%，就能省 10,000 台服务器
+<ul>
+<li>参考：$NJU$对面一套房 ≈ 50 台服务器 (不计运维成本)</li>
+</ul>
+</li>
+</ul>
+<h3 id="数据中心主要挑战">数据中心：主要挑战</h3>
+<p>多副本情况下的<b>高可靠</b>、<b>低延迟</b>数据访问</p>
+<div class="mermaid" id="id-1"></div>
+<p><b>为了可靠性（做数据恢复）每个数据在多个服务器里面都有副本</b></p>
+<p>其中的计算机称为$Key-value-storage$<code>{key : value}</code>，<font color="red"><b>是现在分布式系统的最流行的模型</b></font></p>
+<ul>
+<li>在服务海量地理分布请求的前提下
+<ul>
+<li>数据要保持一致 $\Longrightarrow$ 多个副本都要跟着变动(Consistency)</li>
+<li>服务时刻保持可用 (Availability)</li>
+<li>容忍机器离线 (Partition tolerance)</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter7-4.png" title="/img/Operating System/chapter7-4.png" data-thumbnail="/img/Operating System/chapter7-4.png" data-sub-html="<h2>量子纠缠</h2>">
+        
+    </a><figcaption class="image-caption">量子纠缠</figcaption>
+    </figure>
+<h3 id="这门课的问题如何用好一台计算机">这门课的问题：如何用好一台计算机？</h3>
+<p>如何用一台 (可靠的) 计算机<b>尽可能多地服务并行的请求</b></p>
+<ul>
+<li>关键指标：QPS, tail latency, &hellip;</li>
+</ul>
+<p>我们有的工具</p>
+<ul>
+<li>线程 (threads)
+<ul>
+<li>线程的切换需要代价<font color="purple"><b>（从一个状态机切换到另一个状态机 $\Longrightarrow$ 保存PC，保存所有寄存器（空间开销），压栈，陷入管态等）</b></font></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kr">thread</span><span class="p">(</span><span class="n">start</span> <span class="o">=</span> <span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">println</span><span class="p">(</span><span class="s">&#34;${Thread.currentThread()} has run.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><b>协程 (coroutines)</b>
+<ul>
+<li><code>code: co_yield ==&gt; asm: call &lt;co_yield&gt;</code> <font color="red"><b>实际上是函数调用</b></font>。只需要进行<font color="red"><b>一部分栈和寄存器</b></font>的操作</li>
+<li>多个可以保存/恢复的执行流 (<a href="https://jyywiki.cn/OS/2022/labs/M2" target="_blank" rel="noopener noreffer">M2 - libco</a>)</li>
+<li><b>比线程更轻量 (完全没有系统调用，也就没有操作系统状态)</b></li>
+</ul>
+</li>
+</ul>
+<h3 id="数据中心协程和线程">数据中心：协程和线程</h3>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter6 并发控制：同步</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter6/</link>
     <pubDate>Fri, 10 Mar 2023 20:32:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter6/</guid>
