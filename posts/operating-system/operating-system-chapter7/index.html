@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter7\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  1242 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  3355 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter7\/","datePublished": "2023-03-15T13:26:02+08:00","dateModified": "2023-03-15T13:26:02+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter7 真实世界的并发编程</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-15">2023-03-15</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1242 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-15">2023-03-15</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3355 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -125,8 +125,22 @@
         <li><a href="#数据中心主要挑战">数据中心：主要挑战</a></li>
         <li><a href="#这门课的问题如何用好一台计算机">这门课的问题：如何用好一台计算机？</a></li>
         <li><a href="#数据中心协程和线程">数据中心：协程和线程</a></li>
+        <li><a href="#go-和-goroutine">Go 和 Goroutine</a></li>
+        <li><a href="#现代编程语言上的系统编程">现代编程语言上的系统编程</a></li>
       </ul>
     </li>
+    <li><a href="#我们身边的并发编程">我们身边的并发编程</a>
+      <ul>
+        <li><a href="#web-20-时代-1999">Web 2.0 时代 (1999)</a></li>
+        <li><a href="#人机交互程序特点和主要挑战">人机交互程序：特点和主要挑战</a></li>
+        <li><a href="#单线程--事件模型">单线程 + 事件模型</a></li>
+        <li><a href="#异步事件模型">异步事件模型</a></li>
+        <li><a href="#异步编程promise">异步编程：Promise</a></li>
+        <li><a href="#promise-描述-workflow-的-嵌入式语言">Promise: 描述 Workflow 的 “嵌入式语言”</a></li>
+        <li><a href="#async-await-even-better">Async-Await: Even Better</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
   </ul>
 </nav></div>
                 </div><div class="content" id="content"><h1 id="operating-system">Operating System</h1>
@@ -323,13 +337,580 @@
 </div><ul>
 <li><b>协程 (coroutines)</b>
 <ul>
-<li><code>code: co_yield ==&gt; asm: call &lt;co_yield&gt;</code> <font color="red"><b>实际上是函数调用</b></font>。只需要进行<font color="red"><b>一部分栈和寄存器</b></font>的操作</li>
+<li><code>code: co_yield ==&gt; asm: call &lt;co_yield&gt;</code> $\Longrightarrow$ <font color="red"><b>实际上是函数调用</b></font>。只需要进行<font color="red"><b>一部分栈和一部分寄存器</b></font>的操作</li>
 <li>多个可以保存/恢复的执行流 (<a href="https://jyywiki.cn/OS/2022/labs/M2" target="_blank" rel="noopener noreffer">M2 - libco</a>)</li>
 <li><b>比线程更轻量 (完全没有系统调用，也就没有操作系统状态)</b></li>
 </ul>
 </li>
 </ul>
 <h3 id="数据中心协程和线程">数据中心：协程和线程</h3>
+<ul>
+<li>数据中心简化模型</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>
+<p>数据中心</p>
+<ul>
+<li>
+<p>同一时间有数千/数万个请求到达服务器</p>
+</li>
+<li>
+<p>计算部分</p>
+<ul>
+<li><b>需要利用好多处理器</b>
+<ul>
+<li>线程 → <b><font color="red">这就是我擅长的 (Mandelbrot Set)</font>，但是每一个线程都会占用相当可观的操作系统资源<font color="orange">（需要挂PC，保存状态等，开销比协程大的多）</font></b></li>
+<li>协程 → <b>一人出力，他人摸鱼 $\Longrightarrow$ <font color="red">（协程不受操作系统调度，一个线程里面一次只能运行一个协程）例如协程碰到read(),就会反过来阻塞对应的线程</font></b></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>I/O 部分</p>
+<ul>
+<li>会在系统调用上 block (例如请求另一个服务或读磁盘)
+<ul>
+<li>协程 → 一人干等，他人围观</li>
+<li>线程 → 每个线程都占用可观的操作系统资源</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>(这个问题比你想象的复杂，例如虚拟机)</p>
+</li>
+</ul>
+<h3 id="go-和-goroutine">Go 和 Goroutine</h3>
+<blockquote>
+<p>Go: 小孩子才做选择，多处理器并行和轻量级并发<b><font color="red">我全都要</font></b>！</p>
+</blockquote>
+<p><b>Goroutine: 概念上是线程，实际是线程和协程的混合体</b> $\Longrightarrow$ 解决了高并发$I/O$的问题</p>
+<div class="mermaid" id="id-3"></div>
+<ul>
+<li>
+<p><b>即利用的协程的高效性，又通过一定的机制防止协程造成的阻塞</b></p>
+</li>
+<li>
+<p>调度器会帮助你管理好<b>Goroutine</b></p>
+</li>
+<li>
+<p>同时并行执行的最多也只有一个CPU和一个线程</p>
+<ul>
+<li><font color="red"><b>一个CPU都不会在两个go线程之间切换，省掉了切换CPU线程的时间，运行和切换的都是协程</b></font></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>每个 CPU 上有一个 Go Worker，自由调度 goroutines</li>
+<li>执行到 blocking API 时 (例如 sleep, read)
+<ul>
+<li>Go Worker 偷偷改成 non-blocking 的版本
+<ul>
+<li>成功 → 立即继续执行</li>
+<li>失败 → 立即 yield 到另一个需要 CPU 的 goroutine
+<ul>
+<li>太巧妙了！CPU 和操作系统全部用到 100%</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>例子</p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/fib.go" target="_blank" rel="noopener noreffer">fib.go</a>; <a href="https://books.studygolang.com/gopl-zh/ch9/ch9-08.html" target="_blank" rel="noopener noreffer"><em>The Go Programming Language</em> (ch 9.8)</a></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// Example from &#34;The Go Programming Language&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">go</span> <span class="nf">spinner</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="nx">n</span> <span class="p">=</span> <span class="mi">45</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">fibN</span> <span class="o">:=</span> <span class="nf">fib</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="c1">// slow
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;\rFibonacci(%d) = %d\n&#34;</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">fibN</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">spinner</span><span class="p">(</span><span class="nx">delay</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">r</span> <span class="o">:=</span> <span class="k">range</span> <span class="s">`-\|/`</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;\r%c&#34;</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">delay</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">fib</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="nx">x</span> <span class="p">&lt;</span> <span class="mi">2</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nf">fib</span><span class="p">(</span><span class="nx">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="nf">fib</span><span class="p">(</span><span class="nx">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><code>go spinner(100 * time.Millisecond)</code>概念是线程，实现是协程</p>
+</li>
+<li>
+<p><code>spinner</code>实践上会被调度到另外一个CPU上面执行</p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Operating%20System/chapter7-5.png" title="/img/Operating System/chapter7-5.png" data-thumbnail="/img/Operating System/chapter7-5.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-5.png"
+            data-srcset="/img/Operating%20System/chapter7-5.png, /img/Operating%20System/chapter7-5.png 1.5x, /img/Operating%20System/chapter7-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-5.png" />
+    </a>
+<h3 id="现代编程语言上的系统编程">现代编程语言上的系统编程</h3>
+<blockquote>
+<p>Do not communicate by sharing memory; instead, share memory by communicating. ——<em>Effective Go</em></p>
+</blockquote>
+<p><font color="red">共享内存 = 万恶之源</font></p>
+<ul>
+<li>在奇怪调度下发生的各种并发 bugs
+<ul>
+<li>条件变量：broadcast 性能低，不 broadcast 容易错</li>
+<li>信号量：在管理多种资源时就没那么好用了</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><b>既然生产者-消费者能解决绝大部分问题，提供一个 API 不就好了？</b></p>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/producer-consumer.go" target="_blank" rel="noopener noreffer">producer-consumer.go</a>
+<ul>
+<li>缓存为 0 的 channel 可以用来同步 <font color="red"><b>(先到者等待)</b></font></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">stream</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">const</span> <span class="nx">n</span> <span class="p">=</span> <span class="mi">4</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">produce</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;produce&#34;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">stream</span> <span class="o">&lt;-</span> <span class="nx">i</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">consume</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">x</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">stream</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;consume&#34;</span><span class="p">,</span> <span class="nx">x</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">go</span> <span class="nf">produce</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">consume</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>stream &lt;- i</code> $\Longrightarrow$ 把i丢进channel</li>
+<li><code>x := &lt;- stream</code> $\Longrightarrow$ 把i从channel中拉出来</li>
+</ul>
+<a class="lightgallery" href="/img/Operating%20System/chapter7-6.png" title="/img/Operating System/chapter7-6.png" data-thumbnail="/img/Operating System/chapter7-6.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-6.png"
+            data-srcset="/img/Operating%20System/chapter7-6.png, /img/Operating%20System/chapter7-6.png 1.5x, /img/Operating%20System/chapter7-6.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-6.png" />
+    </a>
+<a class="lightgallery" href="/img/Operating%20System/chapter7-7.png" title="/img/Operating System/chapter7-7.png" data-thumbnail="/img/Operating System/chapter7-7.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-7.png"
+            data-srcset="/img/Operating%20System/chapter7-7.png, /img/Operating%20System/chapter7-7.png 1.5x, /img/Operating%20System/chapter7-7.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-7.png" />
+    </a>
+<h2 id="我们身边的并发编程">我们身边的并发编程</h2>
+<h3 id="web-20-时代-1999">Web 2.0 时代 (1999)</h3>
+<p>人与人之间联系更加紧密的互联网</p>
+<ul>
+<li>“Users were encouraged to provide content, rather than just viewing it.”</li>
+<li>你甚至可以找到一些 “Web 3.0”/Metaverse 的线索</li>
+</ul>
+<hr>
+<p>是什么成就了今天的 Web 2.0?</p>
+<ul>
+<li><font color="red"><b>浏览器中的并发编程</b></font>：Ajax (Asynchronous JavaScript + XML)</li>
+<li>HTML (DOM Tree) + CSS 代表了你能看见的一切
+<ul>
+<li>通过 JavaScript 可以改变它</li>
+<li>通过 JavaScript 可以建立连接本地和服务器</li>
+<li>你就拥有了全世界！</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter7-8.png" title="/img/Operating System/chapter7-8.png" data-thumbnail="/img/Operating System/chapter7-8.png" data-sub-html="<h2>浏览器中的DOM Tree</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-8.png"
+            data-srcset="/img/Operating%20System/chapter7-8.png, /img/Operating%20System/chapter7-8.png 1.5x, /img/Operating%20System/chapter7-8.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-8.png" />
+    </a><figcaption class="image-caption">浏览器中的<code>DOM Tree</code></figcaption>
+    </figure>
+<h3 id="人机交互程序特点和主要挑战">人机交互程序：特点和主要挑战</h3>
+<ul>
+<li>
+<p>特点：不太复杂</p>
+<ul>
+<li>
+<p>既没有太多计算</p>
+<ul>
+<li>DOM Tree 也不至于太大 (大了人也看不过来)</li>
+<li>DOM Tree 怎么画浏览器全帮我们搞定了</li>
+</ul>
+</li>
+<li>
+<p>也没有太多 I/O</p>
+<ul>
+<li>就是一些网络请求<b>（调用的快，返回的慢）</b></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>挑战：程序员多 $\Longrightarrow$<b>（后面非科班，设计师，原画师这样的群体也会参与进来）</b></p>
+<ul>
+<li>
+<p><b><font color="red">零基础</font>的人你让他整共享内存上的多线程</b></p>
+</li>
+<li>
+<p>恐怕我们现在用的到处都是 bug 吧？？？</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="单线程--事件模型">单线程 + 事件模型</h3>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter7-9.jpg" title="/img/Operating System/chapter7-9.jpg" data-thumbnail="/img/Operating System/chapter7-9.jpg" data-sub-html="<h2>单线程&#43;事件模型，事件一旦开始执行就必须执行到结束 $\Longrightarrow$ 这样就避免了并发bug</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-9.jpg"
+            data-srcset="/img/Operating%20System/chapter7-9.jpg, /img/Operating%20System/chapter7-9.jpg 1.5x, /img/Operating%20System/chapter7-9.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-9.jpg" />
+    </a><figcaption class="image-caption">单线程+事件模型，事件一旦开始执行就必须执行到结束 $\Longrightarrow$ <b><code>这样就避免了并发bug</code></b></figcaption>
+    </figure>
+<ul>
+<li>
+<p>但是事件里面请求网络的时候要注意成功和失败的处理方法。<b>因为网络是有延迟而且不稳定的，不能因为请求网络失败就导致在对应的事件里面堵死</b></p>
+</li>
+<li>
+<p>尽可能少但又足够的并发</p>
+<ul>
+<li>
+<p>一个线程、全局的事件队列、<b><font color="red">按序执行 (run-to-complete)</font></b>，<b>没有lock，编写容易</b></p>
+</li>
+<li>
+<p>耗时的 API (Timer, Ajax, &hellip;) 调用会立即返回</p>
+<ul>
+<li>条件满足时向队列里增加一个事件</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span> <span class="p">{</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;https://xxx.yyy.zzz/login&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span> <span class="p">{</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;https://xxx.yyy.zzz/cart&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// do something
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">error</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">error</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter7-10.jpg" title="/img/Operating System/chapter7-10.jpg" data-thumbnail="/img/Operating System/chapter7-10.jpg" data-sub-html="<h2>请求成功的情况</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-10.jpg"
+            data-srcset="/img/Operating%20System/chapter7-10.jpg, /img/Operating%20System/chapter7-10.jpg 1.5x, /img/Operating%20System/chapter7-10.jpg 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-10.jpg" />
+    </a><figcaption class="image-caption">请求成功的情况</figcaption>
+    </figure>
+<h3 id="异步事件模型">异步事件模型</h3>
+<ul>
+<li>
+<p>并发模型简单了很多</p>
+<ul>
+<li>函数的执行是原子的 (不能并行，减少了并发 bug 的可能性)</li>
+</ul>
+</li>
+<li>
+<p><b>API 依然可以并行（由浏览器后台帮你搞定并行）</b></p>
+<ul>
+<li>适合网页这种 “大部分时间花在渲染和网络请求” 的场景
+<ul>
+<li>JavaScript 代码只负责 “描述” <code>DOM Tree</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>坏处</p>
+<ul>
+<li>Callback hell (祖传屎山)
+<ul>
+<li>刚才的代码嵌套 5 层，可维护性已经接近于零了</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="异步编程promise">异步编程：Promise</h3>
+<blockquote>
+<p>导致 callback hell 的本质：人类脑袋里想的是 “流程图”，看到的是 “回调”。</p>
+</blockquote>
+<ul>
+<li>The Promise object represents the <em>eventual completion</em> (or failure) of an asynchronous operation and its resulting value.</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter7-11.png" title="/img/Operating System/chapter7-11.png" data-thumbnail="/img/Operating System/chapter7-11.png" data-sub-html="<h2>Promise: 流程图的构造方法 (Mozilla-MDN Docs)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-11.png"
+            data-srcset="/img/Operating%20System/chapter7-11.png, /img/Operating%20System/chapter7-11.png 1.5x, /img/Operating%20System/chapter7-11.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-11.png" />
+    </a><figcaption class="image-caption">Promise: 流程图的构造方法 (Mozilla-MDN Docs)</figcaption>
+    </figure>
+<h3 id="promise-描述-workflow-的-嵌入式语言">Promise: 描述 Workflow 的 “嵌入式语言”</h3>
+<p>Chaining</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="nx">loadScript</span><span class="p">(</span><span class="s2">&#34;/article/promise-chaining/one.js&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="nx">then</span><span class="p">(</span> <span class="nx">script</span> <span class="p">=&gt;</span> <span class="nx">loadScript</span><span class="p">(</span><span class="s2">&#34;/article/promise-chaining/two.js&#34;</span><span class="p">)</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="nx">then</span><span class="p">(</span> <span class="nx">script</span> <span class="p">=&gt;</span> <span class="nx">loadScript</span><span class="p">(</span><span class="s2">&#34;/article/promise-chaining/three.js&#34;</span><span class="p">)</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="nx">then</span><span class="p">(</span> <span class="nx">script</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// scripts are loaded, we can use functions declared there
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">})</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">err</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span> <span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter7-12.png" title="/img/Operating System/chapter7-12.png" data-thumbnail="/img/Operating System/chapter7-12.png" data-sub-html="<h2>代码描述</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-12.png"
+            data-srcset="/img/Operating%20System/chapter7-12.png, /img/Operating%20System/chapter7-12.png 1.5x, /img/Operating%20System/chapter7-12.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-12.png" />
+    </a><figcaption class="image-caption">代码描述</figcaption>
+    </figure>
+<p>Fork-join</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="nx">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span> <span class="p">(</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">resolve</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span> <span class="p">}</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">b</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span> <span class="p">(</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">resolve</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">)</span> <span class="p">}</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span> <span class="p">(</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">resolve</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">)</span> <span class="p">}</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">([</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">c</span><span class="p">]).</span><span class="nx">then</span><span class="p">(</span> <span class="nx">res</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="p">}</span> <span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter7-13.png" title="/img/Operating System/chapter7-13.png" data-thumbnail="/img/Operating System/chapter7-13.png" data-sub-html="<h2>代码描述</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-13.png"
+            data-srcset="/img/Operating%20System/chapter7-13.png, /img/Operating%20System/chapter7-13.png 1.5x, /img/Operating%20System/chapter7-13.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-13.png" />
+    </a><figcaption class="image-caption">代码描述</figcaption>
+    </figure>
+<h3 id="async-await-even-better">Async-Await: Even Better</h3>
+<p>async function</p>
+<ul>
+<li>总是返回一个 <code>Promise</code> object</li>
+<li><code>async_func()</code> - fork</li>
+</ul>
+<hr>
+<p>await promise</p>
+<ul>
+<li><code>await promise</code> - join</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="nx">A</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="kr">await</span> <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s1">&#39;/hello/a&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">B</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="kr">await</span> <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s1">&#39;/hello/b&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">C</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="kr">await</span> <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s1">&#39;/hello/c&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">hello</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="kr">await</span> <span class="nb">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">([</span><span class="nx">A</span><span class="p">(),</span> <span class="nx">B</span><span class="p">(),</span> <span class="nx">C</span><span class="p">()])</span>
+</span></span><span class="line"><span class="cl"><span class="nx">hello</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">alert</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">res</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;fetch failed!&#39;</span><span class="p">)</span> <span class="p">}</span> <span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter7-14.png" title="/img/Operating System/chapter7-14.png" data-thumbnail="/img/Operating System/chapter7-14.png" data-sub-html="<h2>代码描述</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter7-14.png"
+            data-srcset="/img/Operating%20System/chapter7-14.png, /img/Operating%20System/chapter7-14.png 1.5x, /img/Operating%20System/chapter7-14.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter7-14.png" />
+    </a><figcaption class="image-caption">代码描述</figcaption>
+    </figure>
+<h2 id="总结">总结</h2>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 什么样的任务是需要并行/并发的？它们应该如何实现？</li>
+</ul>
+<hr>
+<p>Take-away message</p>
+<ul>
+<li>并发编程的真实应用场景
+<ul>
+<li><b>高性能计算 (注重任务分解): 生产者-消费者 (MPI/OpenMP)</b></li>
+<li><b>数据中心 (注重系统调用): 线程-协程 (Goroutine)</b></li>
+<li><b>人机交互 (注重易用性): 事件-流图 (Promise)</b></li>
+</ul>
+</li>
+<li>编程工具的发展突飞猛进
+<ul>
+<li>自 Web 2.0 以来，开源社区改变了计算机科学的学习方式</li>
+<li>希望每个同学都有一个<font color="red"><b> “主力现代编程语言”</b></font>
+<ul>
+<li>Modern C++, Rust, Javascript, &hellip;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
                 </span></div><div class="post-info-line"><div class="post-info-mod">
@@ -363,4 +944,4 @@ if ('serviceWorker' in navigator) {
 
         <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
                 <i class="fas fa-chevron-up fa-fw"></i>
-            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA((\"机房1(在北京)\"))\nB((\"机房2(在上海)\"))\nC((\"机房3(在香港)\"))\nD(北京用户)\nE(上海用户)\nF(数据)\nG(Computer)\nH(\"Other computer\")\nA====B====C====A\nD----\u003eA----\u003eD\nE----\u003eB----\u003eE\nF----A\nF----B\nF----C\nG==\"DISK(I/O)\"==\u003eB\nG==Network==\u003eH"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph TB\nA((\"机房1(在北京)\"))\nB((\"机房2(在上海)\"))\nC((\"机房3(在香港)\"))\nD(北京用户)\nE(上海用户)\nF(数据)\nG(Computer)\nH(\"Other computer\")\nA====B====C====A\nD----\u003eA----\u003eD\nE----\u003eB----\u003eE\nF----A\nF----B\nF----C\nG==\"DISK(I/O)\"==\u003eB\nG==Network==\u003eH","id-2":"graph TB\nA(Thread-1)\nB(Thread-2)\nC(...)\nD(Thread-n)\nE(\"read()\")\nF(\"处理(syscall)\")\nG(\"write()\")\nA--\u003eE--\u003eF--\u003eG","id-3":"graph TB\nA(CPU1)\nB(CPU2)\nC(CPU3)\nD(Thread1 -\u003e Go Worker1)\nE(Thread2 -\u003e Go Worker2)\nF(Thread3 -\u003e Go Worker3)\nA----D\nB----E\nC----F\nG(协程1)\nH(协程2)\nJ(协程n)\nK(\"read()，引起阻塞\")\nL(\"实际中不是这样，调用的是read_noneBlock()，只有数据真正来的时候才会执行read()\")\nD----\u003eG\nD----\u003eH\nD----\u003eJ\nG----K\nK====L\nL====\u003eL\nL==yield==\u003eH"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
