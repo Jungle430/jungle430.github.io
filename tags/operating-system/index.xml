@@ -4,7 +4,887 @@
         <link>https://Jungle430.github.io/tags/operating-system/</link>
         <description>Operating System - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Wed, 15 Mar 2023 13:26:02 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/operating-system/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/operating-system/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter8 并发 bug 和应对</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</link>
+    <pubDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>并发编程的基本工具：线程库、互斥和同步</li>
+<li>并发编程的应用场景：高性能计算、数据中心、网页/移动应用</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 并发编程那么难，我写出 bug 怎么办？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>应对 bug (和并发 bug) 的方法</li>
+<li>死锁和数据竞争</li>
+</ul>
+<h2 id="应对-bug-的方法">应对 Bug 的方法</h2>
+<h3 id="基本思路否定你自己">基本思路：否定你自己</h3>
+<blockquote>
+<p>虽然不太愿意承认，但始终假设自己的代码是错的。</p>
+</blockquote>
+<p>然后呢？</p>
+<ul>
+<li>做好测试</li>
+<li>检查哪里错了</li>
+<li>再检查哪里错了</li>
+<li>再再检查哪里错了
+<ul>
+<li>(把任何你认为 “不对” 的情况都检查一遍)</li>
+</ul>
+</li>
+</ul>
+<h3 id="bug-多的根本原因编程语言的缺陷">Bug 多的根本原因：编程语言的缺陷</h3>
+<blockquote>
+<p>软件是需求 (规约) 在计算机数字世界的<b>投影</b>（关于变量的更多内容丢失了，只映射了一部分）</p>
+</blockquote>
+<p>只管 “翻译” 代码，不管和实际需求 (规约) 是否匹配</p>
+<ul>
+<li>可以加入assert来进行证明</li>
+</ul>
+<hr>
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/alipay.c" target="_blank" rel="noopener noreffer">alipay.c</a>的例子
+<ul>
+<li>变量 <code>balance</code> 代表 “余额”</li>
+<li>怎么看 withdraw 以后 0 → 18446744073709551516 都不对</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">balance</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Alipay_withdraw</span><span class="p">(</span><span class="kt">int</span> <span class="n">amt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">balance</span> <span class="o">&gt;=</span> <span class="n">amt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">usleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// unexpected delays
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">balance</span> <span class="o">-=</span> <span class="n">amt</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Talipay</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Alipay_withdraw</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Talipay</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Talipay</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;balance = %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">balance</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<p>三十年后的编程语言和编程方法？</p>
+<ul>
+<li>Annotation verifier (<a href="https://dafny-lang.github.io/dafny/" target="_blank" rel="noopener noreffer">Dafny</a>)</li>
+<li>Specification mining (<a href="http://plse.cs.washington.edu/daikon/" target="_blank" rel="noopener noreffer">Daikon</a>)</li>
+<li><a href="https://dl.acm.org/doi/10.1145/113446.113468" target="_blank" rel="noopener noreffer">Refinement types</a></li>
+<li><a href="https://link.springer.com/article/10.1007/s10009-012-0249-7" target="_blank" rel="noopener noreffer">Program sketching</a>……</li>
+</ul>
+<h3 id="更实在的方法防御性编程">更实在的方法：防御性编程</h3>
+<blockquote>
+<p>把程序需要满足的条件用 <code>assert</code> 表达出来 $\Longrightarrow$ <b>和上面的防御性编程相对应</b></p>
+</blockquote>
+<p>例子：<a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-barrier.c" target="_blank" rel="noopener noreffer">peterson-barrier.c</a>、二叉树的旋转</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define A 1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define B 2
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define BARRIER __sync_synchronize()
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">atomic_int</span> <span class="n">nested</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">atomic_long</span> <span class="n">count</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">long</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d threads in the critical section @ count=%ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">cnt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">assert</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="k">volatile</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">turn</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TA</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">turn</span> <span class="o">=</span> <span class="n">B</span><span class="p">;</span>                <span class="n">BARRIER</span><span class="p">;</span> <span class="c1">// &lt;- this is critcal for x86
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">y</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>         <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">turn</span> <span class="o">!=</span> <span class="n">B</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>  <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TB</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>                <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">x</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>         <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">turn</span> <span class="o">!=</span> <span class="n">A</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>  <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter8-1.jpg" title="/img/Operating System/chapter8-1.jpg" data-thumbnail="/img/Operating System/chapter8-1.jpg" data-sub-html="<h2>二叉树的旋转，维护的一些方法assert(y-&gt;parent == x&#39;-&gt;parent &amp;&amp; y-&gt;left == x &amp;&amp; y-&gt;right == c);</h2>">
+        
+    </a><figcaption class="image-caption">二叉树的旋转，维护的一些方法<code>assert(y-&gt;parent == x'-&gt;parent &amp;&amp; y-&gt;left == x &amp;&amp; y-&gt;right == c);</code></figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-2.png" title="/img/Operating System/chapter8-2.png" data-thumbnail="/img/Operating System/chapter8-2.png" data-sub-html="<h2>assert就是最有效的防御手段,相当于assert(i == 1);</h2>">
+        
+    </a><figcaption class="image-caption"><code>assert</code>就是最有效的防御手段,相当于<code>assert(i == 1);</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>把assert写出来，你也就知道怎么写代码了</p>
+</li>
+<li>
+<p><font color="red"><b>！！！面试的时候能写出干净利落的assert代码是一个重要的加分项，对增强代码的逻辑性和可读性以及debug都有很大帮助 $\Longrightarrow$ 没有人能够写出完美的代码，代码部分和assert是互相印证的，使得代码的可靠性上升了一个数量级</b></font></p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-3.gif" title="/img/Operating System/chapter8-3.gif" data-thumbnail="/img/Operating System/chapter8-3.gif" data-sub-html="<h2>即使是Linus Torvalds声称自己的代码没有bug最后也被打脸</h2>">
+        
+    </a><figcaption class="image-caption">即使是<a href="https://en.wikipedia.org/wiki/Linus_Torvalds" target="_blank" rel="noopener noreffer">Linus Torvalds</a>声称自己的代码没有bug最后也被打脸</figcaption>
+    </figure>
+<ul>
+<li>assert不一定需要绝对的正确，比如在上面的支付宝，如果测试过程中金额较小，我们完全可以使用<code>assert(balance &lt;= 100000);</code>这样的代码</li>
+<li>还可以有这样的assert</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">pid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">assert</span><span class="p">(</span><span class="n">ptr</span> <span class="n">in</span> <span class="n">heap</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assert</span><span class="p">(</span><span class="n">pid</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">pid</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>这些assert看起来和我们的现实世界的逻辑并没有关系，但是它防止了$Memory\ Error\newline$</li>
+</ul>
+<h3 id="防御性编程和规约给我们的启发">防御性编程和规约给我们的启发</h3>
+<ul>
+<li>你知道很多变量的<font color="red">含义</font></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define CHECK_INT(x, cond) \
+</span></span></span><span class="line"><span class="cl"><span class="cp">  ({ panic_on(!((x) cond), &#34;int check fail: &#34; #x &#34; &#34; #cond); })
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define CHECK_HEAP(ptr) \
+</span></span></span><span class="line"><span class="cl"><span class="cp">  ({ panic_on(!IN_RANGE((ptr), heap)); })
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>变量有 “typed annotation”</p>
+<ul>
+<li>
+<p><code>CHECK_INT(waitlist-&gt;count, &gt;= 0);</code></p>
+</li>
+<li>
+<p><code>CHECK_INT(pid, &lt; MAX_PROCS);</code></p>
+</li>
+<li>
+<p><code>CHECK_HEAP(ctx-&gt;rip); CHECK_HEAP(ctx-&gt;cr3);</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>变量含义改变 → 发生奇怪问题 (overflow, memory error, &hellip;)</p>
+<ul>
+<li><font color="red"><b>不要小看这些检查</b></font>，它们在底层编程 (M2, L1, &hellip;) 时非常常见。尤其是C语言“裸奔”写OS内核，既没有语言层面的保护，也没有OS内核的保护（因为你写的就是这玩意），所以这些检查尤其重要！</li>
+<li>这些检查逐渐就从C语言演变成了集成度和安全性更高的一些C++标准库还有Rust的编译器（检查很严格，每次编译都直接叫跌）</li>
+<li>在虚拟机神秘重启/卡住/&hellip;前发出警报</li>
+</ul>
+</li>
+</ul>
+<h2 id="并发-bug死锁-deadlock">并发 Bug：死锁 (Deadlock)</h2>
+<h3 id="死锁-deadlock">死锁 (Deadlock)</h3>
+<blockquote>
+<p>A deadlock is a state in which each member of a group is waiting for another member, including itself, to take action.</p>
+</blockquote>
+<ul>
+<li>出现线程 “互相等待” 的情况</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-4.jpg" title="/img/Operating System/chapter8-4.jpg" data-thumbnail="/img/Operating System/chapter8-4.jpg" data-sub-html="<h2> 互相在等待（你等我，我等你，我等我自己）</h2>">
+        
+    </a><figcaption class="image-caption"><code> 互相在等待（你等我，我等你，我等我自己）</code></figcaption>
+    </figure>
+<h3 id="aa-deadlock">AA-Deadlock</h3>
+<ul>
+<li>
+<p>假设你的 spinlock 不小心发生了中断</p>
+<ul>
+<li>
+<p>在不该打开中断的时候开了中断</p>
+</li>
+<li>
+<p>在不该切换的时候执行了 <code>yield()</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">os_run</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">list_lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">xxx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">xxx</span><span class="p">);</span> <span class="c1">// ---------+
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>                          <span class="c1">//    |
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                           <span class="c1">//    |
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">on_interrupt</span><span class="p">()</span> <span class="p">{</span>      <span class="c1">//    |
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">list_lock</span><span class="p">);</span>   <span class="c1">// &lt;--+
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">list_lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>lock关闭中断，而unlock打开中断。<b>上面的程序上了两把锁，却在只开一把锁的情况下打开了中断。$\Longrightarrow$ 中断需要等第一把锁释放，第一个unlock执行需要等中断返回才能执行完毕</b>。</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<h3 id="abba-deadlock">ABBA-Deadlock</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">swap</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上锁的顺序很重要……</p>
+<ul>
+<li>
+<p>swap本身看起来没有问题</p>
+<ul>
+<li><code>swap(1, 2)</code>; <code>swap(2, 3)</code>, <code>swap(3, 1)</code> → 死锁 $\Longrightarrow$ 如果三个并发执行并同时🔒住了1，2，3，那就和哲学家问题里面所有人都拿起左手的叉子一样变成了死锁</li>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/philosopher.c" target="_blank" rel="noopener noreffer">philosopher.c</a></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread-sync.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define N 3
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="n">sem_t</span> <span class="n">locks</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tphilosopher</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">lhs</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">N</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">id</span> <span class="o">%</span> <span class="n">N</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">P</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locks</span><span class="p">[</span><span class="n">lhs</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;T%d Got %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">id</span><span class="p">,</span> <span class="n">lhs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">P</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locks</span><span class="p">[</span><span class="n">rhs</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;T%d Got %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">id</span><span class="p">,</span> <span class="n">rhs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">V</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locks</span><span class="p">[</span><span class="n">lhs</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">V</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locks</span><span class="p">[</span><span class="n">rhs</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">SEM_INIT</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locks</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tphilosopher</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="避免死锁">避免死锁</h3>
+<ul>
+<li>
+<p>死锁产生的四个<b>必要条件</b> (<a href="https://en.wikipedia.org/wiki/Edward_G._Coffman,_Jr." target="_blank" rel="noopener noreffer">Edward G. Coffman</a>, 1971):</p>
+<ul>
+<li>
+<p>互斥：一个资源每次只能被一个进程使用（例如🔒）</p>
+</li>
+<li>
+<p>请求与保持：一个进程请求资阻塞时，不释放已获得的资源（比如失败版的哲学家吃饭，右手拿叉子被阻塞的时候不会把左手拿到的叉子释放掉）</p>
+</li>
+<li>
+<p>不剥夺：进程已获得的资源不能强行剥夺（🔒没有优先级，获得之后任何人都拿不走）</p>
+</li>
+<li>
+<p>循环等待：若干进程之间形成<b>头尾相接的循环等待资源</b>关系（参考AA-Deadlock里面的mermaid图像以及十字路口的图像）</p>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>“理解了死锁的原因，尤其是产生死锁的四个必要条件，就可以最大可能地避免、预防和解除死锁。所以，在系统设计、进程调度等方面<b>注意如何不让这四个必要条件成立，如何确定资源的合理分配算法，避免进程永久占据系统资源</b>。此外，也要防止进程在处于等待状态的情况下占用资源。因此，对资源的分配要给予合理的规划。” ——Bullshit $\Longrightarrow$ <font color="orange">经典教科书废话，这四个条件想要破除非常困难</font></p>
+</blockquote>
+<h3 id="避免死锁-contd">避免死锁 (cont&rsquo;d)</h3>
+<ul>
+<li>
+<p>AA-Deadlock</p>
+<ul>
+<li>
+<p>AA 型的死锁容易检测，及早报告，及早修复</p>
+</li>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/spinlock-xv6.c" target="_blank" rel="noopener noreffer">spinlock-xv6.c</a> 中的各种防御性编程</p>
+<ul>
+<li><code>if (holding(lk)) panic();</code> $\Longrightarrow$ 如果这把🔒在上🔒的时候，线程已经得到了🔒，直接就panic()，然后crush。防止出现死🔒之后自己到处找，这种编程模式能够迅速帮你定位自己的缺陷和bug。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Mutual exclusion spin locks.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;types.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;param.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;memlayout.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;spinlock.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;riscv.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;proc.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;defs.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">initlock</span><span class="p">(</span><span class="k">struct</span> <span class="n">spinlock</span> <span class="o">*</span><span class="n">lk</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lk</span><span class="o">-&gt;</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lk</span><span class="o">-&gt;</span><span class="n">locked</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lk</span><span class="o">-&gt;</span><span class="n">cpu</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Acquire the lock.
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Loops (spins) until the lock is acquired.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">acquire</span><span class="p">(</span><span class="k">struct</span> <span class="n">spinlock</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">push_off</span><span class="p">();</span> <span class="c1">// disable interrupts to avoid deadlock.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span><span class="p">(</span><span class="n">holding</span><span class="p">(</span><span class="n">lk</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">panic</span><span class="p">(</span><span class="s">&#34;acquire&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// On RISC-V, sync_lock_test_and_set turns into an atomic swap:
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">//   a5 = 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">//   s1 = &amp;lk-&gt;locked
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">//   amoswap.w.aq a5, a5, (s1)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">while</span><span class="p">(</span><span class="n">__sync_lock_test_and_set</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="o">-&gt;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// Tell the C compiler and the processor to not move loads or stores
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// past this point, to ensure that the critical section&#39;s memory
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// references happen strictly after the lock is acquired.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// On RISC-V, this emits a fence instruction.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">__sync_synchronize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// Record info about lock acquisition for holding() and debugging.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">lk</span><span class="o">-&gt;</span><span class="n">cpu</span> <span class="o">=</span> <span class="n">mycpu</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Release the lock.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">release</span><span class="p">(</span><span class="k">struct</span> <span class="n">spinlock</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">holding</span><span class="p">(</span><span class="n">lk</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">panic</span><span class="p">(</span><span class="s">&#34;release&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">lk</span><span class="o">-&gt;</span><span class="n">cpu</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// Tell the C compiler and the CPU to not move loads or stores
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// past this point, to ensure that all the stores in the critical
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// section are visible to other CPUs before the lock is released,
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// and that loads in the critical section occur strictly before
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// the lock is released.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// On RISC-V, this emits a fence instruction.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">__sync_synchronize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// Release the lock, equivalent to lk-&gt;locked = 0.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// This code doesn&#39;t use a C assignment, since the C standard
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// implies that an assignment might be implemented with
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// multiple store instructions.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// On RISC-V, sync_lock_release turns into an atomic swap:
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">//   s1 = &amp;lk-&gt;locked
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">//   amoswap.w zero, zero, (s1)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">__sync_lock_release</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk</span><span class="o">-&gt;</span><span class="n">locked</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">pop_off</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Check whether this cpu is holding the lock.
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Interrupts must be off.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="nf">holding</span><span class="p">(</span><span class="k">struct</span> <span class="n">spinlock</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">r</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">lk</span><span class="o">-&gt;</span><span class="n">locked</span> <span class="o">&amp;&amp;</span> <span class="n">lk</span><span class="o">-&gt;</span><span class="n">cpu</span> <span class="o">==</span> <span class="n">mycpu</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// push_off/pop_off are like intr_off()/intr_on() except that they are matched:
+</span></span></span><span class="line"><span class="cl"><span class="c1">// it takes two pop_off()s to undo two push_off()s.  Also, if interrupts
+</span></span></span><span class="line"><span class="cl"><span class="c1">// are initially off, then push_off, pop_off leaves them off.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">push_off</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">old</span> <span class="o">=</span> <span class="n">intr_get</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">intr_off</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">mycpu</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">noff</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mycpu</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">intena</span> <span class="o">=</span> <span class="n">old</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mycpu</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">noff</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">pop_off</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">cpu</span> <span class="o">*</span><span class="n">c</span> <span class="o">=</span> <span class="n">mycpu</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">intr_get</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="n">panic</span><span class="p">(</span><span class="s">&#34;pop_off - interruptible&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">noff</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">panic</span><span class="p">(</span><span class="s">&#34;pop_off&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">c</span><span class="o">-&gt;</span><span class="n">noff</span> <span class="o">-=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">noff</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">intena</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">intr_on</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>ABBA-Deadlock</p>
+<ul>
+<li>
+<p>任意时刻系统中的锁都是有限的</p>
+</li>
+<li>
+<p>严格<b>按照固定的顺序获得所有锁</b> (lock ordering; 消除 “循环等待”)</p>
+<ul>
+<li>
+<p><b>比如说有X,A,B,C四把🔒，无论如何都要给这四把🔒排一下顺序</b></p>
+<div class="mermaid" id="id-2"></div>
+</li>
+</ul>
+</li>
+<li>
+<p><b>任何一个线程想要获得其中的任何几把🔒，都必须要按照排好的顺序来</b></p>
+</li>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">lock</span><span class="p">(</span><span class="n">A</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">lock</span><span class="p">(</span><span class="n">C</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//------&gt; √ ＜（＾－＾）＞
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">lock</span><span class="p">(</span><span class="n">C</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">lock</span><span class="p">(</span><span class="n">A</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//-----&gt; × 
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>遇事不决可视化：<a href="https://jyywiki.cn/pages/OS/2022/demos/lock-ordering.py" target="_blank" rel="noopener noreffer">lock-ordering.py</a></p>
+</li>
+<li>
+<p>进而证明$@thread-T_1:A \rightarrow B \rightarrow C;@thread-T_2:B \rightarrow C$是安全的</p>
+<ul>
+<li>“在任意时刻总是有获得 “最靠后” 锁的可以继续执行”
+<ul>
+<li><b>即使有许多线程的情况下，总会有一个跑的最快的线程（也就是🔒的位置最靠右/编号最大，只有🔒最大的线程才能获得下一把🔒 $\Longrightarrow$ <font color="red">即使后面的线程都卡死了，最前面的线程仍然“畅通无阻“。</font><font color="orange">最大的线程走进临界区以后，它就会把所有的🔒都给释放掉。</font></b></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">LockOrdering</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">locks</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">tryacquire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lk</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">locks</span><span class="p">[</span><span class="n">lk</span><span class="p">],</span> <span class="n">seen</span> <span class="o">=</span> <span class="s1">&#39;🔒&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">locks</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">seen</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lk</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">locks</span><span class="p">[</span><span class="n">lk</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span> <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_negative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">pass</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>可视化<a href="https://github.com/Jungle430/check-for-NJU-OS/blob/main/lock-ordering.html" target="_blank" rel="noopener noreffer">lock-ordering.html</a></li>
+</ul>
+<hr>
+<ul>
+<li>总结：两条技术
+<ol>
+<li>防御编程 $\Longrightarrow$ AA-Deadlock</li>
+<li>lock-order $\Longrightarrow$ ABBA-Deadlock</li>
+</ol>
+</li>
+</ul>
+<h3 id="lock-ordering-应用-linux-kernel-rmapc">Lock Ordering: 应用 (Linux Kernel: rmap.c)</h3>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-5.png" title="/img/Operating System/chapter8-5.png" data-thumbnail="/img/Operating System/chapter8-5.png" data-sub-html="<h2>Linux Kernel：rmap.c中的Lock Ordering</h2>">
+        
+    </a><figcaption class="image-caption">Linux Kernel：rmap.c中的<code>Lock Ordering</code></figcaption>
+    </figure>
+<h3 id="但是你又-naive-了">但是……你又 Naive 了……</h3>
+<blockquote>
+<p>Textbooks will tell you that if you always lock in the same order, you will never get this kind of deadlock. <b><em>Practice will tell you that this approach doesn&rsquo;t scale</em>:</b> when I create a new lock, I don&rsquo;t understand enough of the kernel to figure out where in the 5000 lock hierarchy it will fit.</p>
+<p><b>The best locks are encapsulated</b>: they <em>never get exposed in headers</em>, and are <em>never held around calls to non-trivial functions outside the same file</em>. You can read through this code and see that it will never deadlock, because it never tries to grab another lock while it has that one. People using your code don&rsquo;t even need to know you are using a lock.</p>
+<p>—— <em><a href="https://www.kernel.org/doc/html/latest/kernel-hacking/locking.html" target="_blank" rel="noopener noreffer">Unreliable Guide to Locking</a></em> by Rusty Russell</p>
+</blockquote>
+<ul>
+<li>我们稍后回到这个问题，继续看更多的 bugs</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter7 真实世界的并发编程</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter7/</link>
     <pubDate>Wed, 15 Mar 2023 13:26:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter7/</guid>
