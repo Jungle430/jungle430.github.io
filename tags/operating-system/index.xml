@@ -882,6 +882,732 @@
 <ul>
 <li>我们稍后回到这个问题，继续看更多的 bugs</li>
 </ul>
+<h2 id="并发-bug数据竞争-data-race-longrightarrow-不上锁不就没有死锁了吗">并发 Bug：数据竞争 (Data Race) $\Longrightarrow$ 不上锁不就没有死锁了吗？</h2>
+<h3 id="数据竞争">数据竞争</h3>
+<blockquote>
+<p><font color="red"><b>不同的线程</b></font>同时访问<font color="red"><b>同一段内存</b></font>，且<font color="red"><b>至少有一个是写</b></font>。</p>
+</blockquote>
+<div class="mermaid" id="id-3"></div>
+<ul>
+<li>两个内存访问在 “赛跑”，<b>“跑赢” 的操作先执行</b> $\Longrightarrow$ 程序最终的结果与谁跑赢有关 $\Longrightarrow$ 计组中和的“读后写”与“写后读”有关的流水线排序问题
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-barrier.c" target="_blank" rel="noopener noreffer">peterson-barrier.c</a>: 内存访问都在赛跑
+<ul>
+<li><a href="https://www.felixcloutier.com/x86/mfence" target="_blank" rel="noopener noreffer">MFENCE</a>：<del>如何留下最少的 fence，依然保证算法正确？</del></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="数据竞争-contd">数据竞争 (cont&rsquo;d)</h3>
+<ul>
+<li>
+<p>Peterson 算法告诉大家：</p>
+<ul>
+<li>
+<p><font color="red">你们写不对无锁的并发程序</font></p>
+</li>
+<li>
+<p>所以事情反而简单了</p>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>用互斥锁保护好共享数据</p>
+<p>消灭一切数据竞争</p>
+</blockquote>
+<div class="mermaid" id="id-4"></div>
+<h3 id="数据竞争例子">数据竞争：例子</h3>
+<ul>
+<li>以下代码概括了你们遇到数据竞争的大部分情况
+<ul>
+<li>不要笑，你们的 bug 几乎都是这两种情况的变种</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Case #1: 上错了锁
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">thread1</span><span class="p">()</span> <span class="p">{</span> <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk1</span><span class="p">);</span> <span class="n">sum</span><span class="o">++</span><span class="p">;</span> <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">thread2</span><span class="p">()</span> <span class="p">{</span> <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk2</span><span class="p">);</span> <span class="n">sum</span><span class="o">++</span><span class="p">;</span> <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk2</span><span class="p">);</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// Case #2: 忘记上锁
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">thread1</span><span class="p">()</span> <span class="p">{</span> <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk1</span><span class="p">);</span> <span class="n">sum</span><span class="o">++</span><span class="p">;</span> <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">thread2</span><span class="p">()</span> <span class="p">{</span> <span class="n">sum</span><span class="o">++</span><span class="p">;</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="更多类型的并发-bug">更多类型的并发 Bug</h2>
+<h3 id="程序员花式犯错">程序员：花式犯错</h3>
+<ul>
+<li>
+<p>回顾我们实现并发控制的工具</p>
+<ul>
+<li>
+<p>互斥锁 (lock/unlock) - 原子性</p>
+</li>
+<li>
+<p>条件变量 (wait/signal) - 同步</p>
+</li>
+</ul>
+</li>
+<li>
+<p>忘记上锁——原子性违反 (Atomicity Violation, AV)</p>
+</li>
+<li>
+<p>忘记同步——顺序违反 (Order Violation, OV)</p>
+</li>
+<li>
+<p>Empirical study: 在 105 个并发 bug 中 (non-deadlock/deadlock)</p>
+<ul>
+<li>
+<p>MySQL (14/9), Apache (13/4), Mozilla (41/16), OpenOffice (6/2)</p>
+</li>
+<li>
+<p><font color="red">97% 的非死锁并发 bug 都是 AV 或 OV</font></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="原子性违反-av">原子性违反 (AV)</h3>
+<ul>
+<li>“ABA”
+<ul>
+<li>我以为一段代码没啥事呢，但被人强势插入了</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-6.png" title="/img/Operating System/chapter8-6.png" data-thumbnail="/img/Operating System/chapter8-6.png" data-sub-html="<h2>ABA</h2>">
+        
+    </a><figcaption class="image-caption"><code>ABA</code></figcaption>
+    </figure>
+<h3 id="原子性违反-contd">原子性违反 (cont&rsquo;d)</h3>
+<ul>
+<li>有时候上锁也不解决问题
+<ul>
+<li>“TOCTTOU” - time of check to time of use</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-7.png" title="/img/Operating System/chapter8-7.png" data-thumbnail="/img/Operating System/chapter8-7.png" data-sub-html="<h2>TOCTTOU</h2>">
+        
+    </a><figcaption class="image-caption"><code>TOCTTOU</code></figcaption>
+    </figure>
+<ul>
+<li><a href="https://www.usenix.org/legacy/events/fast05/tech/full_papers/wei/wei.pdf" target="_blank" rel="noopener noreffer">TOCTTOU vulnerabilities in UNIX-style file systems: An anatomical study</a>(FAST'05)</li>
+</ul>
+<h3 id="顺序违反-ov">顺序违反 (OV)</h3>
+<ul>
+<li>“BA”
+<ul>
+<li>怎么就没按我预想的顺序来呢？
+<ul>
+<li>例子：concurrent use after free</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-8.png" title="/img/Operating System/chapter8-8.png" data-thumbnail="/img/Operating System/chapter8-8.png" data-sub-html="<h2>BA</h2>">
+        
+    </a><figcaption class="image-caption"><code>BA</code></figcaption>
+    </figure>
+<h2 id="应对并发-bug-的方法">应对并发 Bug 的方法</h2>
+<h3 id="完全一样的基本思路否定你自己">完全一样的基本思路：否定你自己</h3>
+<blockquote>
+<p>还是得<font color="red">始终假设自己的代码是错的</font></p>
+</blockquote>
+<ul>
+<li>
+<p>然后呢？</p>
+<ul>
+<li>
+<p>做好测试</p>
+</li>
+<li>
+<p>检查哪里错了</p>
+</li>
+<li>
+<p>再检查哪里错了</p>
+</li>
+<li>
+<p>再再检查哪里错了</p>
+<ul>
+<li>(把任何你认为 “不对” 的情况都检查一遍)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>例如：用 lock ordering 彻底避免死锁？</p>
+<ul>
+<li>你想多了：并发那么复杂，程序员哪能充分测试啊</li>
+</ul>
+</li>
+</ul>
+<h3 id="lockdep-运行时的死锁检查">Lockdep: 运行时的死锁检查</h3>
+<p>Lockdep 规约 (Specification)</p>
+<ul>
+<li>为每一个锁确定唯一的 “allocation site”
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/lock-site.c" target="_blank" rel="noopener noreffer">lock-site.c</a></li>
+<li>assert: 同一个 allocation site 的锁存在全局唯一的上锁顺序</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;assert.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">lock</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">locked</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">site</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">lock_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define STRINGIFY(s) #s
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define TOSTRING(s)  STRINGIFY(s)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define LOCK_INIT() \
+</span></span></span><span class="line"><span class="cl"><span class="cp">  ( (lock_t) { .locked = 0, .site = __FILE__ &#34;:&#34; TOSTRING(__LINE__), } )
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">lock_t</span> <span class="n">lk1</span> <span class="o">=</span> <span class="n">LOCK_INIT</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">lock_t</span> <span class="n">lk2</span> <span class="o">=</span> <span class="n">LOCK_INIT</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;LOCK   %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">lk</span><span class="o">-&gt;</span><span class="n">site</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;UNLOCK %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">lk</span><span class="o">-&gt;</span><span class="n">site</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">some_object</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lock_t</span> <span class="n">lock</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">object_init</span><span class="p">(</span><span class="k">struct</span> <span class="n">some_object</span> <span class="o">*</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">obj</span><span class="o">-&gt;</span><span class="n">lock</span> <span class="o">=</span> <span class="n">LOCK_INIT</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">some_object</span> <span class="o">*</span><span class="n">obj</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">some_object</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">object_init</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">obj</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lk1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter8-9.png" title="/img/Operating System/chapter8-9.png" data-thumbnail="/img/Operating System/chapter8-9.png" data-sub-html="<h2>ChatGPT</h2>">
+        
+    </a><figcaption class="image-caption"><code>ChatGPT</code></figcaption>
+    </figure>
+<ul>
+<li>检查方法：printf
+<ul>
+<li>记录所有观察到的上锁顺序，例如</li>
+</ul>
+</li>
+</ul>
+<p>$$
+[x,y,z] \Longrightarrow x \rightarrow y,x\rightarrow z,y\rightarrow z
+$$</p>
+<ul>
+<li>
+<p>检查是否存在$x ⇝ y ∧ y ⇝ x$</p>
+</li>
+<li>
+<p><font color="red">维护一个图，图里面不能有环（有环就违反了Lock-Order）</font></p>
+</li>
+<li>
+<p><a href="https://jyywiki.cn/OS/OS_Lockdep" target="_blank" rel="noopener noreffer">Lockdep 的实现</a></p>
+<ul>
+<li>Since Linux Kernel 2.6.17, also in <a href="https://gitee.com/openharmony" target="_blank" rel="noopener noreffer">OpenHarmony</a>!</li>
+</ul>
+</li>
+</ul>
+<h3 id="threadsanitizer-运行时的数据竞争检查">ThreadSanitizer: 运行时的数据竞争检查</h3>
+<ul>
+<li>
+<p>为所有事件建立 happens-before 关系图 $\Longrightarrow$ 图论</p>
+<ul>
+<li>
+<p>Program-order + release-acquire</p>
+</li>
+<li>
+<p>对于发生在不同线程且至少有一个是写的$x,y$检查</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>$$
+x ≺ y ∨ y ≺ x
+$$</p>
+<ul>
+<li><a href="https://dl.acm.org/doi/10.1145/359545.359563" target="_blank" rel="noopener noreffer">Time, clocks, and the ordering of events in a distributed system</a></li>
+</ul>
+<h3 id="更多的检查动态程序分析">更多的检查：动态程序分析</h3>
+<ul>
+<li>
+<p>在事件发生时记录</p>
+<ul>
+<li>
+<p>Lockdep: lock/unlock</p>
+</li>
+<li>
+<p>ThreadSanitizer: 内存访问 + lock/unlock</p>
+</li>
+</ul>
+</li>
+<li>
+<p>解析记录检查问题</p>
+<ul>
+<li>Lockdep: $x ⇝ y ∧ y ⇝ x$</li>
+<li>ThreadSanitizer: $x \nprec y ∧ y \nprec x$</li>
+</ul>
+</li>
+<li>
+<p>付出的代价和权衡</p>
+<ul>
+<li>
+<p>程序执行变慢</p>
+</li>
+<li>
+<p>但更容易找到 bug (因此在测试环境中常用)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="动态分析工具sanitizers">动态分析工具：Sanitizers</h3>
+<ul>
+<li>
+<p>没用过 lint/sanitizers？</p>
+</li>
+<li>
+<p><a href="https://clang.llvm.org/docs/AddressSanitizer.html" target="_blank" rel="noopener noreffer">AddressSanitizer</a> (asan); <a href="https://www.usenix.org/conference/atc12/technical-sessions/presentation/serebryany" target="_blank" rel="noopener noreffer">(paper)</a>: 非法内存访问</p>
+<ul>
+<li>Buffer (heap/stack/global) overflow, use-after-free, use-after-return, double-free, &hellip;</li>
+<li>Demo: <a href="https://jyywiki.cn/pages/OS/2022/demos/uaf.c" target="_blank" rel="noopener noreffer">uaf.c</a>; <a href="https://www.kernel.org/doc/html/latest/dev-tools/kasan.html" target="_blank" rel="noopener noreffer">kasan</a></li>
+</ul>
+</li>
+<li>
+<p><a href="https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html" target="_blank" rel="noopener noreffer">ThreadSanitizer</a> (tsan): 数据竞争</p>
+<ul>
+<li>Demo: <a href="https://jyywiki.cn/pages/OS/2022/demos/fish.c" target="_blank" rel="noopener noreffer">fish.c</a>, <a href="https://jyywiki.cn/pages/OS/2022/demos/sum.c" target="_blank" rel="noopener noreffer">sum.c</a>, <a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-barrier.c" target="_blank" rel="noopener noreffer">peterson-barrier.c</a>; <a href="https://github.com/google/ktsan" target="_blank" rel="noopener noreffer">ktsan</a></li>
+</ul>
+</li>
+<li>
+<p><a href="https://clang.llvm.org/docs/MemorySanitizer.html" target="_blank" rel="noopener noreffer">MemorySanitizer</a> (msan): 未初始化的读取</p>
+</li>
+<li>
+<p><a href="https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html" target="_blank" rel="noopener noreffer">UBSanitizer</a> (ubsan): undefined behavior</p>
+<ul>
+<li>Misaligned pointer, signed integer overflow, &hellip;</li>
+<li>Kernel 会带着 <code>-fwrapv</code> 编译</li>
+</ul>
+</li>
+<li>
+<p>示例：test.c</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">free</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc -g test.c -fsanitize<span class="o">=</span>address -o <span class="nb">test</span> <span class="o">&amp;&amp;</span> ./test
+</span></span><span class="line"><span class="cl"><span class="o">=================================================================</span>
+</span></span><span class="line"><span class="cl"><span class="o">==</span><span class="nv">37384</span><span class="o">==</span>ERROR: AddressSanitizer: heap-use-after-free on address 0x602000000010 at pc 0x55c0a903b213 bp 0x7ffe5d50fcd0 sp 0x7ffe5d50fcc8
+</span></span><span class="line"><span class="cl">WRITE of size <span class="m">4</span> at 0x602000000010 thread T0
+</span></span><span class="line"><span class="cl">    <span class="c1">#0 0x55c0a903b212 in main /home/kali/chapter7/test.c:7</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#1 0x7f8416046189 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#2 0x7f8416046244 in __libc_start_main_impl ../csu/libc-start.c:381</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#3 0x55c0a903b0b0 in _start (/home/kali/chapter7/test+0x10b0)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">0x602000000010 is located <span class="m">0</span> bytes inside of 4-byte region <span class="o">[</span>0x602000000010,0x602000000014<span class="o">)</span>
+</span></span><span class="line"><span class="cl">freed by thread T0 here:
+</span></span><span class="line"><span class="cl">    <span class="c1">#0 0x7f84162b76a8 in __interceptor_free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#1 0x55c0a903b1db in main /home/kali/chapter7/test.c:6</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#2 0x7f8416046189 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">previously allocated by thread T0 here:
+</span></span><span class="line"><span class="cl">    <span class="c1">#0 0x7f84162b89cf in __interceptor_malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#1 0x55c0a903b18a in main /home/kali/chapter7/test.c:4</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#2 0x7f8416046189 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">SUMMARY: AddressSanitizer: heap-use-after-free /home/kali/chapter7/test.c:7 in main
+</span></span><span class="line"><span class="cl">Shadow bytes around the buggy address:
+</span></span><span class="line"><span class="cl">  0x0c047fff7fb0: <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
+</span></span><span class="line"><span class="cl">  0x0c047fff7fc0: <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
+</span></span><span class="line"><span class="cl">  0x0c047fff7fd0: <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
+</span></span><span class="line"><span class="cl">  0x0c047fff7fe0: <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
+</span></span><span class="line"><span class="cl">  0x0c047fff7ff0: <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="nv">00</span>
+</span></span><span class="line"><span class="cl"><span class="o">=</span>&gt;0x0c047fff8000: fa fa<span class="o">[</span>fd<span class="o">]</span>fa fa fa fa fa fa fa fa fa fa fa fa fa
+</span></span><span class="line"><span class="cl">  0x0c047fff8010: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+</span></span><span class="line"><span class="cl">  0x0c047fff8020: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+</span></span><span class="line"><span class="cl">  0x0c047fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+</span></span><span class="line"><span class="cl">  0x0c047fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+</span></span><span class="line"><span class="cl">  0x0c047fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+</span></span><span class="line"><span class="cl">Shadow byte legend <span class="o">(</span>one shadow byte represents <span class="m">8</span> application bytes<span class="o">)</span>:
+</span></span><span class="line"><span class="cl">  Addressable:           <span class="m">00</span>
+</span></span><span class="line"><span class="cl">  Partially addressable: <span class="m">01</span> <span class="m">02</span> <span class="m">03</span> <span class="m">04</span> <span class="m">05</span> <span class="m">06</span> <span class="m">07</span> 
+</span></span><span class="line"><span class="cl">  Heap left redzone:       fa
+</span></span><span class="line"><span class="cl">  Freed heap region:       fd
+</span></span><span class="line"><span class="cl">  Stack left redzone:      f1
+</span></span><span class="line"><span class="cl">  Stack mid redzone:       f2
+</span></span><span class="line"><span class="cl">  Stack right redzone:     f3
+</span></span><span class="line"><span class="cl">  Stack after <span class="k">return</span>:      f5
+</span></span><span class="line"><span class="cl">  Stack use after scope:   f8
+</span></span><span class="line"><span class="cl">  Global redzone:          f9
+</span></span><span class="line"><span class="cl">  Global init order:       f6
+</span></span><span class="line"><span class="cl">  Poisoned by user:        f7
+</span></span><span class="line"><span class="cl">  Container overflow:      <span class="nb">fc</span>
+</span></span><span class="line"><span class="cl">  Array cookie:            ac
+</span></span><span class="line"><span class="cl">  Intra object redzone:    bb
+</span></span><span class="line"><span class="cl">  ASan internal:           fe
+</span></span><span class="line"><span class="cl">  Left alloca redzone:     ca
+</span></span><span class="line"><span class="cl">  Right alloca redzone:    <span class="nv">cb</span>
+</span></span><span class="line"><span class="cl"><span class="o">==</span><span class="nv">37384</span><span class="o">==</span>ABORTING
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter8-10.png" title="/img/Operating System/chapter8-10.png" data-thumbnail="/img/Operating System/chapter8-10.png" data-sub-html="<h2>检查sum.c的thread</h2>">
+        
+    </a><figcaption class="image-caption"><code>检查sum.c的thread</code></figcaption>
+    </figure>
+<h2 id="这不就是防御性编程吗">这不就是防御性编程吗？</h2>
+<ul>
+<li>只不过不需要我亲自动手把代码改得乱七八糟了……</li>
+</ul>
+<h3 id="我们也可以buffer-overrun-检查">我们也可以！Buffer Overrun 检查</h3>
+<ul>
+<li>
+<p>Canary (金丝雀) 对一氧化碳非常敏感</p>
+<ul>
+<li>用生命预警矿井下的瓦斯泄露 (since 1911)</li>
+</ul>
+</li>
+<li>
+<p>计算机系统中的 canary</p>
+<ul>
+<li>“牺牲” 一些内存单元，来预警 memory error 的发生
+<ul>
+<li>(程序运行时没有动物受到实质的伤害)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="canary-的例子保护栈空间-m2l2">Canary 的例子：保护栈空间 (M2/L2)</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define MAGIC 0x55555555
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define BOTTOM (STK_SZ / sizeof(u32) - 1)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">struct</span> <span class="n">stack</span> <span class="p">{</span> <span class="kt">char</span> <span class="n">data</span><span class="p">[</span><span class="n">STK_SZ</span><span class="p">];</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">canary_init</span><span class="p">(</span><span class="k">struct</span> <span class="n">stack</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">u32</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="p">(</span><span class="n">u32</span> <span class="o">*</span><span class="p">)</span><span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">CANARY_SZ</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ptr</span><span class="p">[</span><span class="n">BOTTOM</span> <span class="o">-</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">MAGIC</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">canary_check</span><span class="p">(</span><span class="k">struct</span> <span class="n">stack</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">u32</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="p">(</span><span class="n">u32</span> <span class="o">*</span><span class="p">)</span><span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">CANARY_SZ</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">panic_on</span><span class="p">(</span><span class="n">ptr</span><span class="p">[</span><span class="n">BOTTOM</span> <span class="o">-</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">MAGIC</span><span class="p">,</span> <span class="s">&#34;underflow&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">panic_on</span><span class="p">(</span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">MAGIC</span><span class="p">,</span> <span class="s">&#34;overflow&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="烫烫烫屯屯屯和葺葺葺">烫烫烫、屯屯屯和葺葺葺</h3>
+<ul>
+<li>
+<p>msvc 中 debug mode 的 guard/fence/canary</p>
+<ul>
+<li>
+<p>未初始化栈: <code>0xcccccccc</code></p>
+</li>
+<li>
+<p>未初始化堆: <code>0xcdcdcdcd</code></p>
+</li>
+<li>
+<p>对象头尾: <code>0xfdfdfdfd</code></p>
+</li>
+<li>
+<p>已回收内存: <code>0xdddddddd</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>(b'**\xcc**' * 80).decode('gb2312')</code></p>
+</li>
+</ul>
+<blockquote>
+<p>手持两把锟斤拷，口中疾呼烫烫烫</p>
+<p>脚踏千朵屯屯屯，笑看万物锘锘锘</p>
+<p>(它们一直在无形中保护你)</p>
+</blockquote>
+<h3 id="防御性编程低配版-lockdep">防御性编程：低配版 Lockdep</h3>
+<ul>
+<li>不必大费周章记录什么上锁顺序
+<ul>
+<li>统计当前的 spin count
+<ul>
+<li>如果超过某个明显不正常的数值 (1,000,000,000) 就报告</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">spin_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">spin_cnt</span><span class="o">++</span> <span class="o">&gt;</span> <span class="n">SPIN_LIMIT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Too many spin @ %s:%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__FILE__</span><span class="p">,</span> <span class="n">__LINE__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>配合调试器和线程 backtrace 一秒诊断死锁</li>
+</ul>
+<h3 id="防御性编程低配版-sanitizer-l1">防御性编程：低配版 Sanitizer (L1)</h3>
+<ul>
+<li>内存分配要求<code>malloc and free</code>：已分配内存$S=[l_0,r_0) \cup [l_1,r_1) \cup &hellip;$
+<ul>
+<li>$kalloc(S)$返回的$[l,r)$ 必须满足$[l,r) \cup S = \empty$
+<ul>
+<li>thread-local allocation + 并发的 free 还蛮容易弄错的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// allocation
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">u32</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">panic_on</span><span class="p">(((</span><span class="n">u32</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">MAGIC</span><span class="p">,</span> <span class="s">&#34;double-allocation&#34;</span><span class="p">);</span><span class="c1">//分配的时候看到了malloc颜色
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">MAGIC</span><span class="p">;</span> <span class="c1">//刷上malloc颜色
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// free
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">u32</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">alloc_size</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">panic_on</span><span class="p">(((</span><span class="n">u32</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#34;double-free&#34;</span><span class="p">);</span><span class="c1">//分配的时候看到了free颜色
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//刷上free颜色
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="总结">总结</h2>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 如何拯救人类不擅长的并发编程？</li>
+</ul>
+<hr>
+<p>Take-away message</p>
+<ul>
+<li>常见的并发 bug
+<ul>
+<li>死锁、数据竞争、原子性/顺序违反</li>
+</ul>
+</li>
+<li>不要盲目相信自己：检查、检查、检查
+<ul>
+<li>防御性编程：检查</li>
+<li>动态分析：打印 + 检查</li>
+</ul>
+</li>
+</ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>
 <item>
