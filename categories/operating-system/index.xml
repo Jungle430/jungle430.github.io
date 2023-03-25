@@ -4,7 +4,503 @@
         <link>https://Jungle430.github.io/categories/operating-system/</link>
         <description>Operating System - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/operating-system/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter9 操作系统的状态机模型</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</link>
+    <pubDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>并发……就这么……讲完了……
+<ul>
+<li>理解的方式：“玩一玩” 示例代码</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 听说操作系统也是程序。那到底是鸡生蛋还是蛋生鸡？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>软件和硬件的桥梁</li>
+<li>操作系统的加载和初始化</li>
+<li>AbstractMachine 代码导读</li>
+</ul>
+<h2 id="自己动手写操作系统">自己动手写操作系统</h2>
+<h3 id="时事热评">时事热评</h3>
+<p><a href="https://www.bilibili.com/video/BV14T4y1D7y8" target="_blank" rel="noopener noreffer">小学生写了三个月的操作系统是什么样的？</a></p>
+<ul>
+<li>看到 i386 就知道了嘛</li>
+</ul>
+<h3 id="本学期的-oslabs">本学期的 OSLabs</h3>
+<p>热身实验</p>
+<ul>
+<li>Lab0 (amgame): 熟悉代码框架</li>
+</ul>
+<hr>
+<p>正经实验</p>
+<ul>
+<li>
+<p>Lab1 (pmm): Physical memory management</p>
+<ul>
+<li>多处理器 (bare-metal) 上的 kalloc/free</li>
+</ul>
+</li>
+<li>
+<p>Lab2 (kmt): Kernel multi-threading</p>
+<ul>
+<li>中断和异常驱动的上下文 (线程) 切换</li>
+</ul>
+</li>
+<li>
+<p>Lab3 (uproc): User processes</p>
+<ul>
+<li>虚拟地址空间、用户态进程和系统调用</li>
+</ul>
+</li>
+<li>
+<p>Lab4 (vfs): Virtual file system</p>
+<ul>
+<li>devfs, procfs, 简单的文件系统；ELF 加载器</li>
+</ul>
+</li>
+</ul>
+<h3 id="大学的真正意义">大学的真正意义</h3>
+<blockquote>
+<p>将已有的知识和方法重新消化，为大家建立好 “台阶”，在有限的时间里迅速<font color="red">赶上数十年来建立起的学科体系</font></p>
+</blockquote>
+<hr>
+<ul>
+<li>
+<p>例子：破除 “写操作系统很难”、“写操作系统很牛” 的错误认识</p>
+<ul>
+<li>
+<p>操作系统真的就是个 C 程序</p>
+</li>
+<li>
+<p>你只是需要 “被正确告知” 一些额外的知识</p>
+<ul>
+<li>然后写代码、吃苦头</li>
+<li>从而建立正确的 “专业世界观”</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="例子">例子</h3>
+<ul>
+<li>
+<p>“专业世界观” 的例子 (这些都没啥，paper 都发不了)</p>
+<ul>
+<li>
+<p>写 x86 模拟器的时候，不知道哪条指令错了，怎么办？</p>
+</li>
+<li>
+<p>做操作系统实验的时候，如果遇到神秘 CPU Reset，怎么办？</p>
+</li>
+<li>
+<p>做实验做不下去的时候，该实现什么工具？</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>“专业世界观” 的学习方法</p>
+<ul>
+<li>
+<p>经典研究论文 (OSDI, SOSP, ATC, EuroSys, &hellip;)</p>
+</li>
+<li>
+<p>久经考验的经典教学材料 (xv6, OSTEP, CSAPP, &hellip;)</p>
+</li>
+<li>
+<p>海量的开源工具 (GNU 系列, qemu, gdb, &hellip;)</p>
+</li>
+<li>
+<p>第三方资料，慎用 (tutorials, osdev wiki, &hellip;)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="硬件和软件的桥梁">硬件和软件的桥梁</h2>
+<h3 id="c-程序">C 程序</h3>
+<ul>
+<li>
+<p>我们已经知道如何写一个 “最小” 的 C 程序了：</p>
+<ul>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/minimal.S" target="_blank" rel="noopener noreffer">minimal.S</a></p>
+</li>
+<li>
+<p>不需要链接任何库，就能在操作系统上运行</p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="n">globl</span> <span class="n">_start</span>
+</span></span><span class="line"><span class="cl"><span class="nl">_start</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_write</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span>   <span class="c1">// write(
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="c1">//   fd=1,
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="n">st</span><span class="p">,</span>        <span class="o">%</span><span class="n">rsi</span>   <span class="c1">//   buf=st,
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="p">(</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">),</span> <span class="o">%</span><span class="n">rdx</span>   <span class="c1">//   count=ed-st
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">syscall</span>                 <span class="c1">// );
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_exit</span><span class="p">,</span>  <span class="o">%</span><span class="n">rax</span>   <span class="c1">// exit(
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="c1">//   status=1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">syscall</span>                 <span class="c1">// );
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="nl">st</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="n">ascii</span> <span class="s">&#34;</span><span class="se">\033</span><span class="s">[01;31mHello, OS World</span><span class="se">\033</span><span class="s">[0m</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">ed</span><span class="p">:</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>“程序 = 状态机” 没问题</p>
+</li>
+<li>
+<p>带来更多的疑问</p>
+<ul>
+<li><font color="red">但谁创建的这个状态机？？？</font>
+<ul>
+<li>当然是操作系统了……呃…… $\Longrightarrow$ 参考<a href="https://jungle430.github.io/posts/operating-system/support2/#%E4%BB%8E%E6%88%91%E4%BB%AC%E7%BB%88%E7%AB%AF%E6%95%B2%E5%9B%9E%E8%BD%A6%E5%88%B0%E7%A8%8B%E5%BA%8F%E8%A2%AB%E8%BD%BD%E5%85%A5%E6%89%A7%E8%A1%8C%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88" target="_blank" rel="noopener noreffer">从我们终端敲回车到程序被载入执行的过程中发生了什么？</a></li>
+</ul>
+</li>
+<li><font color="red">这个程序可以在没有操作系统的硬件上运行吗？</font>
+<ul>
+<li>“启动” 状态机是由 “加载器” 完成的</li>
+<li>加载器也是一段程序 (状态机)</li>
+<li>这个程序由是由谁加载的？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ file minimal
+</span></span><span class="line"><span class="cl">minimal: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>SYSV<span class="o">)</span>, statically linked, not stripped
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="bare-metal-与程序员的约定">Bare-metal 与程序员的约定</h3>
+<ul>
+<li>
+<p>计算机硬件运行的时候也是状态机</p>
+</li>
+<li>
+<p>为了让计算机能<font color="red">运行任何我们的程序</font>，一定存在软件/硬件的约定</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><b>CPU reset</b> 后，处理器处于某个<b>确定的状态</b></p>
+<ul>
+<li><b>PC 指针</b>一般指向一段 <font color="blue">memory-mapped ROM</font>
+<ul>
+<li>ROM 存储了厂商提供的 firmware (固件)</li>
+</ul>
+</li>
+<li>处理器的大部分特性处于关闭状态
+<ul>
+<li>缓存、虚拟存储、……</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Firmware (固件，厂商提供的代码)</p>
+<ul>
+<li>将用户数据加载到内存
+<ul>
+<li>例如存储介质上的第二级 loader (加载器)</li>
+<li>或者直接加载操作系统 (嵌入式系统)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="x86-family-cpu-reset-行为">x86 Family: CPU Reset 行为</h3>
+<ul>
+<li>
+<p>CPU Reset (<a href="https://software.intel.com/en-us/articles/intel-sdm" target="_blank" rel="noopener noreffer">Intel® 64 and IA-32 Architectures Software Developer’s Manual</a>, Volume 3A/3B)</p>
+</li>
+<li>
+<p>寄存器会有初始状态</p>
+<ul>
+<li>
+<p><code>EIP = 0x0000fff0</code></p>
+</li>
+<li>
+<p><code>CR0 = 0x60000010</code></p>
+<ul>
+<li>16-bit 模式 $\Longrightarrow$ 2010年前的老电脑会兼容老接口和老的操作系统</li>
+</ul>
+</li>
+<li>
+<p><code>EFLAGS = 0x00000002</code></p>
+</li>
+<li>
+<p>interrupt disabled（中断关闭）</p>
+</li>
+</ul>
+</li>
+<li>
+<p>TFM (5,000 页 by 2019)</p>
+<ul>
+<li>最需要的 Volume 3A 只有 468 页</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-1.png" title="/img/Operating System/chapter9-1.png" data-thumbnail="/img/Operating System/chapter9-1.png" data-sub-html="<h2>friendly manual</h2>">
+        
+    </a><figcaption class="image-caption"><code>friendly manual</code></figcaption>
+    </figure>
+<ul>
+<li>让<code>qemu</code>模拟器停在第一条指令上，和上面的手册对照，会发现和手册一致</li>
+</ul>
+<h3 id="cpu-reset-之后发生了什么">CPU Reset 之后：发生了什么？</h3>
+<ul>
+<li>
+<p>《计算机系统基础》：<font color="red">不仅是程序，整个计算机系统也是一个状态机</font></p>
+<ul>
+<li>
+<p>从 PC (<code>CS:IP</code>) 指针处取指令、译码、执行……</p>
+</li>
+<li>
+<p>从 firmware 开始执行</p>
+<ul>
+<li><code>ffff0</code>(PC初始化的值) 通常是一条向 firmware 跳转的 jmp 指令</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>厂商会在<code>ROW</code>里面放好写死的代码（Only-read）</p>
+</li>
+<li>
+<p>Firmware: <a href="https://www.zhihu.com/question/21672895" target="_blank" rel="noopener noreffer">BIOS vs. UEFI</a></p>
+<ul>
+<li>
+<p>都是主板/主板上外插设备的软件抽象</p>
+<ul>
+<li>支持系统管理程序运行</li>
+</ul>
+</li>
+<li>
+<p>Legacy BIOS (Basic I/O System)</p>
+</li>
+<li>
+<p>UEFI (Unified Extensible Firmware Interface)</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-2.png" title="/img/Operating System/chapter9-2.png" data-thumbnail="/img/Operating System/chapter9-2.png" data-sub-html="<h2>BIOS</h2>">
+        
+    </a><figcaption class="image-caption"><code>BIOS</code></figcaption>
+    </figure>
+<h3 id="legacy-bios-约定">Legacy BIOS: 约定</h3>
+<p><b>Firmware 必须提供机制，将用户数据载入内存</b></p>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>Legacy BIOS 把<b>第一个可引导设备的第一个扇区加载到物理内存的 <code>7c00</code> 位置</b>，这也是我们Fireware和OS之间的第一次，也是唯一一次握手</p>
+<ul>
+<li>
+<p>此时处理器处于 16-bit 模式</p>
+</li>
+<li>
+<p>规定 <code>CS:IP = 0x7c00</code>, <code>(R[CS] &lt;&lt; 4) | R[IP] == 0x7c00</code></p>
+<ul>
+<li>
+<p>可能性1：<code>CS = 0x07c0, IP = 0</code></p>
+</li>
+<li>
+<p>可能性2：<code>CS = 0, IP = 0x7c00</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>其他没有任何约束</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Windows启动模式：老的Windows的A，B盘都是软盘，BIOS先去软盘里面读前512个<code>bytes</code>，看最后两个byte是否为<code>55aa</code>（大端），如果是就加载这块磁盘，否则读下一块，如果都不是就启动失败。读完A/B盘之后引导到C盘，这也是为什么今天的Windows操作系统C盘是系统盘的原因</p>
+</li>
+<li>
+<p>Firmware做的事情（以BIOS为例）</p>
+</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<h3 id="能不能看一下代码">能不能看一下代码？</h3>
+<blockquote>
+<p>Talk is cheap. Show me the code. ——Linus Torvalds</p>
+</blockquote>
+<ul>
+<li>
+<p>有没有可能我们真的去看从 CPU Reset 以后每一条指令的执行？</p>
+</li>
+<li>
+<p><font color="red">计算机系统公理：你想到的就一定有人做到</font></p>
+</li>
+<li>
+<p>模拟方案：QEMU</p>
+<ul>
+<li>传奇黑客、天才程序员 <a href="https://www.zhihu.com/question/28388113" target="_blank" rel="noopener noreffer">Fabrice Bellard</a> 的杰作（其他:ffmpeg)
+<ul>
+<li><a href="https://www.usenix.org/legacy/publications/library/proceedings/usenix05/tech/freenix/full_papers/bellard/bellard.pdf" target="_blank" rel="noopener noreffer">QEMU, A fast and portable dynamic translator</a> (USENIX ATC'05)</li>
+<li>Android Virtual Device, VirtualBox, &hellip; 背后都是 QEMU</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>真机方案：JTAG (Joint Test Action Group) debugger</p>
+<ul>
+<li>一系列 (物理) 调试寄存器，可以实现 gdb 接口 (!!!)</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-3.png" title="/img/Operating System/chapter9-3.png" data-thumbnail="/img/Operating System/chapter9-3.png" data-sub-html="<h2>ffmpeg</h2>">
+        
+    </a><figcaption class="image-caption"><code>ffmpeg</code></figcaption>
+    </figure>
+<h3 id="调试-qemu-确认-firmware-的行为">调试 QEMU: 确认 Firmware 的行为</h3>
+<blockquote>
+<p>亲眼确认 Firmware 到底是不是会加载启动盘第一个扇区到 <code>0x7c00</code> 内存位置！</p>
+</blockquote>
+<p>调试 QEMU 模拟器</p>
+<ul>
+<li>
+<p>查看 CPU Reset 后的寄存器</p>
+<ul>
+<li><code>info registers</code></li>
+</ul>
+</li>
+<li>
+<p>查看<code>0x7c00</code>内存的加载</p>
+<ul>
+<li><code>watch *0x7c00</code> - 《计算机系统基础》的良苦用心</li>
+<li>查看当前指令 <code>x/i ($cs * 16 + $rip)</code></li>
+<li>打印内存 <code>x/16xb 0x7c00</code></li>
+</ul>
+</li>
+<li>
+<p>进入<code>0x7c00</code>代码的执行</p>
+<ul>
+<li><code>b *0x7c00</code>, <code>c</code> (撒花！我们一会再回来)</li>
+</ul>
+</li>
+</ul>
+<h3 id="鸡和蛋的问题解决">鸡和蛋的问题解决</h3>
+<ul>
+<li>
+<p>有个原始的鸡：Firmware</p>
+<ul>
+<li>
+<p>代码直接存在于硬件里</p>
+</li>
+<li>
+<p>CPU Reset 后 Firmware 会执行</p>
+<ul>
+<li>加载 512 字节到内存 (Legacy Boot)
+<ul>
+<li>然后功成身退</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Firmware 的另一用处</p>
+<ul>
+<li>放置一些 “绝对安全的代码”
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/manuals/BIOS-interrupts.pdf" target="_blank" rel="noopener noreffer">BIOS 中断</a> (Hello World 是如何被打印的)</li>
+<li>如果加载失败将错误信息打印出来</li>
+<li>ARM Trusted Firmware
+<ul>
+<li>Boot-Level 1, 2, 3.1, 3.2, 3.3</li>
+<li><a href="https://www.denx.de/wiki/U-Boot" target="_blank" rel="noopener noreffer">U-Boot</a>: the universal boot loader</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="小插曲firmware-的病毒-1998">小插曲：Firmware 的病毒 (1998)</h3>
+<ul>
+<li>
+<p>Firmware 通常是只读的 (当然……)</p>
+</li>
+<li>
+<p>Intel 430TX (Pentium) 芯片组允许<font color="red">写入 Flash ROM</font></p>
+<ul>
+<li>
+<p>只要向 Flash BIOS 写入特定序列，Flash ROM 就变为可写</p>
+<ul>
+<li>留给 firmware 更新的通道</li>
+</ul>
+</li>
+<li>
+<p>要得到这个序列其实并不困难</p>
+<ul>
+<li>似乎文档里就有 🤔 Boom……</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><a href="https://zh.wikipedia.org/zh-tw/CIH%E7%97%85%E6%AF%92" target="_blank" rel="noopener noreffer">CIH</a> 的作者陈盈豪被逮捕，但并未被定罪</p>
+</blockquote>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-4.gif" title="/img/Operating System/chapter9-4.gif" data-thumbnail="/img/Operating System/chapter9-4.gif" data-sub-html="<h2>病毒代码结尾的CIH</h2>">
+        
+    </a><figcaption class="image-caption"><code>病毒代码结尾的CIH</code></figcaption>
+    </figure>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter8 并发 bug 和应对</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</link>
     <pubDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</guid>
@@ -11226,606 +11722,6 @@ $\rightarrow$ <a href="https://en.wikipedia.org/wiki/Segmentation_fault" target=
     </div>
 <p>看了一部分该文章，太长了，先看一小半，因为是32位的老版本Linux，很多东西不能完全复现</p>
 <p>$\Longrightarrow$ <a href="https://jungle430.github.io/posts/operating-system/support2/" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()?》</a></p>
-<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
-]]></description>
-</item>
-<item>
-    <title>Operating System Chapter1 操作系统概述</title>
-    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter1/</link>
-    <pubDate>Fri, 30 Dec 2022 16:27:09 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter1/</guid>
-    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
-<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
-<h2 id="操作系统概述">操作系统概述</h2>
-<p>$Overvier\newline$</p>
-<ul>
-<li>为什么要学操作系统? $(why)\newline$</li>
-<li>到底什么是操作系统? $(what)\newline$</li>
-<li>怎么学操作系统? $(how)\newline$</li>
-</ul>
-<h3 id="为什么学操作系统whynewline">为什么学操作系统?$(why)\newline$</h3>
-<ul>
-<li>
-<p>每天都在用的东西你没搞明白 $\rightarrow$ 窗口是怎么创建的？ 为什么$Ctrl-C$有时不能退出程序？</p>
-</li>
-<li>
-<p>组里的服务器有128个处理器，而你的程序却只能用一个 😂</p>
-</li>
-<li>
-<p>你每天都在用的东西，却实现不出来🤡 $\rightarrow$ 浏览器，编译器，$IDE$，游戏/外挂，任务管理器，杀毒软件，病毒…</p>
-</li>
-</ul>
-<p>学完：</p>
-<p>悟性好 $\rightarrow$ 系统方向“毕业”，具有编写一切“能写出来”程序的能力（具备阅读论文的能力）</p>
-<p>悟性差 $\rightarrow$ 内力大增， 可能在工作中的某一天想起上课的内容</p>
-<h3 id="什么是操作系统whatnewline">什么是操作系统?$(what)\newline$</h3>
-<blockquote>
-<p>Operating System: A body of software, in fact, that is responsible for <em>making it easy to run programs</em> (even allowing you to seemingly run many at the same time), allowing programs to share memory, enabling programs to interact with devices, and other fun stuff like that. (OSTEP)</p>
-</blockquote>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-1.png" title="/img/Operating System/chapter1-1.png" data-thumbnail="/img/Operating System/chapter1-1.png" data-sub-html="<h2>From PPT(什么是操作系统？)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>什么是操作系统？</code>)</figcaption>
-    </figure>
-<p>Question:操作系统如何从一开始变成现在这样的？</p>
-<p>$\rightarrow$ 三个重要的线索</p>
-<blockquote>
-<p>计算机（硬件）</p>
-<p>程序（软件）</p>
-<p>操作系统（管理软件的软件）</p>
-</blockquote>
-<h4 id="操作系统历史">操作系统历史</h4>
-<h5 id="1940s">1940s</h5>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-2.png" title="/img/Operating System/chapter1-2.png" data-thumbnail="/img/Operating System/chapter1-2.png" data-sub-html="<h2>From PPT(1940s 1)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1940s 1</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-3.jpg" title="/img/Operating System/chapter1-3.jpg" data-thumbnail="/img/Operating System/chapter1-3.jpg" data-sub-html="<h2>From PPT(1940s 2)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1940s 2</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-4.jpg" title="/img/Operating System/chapter1-4.jpg" data-thumbnail="/img/Operating System/chapter1-4.jpg" data-sub-html="<h2>From PPT(1940s 3)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1940s 3</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-5.png" title="/img/Operating System/chapter1-5.png" data-thumbnail="/img/Operating System/chapter1-5.png" data-sub-html="<h2>From PPT(1940s 4)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1940s 4</code>)</figcaption>
-    </figure>
-<h5 id="1950s">1950s</h5>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-6.png" title="/img/Operating System/chapter1-6.png" data-thumbnail="/img/Operating System/chapter1-6.png" data-sub-html="<h2>From PPT(1950s 1)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1950s 1</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-7.png" title="/img/Operating System/chapter1-7.png" data-thumbnail="/img/Operating System/chapter1-7.png" data-sub-html="<h2>From PPT(1950s 2)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1950s 2</code>)</figcaption>
-    </figure>
-<p>Example code on ppt</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fortran" data-lang="fortran"><span class="line"><span class="cl"><span class="n">C</span><span class="o">----</span><span class="w"> </span><span class="n">THIS</span><span class="w"> </span><span class="k">PROGRAM </span><span class="n">READS</span><span class="w"> </span><span class="n">INPUT</span><span class="w"> </span><span class="n">FROM</span><span class="w"> </span><span class="n">THE</span><span class="w"> </span><span class="n">CARD</span><span class="w"> </span><span class="n">READER</span><span class="p">,</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">C</span><span class="o">----</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">INTEGERS</span><span class="w"> </span><span class="n">IN</span><span class="w"> </span><span class="n">EACH</span><span class="w"> </span><span class="n">CARD</span><span class="p">,</span><span class="w"> </span><span class="n">CALCULATE</span><span class="w"> </span><span class="nb">AND </span><span class="n">OUTPUT</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">C</span><span class="o">----</span><span class="w"> </span><span class="n">THE</span><span class="w"> </span><span class="nb">SUM </span><span class="n">OF</span><span class="w"> </span><span class="n">THEM</span><span class="p">.</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="mi">100</span><span class="w"> </span><span class="k">READ</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="n">I1</span><span class="p">,</span><span class="w"> </span><span class="n">I2</span><span class="p">,</span><span class="w"> </span><span class="n">I3</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">   </span><span class="mi">10</span><span class="w"> </span><span class="k">FORMAT</span><span class="p">(</span><span class="mi">3</span><span class="n">I5</span><span class="p">)</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="k">IF</span><span class="w"> </span><span class="p">(</span><span class="n">I1</span><span class="p">.</span><span class="n">EQ</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">AND</span><span class="p">.</span><span class="w"> </span><span class="n">I2</span><span class="p">.</span><span class="n">EQ</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="p">.</span><span class="nb">AND</span><span class="p">.</span><span class="w"> </span><span class="n">I3</span><span class="p">.</span><span class="n">EQ</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">GOTO</span><span class="w"> </span><span class="mi">200</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">ISUM</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">I1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">I2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">I3</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="k">WRITE</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="n">I1</span><span class="p">,</span><span class="w"> </span><span class="n">I2</span><span class="p">,</span><span class="w"> </span><span class="n">I3</span><span class="p">,</span><span class="w"> </span><span class="n">ISUM</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">   </span><span class="mi">20</span><span class="w"> </span><span class="k">FORMAT</span><span class="p">(</span><span class="mi">7</span><span class="n">HSUM</span><span class="w"> </span><span class="n">OF</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">I5</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="n">H</span><span class="p">,</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">I5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="n">H</span><span class="w"> </span><span class="nb">AND</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">I5</span><span class="p">,</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">     </span><span class="o">*</span><span class="w">   </span><span class="mi">4</span><span class="n">H</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">I6</span><span class="p">)</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="k">GOTO</span><span class="w"> </span><span class="mi">100</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="mi">200</span><span class="w"> </span><span class="k">STOP
-</span></span></span><span class="line"><span class="cl"><span class="k">      END</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter1-8.png" title="/img/Operating System/chapter1-8.png" data-thumbnail="/img/Operating System/chapter1-8.png" data-sub-html="<h2>From PPT(1950s 3)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1950s 3</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-9.png" title="/img/Operating System/chapter1-9.png" data-thumbnail="/img/Operating System/chapter1-9.png" data-sub-html="<h2>From PPT(1950s 4)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1950s 4</code>)</figcaption>
-    </figure>
-<h5 id="1960s">1960s</h5>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-10.png" title="/img/Operating System/chapter1-10.png" data-thumbnail="/img/Operating System/chapter1-10.png" data-sub-html="<h2>From PPT(1960s 1)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1960s 1</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-11.png" title="/img/Operating System/chapter1-11.png" data-thumbnail="/img/Operating System/chapter1-11.png" data-sub-html="<h2>From PPT(1960s 2)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1960s 2</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-12.png" title="/img/Operating System/chapter1-12.png" data-thumbnail="/img/Operating System/chapter1-12.png" data-sub-html="<h2>From PPT(1960s 3)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1960s 3</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-13.png" title="/img/Operating System/chapter1-13.png" data-thumbnail="/img/Operating System/chapter1-13.png" data-sub-html="<h2>From PPT(1960s 4)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1960s 4</code>)</figcaption>
-    </figure>
-<h5 id="1970s">1970s+</h5>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-14.png" title="/img/Operating System/chapter1-14.png" data-thumbnail="/img/Operating System/chapter1-14.png" data-sub-html="<h2>From PPT(1970s&#43; 1)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1970s+ 1</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-15.png" title="/img/Operating System/chapter1-15.png" data-thumbnail="/img/Operating System/chapter1-15.png" data-sub-html="<h2>From PPT(1970s&#43; 2)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1970s+ 2</code>)</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-16.png" title="/img/Operating System/chapter1-16.png" data-thumbnail="/img/Operating System/chapter1-16.png" data-sub-html="<h2>From PPT(1970s&#43; 3)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>1970s+ 3</code>)</figcaption>
-    </figure>
-<h5 id="today">today</h5>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-17.png" title="/img/Operating System/chapter1-17.png" data-thumbnail="/img/Operating System/chapter1-17.png" data-sub-html="<h2>From PPT(today)</h2>">
-        
-    </a><figcaption class="image-caption">From PPT(<code>today</code>)</figcaption>
-    </figure>
-<h4 id="理解操作系统三个根本问题">理解操作系统：三个根本问题</h4>
-<p>操作系统服务谁？</p>
-<ul>
-<li><strong>程序 = 状态机</strong></li>
-<li>课程涉及：多线程 $Linux$ 应用程序</li>
-</ul>
-<hr>
-<p>(设计/应用视角) 操作系统为程序提供什么服务？</p>
-<ul>
-<li><strong>操作系统 = 对象 + $API\newline$</strong></li>
-<li>课程涉及：$POSIX$ + 部分$ Linux$ 特性</li>
-</ul>
-<hr>
-<p>(实现/硬件视角) 如何实现操作系统提供的服务？</p>
-<ul>
-<li><strong>操作系统 = C 程序</strong>
-<ul>
-<li>完成初始化后就成为 $interrupt/trap/fault handler\newline$</li>
-</ul>
-</li>
-<li>课程涉及：$xv6$, 自制迷你操作系统</li>
-</ul>
-<h3 id="怎么学操作系统hownewline">怎么学操作系统?$(how)\newline$</h3>
-<ol>
-<li>是一个合格的操作系统用户
-<ul>
-<li>会 $STFW/RTFM$ 自己动手解决问题</li>
-<li>不怕使用任何命令行工具
-<ul>
-<li>$vim, tmux, grep, gcc, binutils, &hellip;\newline$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>不惧怕写代码
-<ul>
-<li>能管理一定规模 (数千行) 的代码</li>
-<li>能在出 bug 时默念 “机器永远是对的、我肯定能调出来的”
-<ul>
-<li>然后开始用正确的工具/方法调试</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>写代码 = 创造有趣的东西</p>
-<ul>
-<li>命令行 + 浏览器就是世界</li>
-</ul>
-<p>教科书:</p>
-<p>Remzi&rsquo;s <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener noreffer">Operating Systems: Three Easy Pieces</a></p>
-<p>顺序：并发 → 虚拟化 → 持久化</p>
-<h3 id="个人补充考试用">个人补充（考试用）</h3>
-<blockquote>
-<p>Update in 2023-03-02 又是🤡+💩🐴的一天</p>
-<p>PPT上面讲了个🐔8️⃣，真是给✌️整无语了，又没看懂，看点书吧</p>
-<p>2023-03-03 0:10 🤡半夜看书，确实是有🅱️<b>IG</b>🧊了</p>
-</blockquote>
-<ul>
-<li>计算机系统自上而下可大致分成四个部分：<b>硬件，操作系统，应用程序和用户</b>（和计组的分层不一样）</li>
-</ul>
-<h4 id="操作系统的特征">操作系统的特征</h4>
-<h5 id="并发concurrence">并发(<code>Concurrence</code>)</h5>
-<p>并发是指两个或多个事件在<b>同一时间间隔内发生</b>。操作系统的并发性是指计算机系统中同时存在多个运行的程序，因此它具有处理和调度多个程序同时执行的能力。<u>引入进程的目的是使程序能并发执行</u></p>
-<ul>
-<li>
-<p><b>注意区分同一时间间隔（并发）和同一时刻（并行）的区别。</b></p>
-<ul>
-<li>
-<p>在多道程序环境下，一段时间内，宏观上有多道程序在同时执行，而每个时刻，<b>单处理机</b>环境下实际仅能有一道程序执行，<u>因此微观上这些程序仍是分时交替执行的</u>。<b>操作系统的并发性是通过分时得以实现的</b>。</p>
-</li>
-<li>
-<p><b>并行性是指系统具有同时进行运算或操作的特性，在同一时刻能完成两种或两种以上的工作</b>。<u>并行性需要有相关硬件的支持，如多流水线或多处理机硬件环境</u></p>
-</li>
-<li>
-<p>例子：</p>
-<ul>
-<li>并发执行：吃十分钟面包（就吃面包） $\Longrightarrow$ 写十分钟字（就写字） $\Longrightarrow$ 吃十分钟面包（就吃面包）$\Longrightarrow$ $\dots$ （宏观上一起做微观上分着做）</li>
-<li>并行执行：左手拿着面包吃，右手写字（宏观和微观都是同时做）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h5 id="共享sharing">共享(<code>Sharing</code>)</h5>
-<p>指系统中的资源可供内存中<u>多个并发执行的进程共同使用</u>。可分为两种方式</p>
-<ul>
-<li>
-<p>互斥共享方式</p>
-<ul>
-<li>系统中的某些资源，如打印机，磁带机，<u>虽然可供多个进程使用，但为使得所打印或记录的结果不致造成混淆，应规定在<b>一个时间段内只允许一个进程访问此资源</b></u>
-<ul>
-<li>为此，<u>当进程A访问某个资源时，必须先提出请求</u>，若此时资源空闲，则系统便将之分配给进程A使用，<b>此后又其他进程对该资源进行访问（只要A未用完）就必须等待</b>。<u>仅当进程A访问完并释放该资源后，才允许另一个进程对该资源进行访问</u>。这种资源访问方式就叫<b>互斥式共享</b>，把<u>在一段时间内只允许一个进程访问的资源称为<b>临界资源</b></u>。</li>
-<li><b>计算机系统中的大多数物理设备及某些软件中所用的栈，变量和表格，都属于临界资源，它们都要求被互斥地共享</b>。</li>
-<li><u>互斥共享的方式要求一种资源在一段时间内（哪怕是一段很小的时间）只能满足一个请求，否则就会出现严重的问题</u>，（比如打印机第一行打的是A file的内容，第二行打的是B file的内容）。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>同时访问方式</p>
-<ul>
-<li>系统中还有另一类资源，这类资源允许在一段时间内由多个进程”同时“访问。<b>这里所说的”同时“通常是宏观上的，而在”微观“上，这些进程可能是交替地对该资源进行访问即”分时共享“的</b>。<u>可供多个进程”同时“访问的典型资源就是磁盘设备，一些用重入码编写的文件也可被”同时“共享，即允许若干个用户同时访问该文件</u>。</li>
-<li>同时访问共享通常要求一个请求分几个时间片段间隔地完成，<b>其效果与连续完成地效果相同</b>。</li>
-</ul>
-</li>
-<li>
-<p><b>并发</b>和<b>共享</b>之间的关系</p>
-<ul>
-<li>并发和共享是操作系统两个<b>最基本</b>的特征</li>
-<li><b>资源共享是以程序的并发为条件的</b>，若系统不允许程序并发执行，则自然不存在资源共享问题</li>
-<li><u>若系统不能对资源共享实施有效的管理，则必将影响到程序的并发执行，甚至根本无法并发执行</u></li>
-</ul>
-</li>
-</ul>
-<hr>
-<h5 id="虚拟virtual">虚拟(<code>Virtual</code>)</h5>
-<p><b>虚拟是指把一个物理上的实体变为若干逻辑上的对应物</b>。物理实体（前者）是实际存在的；而后者是虚的，是用户感觉上的事物。<u>用于实现虚拟的技术，称为<b>虚拟技术</b></u>。</p>
-<p>操作系统中利用了多种虚拟技术来实现<u>虚拟处理器，虚拟内存和虚拟外部设备等</u>。</p>
-<ul>
-<li>虚拟处理器技术
-<ul>
-<li><b>虚拟处理器技术是通过多道程序设计技术，采用让<u>多道程序并发执行的方法</u>，来分时使用一个处理器的</b>。此时，<b>虽然只有一个处理器</b>，但它能同时为多个用户服务，<u>使每个终端用户都感觉有一个中央处理器（CPU）在专门为它服务</u>。<u>利用<b>多道程序设计技术</b>把一个物理上的CPU虚拟为多个逻辑上的CPU</u>，称为<b>虚拟处理器</b>。</li>
-</ul>
-</li>
-<li>虚拟存储器技术
-<ul>
-<li>采用虚拟存储器技术将一台机器的物理存储器变为虚拟存储器，以便<b>从逻辑上扩充存储器的容量</b>。当然，这时用户所感觉到的内存容量是虚的。<u>我们把用户感觉到（但实际不存在）的存储器称为<b>虚拟存储器</b></u>。</li>
-</ul>
-</li>
-<li>虚拟设备技术
-<ul>
-<li>采用虚拟设备技术将一台物理$I/O$设备<b>虚拟为多台逻辑上的$I/O$设备</b>，并<u>允许每个用户占用一台逻辑上的$I/O$设备</u>，<b>使原来仅允许在一段时间内由一个用户访问的设备（即临界资源）变为在一段时间内允许多个用户同时访问的共享设备</b>。</li>
-</ul>
-</li>
-<li>操作系统虚拟技术归纳
-<ul>
-<li>时分复用技术 $\Longrightarrow$ 处理器的分时共享</li>
-<li>空分复用技术 $\Longrightarrow$ 虚拟存储器</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h5 id="异步asynchronism">异步(<code>Asynchronism</code>)</h5>
-<ul>
-<li>多道程序环境允许多个程序并发执行，<b>但是由于资源有限。进程的执行并不是一贯到底的，而是走走停停的，它<u>以不可预知的速度向前推进</u>，这就是程序的异步性</b>。</li>
-<li>异步性使得操作系统<b>运行在一种随机的环境下</b>，<u>可能导致进程的产生与时间有关的错误</u>（就像对全局变量的访问顺序不当会导致程序出错一样）。然而，<b>只要运行环境相同，操作系统就须保证多次运行程序后都能获得相同的结果</b>。</li>
-</ul>
-<h4 id="操作系统的目标和功能">操作系统的目标和功能</h4>
-<blockquote>
-<p>Update in 2023-03-03 22:00</p>
-<p>翘课爽玩的一天，✌️在百京就是百京朝阳✌️，逛了万达，不过万达也和老家的商网结构差不多，感觉全🇨🇳的五六层都是一个🅱️🐑，一楼🍎专卖店看了看<b>MacBook Air</b>，🐮魔是真得薄啊，加上类Unix的系统和续航，✌️将来有💸必须狠狠奖励自己一台</p>
-</blockquote>
-<p>比喻</p>
-<div class="mermaid" id="id-1"></div>
-<p>有了工人，机器就能发挥更大的作用，因此工人就成了<b>”扩充机器“</b>。</p>
-<h5 id="操作系统作为计算机系统资源的管理者">操作系统作为计算机系统资源的管理者</h5>
-<h6 id="处理机管理">处理机管理</h6>
-<ul>
-<li><b>在多道程序环境下，处理机的分配和运行都以进程（或线程）为基本单位</b>，因此<u>对处理机的管理可归结为对进程的管理</u>。并发是指在计算机内同时运行多个进程，因此<u>进程何时创建，何时撤销，如何管理，如何避免冲突，合理共享就是进程管理的最主要的任务</u>。进程管理的主要功能包括<b>进程控制，进程同步，进程通信，死锁处理，处理机调度</b>等</li>
-</ul>
-<h6 id="存储器管理">存储器管理</h6>
-<ul>
-<li>存储器管理是为了给多道程序的运行提供良好的环境，方便用户使用及提高内存的利用率，<b>主要包括内存分配与回收，地址映射，内存保护与共享和内存扩充等功能</b></li>
-</ul>
-<h6 id="文件管理">文件管理</h6>
-<ul>
-<li>计算机中的信息都是以文件的形式存在的，操作系统中<b>负责文件管理的部分</b>称为<b>文件系统</b>。<b>文件管理包括文件存储空间的管理，目录管理及文件读写管理和保护等</b>。</li>
-</ul>
-<h6 id="设备管理">设备管理</h6>
-<ul>
-<li><u>设备管理的主要任务是完成用户的$I/O$请求，方便用户使用各种设备，并提高设备的利用率</u>，主要包括<b>缓冲管理，设备分配，设备处理和虚拟设备等功能</b>。</li>
-</ul>
-<p><u>以上工作都由OS负责，用户无需关注</u></p>
-<h5 id="操作系统作为用户与计算机硬件系统之间的接口">操作系统作为用户与计算机硬件系统之间的接口</h5>
-<ul>
-<li>操作系统提供的接口主要分为两类：<b>命令接口，程序接口</b>。</li>
-</ul>
-<h6 id="命令接口">命令接口</h6>
-<ul>
-<li>使用命令接口进行作业控制的主要方式有两种：<u>联机控制方式和脱机控制方式</u></li>
-<li><u>按照作业控制方式的不同</u>，可将命令接口分为<b>联机命令接口</b>和<b>脱机命令接口</b></li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><b>联机命令接口</b></p>
-<ul>
-<li>又称<u>交互式命令接口</u>，适用于<b>分时或实时系统的接口</b>。它由一组键盘操作命令组成。<u>用户通过控制台或终端输入操作命令，向系统提出各种服务要求</u>。<b>用户每输入一条命令，控制权就转给操作系统的命令解释程序，然后由<u>命令解释程序</u>解释并执行输入的命令，完成指定的功能。之后，控制权转回控制台或终端</b>，此时用户又可输入下一条命令。联机命令接口可以这样理解：<u>”雇主“说一句话，”工人“做一件事，并作出反馈</u>，这就强调了交互性。<u>（典型<code>Linux</code>的终端<b>群魔乱舞</b> $\Longrightarrow$ <code>shell</code>是命令解析器）</u></li>
-</ul>
-</li>
-<li>
-<p><b>脱机命令接口</b></p>
-<ul>
-<li>又称<u>批处理命令接口</u>，适用于<b>批处理系统</b>，它由一组作业控制命令组成。<u>脱机用户不能直接干预作业的运行</u>，而应事先用相应的作业控制命令写成一份作业操作说明说明书，连同作业一起提交给系统。<b>系统调度到该作业时，由系统中的命令解释程序逐条解释执行作业说明书上的命令</b>，从而<b>间接地</b>控制作业地运行。</li>
-</ul>
-</li>
-</ul>
-<h6 id="程序接口">程序接口</h6>
-<ul>
-<li>程序接口由<b>一组系统调用</b>（也称<b>广义指令</b>）组成，<b>用户通过在程序中使用这些系统调用来请求操作系统为其提供服务</b>。</li>
-<li>当前最为流行的是用户图形界面($GUI$)，即图形接口。</li>
-<li>严格来说，<u>图形接口不是操作系统的一部分</u>，但是<b>图形接口所调用的系统调用命令是操作系统的一部分</b>。</li>
-</ul>
-<h5 id="操作系统实现了对计算机资源的扩充">操作系统实现了对计算机资源的扩充</h5>
-<ul>
-<li>没有任何软件支持的计算机称为<b>裸机</b></li>
-<li>操作系统所提供的资源管理功能和方便用户的各种服务功能，将裸机的功能变得更强大，使用变得更方便</li>
-<li>覆盖软件的机器称为<b>扩充机器</b>或<b>虚拟机</b></li>
-<li>”工人“操作机器，机器就有更大的作用，于是”工人“便成了”扩充机器“</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>总结：操作系统是对<b>计算机资源</b>进行管理的<b>软件</b></p>
-</li>
-<li>
-<p>补充：计算机开机后，操作系统最终被加载到<b>RAM</b></p>
-</li>
-</ul>
-<h4 id="操作系统历史-1">操作系统历史</h4>
-<blockquote>
-<p>Update in 2023-03-04</p>
-<p>昨天太™️累了，朝阳和西土城来回折腾加上录一下午节目给✌️整的浑身都是酸痛的，不给✌️录志愿百京✌️就鲨了你们所有人的🏇</p>
-<p>今天直接😴🅱️🅱️了，一觉淦到1️⃣2️⃣点，到食堂狠狠地炫了🍜，下午把第一章给看完</p>
-</blockquote>
-<h5 id="手工操作阶段此时没有操作系统">手工操作阶段（此时没有操作系统）</h5>
-<p>一切都得<b>人工干预</b></p>
-<ul>
-<li>两个突出的缺点
-<ul>
-<li><b>用户独占全机</b>，虽然不会出现因为资源已被其他用户占用而等待的现象，<b>但资源利用率低</b></li>
-<li><b>CPU等待手工操作</b>，CPU的利用不充分</li>
-</ul>
-</li>
-</ul>
-<h5 id="批处理阶段操作系统开始出现">批处理阶段（操作系统开始出现）</h5>
-<h6 id="单道批处理操作系统">单道批处理操作系统</h6>
-<ul>
-<li>系统对作业的处理是成批进行的，但内存中始终保持一道作业</li>
-<li>目的：解决人机矛盾以及CPU和I/O设备速率不匹配</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>特征</p>
-<ul>
-<li>自动性：磁带上的作业能自动地逐个运行，无须人工干预</li>
-<li>顺序性：磁带上的各道作业顺序地进入内存，<b>各道作业完成顺序与它们进入内存的顺序在正常情况下应完全相同</b></li>
-<li>单道性：内存中仅有一道程序运行，当该程序<b>完成</b>或<b>发生异常情况</b>时，才换入其后续程序进入内存运行</li>
-</ul>
-</li>
-<li>
-<p>问题：单道程序<b>运行期间</b>发出输入/输出请求后，高速的CPU需要处于等待低速的I/O完成的状态</p>
-</li>
-</ul>
-<h6 id="多道批处理程序">多道批处理程序</h6>
-<ul>
-<li>
-<p>多道程序设计技术允许多个程序同时进入内存并允许它们<b>在CPU中交替地运行</b>，<u>这些程序共享系统中的各种硬/软件资源</u></p>
-</li>
-<li>
-<p>当一道程序因I/O请求而暂停运行时，CPU便立即转去运行另一道程序 $\Longrightarrow$ 实现系统各部件之间的<b>并行工作</b>，让系统各个组成部分的都尽量去“忙”，提高效率</p>
-</li>
-<li>
-<p>特点</p>
-<ul>
-<li><b>多道</b>：计算机内存中同时存放多道相互独立的程序</li>
-<li><b>宏观上并行</b>：同时进入系统的多道程序都处于运行过程中，即它们先后开始各自的运行，但都未运行完毕</li>
-<li><b>微观上串行</b>：<u>内存中的多道程序轮流占有CPU，交替执行</u></li>
-</ul>
-</li>
-<li>
-<p>面临的问题</p>
-<ul>
-<li>如何分配处理器</li>
-<li>多道程序内存的分配问题</li>
-<li>I/O设备如何分配</li>
-<li>如何组织和存放大量的程序和数据，以方便用户使用并保证其安全性与一致性</li>
-</ul>
-</li>
-<li>
-<p>优点：资源利用率高，系统吞吐量大</p>
-</li>
-<li>
-<p>缺点：用户响应时间较长；<b>不提供人机交互能力</b>，<u>用户即不能了解自己的程序的运行情况，又不能控制计算机</u></p>
-</li>
-</ul>
-<h5 id="分时操作系统">分时操作系统</h5>
-<ul>
-<li>将处理器的运行时间切成很短的时间片，按照时间片把处理器分配给各联机作业使用</li>
-<li><u>若某个作业在分配给它的时间片内不能完成计算，则暂时停止该作业的运行，将处理器分配给其他作业使用，等待下一轮运行</u></li>
-<li><u>由于计算机运行很快，作业轮转地也很快，所以每个用户都感觉自己在独占一台计算机</u></li>
-<li>多个用户通过终端与主机进行交互而互不干扰，<b>实现分时的关键就是如何使用户能与自己的作业进行交互</b></li>
-<li>分时操作系统支持多道程序设计，但是与<b>多道批处理相比不同的是分时操作系统支持人机交互</b></li>
-<li>特征
-<ul>
-<li>同时性（多路性）：允许多个终端用户同时使用一台计算机</li>
-<li>交互性：用户可以通过终端与计算机交互</li>
-<li>独立性：系统中多个用户可以彼此独立的操作，互不干扰</li>
-<li>及时性：用户请求能在很短时间内获得响应</li>
-</ul>
-</li>
-</ul>
-<h5 id="实时操作系统">实时操作系统</h5>
-<p><b>有时间限制</b></p>
-<ul>
-<li>硬实时系统：某个动作<b>必须绝对地在规定的时刻（或规定的时间范围内）发生</b>，如飞行器的飞行自动控制系统</li>
-<li>软实时系统：能够<b>接受偶尔违反时间规定</b>且不会引起任何永久性损害，入订票系统，银行管理系统</li>
-</ul>
-<h5 id="网络操作系统">网络操作系统</h5>
-<p>通过计算机网络将各台计算机有机地联合起来，特点是网络中各种资源的共享及各台计算机之间的通信</p>
-<h5 id="分布式计算机系统">分布式计算机系统</h5>
-<ul>
-<li>系统中任意两台计算机通过通信方式交换信息，系统中每台计算机都具有同等地位（没有主机和从机）</li>
-<li>每台计算机上的资源都能为所有用户共享，系统中的任意台计算机都可以构成一个子系统，而且还能重构</li>
-<li>任何工作都可以分布在几台计算机上，由它们并行工作，协同完成</li>
-<li>用于管理分布式计算机系统的操作系统称为<b>分布式计算机系统</b>
-<ul>
-<li>特点：分布性和并行性</li>
-<li>与网络操作系统本质不同：分布式操作系统中的若干计算机<u>相互协同完成同一任务</u></li>
-</ul>
-</li>
-</ul>
-<h5 id="个人计算机系统">个人计算机系统</h5>
-<p>主要为办公和游戏而生，主流：windows,macOS,linux</p>
-<h5 id="总结">总结</h5>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-18.png" title="/img/Operating System/chapter1-18.png" data-thumbnail="/img/Operating System/chapter1-18.png" data-sub-html="<h2>OS发展历史</h2>">
-        
-    </a><figcaption class="image-caption">OS发展历史</figcaption>
-    </figure>
-<h4 id="操作系统运行环境">操作系统运行环境</h4>
-<div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><div class="typeit"><div id="id-2" class=""></div></div>
-<p>睡过头了，下午接着写。马上收尾，晚上写💩🎠的英语作业</div>
-        </div>
-    </div>
-<h5 id="处理器的运行模式">处理器的运行模式</h5>
-<ul>
-<li>
-<p>指令分类</p>
-<ul>
-<li>特权指令：<b>指不允许用户直接使用的指令</b>，如I/O指令，置中断指令等</li>
-<li>非特权指令：<b>指允许用户直接使用的指令</b>，它不能直接访问系统中的软硬件资源，仅限于访问用户的地址空间，<b>这也是为了防止用户程序对系统造成破坏</b></li>
-</ul>
-</li>
-<li>
-<p>CPU的运行模式</p>
-<ul>
-<li><b>用户态</b>（目态）：只能执行非特权指令，<u>用户自编程序运行在用户态</u></li>
-<li><b>核心态</b>（管态，内核态）：能够执行特权指令，<b>切换到用户态的指令也是特权指令</b>，<u>操作系统内核程序运行在核心态</u></li>
-</ul>
-</li>
-</ul>
-<h5 id="操作系统内核">操作系统内核</h5>
-<ul>
-<li>内核是计算机配置的底层软件，它管理着各种资源，$应用程序 \xleftrightarrow{内核} 硬件$，主要包括4方面内容
-<ul>
-<li>时钟管理：<u>操作系统需要通过时钟管理来向用户提供标准的系统时间</u>。另外，<b>通过时钟的中断管理，可以实现进程的切换</b>。</li>
-<li>中断机制：键盘或鼠标的信息输入，进程的管理和调度，系统功能的调用，设备驱动，文件访问等，无不依赖于中断机制。可以说，<b>现在操作系统是靠中断驱动的软件</b>。
-<ul>
-<li>中断机制中，<b>只有一小部分功能属于内核</b>，它们负责<u>保护和恢复中断现场的信息</u>，转移控制权到相关的处理程序。这样可以<u>减少中断的处理时间，提高系统的并行处理能力</u>。</li>
-</ul>
-</li>
-<li>原语（Atomic Operation）：按照层次结构设计的操作系统，底层必然是一些<u>可被调用的公共小程序</u>，它们各自完成一个规定的操作。它们的特点如下
-<ul>
-<li><b>处于操作系统的最底层，是最接近硬件的一部分</b></li>
-<li>这些程序的运行具有原子性，<b>其操作只能一气呵成</b>（出于系统安全性和便于管理考虑）$\Longrightarrow$ 类比Java里面的<code>lock()</code>和<code>synchronized</code></li>
-<li><u>运行时间较短，而且调用频繁</u></li>
-<li><b>定义原语：关闭中断，让所有动作不可分割地完成后再打开中断。</b></li>
-<li>例子：<u>系统中的设备驱动，CPU切换，进程通信等功能中的<b>部分操作</b>都可定义为原语</u></li>
-</ul>
-</li>
-<li>系统控制的数据结构及处理：系统中用来登记状态信息的数据结构有很多，如作业控制块，进程控制块等。为了实现有效的管理，系统需要一些基本的操作，常见的操作有一下3种：
-<ul>
-<li><b>进程管理</b>：进程状态管理，进程调度和分派，创建和撤销进程控制块等</li>
-<li><b>存储器管理</b>：存储器的空间分配和回收，内存信息保护程序，代码对换程序等</li>
-<li><b>设备管理</b>：缓冲区管理，设备分配和回收等</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="中断和异常">中断和异常</h4>
-<ul>
-<li>
-<p>定义</p>
-<ul>
-<li>中断(Interruption)：也称<b>外中断</b>，<b>是指来自CPU执行指令外部的事件</b>，通常用于信息输入/出，如设备发出的I/O结束中断，表示设备输入/出处理已经完成。<u>时钟中断，表示一个固定的时间片已到，让处理机处理计时，启动定时运行的任务等</u>。</li>
-<li>异常(Exception)：也称<b>内中断</b>，是指来自<b>CPU执行指令内部的事件</b>，<u>如程序的非法操作码，地址越界，运算溢出，虚拟系统的缺页及专门的陷入指令等引起的事件</u>。<b>异常不能被屏蔽</b>，一旦出现，就应立即处理。</li>
-</ul>
-</li>
-<li>
-<p>联系与区别</p>
-</li>
-</ul>
-<div class="mermaid" id="id-3"></div>
-<ul>
-<li>处理过程：复习计组</li>
-</ul>
-<h4 id="系统调用">系统调用</h4>
-<ul>
-<li>大致分类
-<ul>
-<li>设备管理</li>
-<li>文件管理</li>
-<li>进程控制</li>
-<li>进程通信</li>
-<li>内存管理</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-19.png" title="/img/Operating System/chapter1-19.png" data-thumbnail="/img/Operating System/chapter1-19.png" data-sub-html="<h2>两种状态的切换</h2>">
-        
-    </a><figcaption class="image-caption">两种状态的切换</figcaption>
-    </figure>
-<blockquote>
-<p>由用户态进入核心态，不仅状态需要切换，而且<b>所用的堆栈也可能需要从用户堆栈切换为系统堆栈</b>，<u>但这个系统堆栈也是属于该进程的</u></p>
-</blockquote>
-<h5 id="宏内核">宏内核</h5>
-<p>也称单内核或大内核，是指<b>将系统的主要功能模块都作为一个紧密联系的整体运行在核心态</b>，从而为用户程序提供高性能的系统服务。因为<u>各管理模块之间共享信息，能有效利用相互之间的有效特性，所以具有无可比拟的性能优势</u>。</p>
-<h5 id="微内核">微内核</h5>
-<p>由于宏内核过于庞大，所以有了微内核构架，讲内核中最基本的功能保留在内核，而将那些不需要在核心态执行的功能移到用户态执行，从而降低内核设计复杂性。</p>
-<ul>
-<li>基本功能
-<ul>
-<li>进程（线程）管理</li>
-<li>低级存储器管理</li>
-<li>中断和陷入处理</li>
-</ul>
-</li>
-</ul>
-<h4 id="操作系统引导">操作系统引导</h4>
-<ol>
-<li>激活CPU</li>
-<li>硬件自检</li>
-<li>加载带有操作系统的硬盘</li>
-<li>加载主引导记录MBR</li>
-<li>扫描硬盘分区表</li>
-<li>加载分区引导记录PBR</li>
-</ol>
-<h4 id="虚拟机">虚拟机</h4>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter1-20.png" title="/img/Operating System/chapter1-20.png" data-thumbnail="/img/Operating System/chapter1-20.png" data-sub-html="<h2>虚拟机两种模式</h2>">
-        
-    </a><figcaption class="image-caption">虚拟机两种模式</figcaption>
-    </figure>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>

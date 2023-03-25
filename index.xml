@@ -4,9 +4,505 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</lastBuildDate>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>Operating System Chapter9 操作系统的状态机模型</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</link>
+    <pubDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>并发……就这么……讲完了……
+<ul>
+<li>理解的方式：“玩一玩” 示例代码</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 听说操作系统也是程序。那到底是鸡生蛋还是蛋生鸡？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>软件和硬件的桥梁</li>
+<li>操作系统的加载和初始化</li>
+<li>AbstractMachine 代码导读</li>
+</ul>
+<h2 id="自己动手写操作系统">自己动手写操作系统</h2>
+<h3 id="时事热评">时事热评</h3>
+<p><a href="https://www.bilibili.com/video/BV14T4y1D7y8" target="_blank" rel="noopener noreffer">小学生写了三个月的操作系统是什么样的？</a></p>
+<ul>
+<li>看到 i386 就知道了嘛</li>
+</ul>
+<h3 id="本学期的-oslabs">本学期的 OSLabs</h3>
+<p>热身实验</p>
+<ul>
+<li>Lab0 (amgame): 熟悉代码框架</li>
+</ul>
+<hr>
+<p>正经实验</p>
+<ul>
+<li>
+<p>Lab1 (pmm): Physical memory management</p>
+<ul>
+<li>多处理器 (bare-metal) 上的 kalloc/free</li>
+</ul>
+</li>
+<li>
+<p>Lab2 (kmt): Kernel multi-threading</p>
+<ul>
+<li>中断和异常驱动的上下文 (线程) 切换</li>
+</ul>
+</li>
+<li>
+<p>Lab3 (uproc): User processes</p>
+<ul>
+<li>虚拟地址空间、用户态进程和系统调用</li>
+</ul>
+</li>
+<li>
+<p>Lab4 (vfs): Virtual file system</p>
+<ul>
+<li>devfs, procfs, 简单的文件系统；ELF 加载器</li>
+</ul>
+</li>
+</ul>
+<h3 id="大学的真正意义">大学的真正意义</h3>
+<blockquote>
+<p>将已有的知识和方法重新消化，为大家建立好 “台阶”，在有限的时间里迅速<font color="red">赶上数十年来建立起的学科体系</font></p>
+</blockquote>
+<hr>
+<ul>
+<li>
+<p>例子：破除 “写操作系统很难”、“写操作系统很牛” 的错误认识</p>
+<ul>
+<li>
+<p>操作系统真的就是个 C 程序</p>
+</li>
+<li>
+<p>你只是需要 “被正确告知” 一些额外的知识</p>
+<ul>
+<li>然后写代码、吃苦头</li>
+<li>从而建立正确的 “专业世界观”</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="例子">例子</h3>
+<ul>
+<li>
+<p>“专业世界观” 的例子 (这些都没啥，paper 都发不了)</p>
+<ul>
+<li>
+<p>写 x86 模拟器的时候，不知道哪条指令错了，怎么办？</p>
+</li>
+<li>
+<p>做操作系统实验的时候，如果遇到神秘 CPU Reset，怎么办？</p>
+</li>
+<li>
+<p>做实验做不下去的时候，该实现什么工具？</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>“专业世界观” 的学习方法</p>
+<ul>
+<li>
+<p>经典研究论文 (OSDI, SOSP, ATC, EuroSys, &hellip;)</p>
+</li>
+<li>
+<p>久经考验的经典教学材料 (xv6, OSTEP, CSAPP, &hellip;)</p>
+</li>
+<li>
+<p>海量的开源工具 (GNU 系列, qemu, gdb, &hellip;)</p>
+</li>
+<li>
+<p>第三方资料，慎用 (tutorials, osdev wiki, &hellip;)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="硬件和软件的桥梁">硬件和软件的桥梁</h2>
+<h3 id="c-程序">C 程序</h3>
+<ul>
+<li>
+<p>我们已经知道如何写一个 “最小” 的 C 程序了：</p>
+<ul>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/minimal.S" target="_blank" rel="noopener noreffer">minimal.S</a></p>
+</li>
+<li>
+<p>不需要链接任何库，就能在操作系统上运行</p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="n">globl</span> <span class="n">_start</span>
+</span></span><span class="line"><span class="cl"><span class="nl">_start</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_write</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span>   <span class="c1">// write(
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="c1">//   fd=1,
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="n">st</span><span class="p">,</span>        <span class="o">%</span><span class="n">rsi</span>   <span class="c1">//   buf=st,
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="p">(</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">),</span> <span class="o">%</span><span class="n">rdx</span>   <span class="c1">//   count=ed-st
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">syscall</span>                 <span class="c1">// );
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_exit</span><span class="p">,</span>  <span class="o">%</span><span class="n">rax</span>   <span class="c1">// exit(
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="c1">//   status=1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">syscall</span>                 <span class="c1">// );
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="nl">st</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="n">ascii</span> <span class="s">&#34;</span><span class="se">\033</span><span class="s">[01;31mHello, OS World</span><span class="se">\033</span><span class="s">[0m</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">ed</span><span class="p">:</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>“程序 = 状态机” 没问题</p>
+</li>
+<li>
+<p>带来更多的疑问</p>
+<ul>
+<li><font color="red">但谁创建的这个状态机？？？</font>
+<ul>
+<li>当然是操作系统了……呃…… $\Longrightarrow$ 参考<a href="https://jungle430.github.io/posts/operating-system/support2/#%E4%BB%8E%E6%88%91%E4%BB%AC%E7%BB%88%E7%AB%AF%E6%95%B2%E5%9B%9E%E8%BD%A6%E5%88%B0%E7%A8%8B%E5%BA%8F%E8%A2%AB%E8%BD%BD%E5%85%A5%E6%89%A7%E8%A1%8C%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88" target="_blank" rel="noopener noreffer">从我们终端敲回车到程序被载入执行的过程中发生了什么？</a></li>
+</ul>
+</li>
+<li><font color="red">这个程序可以在没有操作系统的硬件上运行吗？</font>
+<ul>
+<li>“启动” 状态机是由 “加载器” 完成的</li>
+<li>加载器也是一段程序 (状态机)</li>
+<li>这个程序由是由谁加载的？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ file minimal
+</span></span><span class="line"><span class="cl">minimal: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>SYSV<span class="o">)</span>, statically linked, not stripped
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="bare-metal-与程序员的约定">Bare-metal 与程序员的约定</h3>
+<ul>
+<li>
+<p>计算机硬件运行的时候也是状态机</p>
+</li>
+<li>
+<p>为了让计算机能<font color="red">运行任何我们的程序</font>，一定存在软件/硬件的约定</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><b>CPU reset</b> 后，处理器处于某个<b>确定的状态</b></p>
+<ul>
+<li><b>PC 指针</b>一般指向一段 <font color="blue">memory-mapped ROM</font>
+<ul>
+<li>ROM 存储了厂商提供的 firmware (固件)</li>
+</ul>
+</li>
+<li>处理器的大部分特性处于关闭状态
+<ul>
+<li>缓存、虚拟存储、……</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Firmware (固件，厂商提供的代码)</p>
+<ul>
+<li>将用户数据加载到内存
+<ul>
+<li>例如存储介质上的第二级 loader (加载器)</li>
+<li>或者直接加载操作系统 (嵌入式系统)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="x86-family-cpu-reset-行为">x86 Family: CPU Reset 行为</h3>
+<ul>
+<li>
+<p>CPU Reset (<a href="https://software.intel.com/en-us/articles/intel-sdm" target="_blank" rel="noopener noreffer">Intel® 64 and IA-32 Architectures Software Developer’s Manual</a>, Volume 3A/3B)</p>
+</li>
+<li>
+<p>寄存器会有初始状态</p>
+<ul>
+<li>
+<p><code>EIP = 0x0000fff0</code></p>
+</li>
+<li>
+<p><code>CR0 = 0x60000010</code></p>
+<ul>
+<li>16-bit 模式 $\Longrightarrow$ 2010年前的老电脑会兼容老接口和老的操作系统</li>
+</ul>
+</li>
+<li>
+<p><code>EFLAGS = 0x00000002</code></p>
+</li>
+<li>
+<p>interrupt disabled（中断关闭）</p>
+</li>
+</ul>
+</li>
+<li>
+<p>TFM (5,000 页 by 2019)</p>
+<ul>
+<li>最需要的 Volume 3A 只有 468 页</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-1.png" title="/img/Operating System/chapter9-1.png" data-thumbnail="/img/Operating System/chapter9-1.png" data-sub-html="<h2>friendly manual</h2>">
+        
+    </a><figcaption class="image-caption"><code>friendly manual</code></figcaption>
+    </figure>
+<ul>
+<li>让<code>qemu</code>模拟器停在第一条指令上，和上面的手册对照，会发现和手册一致</li>
+</ul>
+<h3 id="cpu-reset-之后发生了什么">CPU Reset 之后：发生了什么？</h3>
+<ul>
+<li>
+<p>《计算机系统基础》：<font color="red">不仅是程序，整个计算机系统也是一个状态机</font></p>
+<ul>
+<li>
+<p>从 PC (<code>CS:IP</code>) 指针处取指令、译码、执行……</p>
+</li>
+<li>
+<p>从 firmware 开始执行</p>
+<ul>
+<li><code>ffff0</code>(PC初始化的值) 通常是一条向 firmware 跳转的 jmp 指令</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>厂商会在<code>ROW</code>里面放好写死的代码（Only-read）</p>
+</li>
+<li>
+<p>Firmware: <a href="https://www.zhihu.com/question/21672895" target="_blank" rel="noopener noreffer">BIOS vs. UEFI</a></p>
+<ul>
+<li>
+<p>都是主板/主板上外插设备的软件抽象</p>
+<ul>
+<li>支持系统管理程序运行</li>
+</ul>
+</li>
+<li>
+<p>Legacy BIOS (Basic I/O System)</p>
+</li>
+<li>
+<p>UEFI (Unified Extensible Firmware Interface)</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-2.png" title="/img/Operating System/chapter9-2.png" data-thumbnail="/img/Operating System/chapter9-2.png" data-sub-html="<h2>BIOS</h2>">
+        
+    </a><figcaption class="image-caption"><code>BIOS</code></figcaption>
+    </figure>
+<h3 id="legacy-bios-约定">Legacy BIOS: 约定</h3>
+<p><b>Firmware 必须提供机制，将用户数据载入内存</b></p>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>Legacy BIOS 把<b>第一个可引导设备的第一个扇区加载到物理内存的 <code>7c00</code> 位置</b>，这也是我们Fireware和OS之间的第一次，也是唯一一次握手</p>
+<ul>
+<li>
+<p>此时处理器处于 16-bit 模式</p>
+</li>
+<li>
+<p>规定 <code>CS:IP = 0x7c00</code>, <code>(R[CS] &lt;&lt; 4) | R[IP] == 0x7c00</code></p>
+<ul>
+<li>
+<p>可能性1：<code>CS = 0x07c0, IP = 0</code></p>
+</li>
+<li>
+<p>可能性2：<code>CS = 0, IP = 0x7c00</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>其他没有任何约束</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Windows启动模式：老的Windows的A，B盘都是软盘，BIOS先去软盘里面读前512个<code>bytes</code>，看最后两个byte是否为<code>55aa</code>（大端），如果是就加载这块磁盘，否则读下一块，如果都不是就启动失败。读完A/B盘之后引导到C盘，这也是为什么今天的Windows操作系统C盘是系统盘的原因</p>
+</li>
+<li>
+<p>Firmware做的事情（以BIOS为例）</p>
+</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<h3 id="能不能看一下代码">能不能看一下代码？</h3>
+<blockquote>
+<p>Talk is cheap. Show me the code. ——Linus Torvalds</p>
+</blockquote>
+<ul>
+<li>
+<p>有没有可能我们真的去看从 CPU Reset 以后每一条指令的执行？</p>
+</li>
+<li>
+<p><font color="red">计算机系统公理：你想到的就一定有人做到</font></p>
+</li>
+<li>
+<p>模拟方案：QEMU</p>
+<ul>
+<li>传奇黑客、天才程序员 <a href="https://www.zhihu.com/question/28388113" target="_blank" rel="noopener noreffer">Fabrice Bellard</a> 的杰作（其他:ffmpeg)
+<ul>
+<li><a href="https://www.usenix.org/legacy/publications/library/proceedings/usenix05/tech/freenix/full_papers/bellard/bellard.pdf" target="_blank" rel="noopener noreffer">QEMU, A fast and portable dynamic translator</a> (USENIX ATC'05)</li>
+<li>Android Virtual Device, VirtualBox, &hellip; 背后都是 QEMU</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>真机方案：JTAG (Joint Test Action Group) debugger</p>
+<ul>
+<li>一系列 (物理) 调试寄存器，可以实现 gdb 接口 (!!!)</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-3.png" title="/img/Operating System/chapter9-3.png" data-thumbnail="/img/Operating System/chapter9-3.png" data-sub-html="<h2>ffmpeg</h2>">
+        
+    </a><figcaption class="image-caption"><code>ffmpeg</code></figcaption>
+    </figure>
+<h3 id="调试-qemu-确认-firmware-的行为">调试 QEMU: 确认 Firmware 的行为</h3>
+<blockquote>
+<p>亲眼确认 Firmware 到底是不是会加载启动盘第一个扇区到 <code>0x7c00</code> 内存位置！</p>
+</blockquote>
+<p>调试 QEMU 模拟器</p>
+<ul>
+<li>
+<p>查看 CPU Reset 后的寄存器</p>
+<ul>
+<li><code>info registers</code></li>
+</ul>
+</li>
+<li>
+<p>查看<code>0x7c00</code>内存的加载</p>
+<ul>
+<li><code>watch *0x7c00</code> - 《计算机系统基础》的良苦用心</li>
+<li>查看当前指令 <code>x/i ($cs * 16 + $rip)</code></li>
+<li>打印内存 <code>x/16xb 0x7c00</code></li>
+</ul>
+</li>
+<li>
+<p>进入<code>0x7c00</code>代码的执行</p>
+<ul>
+<li><code>b *0x7c00</code>, <code>c</code> (撒花！我们一会再回来)</li>
+</ul>
+</li>
+</ul>
+<h3 id="鸡和蛋的问题解决">鸡和蛋的问题解决</h3>
+<ul>
+<li>
+<p>有个原始的鸡：Firmware</p>
+<ul>
+<li>
+<p>代码直接存在于硬件里</p>
+</li>
+<li>
+<p>CPU Reset 后 Firmware 会执行</p>
+<ul>
+<li>加载 512 字节到内存 (Legacy Boot)
+<ul>
+<li>然后功成身退</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Firmware 的另一用处</p>
+<ul>
+<li>放置一些 “绝对安全的代码”
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/manuals/BIOS-interrupts.pdf" target="_blank" rel="noopener noreffer">BIOS 中断</a> (Hello World 是如何被打印的)</li>
+<li>如果加载失败将错误信息打印出来</li>
+<li>ARM Trusted Firmware
+<ul>
+<li>Boot-Level 1, 2, 3.1, 3.2, 3.3</li>
+<li><a href="https://www.denx.de/wiki/U-Boot" target="_blank" rel="noopener noreffer">U-Boot</a>: the universal boot loader</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="小插曲firmware-的病毒-1998">小插曲：Firmware 的病毒 (1998)</h3>
+<ul>
+<li>
+<p>Firmware 通常是只读的 (当然……)</p>
+</li>
+<li>
+<p>Intel 430TX (Pentium) 芯片组允许<font color="red">写入 Flash ROM</font></p>
+<ul>
+<li>
+<p>只要向 Flash BIOS 写入特定序列，Flash ROM 就变为可写</p>
+<ul>
+<li>留给 firmware 更新的通道</li>
+</ul>
+</li>
+<li>
+<p>要得到这个序列其实并不困难</p>
+<ul>
+<li>似乎文档里就有 🤔 Boom……</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><a href="https://zh.wikipedia.org/zh-tw/CIH%E7%97%85%E6%AF%92" target="_blank" rel="noopener noreffer">CIH</a> 的作者陈盈豪被逮捕，但并未被定罪</p>
+</blockquote>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-4.gif" title="/img/Operating System/chapter9-4.gif" data-thumbnail="/img/Operating System/chapter9-4.gif" data-sub-html="<h2>病毒代码结尾的CIH</h2>">
+        
+    </a><figcaption class="image-caption"><code>病毒代码结尾的CIH</code></figcaption>
+    </figure>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter8 并发 bug 和应对</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</link>
     <pubDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</guid>
@@ -9322,763 +9818,6 @@ jyyslide-md</a></p>
 <p>}</p>
 </blockquote>
 <div id="id-1"><strong>Ending</strong></div>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #01: Course Overview &amp; Relational Model</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/</link>
-    <pubDate>Wed, 22 Feb 2023 15:23:14 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-01-course-overview--relational-model">Lecture #01: Course Overview &amp; Relational Model</h2>
-<h3 id="outline">Outline</h3>
-<ul>
-<li>Course Logistics</li>
-<li>Relational Model</li>
-<li>Relational Algebra</li>
-</ul>
-<h3 id="course-overiew">Course overiew</h3>
-<ul>
-<li>This course is about the design/implementation of database management systems (<code>DBMSs</code>)</li>
-<li>This is <strong>not</strong> a course ($\rightarrow Key\ point\ is\ the\ theory\ and\ the\ concept$) about how to use a DBMS to build applications or how to administer a DBMS.→ See <a href="http://www.heinz.cmu.edu/academic-resources/course-results/course-details/index.aspx?cid=273" target="_blank" rel="noopener noreffer">CMU 95-703</a> (Heinz College)</li>
-</ul>
-<h3 id="projects">PROJECTS</h3>
-<ul>
-<li>
-<p>All projects will use the CMU DB Group <a href="https://github.com/cmu-db/bustub" target="_blank" rel="noopener noreffer">BusTub</a> academic DBMS.</p>
-<ul>
-<li>→ Each project builds on the previous one.</li>
-<li>→ We will not teach you how to write/debug C++17</li>
-</ul>
-</li>
-<li>
-<p><strong>complete <a href="https://15445.courses.cs.cmu.edu/fall2022/project0/" target="_blank" rel="noopener noreffer">Project #0</a> ! ! !</strong></p>
-</li>
-</ul>
-<h3 id="database">Database</h3>
-<ul>
-<li>
-<p><strong>Organized collection of inter-related data that models some aspect of the real-world</strong></p>
-</li>
-<li>
-<p><strong>Databases are the core component of most computer applications</strong></p>
-</li>
-</ul>
-<h4 id="example">Example</h4>
-<p>Create a database that models a digital music store to keep track of artists and albums</p>
-<ul>
-<li>Things we need for our store
-<ul>
-<li>Information about <code>Artists</code></li>
-<li>What <code>Albums</code> those Artists released</li>
-</ul>
-</li>
-</ul>
-<h5 id="flat-file-strawman">FLAT FILE STRAWMAN</h5>
-<ul>
-<li>
-<p>Store our database as <strong>comma-separated value (CSV)</strong> files that we manage ourselves in our application code</p>
-<ul>
-<li>
-<p>Use a separate file per entity</p>
-</li>
-<li>
-<p>The application must parse the files each time they want to read/update records</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Create a database that models a digital music store</p>
-</li>
-</ul>
-<p>Artist(name, year, country)</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;Wu-Tang Clan&#34;</span><span class="err">,</span><span class="mi">1992</span><span class="err">,</span><span class="s2">&#34;USA&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;Notorious BIG&#34;</span><span class="err">,</span><span class="mi">1992</span><span class="err">,</span><span class="s2">&#34;USA&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;GZA&#34;</span><span class="err">,</span><span class="mi">1990</span><span class="err">,</span><span class="s2">&#34;USA&#34;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Album(name, artist, year)</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;Enter the Wu-Tang&#34;</span><span class="err">,</span><span class="s2">&#34;Wu-Tang Clan&#34;</span><span class="err">,</span><span class="mi">1993</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;St.Ides Mix Tape&#34;</span><span class="err">,</span><span class="s2">&#34;Wu-Tang Clan&#34;</span><span class="err">,</span><span class="mi">1994</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;Liquid Swords&#34;</span><span class="err">,</span><span class="s2">&#34;GZA&#34;</span><span class="err">,</span><span class="mi">1990</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h5 id="our-code">Our Code</h5>
-<ul>
-<li>Example: Get the year that GZA went solo $\rightarrow$ Artist</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-</span></span><span class="line"><span class="cl">	<span class="n">record</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&#34;GZA&#34;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">		<span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="problem-about-flat-files-rightarrow-data-integrity">Problem about FLAT FILES $\rightarrow$ DATA-INTEGRITY</h4>
-<ul>
-<li>
-<p>How do we ensure that the artist is the same for each album entry?</p>
-</li>
-<li>
-<p>What if somebody overwrites the album year with an invalid string?</p>
-</li>
-<li>
-<p>What if there are multiple artists on an album?</p>
-</li>
-<li>
-<p>What happens if we delete an artist that has albums?</p>
-</li>
-</ul>
-<h4 id="problem-about-flat-files-rightarrow-implementation">Problem about FLAT FILES $\rightarrow$ IMPLEMENTATION</h4>
-<ul>
-<li>
-<p>How do you find a particular record?</p>
-</li>
-<li>
-<p>What if we now want to create a new application that uses the same database?</p>
-</li>
-<li>
-<p>What if two threads try to write to the same file at the same time?</p>
-</li>
-</ul>
-<h4 id="problem-about-flat-files-rightarrow-durability">Problem about FLAT FILES $\rightarrow$ DURABILITY</h4>
-<ul>
-<li>
-<p>What if the machine crashes while our program is updating a record?</p>
-</li>
-<li>
-<p>What if we want to replicate the database on multiple machines for high availability?</p>
-</li>
-</ul>
-<h3 id="database-management-system">DATABASE MANAGEMENT SYSTEM</h3>
-<ul>
-<li>
-<p>A <u>database management system</u> (<strong>DBMS</strong>) is software that allows applications to <strong>store and analyze information in a database</strong></p>
-</li>
-<li>
-<p>A general-purpose DBMS supports the <u>definition, creation, querying, update, and administration of databases</u> in accordance with some <u>data model</u></p>
-</li>
-</ul>
-<h4 id="early-dbmss">EARLY DBMSs</h4>
-<blockquote>
-<p>Early database applications were difficult to build and maintain on available DBMSs in the 1960s</p>
-<blockquote>
-<p>Examples: IDS, IMS, CODASYL</p>
-<p>Computers were expensive, humans were cheap😂</p>
-</blockquote>
-</blockquote>
-<ul>
-<li><u>Tight coupling</u> between <strong>logical</strong> and <strong>physical</strong> layers</li>
-<li>Programmers had to (roughly) know what queries the application would execute before they could deploy the database😟</li>
-</ul>
-<blockquote>
-<p><strong>Ted Codd</strong> was a <u>mathematician</u> working at IBM Research in the late 1960s</p>
-<p>He saw IBM&rsquo;s developers spending their time <strong>rewriting database programs</strong> every time <u>the database’s schema or layout changed</u>😨</p>
-<p>Devised the <strong>relational model</strong> in 1969</p>
-</blockquote>
-<h3 id="relational-model">RELATIONAL MODEL</h3>
-<ul>
-<li>
-<p>The relational model defines a database abstraction based on relations to avoid maintenance overhead</p>
-</li>
-<li>
-<p>Key tenets</p>
-<ul>
-<li>Store database in simple data structures (relations)</li>
-<li>Physical storage left up to the DBMS implementation</li>
-<li>Access data through high-level language, DBMS figures out best execution strategy</li>
-</ul>
-</li>
-<li>
-<p><strong>Structure:</strong> The definition of the database&rsquo;s relations and their contents</p>
-</li>
-<li>
-<p><strong>Integrity:</strong> Ensure the database&rsquo;s contents satisfy constraints</p>
-</li>
-<li>
-<p><strong>Manipulation:</strong> Programming interface for accessing and modifying a database&rsquo;s contents</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>A <u>relation</u> is an unordered set that contain the relationship of attributes that represent entities</li>
-<li>A <u>tuple</u> is a set of attribute values (also known as its <u>domain</u>) in the relation
-<ul>
-<li>Values are (normally) atomic/scalar</li>
-<li>The special value <strong>NULL</strong> is a member of every domain (if allowed)</li>
-</ul>
-</li>
-</ul>
-<p>Artist(name, year, country)</p>
-<table>
-<thead>
-<tr>
-<th>name</th>
-<th>year</th>
-<th>country</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Wu-Tang Clan</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>Notorious BIG</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>GZA</td>
-<td>1990</td>
-<td>USA</td>
-</tr>
-</tbody>
-</table>
-<p>$$
-n-ary\ Relation=Table\ with\ n\ columns\newline
-$$</p>
-<h4 id="relational-model-primary-keys">RELATIONAL MODEL: PRIMARY KEYS</h4>
-<ul>
-<li>A relation&rsquo;s <u>primary key</u> <strong>uniquely</strong> identifies a single tuple</li>
-<li>Some <code>DBMSs</code> automatically create an internal primary key if a table does not define one</li>
-<li>Auto-generation of unique integer primary keys
-<ul>
-<li>→ <strong>SEQUENCE</strong> (SQL:2003)</li>
-<li>→ <strong>AUTO_INCREMENT</strong> (MySQL)</li>
-</ul>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>id</th>
-<th>name</th>
-<th>year</th>
-<th>country</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>123</td>
-<td>Wu-Tang Clan</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>456</td>
-<td>Notorious BIG</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>789</td>
-<td>GZA</td>
-<td>1990</td>
-<td>USA</td>
-</tr>
-</tbody>
-</table>
-<h4 id="relational-model-foreign-keys">RELATIONAL MODEL: FOREIGN KEYS</h4>
-<ul>
-<li>A <u>foreign key</u> specifies that an attribute <strong>from one relation</strong> has to <strong>map to a tuple in another relation</strong></li>
-</ul>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-1.png" title="/img/CMU 15-445 Database Systems/chapter1-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-1.png">
-        
-    </a>
-<h3 id="data-models">DATA MODELS</h3>
-<ul>
-<li>
-<p>A <u>data model</u> is a collection of concepts for describing the data in a database</p>
-</li>
-<li>
-<p>A <u>schema</u> is a description of a particular collection of data, <u>using a given data model</u></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Example</p>
-<ul>
-<li>
-<p><strong>Relational</strong> $\leftarrow This\ Course\newline$</p>
-</li>
-<li>
-<p>Key/Value</p>
-</li>
-<li>
-<p>Graph</p>
-</li>
-<li>
-<p>Document / Object</p>
-</li>
-<li>
-<p>Wide-Column / Column-family</p>
-</li>
-<li>
-<p>Array / Matrix / Vectors</p>
-</li>
-<li>
-<p>Hierarchical</p>
-</li>
-<li>
-<p>Network</p>
-</li>
-<li>
-<p>Multi-Value</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="data-manipulation-languages-dml">DATA MANIPULATION LANGUAGES (DML)</h3>
-<ul>
-<li>
-<p>Methods to store and retrieve information from a database</p>
-</li>
-<li>
-<p><strong>Procedural:</strong></p>
-<ul>
-<li>→ The query specifies the (high-level) strategy to find the desired result based on sets / bags $\leftarrow Relational\ Algebra\newline$</li>
-</ul>
-</li>
-<li>
-<p><strong>Non-Procedural (Declarative):</strong></p>
-<ul>
-<li>→ The query specifies only what data is wanted and not how to find it. $\leftarrow Relational\ Calculus\newline$</li>
-</ul>
-</li>
-</ul>
-<h3 id="relational-algebra">RELATIONAL ALGEBRA</h3>
-<ul>
-<li>
-<p>Fundamental operations to retrieve and manipulate tuples in a relation</p>
-<ul>
-<li>→ Based on set algebra</li>
-</ul>
-</li>
-<li>
-<p>Each operator takes one or more relations as its inputs and outputs a new relation</p>
-<ul>
-<li>→ We can &ldquo;chain&rdquo; operators together to create more complex operations</li>
-</ul>
-</li>
-</ul>
-<p>$$
-\begin{align}
-&amp;\sigma\Longrightarrow Select\newline
-&amp;\prod\Longrightarrow Projection\newline
-&amp;\cup\Longrightarrow Union\newline
-&amp;\cap\Longrightarrow Intersection\newline
-&amp;-\Longrightarrow Difference\newline
-&amp;\times\Longrightarrow Product\newline
-&amp;\bowtie\Longrightarrow Join\newline
-\end{align}
-$$</p>
-<h4 id="select">SELECT</h4>
-<ul>
-<li>
-<p>Choose a subset of the tuples from a relation that satisfies a selection predicate</p>
-<ul>
-<li>
-<p>Predicate acts as a filter to retain only tuples that fulfill its qualifying requirement</p>
-</li>
-<li>
-<p>Can combine multiple predicates using conjunctions / disjunctions</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>$$
-Syntax:\sigma_{predicate}(R)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-2.png" title="/img/CMU 15-445 Database Systems/chapter1-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-2.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">WHERE</span><span class="w"> </span><span class="n">a_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;a2&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">b_id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">102</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="projection">PROJECTION</h4>
-<ul>
-<li>
-<p>Generate a relation with tuples that contains only the specified attributes</p>
-<ul>
-<li>
-<p>Can rearrange attributes’ ordering</p>
-</li>
-<li>
-<p>Can manipulate the values</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>$$
-Syntax:\prod_{A_1, A_2, &hellip;A_n}(R)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-3.png" title="/img/CMU 15-445 Database Systems/chapter1-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-3.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">b_id</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">a_id</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">a_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;a2&#39;</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="union">UNION</h4>
-<ul>
-<li>Generate a relation that contains all tuples that <strong>appear in either only one or both input relations</strong></li>
-</ul>
-<p>$$
-Syntax:(R\cup S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-4.png" title="/img/CMU 15-445 Database Systems/chapter1-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-4.png">
-        
-    </a>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-5.png" title="/img/CMU 15-445 Database Systems/chapter1-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-5.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="k">UNION</span><span class="w"> </span><span class="k">ALL</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">S</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="intersection">INTERSECTION</h4>
-<ul>
-<li>Generate a relation that contains only the tuples that <strong>appear in both of the input relations</strong></li>
-</ul>
-<p>$$
-Syntax:(R\cap S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-6.png" title="/img/CMU 15-445 Database Systems/chapter1-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-6.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="k">INTERSECT</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">S</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="difference">DIFFERENCE</h4>
-<ul>
-<li>Generate a relation that contains only the tuples that appear in the first and not the second of the input relations</li>
-</ul>
-<p>$$
-Syntax:(R-S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-7.png" title="/img/CMU 15-445 Database Systems/chapter1-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-7.png">
-        
-    </a>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-8.png" title="/img/CMU 15-445 Database Systems/chapter1-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-8.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="k">EXCEPT</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">S</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="product">PRODUCT</h4>
-<ul>
-<li>Generate a relation that contains all possible combinations of tuples from the input relations(<code>combination</code>)</li>
-</ul>
-<p>$$
-Syntax:(R\times S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-9.png" title="/img/CMU 15-445 Database Systems/chapter1-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-9.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">CROSS</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="p">;</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">,</span><span class="w"> </span><span class="n">S</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="join-">JOIN !</h4>
-<ul>
-<li>Generate a relation that contains all tuples that are a combination of two tuples (one from each input relation) with a common value(s) for one or more attributes</li>
-</ul>
-<p>$$
-Syntax:(R\bowtie S)
-$$</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">NATURAL</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>R</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>A</th>
-<th>B</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>a</td>
-<td>1</td>
-</tr>
-<tr>
-<td>b</td>
-<td>2</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>S</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>B</th>
-<th>C</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>x</td>
-</tr>
-<tr>
-<td>1</td>
-<td>y</td>
-</tr>
-<tr>
-<td>3</td>
-<td>z</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>$R\bowtie S$</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>a</td>
-<td>1</td>
-<td>x</td>
-</tr>
-<tr>
-<td>a</td>
-<td>1</td>
-<td>y</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span><span class="n">a_id</span><span class="p">,</span><span class="w"> </span><span class="n">b_id</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-10.png" title="/img/CMU 15-445 Database Systems/chapter1-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-10.png">
-        
-    </a>
-<h4 id="extra-operators">EXTRA OPERATORS</h4>
-<ul>
-<li>
-<p>Rename($\rho$)</p>
-</li>
-<li>
-<p>Assignment($R \leftarrow S$)</p>
-</li>
-<li>
-<p>Duplicate Elimination($\delta$)</p>
-</li>
-<li>
-<p>Aggregation($\gamma$)</p>
-</li>
-<li>
-<p>Sorting($\tau$)</p>
-</li>
-<li>
-<p>Division($R\div S$)</p>
-</li>
-</ul>
-<h4 id="observation">OBSERVATION</h4>
-<blockquote>
-<p>Relational algebra is a procedural language because it defines the high level-steps of how to compute a query. For example, $\sigma_{b_id=102}(R\bowtie S)$ is saying to first do the join of R and S and then do the select,whereas $(R \bowtie (\sigma_{b_id=102}(S)))$ will do the select on S first, and then do the join. These two statements will actually produce the same answer, but if there is only 1 tuple in S with b_id=102 out of a billion tuples, then$(R \bowtie (\sigma_{b_id=102}(S)))$ will be significantly faster than $\sigma_{b_id=102}(R\bowtie S)$😂</p>
-</blockquote>
-<blockquote>
-<p>A better approach is to say the result you want (state $\rightarrow$<u>retrieve the joined tuples from R and S where b_id equals 102</u>), and let the DBMS decide the steps it wants to take to compute the query. SQL will do exactly this,and it is the de facto standard for writing queries on relational model databases🐮</p>
-</blockquote>
-<h4 id="queries">QUERIES</h4>
-<ul>
-<li>
-<p>The relational model is independent of any query language implementation.</p>
-</li>
-<li>
-<p><strong>SQL</strong> is the <em>de facto</em> standard (many dialects)</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-</span></span><span class="line"><span class="cl">	<span class="n">record</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&#34;GZA&#34;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">		<span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">artists</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;GZA&#39;</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="document-data-model">DOCUMENT DATA MODEL</h3>
-<ul>
-<li>Embed data hierarchy into a single object❌</li>
-</ul>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-11.png" title="/img/CMU 15-445 Database Systems/chapter1-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-11.png">
-        
-    </a>
-<div class="mermaid" id="id-1"></div>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Artist</span> <span class="o">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">year</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Album</span> <span class="n">albums</span><span class="o">[];</span>
-</span></span><span class="line"><span class="cl"><span class="o">};</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Album</span> <span class="o">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">year</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl"><span class="o">};</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>$$
-\Downarrow
-$$</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;GZA&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="nt">&#34;year&#34;</span><span class="p">:</span> <span class="mi">1990</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="nt">&#34;albums&#34;</span><span class="p">:</span> <span class="p">[</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Liquid Swords&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;year&#34;</span><span class="p">:</span> <span class="mi">1995</span>
-</span></span><span class="line"><span class="cl">        <span class="p">},</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Beneath the Surface&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;year&#34;</span><span class="p">:</span> <span class="mi">1999</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">]</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="conclusion">CONCLUSION</h3>
-<ul>
-<li>
-<p>Databases are ubiquitous</p>
-</li>
-<li>
-<p>Relational algebra defines the primitives for processing queries on a relational database.</p>
-</li>
-<li>
-<p>We will see relational algebra again when we talk about query optimization + execution</p>
-</li>
-</ul>
 ]]></description>
 </item>
 </channel>
