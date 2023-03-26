@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter9\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  2156 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  4548 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter9\/","datePublished": "2023-03-25T23:21:44+08:00","dateModified": "2023-03-25T23:21:44+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter9 操作系统的状态机模型</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-25">2023-03-25</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2156 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-25">2023-03-25</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4548 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 10 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -132,8 +132,26 @@
         <li><a href="#调试-qemu-确认-firmware-的行为">调试 QEMU: 确认 Firmware 的行为</a></li>
         <li><a href="#鸡和蛋的问题解决">鸡和蛋的问题解决</a></li>
         <li><a href="#小插曲firmware-的病毒-1998">小插曲：Firmware 的病毒 (1998)</a></li>
+        <li><a href="#今天的-firmware-uefi">今天的 Firmware: UEFI</a></li>
+        <li><a href="#uefi-上的操作系统加载">UEFI 上的操作系统加载</a></li>
       </ul>
     </li>
+    <li><a href="#操作系统的状态机模型">操作系统的状态机模型</a>
+      <ul>
+        <li><a href="#操作系统-的状态机已经启动">“操作系统” 的状态机已经启动</a></li>
+        <li><a href="#操作系统是个-c-程序">操作系统：是个 C 程序</a></li>
+        <li><a href="#abstractmachine-对-c-程序语义-做出的扩充">AbstractMachine 对 “C 程序语义” 做出的扩充</a></li>
+      </ul>
+    </li>
+    <li><a href="#rtfsc-时间">RTFSC 时间</a>
+      <ul>
+        <li><a href="#0-生成镜像和启动虚拟机">(0) 生成镜像和启动虚拟机</a></li>
+        <li><a href="#0-生成镜像和启动虚拟机-contd">(0) 生成镜像和启动虚拟机 (cont&rsquo;d)</a></li>
+        <li><a href="#0-生成镜像和启动虚拟机-contd-1">(0) 生成镜像和启动虚拟机 (cont&rsquo;d)</a></li>
+        <li><a href="#1-启动加载器-boot-loader">(1) 启动加载器 (Boot Loader)</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
   </ul>
 </nav></div>
                 </div><div class="content" id="content"><h1 id="operating-system">Operating System</h1>
@@ -648,8 +666,646 @@
             data-srcset="/img/Operating%20System/chapter9-4.gif, /img/Operating%20System/chapter9-4.gif 1.5x, /img/Operating%20System/chapter9-4.gif 2x"
             data-sizes="auto"
             alt="/img/Operating System/chapter9-4.gif" />
-    </a><figcaption class="image-caption"><code>病毒代码结尾的CIH</code></figcaption>
+    </a><figcaption class="image-caption">病毒代码结尾的<code>CIH</code></figcaption>
     </figure>
+<h3 id="今天的-firmware-uefi">今天的 Firmware: UEFI</h3>
+<ul>
+<li>
+<p>IBM PC 所有设备/BIOS 中断是有 specification 的 (成就了 “兼容机”)</p>
+</li>
+<li>
+<p>今天的 boot loader 面临麻烦得多的硬件：</p>
+<ul>
+<li>指纹锁、不知名厂商生产网卡上的网络启动、USB 上的蓝牙转接器连接的蓝牙键盘、……</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-5.png" title="/img/Operating System/chapter9-5.png" data-thumbnail="/img/Operating System/chapter9-5.png" data-sub-html="<h2>UEFI</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter9-5.png"
+            data-srcset="/img/Operating%20System/chapter9-5.png, /img/Operating%20System/chapter9-5.png 1.5x, /img/Operating%20System/chapter9-5.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter9-5.png" />
+    </a><figcaption class="image-caption"><code>UEFI</code></figcaption>
+    </figure>
+<h3 id="uefi-上的操作系统加载">UEFI 上的操作系统加载</h3>
+<ul>
+<li>
+<p>标准化的加载流程</p>
+<ul>
+<li>
+<p>盘必须按 GPT (GUID Partition Table) 方式格式化</p>
+</li>
+<li>
+<p>预留一个 FAT32 分区 (lsblk/fdisk 可以看到)</p>
+</li>
+<li>
+<p>Firmware 加载任意大小的 PE 可执行文件<code>.efi</code></p>
+<ul>
+<li>
+<p>没有 legacy boot 512 字节限制</p>
+</li>
+<li>
+<p>EFI 应用可以返回 firmware</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>更好的程序支持</p>
+<ul>
+<li>
+<p>设备驱动框架</p>
+</li>
+<li>
+<p>更多的功能，例如 Secure Boot，只能启动 “信任” 的操作系统</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="操作系统的状态机模型">操作系统的状态机模型</h2>
+<h3 id="操作系统-的状态机已经启动">“操作系统” 的状态机已经启动</h3>
+<ul>
+<li>Firmware 和 boot loader 共同完成 “操作系统的加载”
+<ul>
+<li>初始化全局变量和栈；分配堆区 (<code>heap</code>)</li>
+<li>为 <code>main</code> 函数传递参数
+<ul>
+<li>谁给操作系统传递了参数？</li>
+<li>如何实现参数传递？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>进入 C 代码之后</p>
+<ul>
+<li>
+<p>完全遵循 C 语言的形式语义</p>
+</li>
+<li>
+<p>但有一些行为 “补充” —— AbstractMachine API</p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<h3 id="操作系统是个-c-程序">操作系统：是个 C 程序</h3>
+<ul>
+<li>一个迷你 “操作系统” <a href="https://jyywiki.cn/pages/OS/2022/demos/thread-os.c" target="_blank" rel="noopener noreffer">thread-os.c</a>
+<ul>
+<li>make 会得到一个 “磁盘镜像”，好像魔法一样
+<ul>
+<li>就跟你们第一次用 IDE 的时候按一个键就可以编译运行一样</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cte_init</span><span class="p">(</span><span class="n">on_interrupt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Task</span> <span class="o">*</span><span class="n">task</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Area</span> <span class="n">stack</span>    <span class="o">=</span> <span class="p">(</span><span class="n">Area</span><span class="p">)</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">task</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">kcontext</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">task</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">next</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">)];</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mpe_init</span><span class="p">(</span><span class="n">mp_entry</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>thread-os.c</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;am.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;klib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;klib-macros.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define MAX_CPU 8
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">union</span> <span class="n">task</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">union</span> <span class="n">task</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span>      <span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Context</span>    <span class="o">*</span><span class="n">context</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">stack</span><span class="p">[</span><span class="mi">8192</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Task</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Task</span> <span class="o">*</span><span class="n">currents</span><span class="p">[</span><span class="n">MAX_CPU</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define current currents[cpu_current()]
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// user-defined tasks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span>   <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="n">atomic_xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">));</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span> <span class="n">atomic_xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">lock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Thread-%s on CPU #%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">cpu_current</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="n">unlock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="k">volatile</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Task</span> <span class="n">tasks</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;A&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;B&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;C&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;D&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;E&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ------------------
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">Context</span> <span class="o">*</span><span class="nf">on_interrupt</span><span class="p">(</span><span class="n">Event</span> <span class="n">ev</span><span class="p">,</span> <span class="n">Context</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">extern</span> <span class="n">Task</span> <span class="n">tasks</span><span class="p">[];</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">current</span><span class="p">)</span> <span class="n">current</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>          <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">while</span> <span class="p">((</span><span class="n">current</span> <span class="o">-</span> <span class="n">tasks</span><span class="p">)</span> <span class="o">%</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cpu_current</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mp_entry</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">iset</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">yield</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cte_init</span><span class="p">(</span><span class="n">on_interrupt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Task</span> <span class="o">*</span><span class="n">task</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Area</span> <span class="n">stack</span>    <span class="o">=</span> <span class="p">(</span><span class="n">Area</span><span class="p">)</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">task</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">kcontext</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">task</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">next</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">)];</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mpe_init</span><span class="p">(</span><span class="n">mp_entry</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="abstractmachine-对-c-程序语义-做出的扩充">AbstractMachine 对 “C 程序语义” 做出的扩充</h3>
+<ul>
+<li>
+<p>TRM + MPE</p>
+<ul>
+<li>
+<p>完全等同于多线程 (处理器相当于线程) - L1/native</p>
+</li>
+<li>
+<p>IOE API: 完全是普通的库函数</p>
+<ul>
+<li>同一设备的数据竞争 = undefined behavior</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>CTE</p>
+<ul>
+<li>
+<p>允许创建多个执行流 (类比协程) - M2</p>
+</li>
+<li>
+<p>yield 主动切换；会被中断被动打断</p>
+</li>
+<li>
+<p><code>on_interrupt</code> 会拦截到中断事件</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>VME</p>
+<ul>
+<li>
+<p>允许创建一个 “经过地址翻译的执行模式”</p>
+</li>
+<li>
+<p>通过 CTE API 管理</p>
+</li>
+</ul>
+</li>
+<li>
+<p>有关中断代码</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">Context</span> <span class="o">*</span><span class="nf">on_interrupt</span><span class="p">(</span><span class="n">Event</span> <span class="n">ev</span><span class="p">,</span> <span class="n">Context</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">extern</span> <span class="n">Task</span> <span class="n">tasks</span><span class="p">[];</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">current</span><span class="p">)</span> <span class="n">current</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>          <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">while</span> <span class="p">((</span><span class="n">current</span> <span class="o">-</span> <span class="n">tasks</span><span class="p">)</span> <span class="o">%</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cpu_current</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mp_entry</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">iset</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">yield</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">iset</span><span class="p">(</span><span class="kt">bool</span> <span class="n">enable</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">extern</span> <span class="n">sigset_t</span> <span class="n">__am_intr_sigmask</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// NOTE: sigprocmask does not supported in multithreading
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">sigprocmask</span><span class="p">(</span><span class="n">enable</span> <span class="o">?</span> <span class="nl">SIG_UNBLOCK</span> <span class="p">:</span> <span class="n">SIG_BLOCK</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">__am_intr_sigmask</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">ret</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="rtfsc-时间">RTFSC 时间</h2>
+<h3 id="0-生成镜像和启动虚拟机">(0) 生成镜像和启动虚拟机</h3>
+<blockquote>
+<p>如果使用 “土办法”，你很可能被淹没在 Makefile 中</p>
+<ul>
+<li>读懂 Makefile 需要 STFW, RTFM，大量的精力</li>
+<li>虽然花点时间读是值得的，但很可能读了很久都没读到重要的地方</li>
+</ul>
+</blockquote>
+<ul>
+<li>
+<p>花一点时间想 “应该怎么做”</p>
+<ul>
+<li>
+<p>花几分钟创建一个小工具：“AbstractMachine 构建理解工具”</p>
+<ul>
+<li>UNIX Philosophy: keep it simple, stupid</li>
+<li>everything is a file; write things to work together using text interface</li>
+</ul>
+</li>
+<li>
+<p><em>Get out of your comfort zone</em></p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Abstract-Machine 通过脚本+重定向可以转化为<a href="https://github.com/Jungle430/check-for-NJU-OS/blob/main/abstract-machine-Makefile.html" target="_blank" rel="noopener noreffer">HTML代码</a>进行阅读</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿jungle-virtual-machine<span class="o">)</span>-<span class="o">[</span>~/deom1/abstract-machine<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ sudo apt install python3-markdown
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿jungle-virtual-machine<span class="o">)</span>-<span class="o">[</span>~/deom1/abstract-machine<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ cat Makefile <span class="p">|</span> sed <span class="s1">&#39;s/^\([^#]\)/    \1/g&#39;</span> <span class="p">|</span> markdown_py &gt; Makefile.html
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注：使用了自动化工具<a href="https://python-markdown.github.io" target="_blank" rel="noopener noreffer">python3-markdown</a></p>
+<h3 id="0-生成镜像和启动虚拟机-contd">(0) 生成镜像和启动虚拟机 (cont&rsquo;d)</h3>
+<ul>
+<li>观察 AbstractMachine 程序编译过程的正确方法：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">make -nB <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> grep -ve <span class="s1">&#39;^\(\#\|echo\|mkdir\|make\)&#39;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> sed <span class="s2">&#34;s#</span><span class="nv">$AM_HOME</span><span class="s2">#\$AM_HOME#g&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> sed <span class="s2">&#34;s#</span><span class="nv">$PWD</span><span class="s2">#.#g&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> vim -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>Command line tricks</p>
+<ul>
+<li><code>make -nB</code> (RTFM)</li>
+<li>grep: 文本过滤，省略了一些干扰项
+<ul>
+<li>echo (提示信息), mkdir (目录建立), make (sub-goals)</li>
+</ul>
+</li>
+<li>sed: 让输出更易读
+<ul>
+<li>将绝对路径替换成相对路径</li>
+</ul>
+</li>
+<li>vim: 更舒适的编辑/查看体验</li>
+</ul>
+</li>
+<li>
+<p>部分<code>make -nB</code>的输出信息</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl"><span class="gh"># Building hello-image [x86_64-qemu]
+</span></span></span><span class="line"><span class="cl"><span class="gh"></span>mkdir -p /home/jungle/deom1/deom/build/x86_64-qemu/ <span class="err">&amp;&amp;</span> echo + CC main.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/deom/build/x86_64-qemu/main.o /home/jungle/deom1/deom/main.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/deom/build/x86_64-qemu/ <span class="err">&amp;&amp;</span> echo + CC say.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/deom/build/x86_64-qemu/say.o /home/jungle/deom1/deom/say.c
+</span></span><span class="line"><span class="cl">make -s -C /home/jungle/deom1/deom/../abstract-machine/am archive
+</span></span><span class="line"><span class="cl"><span class="gh"># Building am-archive [x86_64-qemu]
+</span></span></span><span class="line"><span class="cl"><span class="gh"></span>mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + AS src/x86/qemu/start64.S
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -MMD -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -m64 -fPIC -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/start64.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/start64.S
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + AS src/x86/qemu/trap64.S
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -MMD -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -m64 -fPIC -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trap64.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/trap64.S
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/trm.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trm.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/trm.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/cte.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/cte.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/cte.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/ioe.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ioe.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/ioe.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/vme.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/vme.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/vme.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/mpe.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/mpe.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/mpe.c
+</span></span><span class="line"><span class="cl">echo + AR &#34;-&gt;&#34; build/am-x86_64-qemu.a
+</span></span><span class="line"><span class="cl">ar rcs /home/jungle/deom1/abstract-machine/am/build/am-x86_64-qemu.a /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/start64.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trap64.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trm.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/cte.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ioe.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/vme.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/mpe.o
+</span></span><span class="line"><span class="cl">make -s -C /home/jungle/deom1/deom/../abstract-machine/klib archive
+</span></span><span class="line"><span class="cl"><span class="gh"># Building klib-archive [x86_64-qemu]
+</span></span></span><span class="line"><span class="cl"><span class="gh"></span>mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/stdio.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdio.o /home/jungle/deom1/abstract-machine/klib/src/stdio.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/int64.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/int64.o /home/jungle/deom1/abstract-machine/klib/src/int64.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/string.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/string.o /home/jungle/deom1/abstract-machine/klib/src/string.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/cpp.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/cpp.o /home/jungle/deom1/abstract-machine/klib/src/cpp.c
+</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/stdlib.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdlib.o /home/jungle/deom1/abstract-machine/klib/src/stdlib.c
+</span></span><span class="line"><span class="cl">echo + AR &#34;-&gt;&#34; build/klib-x86_64-qemu.a
+</span></span><span class="line"><span class="cl">ar rcs /home/jungle/deom1/abstract-machine/klib/build/klib-x86_64-qemu.a /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdio.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/int64.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/string.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/cpp.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdlib.o
+</span></span><span class="line"><span class="cl">echo + LD &#34;-&gt;&#34; build/hello-x86_64-qemu.elf
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-ld -melf_x86_64 -N -Ttext-segment=0x00100000 -o /home/jungle/deom1/deom/build/hello-x86_64-qemu.elf --start-group /home/jungle/deom1/deom/build/x86_64-qemu/main.o /home/jungle/deom1/deom/build/x86_64-qemu/say.o /home/jungle/deom1/deom/../abstract-machine/am/build/am-x86_64-qemu.a /home/jungle/deom1/deom/../abstract-machine/klib/build/klib-x86_64-qemu.a --end-group
+</span></span><span class="line"><span class="cl">echo \# Creating image [x86_64-qemu]
+</span></span><span class="line"><span class="cl">make -s -C /home/jungle/deom1/deom/../abstract-machine/am/src/x86/qemu/boot
+</span></span><span class="line"><span class="cl">echo + CC start.S main.c
+</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -static -m32 -fno-pic -Os -nostdlib -Ttext 0x7c00 -I/home/jungle/deom1/deom/../abstract-machine/am/src -o bootblock.o start.S main.c
+</span></span><span class="line"><span class="cl">python3 genboot.py bootblock.o
+</span></span><span class="line"><span class="cl">echo + CREATE &#34;-&gt;&#34; build/hello-x86_64-qemu
+</span></span><span class="line"><span class="cl">( cat /home/jungle/deom1/deom/../abstract-machine/am/src/x86/qemu/boot/bootblock.o; head -c 1024 /dev/zero; cat /home/jungle/deom1/deom/build/hello-x86_64-qemu.elf ) &gt; /home/jungle/deom1/deom/build/hello-x86_64-qemu
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="0-生成镜像和启动虚拟机-contd-1">(0) 生成镜像和启动虚拟机 (cont&rsquo;d)</h3>
+<p>想要看得更清楚一些？</p>
+<ul>
+<li><code>:%s/ /\r /g</code>
+<ul>
+<li>每一个命令就像 “一句话”</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>编译</p>
+<ul>
+<li><code>-std=gnu11</code>, <code>m64</code>, <code>-mno-sse</code>, <code>-I</code>, <code>-D</code>, &hellip; (这对你配置 vscode 很重要)</li>
+</ul>
+<p>链接</p>
+<ul>
+<li><code>-melf_x86_64</code>, <code>-N</code>, <code>-Ttext-segment=0x00100000</code></li>
+<li>链接了需要的库 (<code>am-x86_64-qemu.a</code>, <code>klib-x86_64-qemu.a</code>)</li>
+</ul>
+<p>彩蛋</p>
+<ul>
+<li><code>make html</code></li>
+</ul>
+<h3 id="1-启动加载器-boot-loader">(1) 启动加载器 (Boot Loader)</h3>
+<p>512 字节中的代码，假设了镜像格式 (真正的的加载器有很多 stages)</p>
+<ul>
+<li>16-bit → 32-bit</li>
+<li>ELF32/64 的加载器
+<ul>
+<li>按照约定的磁盘镜像格式加载</li>
+</ul>
+</li>
+</ul>
+<p>代码讲解：</p>
+<ul>
+<li><code>am/src/x86/qemu/boot/start.S</code>和<code>main.c</code>
+<ul>
+<li>它们都可以调试！</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">elf32</span><span class="o">-&gt;</span><span class="n">e_machine</span> <span class="o">==</span> <span class="n">EM_X86_64</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">((</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)())(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">elf64</span><span class="o">-&gt;</span><span class="n">e_entry</span><span class="p">)();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">((</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)())(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">elf32</span><span class="o">-&gt;</span><span class="n">e_entry</span><span class="p">)();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="总结">总结</h2>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 操作系统也是程序，它如何用状态机如何定义？</li>
+</ul>
+<hr>
+<p>Take-away message</p>
+<ul>
+<li>一切皆可调试 (包括 firmware)
+<ul>
+<li>理解操作系统是如何被启动的</li>
+<li>学会使用 gdb (必备生存技能)</li>
+</ul>
+</li>
+<li>操作系统也是程序
+<ul>
+<li>AbstractMachine 扩展了程序的语义，仅此而已</li>
+</ul>
+</li>
+</ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
                 </span></div><div class="post-info-line"><div class="post-info-mod">
@@ -683,4 +1339,4 @@ if ('serviceWorker' in navigator) {
 
         <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
                 <i class="fas fa-chevron-up fa-fw"></i>
-            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(\"启动磁盘的第一个512bytes\")\nB(\"启动磁盘的其他部分\")\nA====B\nC(\"主引导扇区\")\nC--\u003eA\nD(\"内存的确定地址7c00\")\nA--\"By Firmware to\"--\u003eD","id-2":"graph TB\nA(CPU)\nB(\"内存的7c00是磁盘的前512byte, pc指向7c00，其他寄存器也是另有规定, CPU:16 bit mode\")\nA--BIOS--\u003eB"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(\"启动磁盘的第一个512bytes\")\nB(\"启动磁盘的其他部分\")\nA====B\nC(\"主引导扇区\")\nC--\u003eA\nD(\"内存的确定地址7c00\")\nA--\"By Firmware to\"--\u003eD","id-2":"graph TB\nA(CPU)\nB(\"内存的7c00是磁盘的前512byte, pc指向7c00，其他寄存器也是另有规定, CPU:16 bit mode\")\nA--BIOS--\u003eB","id-3":"graph TB\nA(\"CPU Reset\")\nB(\"内存的7c00是磁盘的前512byte, pc指向7c00，其他寄存器也是另有规定, CPU:16 bit mode\")\nA--BIOS--\u003eB\nB--\"then\"--\u003eD\nC(\"内存\")\nD(\"OS\")\nE(\"PC\")\nD--\"boot loader\"--\u003eC\nC--\"then\"--\u003eE\nE--\"point to\"--\u003eD\nF(\"OS开始运行\")\nD--\u003eF"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
