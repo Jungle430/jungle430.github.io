@@ -4,7 +4,274 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Tue, 28 Mar 2023 13:10:52 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Operating System Chapter10 状态机模型的应用</title>
+    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</link>
+    <pubDate>Tue, 28 Mar 2023 13:10:52 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</guid>
+    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>状态机：理论
+<ul>
+<li>数字电路：<a href="https://jyywiki.cn/pages/OS/2022/demos/logisim.c" target="_blank" rel="noopener noreffer">logisim.c</a> 和 <a href="https://jyywiki.cn/pages/OS/2022/demos/seven-seg.py" target="_blank" rel="noopener noreffer">seven-seg.py</a></li>
+<li>Model checker: 理解并发程序执行的新方法</li>
+</ul>
+</li>
+<li>状态机：实践
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/thread-os.c" target="_blank" rel="noopener noreffer">thread-os.c</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 状态机模型如此有用，还能更有用一点吗？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>终于做完了铺垫，是时候让你感受到 “真正的力量” 了
+<ul>
+<li>都是没用的内容，当我口胡就行了</li>
+</ul>
+</li>
+</ul>
+<h2 id="状态机理解我们的世界">状态机：理解我们的世界</h2>
+<h3 id="哲--学探讨">哲 ♂ 学探讨</h3>
+<ul>
+<li>
+<p>我们的物理世界是 “确定规则” 的状态机吗？</p>
+<ul>
+<li>
+<p>宏观物理世界近似于 deterministic 的状态机 (经典力学)</p>
+</li>
+<li>
+<p>微观世界可能是 non-deterministic 的 (量子力学)</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>把物理世界建模成基本粒子的运动</p>
+<ul>
+<li><a href="https://playgameoflife.com/" target="_blank" rel="noopener noreffer">Conway&rsquo;s game of life</a> $\Longrightarrow$ <b>Turing Complete</b></li>
+</ul>
+<h3 id="哲--学探讨-contd">哲 ♂ 学探讨 (cont&rsquo;d)</h3>
+<p>可以在这个模型上严肃地定义很多概念：预测未来、时间旅行……</p>
+<ul>
+<li>成为你理解物理 (和计算机) 世界的参考</li>
+</ul>
+<hr>
+<ul>
+<li>例子
+<ul>
+<li>Cellular automata 不支持 “时间旅行”
+<ul>
+<li>怎么添加一个公理使它可以支持？
+<ul>
+<li>平行宇宙</li>
+<li>如果世界线需要合并？可以<a href="https://www.scientificamerican.com/article/time-travel-simulation-resolves-grandfather-paradox/" target="_blank" rel="noopener noreffer">收敛于某个分布</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Cellular automata 不支持 “预测外来”
+<ul>
+<li>能否添加一个 syscall 使它支持？
+<ul>
+<li><a href="https://www.scottaaronson.com/papers/philos.pdf" target="_blank" rel="noopener noreffer">Why philosophers should care about computational complexity, Ch. 10</a> (<b>jyy 强烈推荐，解释部分在10th-section</b>)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="状态机模型理解编译器和现代-cpu">状态机模型：理解编译器和现代 CPU</h3>
+<ul>
+<li>编译器：源代码$S$(状态机) → 二进制代码$C$(状态机)</li>
+</ul>
+<p>$$
+C=compile(S)
+$$</p>
+<ul>
+<li>
+<p>编译 (优化) 的正确性 (Soundness):</p>
+<ul>
+<li><font color="red"><em>S</em> 与 <em>C</em> 的可观测行为严格一致</font> （二进制落实到硬件也是如此，严格一致不是句句对应，而是状态机一致，比如一个时钟周期内执行两条指令 $\Longrightarrow$ <font color="red">instruction-level parallelism</font>）
+<ul>
+<li>system calls; volatile variable loads/stores; termination</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>超标量 (superscalar)/乱序执行处理器</p>
+<ul>
+<li>
+<p>允许在状态机上 “跳跃”</p>
+</li>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/ilp-demo.c" target="_blank" rel="noopener noreffer">ilp-demo.c</a></p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define LOOP 1000000000ul
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">void</span> <span class="n">loop</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LOOP</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rax;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rdi;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rsi;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rdx;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rcx;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r10;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r8;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r9;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:::</span><span class="s">&#34;rax&#34;</span><span class="p">,</span> <span class="s">&#34;rdi&#34;</span><span class="p">,</span> <span class="s">&#34;rsi&#34;</span><span class="p">,</span> <span class="s">&#34;rdx&#34;</span><span class="p">,</span> <span class="s">&#34;rcx&#34;</span><span class="p">,</span> <span class="s">&#34;r10&#34;</span><span class="p">,</span> <span class="s">&#34;r8&#34;</span><span class="p">,</span> <span class="s">&#34;r9&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">st</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">loop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">ed</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">LOOP</span> <span class="o">*</span> <span class="p">(</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000000000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">ips</span> <span class="o">=</span> <span class="n">inst</span> <span class="o">/</span> <span class="p">((</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">CLOCKS_PER_SEC</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%.2lfG instructions/s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ips</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在优化下执行的效果</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ screenfetch            
+</span></span><span class="line"><span class="cl">..............                                  
+</span></span><span class="line"><span class="cl">            ..,<span class="p">;</span>:ccc,.                           kali@kali
+</span></span><span class="line"><span class="cl">          ......<span class="s1">&#39;&#39;&#39;;lxO.                         OS: Kali Linux 
+</span></span></span><span class="line"><span class="cl"><span class="s1">.....&#39;&#39;&#39;&#39;..........,:ld;                         Kernel: x86_64 Linux 6.0.0-kali3-amd64
+</span></span></span><span class="line"><span class="cl"><span class="s1">           .&#39;</span><span class="p">;;;</span>:::<span class="p">;</span>,,.x,                        Uptime: 49m
+</span></span><span class="line"><span class="cl">      ..<span class="s1">&#39;&#39;&#39;.            0Xxoc:,.  ...            Packages: 2707
+</span></span></span><span class="line"><span class="cl"><span class="s1">  ....                ,ONkc;,;cokOdc&#39;</span>,.          Shell: zsh 5.9
+</span></span><span class="line"><span class="cl"> .                   OMo           <span class="s1">&#39;:ddo.        Resolution: 1714x874
+</span></span></span><span class="line"><span class="cl"><span class="s1">                    dMc               :OO;       DE: Xfce
+</span></span></span><span class="line"><span class="cl"><span class="s1">                    0M.                 .:o.     WM: Xfwm4
+</span></span></span><span class="line"><span class="cl"><span class="s1">                    ;Wd                          WM Theme: Kali-Dark
+</span></span></span><span class="line"><span class="cl"><span class="s1">                     ;XO,                        GTK Theme: Kali-Dark [GTK2]
+</span></span></span><span class="line"><span class="cl"><span class="s1">                       ,d0Odlc;,..               Icon Theme: Flat-Remix-Blue-Dark
+</span></span></span><span class="line"><span class="cl"><span class="s1">                           ..&#39;</span>,<span class="p">;</span>:cdOOd::,.       Font: Cantarell <span class="m">11</span>
+</span></span><span class="line"><span class="cl">                                    .:d<span class="p">;</span>.<span class="s1">&#39;:;.    Disk: 19G / 80G (26%)
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                       &#39;</span>d,  .<span class="s1">&#39;   CPU: AMD Ryzen 9 5900HX with Radeon Graphics @ 4x 3.294GHz
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                         ;l   .. GPU: VMware SVGA II Adapter
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                          .o     RAM: 1501MiB / 1972MiB
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                            c   
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                            .&#39;</span>  
+</span></span><span class="line"><span class="cl">                                             .  
+</span></span><span class="line"><span class="cl">                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ gcc -O2 ilp-demo.c -o ilp-demo   
+</span></span><span class="line"><span class="cl">                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./ilp-demo                      
+</span></span><span class="line"><span class="cl">19.06G instructions/s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./ilp-demo
+</span></span><span class="line"><span class="cl">19.38G instructions/s
+</span></span><span class="line"><span class="cl">                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./ilp-demo
+</span></span><span class="line"><span class="cl">19.19G instructions/s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>优化过后，每一个时钟周期可以执行远远超过一条指令</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Operating System Chapter9 操作系统的状态机模型</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</link>
     <pubDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</guid>
@@ -9630,824 +9897,6 @@ jyyslide-md</a></p>
 </div>
         </div>
     </div>
-]]></description>
-</item>
-<item>
-    <title>《C&#43;&#43; Primer》 字符串，向量和数组</title>
-    <link>https://Jungle430.github.io/posts/cpp-primer/chapter3/</link>
-    <pubDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cpp-primer/chapter3/</guid>
-    <description><![CDATA[<h1 id="c-primer">C++ Primer</h1>
-<h2 id="字符串向量和数组">字符串，向量和数组</h2>
-<h3 id="标准库类型string">标准库类型string</h3>
-<ul>
-<li>标准库类型<code>string</code>表示可变长的字符序列，使用<code>string</code>类型必须先包含头文件，<code>string</code>定义在命名空间<code>std</code>中</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">using</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>定义和初始化<code>string</code>对象</li>
-</ul>
-<table border="2" >
-	<tr>
-		<td colspan="2">初始化string对象的方式</td>
-	</tr>
-	<tr>
-		<td>string s1</td>
-		<td>默认初始化，s1是一个空串</td>
-	</tr>
-	<tr>
-		<td>string s2(s1)</td>
-        <td>s2是s1的副本</td>
-	</tr>
-	<tr>
-		<td>string s2 = s1</td>
-		<td>等价于s2(s1),s2是s1的副本</td>
-	</tr>
-	<tr>
-		<td>string s3("value")</td>
-		<td>s3是字面值"value"的副本，除了字面值最后的那个空字符外</td>
-	</tr>
-	<tr>
-		<td>string s3 = "value"</td>
-		<td>等价于s3("value"),s3是字面值"value"的副本
-	</tr>
-	<tr>
-		<td>string s4(n, 'c')</td>
-		<td>把s4初始化为由连续n个字符c组成的串</td>
-	</tr>
-</table>
-<ul>
-<li>
-<p>直接初始化和拷贝初始化</p>
-<ul>
-<li>使用等号(=) $\rightarrow$ <strong>拷贝初始化</strong>(copy initialization),编译器把等号右侧的初始值拷贝到新创建的对象中去</li>
-<li>不使用等号，执行的是<strong>直接初始化</strong>(direct initialization)</li>
-</ul>
-</li>
-<li>
-<p>如何使用</p>
-<ul>
-<li>初始化需要一个值：拷贝初始化和直接初始化都行</li>
-<li>初始化需要多个值
-<ul>
-<li>尽量用直接初始化</li>
-<li>拷贝初始化需要显式地创建一个（临时）对象来进行拷贝：<code>string s8 = string(10, 'c');</code>（可读性差，也没有任何补偿优势）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p><code>string</code>对象上的操作</p>
-</li>
-</ul>
-<table border="2" >
-	<tr>
-		<td colspan="2">string的操作</td>
-	</tr>
-	<tr>
-		<td>os << s</td>
-		<td>将s写到输出流os当中，返回os</td>
-	</tr>
-	<tr>
-		<td>is >> s</td>
-		<td>从is中读取字符串赋给s，字符串以空白分隔，返回is</td>
-	</tr>
-	<tr>
-		<td>getline(is, s)</td>
-		<td>从is中读取一行赋给s，返回is(换行符也被读了进来,但是不会存入读入的字符串中去)</td>
-	</tr>
-	<tr>
-		<td>s.empty()</td>
-		<td>s为空返回true，否则返回false</td>
-	</tr>
-	<tr>
-		<td>s.size()</td>
-		<td>返回s中字符的个数</td>
-	</tr>
-	<tr>
-		<td>s[n]</td>
-		<td>返回s中第n个字符的<b>引用</b></td>
-	</tr>
-    <tr>
-        <td>s1 + s2</td>
-        <td>返回s1和s2连接后的结果</td>
-    </tr>
-    <tr>
-        <td>s1 = s2</td>
-        <td>用s2的副本替代s1中原来的字符</td>
-    </tr>
-    <tr>
-    	<td>s1 == s2</td>
-        <td>如果s1个s2中所含的字符完全一样，则返回true,否则返回false</td>
-    </tr>
-    <tr>
-    	<td>s1 != s2</td>
-        <td>等性判断对字母的大小写敏感</td>
-    </tr>
-    <tr>
-        <td><, <=, >, >=</td>
-        <td>利用字典序进行比较，对字母大小写敏感</td>
-    </tr>
-</table>    
-<ul>
-<li>技巧:读取未知数量的string对象</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">word</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">word</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">word</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>原理：<u>CTRL+Z/读到文件末尾 -&gt; 引发异常 -&gt; 记录异常 -&gt; fail() 返回true-&gt; operator void*() 返回 0 -&gt; while结束</u>，参考文章:<a href="https://www.zhangjiee.com/blog/2013/deep-into-while-cin.html" target="_blank" rel="noopener noreffer">C++ 深入探究 while(cin)</a></p>
-<ul>
-<li>如果是按行读</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>string::size_type类型</p>
-<ul>
-<li>
-<p>string类的size函数返回的是是一个string::size_type类型的值，无符号类型，足以存放下任何<code>string</code>对象的大小，下标运算符参数类型也是如此</p>
-</li>
-<li>
-<p>string类以及其他大多数标准库类型都定义了几种配套的类型。<u>这些配套类型体现了标准库类型与机器无关的特性，类型<b>size_type</b>即是其中的一种</u>。标准库会根据运行的机器型号分配适当的类型，我们不需过多关心，如果要看类型在C++11以后可以借助<code>auto</code>和<code>decltype</code>来推断变量类型</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">len</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>由于string::size_type是一个无符号类型，所以我们在对字符串进行有关size的相关操作时，尽量避免int与unsigned混用，否则会由于反补码机制出现意想不到的一些bug，正确做法</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">line</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="p">...</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="k">decltype</span><span class="p">(</span><span class="n">str</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">str</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="p">............</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-</li>
-<li>
-<p>字典序相关比较机制</p>
-</li>
-</ul>
-<ol>
-<li>较短的string对象小于较长的string对象(前面的内容都完全相同)</li>
-<li>如果两个string对象在某些对应的位置上不一致，则string对象比较的结果其实是string对象中第一对相异字符比较的结果</li>
-</ol>
-<ul>
-<li>
-<p>字面值和string对象相加</p>
-<ul>
-<li>
-<p>通过重载+和+=运算符实现，使用时一定要注意返回值的问题，不要两边类型不匹配（例如两个字面值相加）</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s3</span> <span class="o">=</span> <span class="n">s1</span> <span class="o">+</span> <span class="s">&#34;, &#34;</span> <span class="o">+</span> <span class="n">s2</span> <span class="o">+</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>防止上述问题：<b>必须确保每个加法运算符(+)的两侧运算对象至少有一个是string</b></p>
-</li>
-</ul>
-</li>
-<li>
-<p>处理string对象中的字符</p>
-<ul>
-<li>主要利用到了头文件<code>&lt;cctype&gt;</code></li>
-</ul>
-</li>
-</ul>
-<table border="2" >
-	<tr>
-		<td colspan="2">&ltccytpe&gt中的常用函数</td>
-	</tr>
-    <tr>
-        <td>isdigit(c)</td>
-        <td>当c是数字的时候为真</td>
-    </tr>
-    <tr>
-        <td>islower(c)</td>
-        <td>c是小写字母的时候为真</td>
-    </tr>
-    <tr>
-        <td>isupper(c)</td>
-        <td>c是大写字母的时候为真</td>
-    </tr>
-    <tr>
-        <td>isspace(c)</td>
-        <td>c是空格的时候为真</td>
-    </tr>
-    <tr>
-        <td>tolower(c)</td>
-        <td>如果c是大写字母，则输出对应的小写字母，否则原样输出c</td>
-    </tr>
-    <tr>
-        <td>toupper(c)</td>
-        <td>如果c是小写字母，则输出对应的大写字母，否则原样输出c</td>
-    </tr>
-</table> 
-<blockquote>
-<p>为了向后兼容C，C++保留了C的标准库，但是为了更好地符合C++的要求，C++自己又开发出了一套新的标准库，去掉C库中的.h,前面加上c，即&lt;name.h&gt; $\rightarrow$ &lt;cname&gt;，上面&lt;cctype&gt;就是由C中的&lt;ctype.h&gt;衍生过来的，C++库中的函数为了防止与C标准库中的内容发生命名冲突，都在std命名空间中</p>
-</blockquote>
-<ul>
-<li>基于范围的for语句
-<ul>
-<li>C++11的新特性</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="nl">declaration</span> <span class="p">:</span> <span class="n">expression</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">statement</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">//example    
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">str</span><span class="p">(</span><span class="s">&#34;Some string&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">c</span> <span class="p">:</span> <span class="n">str</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>重载的下标运算符
-<ul>
-<li>operator[] -&gt; 接收输入是std::string::size_type类型的值，返回string对应位置字符的引用</li>
-<li>超出范围下标将引发不可预知的结果（内存非法越界访问或者访问到<code>nullptr</code> $\rightarrow$ 空字符串，C++为了性能并不会像Java那样在下标访问时进行检查，会有很大风险）</li>
-</ul>
-</li>
-</ul>
-<h3 id="标准库类型vector">标准库类型vector</h3>
-<ul>
-<li>
-<p>vector本质是一种变长数组</p>
-</li>
-<li>
-<p>vector也是一种容器(container)</p>
-</li>
-<li>
-<p>vector包含于头文件&lt;vector&gt;中，定义在std命名空间下</p>
-</li>
-<li>
-<p>vector是类模板，使用时必须声明其类型（其实在Modern C++中编译器也能自己推导一部分了），编译器根据模板创建类或函数函数的过程称为<b>实例化</b>(instantiation),由于C++的分离式编译，<b>自己写模板的时候一定要将声明与实现都写在.h里，不要将实现分离到.cpp中，否则会导致编译失败</b></p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-1.jpg" title="/img/C&#43;&#43; Primer/chapter3-1.jpg" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-1.jpg" data-sub-html="<h2>由于模板的声明与实现分离导致编译失败</h2>">
-        
-    </a><figcaption class="image-caption"><code>由于模板的声明与实现分离导致编译失败</code></figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-2.jpg" title="/img/C&#43;&#43; Primer/chapter3-2.jpg" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-2.jpg" data-sub-html="<h2>全部写入头文件后编译成功</h2>">
-        
-    </a><figcaption class="image-caption"><code>全部写入头文件后编译成功</code></figcaption>
-    </figure>
-<ul>
-<li>vector能容纳绝大多数类型的对象作为其元素，但是因为<u>引用不是对象，所以不存在包含引用的vector</u></li>
-</ul>
-<hr>
-<ul>
-<li>定义和初始化vector对象</li>
-</ul>
-<table border="2" >
-	<tr>
-		<td colspan="2">初始化vector对象的方法</td>
-	</tr>
-    <tr>
-        <td>vector&ltT&gt v1</td>
-        <td>v1是一个空vector，它潜在的元素是T类型的，执行默认初始化</td>
-    </tr>
-    <tr>
-    	<td>vector&ltT&gt v2(v1)</td>
-        <td>v2中包含有v1所有元素的副本</td>
-    </tr>
-    <tr>
-        <td>vector&ltT&gt v2 = v1</td>
-        <td>等价于v2(v1),v2中包含有v1所有元素的副本</td>
-    </tr>
-    <tr>
-        <td>vector&ltT&gt v3(n, val)</td>
-        <td>v3包含了n个重复元素，每个元素的值都是val</td>
-    </tr>
-    <tr>
-    	<td>vector&ltT&gt v4(n)</td>
-        <td>v4重复包含了n个重复地执行了值初始化的对象（默认初始化）</td>
-    </tr>
-    <tr>
-        <td>vector&ltT&gt v5{a, b, c, ...}</td>
-        <td>v5包含了初始值个数的元素，每个元素都被赋予了相应的初始值(注意使用花括号)</td>
-    </tr>
-    <tr>
-        <td>vector&ltT&gt v5 = {a, b, c, ...}</td>
-        <td>等价于v5{a, b, c, ...}</td>
-    </tr>
-</table>    
-<ul>
-<li>
-<p>圆括号与花括号</p>
-<ul>
-<li>圆括号是提供的值用来构造(construct)vector对象的</li>
-<li>花括号是用来进行列表初始化的(list initialize),初始化过程会尽可能的把花括号内的值当成是元素初始值的列表来处理，只有在<u>无法执行列表初始化时才会考虑其他初始化方式</u> $\Longrightarrow$ 列表内数据与所需元素类型不同</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v1</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span> <span class="c1">// -&gt; {0, 0, 0, 0, 0, 0, 0, 0, 0, 0} 
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v2</span><span class="p">{</span><span class="mi">10</span><span class="p">};</span> <span class="c1">// -&gt; {10}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v3</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span> <span class="c1">// -&gt; {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v4</span><span class="p">{</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">};</span> <span class="c1">// -&gt; {10, 1}
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>列表初始化构造失败转为直接构造</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">v5</span><span class="p">{</span><span class="mi">10</span><span class="p">};</span> <span class="c1">//10个默认初始化string
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">v8</span><span class="p">{</span><span class="mi">10</span><span class="p">,</span> <span class="s">&#34;hi&#34;</span><span class="p">};</span> <span class="c1">//10个&#34;hi&#34;
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<ul>
-<li>vector有关操作</li>
-</ul>
-<table border="2" >
-	<tr>
-		<td colspan="2">vector支持的操作</td>
-	</tr>
-    <tr>
-        <td>v.empty()</td>
-        <td>返回元素个数是否为空</td>
-    </tr>
-    <tr>
-        <td>v.size()</td>
-        <td>返回元素个数</td>
-    </tr>
-    <tr>
-        <td>v.push_back(t)</td>
-        <td>向v的尾端添加一个值为t的元素</td>
-    </tr>
-    <tr>
-        <td>v[n]</td>
-        <td>下标访问，返回第n个位置上元素的引用</td>
-    </tr>
-    <tr>
-        <td>v1 = v2</td>
-        <td>用v2中元素的拷贝替换v1中的元素</td>
-    </tr>
-    <tr>
-        <td>v1 = {a, b, c...}</td>
-        <td>用列表中的元素拷贝替换v1中的元素</td>
-    </tr>
-    <tr>
-        <td>v1 == v2; v1 != v2</td>
-        <td>判等条件：元素数量相等且对应位置的元素值相等(对象需要重载==和!=运算符)</td>
-    </tr>
-    <tr>
-        <td>&lt, &lt=, &gt, &gt=</td>
-        <td>字典序比较，对象需要重载相应运算符</td>
-    </tr>
-</table> 
-<ul>
-<li>有关使用push_back的建议</li>
-</ul>
-<ol>
-<li>不需要在创建<code>vector</code>时确定其中的元素及其大小，后续使用push_back即可</li>
-<li>在循环体内部包含向<code>vector</code>对象添加元素的操作时，不应该使用<code>foreach</code>循环</li>
-</ol>
-<ul>
-<li>
-<p>size()返回的类型为vector::size_type,同string::size_type,由头文件和机器来决定类型，下标运算符参数类型也是如此(同string)</p>
-</li>
-<li>
-<p>虽然vector可以扩容，但是不能通过下标来添加元素，通过下标访问不存在的元素会产生非常严重的后果，例如缓冲区溢出(<code>buffer overflow</code>),会导致出现安全问题</p>
-</li>
-</ul>
-<h3 id="迭代器介绍与使用">迭代器介绍与使用</h3>
-<ul>
-<li>目的：访问对象中的元素</li>
-<li>迭代器类似于指针类型，<u>也提供了对对象的间接访问</u>，使用迭代器可以访问某个元素，也可以从一个元素移动到另一个元素</li>
-<li>有效与无效迭代器
-<ul>
-<li>有效：迭代器指向<u>某个元素或者容器中尾元素的下一位置</u></li>
-<li>无效：除了上述指向的迭代器都无效</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>获取迭代器：获取迭代器不能使用取地址符，有专门的方法进行获取，容器一般都支持<b>begin</b>和<b>end</b>方法
-<ul>
-<li>begin返回指向第一个元素的迭代器</li>
-<li>end返回指向容器<b>“尾元素的下一位置(one past the end)”的迭代器</b>,这样的迭代器没有什么实际意义，只是一个标记，表示我们已经处理完了容器中的所有元素。end成员返回的迭代器通常被称为<b>尾后迭代器(off-the-end iterator)或尾迭代器(end iterator)</b></li>
-<li><b>如果容器为空，begin和end返回的是同一个迭代器,都是尾后迭代器(可以作为容器的判空手段）</b></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">b</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">e</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><table border="2" >
-	<tr>
-		<td colspan="2">标准容器迭代器的运算符</td>
-	</tr>
-    <tr>
-        <td>*iter</td>
-        <td>返回迭代器iter所指元素的引用</td>
-    </tr>
-    <tr>
-        <td>iter->men</td>
-        <td>解引用iter并获得该元素的名为men的成员，等价于(*iter).men</td>
-    </tr>
-    <tr>
-        <td>++iter</td>
-        <td>令iter指示容器中的下一个元素</td>
-    </tr>
-    <tr>
-        <td>--iter</td>
-        <td>令iter指示容器中的下一个元素</td>
-    </tr>
-    <tr>
-        <td>iter1 == iter2; iter1 != iter2</td>
-        <td>判等条件：两个迭代器指示的是同一个元素或者他们是同一个容器的尾后迭代器，则相等；反之则不等</td>
-    </tr>
-</table>    
-<ul>
-<li>试图解引用一个非法迭代器或者尾后迭代器也是危险行为！</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">string</span> <span class="nf">s</span><span class="p">(</span><span class="s">&#34;Some thing&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">!=</span> <span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span> <span class="c1">// -&gt; is empty?
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">it</span> <span class="o">=</span> <span class="n">toupper</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>一般循环</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">ii</span> <span class="o">!=</span> <span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">it</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//......
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>大多数标准库容器的迭代器都定义了<code>==</code>和<code>!=</code>，但是它们中的大多数都没有定义<code>&lt;</code>运算符，所以我们使用迭代器是尽量使用<code>==</code>和<code>!=</code></p>
-</li>
-<li>
-<p>迭代器类型</p>
-<ul>
-<li>iterator可读可写</li>
-<li>const_iterator只读</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">it</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">const_iterator</span> <span class="n">it</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>实际使用中使用auto让编译器决定即可</p>
-</li>
-<li>
-<p><code>begin()</code>和<code>end</code>自己决定返回的是否为const，如果必须要用const_iterator,使用<code>cbegin()</code>和<code>cend()</code>即可<code>C++ 11</code></p>
-</li>
-<li>
-<p>注意，凡是使用了迭代器的循环体，都不要向迭代器所属的容器中添加元素，否则可能会造成迭代器失效</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>迭代器运算</li>
-</ul>
-<table border="2" >
-	<tr>
-		<td colspan="2">迭代器运算</td>
-	</tr>
-    <tr>
-        <td>iter + n</td>
-        <td>迭代器加上了一个整数值仍得一个迭代器，迭代器指示的新位置与原来相比向后移动了若干元素</td>
-    </tr>
-    <tr>
-        <td>iter - n</td>
-        <td>迭代器减去了一个整数值仍得一个迭代器，迭代器指示的新位置与原来相比向前移动了若干元素</td>
-    </tr>
-    <tr>
-        <td>iter += n</td>
-        <td>iter = iter + n</td>
-    </tr>
-    <tr>
-        <td>iter -= n</td>
-        <td>iter = iter - n</td>
-    </tr>
-    <tr>
-        <td>iter1 - iter2</td>
-        <td>两个迭代器相减的结果是它们之间的距离，两个迭代器必须是同一个容器的有效迭代器，返回值类型为<b>difference_type(带符号类型)</b></td>
-    </tr>
-    <tr>
-        <td>&gt, &gt=, &lt, &lt=</td>
-        <td>关系运算符，注意两个迭代器必须是同一个容器的有效迭代器</td>
-    </tr>
-</table>    
-<h3 id="数组">数组</h3>
-<ul>
-<li>编译的时候数组的维度应该是已知的，<b>维度必须是一个常量表达式</b></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span> <span class="c1">// 不是常量表达式
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">unsigned</span> <span class="n">sz</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>  <span class="c1">//常量表达式
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><u>默认情况下，数组中的元素会被默认初始化</u> $\Longrightarrow$ <b>这里注意如果遇到了<code>new</code>和<code>delete</code>相关的一些操作，一定要防止默认初始化改变指针最后导致<code>delete</code>释放内存的时候程序崩溃</b></li>
-</ul>
-<figure><a class="lightgallery" href="/img/C&#43;&#43;%20Primer/chapter3-3.png" title="/img/C&#43;&#43; Primer/chapter3-3.png" data-thumbnail="/img/C&#43;&#43; Primer/chapter3-3.png" data-sub-html="<h2>HEAP CORRUPTION DETECTED报错说明及解决方案</h2>">
-        
-    </a><figcaption class="image-caption"><a href="https://blog.csdn.net/weixin_44426759/article/details/107194567?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522167729932416800182739726%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=167729932416800182739726&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-107194567-null-null.142%5ev73%5ewechat,201%5ev4%5eadd_ask,239%5ev2%5einsert_chatgpt&amp;utm_term=heap%20corruption%20detected&amp;spm=1018.2226.3001.4187" target="_blank" rel="noopener noreffer">HEAP CORRUPTION DETECTED报错说明及解决方案</a></figcaption>
-    </figure>
-<ul>
-<li>显式初始化 $\Longrightarrow$ 通过列表初始化数组</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">unsigned</span> <span class="n">sz</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">ia1</span><span class="p">[</span><span class="n">sz</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span> <span class="c1">//维度为3
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">a3</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span> <span class="c1">// {0, 1, 2, 0, 0} 后面会默认初始化
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">a5</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span> <span class="c1">//错误，初始值过多
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>字符数组
-<ul>
-<li>字符数组可以用字符串字面值进行赋值，但是要注意最后还有一个终止符</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">a</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;Hello world&#34;</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">b</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#34;Daniel&#34;</span><span class="p">;</span> <span class="c1">//错误，忽略了最后的&#39;\0&#39;
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>不能将数组的内容拷贝给其他数组作为其初始值，也不能用数组为其他数组赋值</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a</span><span class="p">[]{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a2</span><span class="p">[]</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span> <span class="c1">//错误
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">a2</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span> <span class="c1">//错误
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p>本质是指针的拷贝，最后容易导致出现内存泄漏和野指针问题，虽然部分编译器支持上述行为，但是为了安全性和通用性，尽量不要出现上述代码</p>
-</blockquote>
-<ul>
-<li>
-<p>阅读数组声明含义：由内向外读</p>
-</li>
-<li>
-<p>数组也可以用基于范围的for循环</p>
-</li>
-<li>
-<p>访问数组元素使用的下标用的类型为<code>size_t</code>，也是一种机器相关类型，头文件C：<b>&lt;stddef.h&gt;</b> $\Longrightarrow$ C++：<b>&lt;cstddef&gt;</b>，但是内置下标运算符也可以使用负数(不同于vector和string)</p>
-</li>
-<li>
-<p>数组的下标访问同样只由程序员负责检查，一定要防止非法访问</p>
-</li>
-<li>
-<p><code>auto</code>返回的是指针,<code>decltype</code>返回的是数组</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//指针迭代器用法
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">]{};</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">e</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">arr</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">b</span> <span class="o">=</span> <span class="n">arr</span><span class="p">;</span> <span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">do_something</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>C++11后引入了begin和end函数(定义于&lt;iterator&gt;，可以通过这两个函数获得的指针来模拟迭代器</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">arr</span><span class="p">[]{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">begin</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">begin</span><span class="p">(</span><span class="n">arr</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">end</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">end</span><span class="p">(</span><span class="n">arr</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(;</span> <span class="n">begin</span> <span class="o">!=</span> <span class="n">end</span><span class="p">;</span> <span class="n">begin</span><span class="o">++</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>两个指针相减的结果类型是<code>ptrdiff_t</code>的机器相关有符号类型，定义于&lt;cstddef&gt;文件中</p>
-</li>
-<li>
-<p>同一数组的两个有效指针可以进行比较</p>
-</li>
-<li>
-<p>C风格的字符串处理函数位于头文件&lt;cstring&gt;中，但是为了方便性和安全性，C++程序中尽量使用std::string</p>
-</li>
-<li>
-<p>C风格的字符串比较实际是在比较字符串数组首地址</p>
-</li>
-<li>
-<p>旧代码接口</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">string</span> <span class="n">s</span> <span class="p">{</span><span class="s">&#34;Hello world&#34;</span><span class="p">};</span>
-</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="c1">//但是在后续由于扩容等机制c_str()的指针可能会失去作用，最好通过s.c_str()拷贝复制一份
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="o">*</span><span class="n">arr</span><span class="p">[]{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
-</span></span><span class="line"><span class="cl"><span class="n">vector</span><span class="p">(</span><span class="n">begin</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span> <span class="n">end</span><span class="p">(</span><span class="n">arr</span><span class="p">));</span> <span class="c1">// -&gt; {0, 1, 2, 3, 4, 5}
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><u>建议：尽量使用标准库而非指针和数组</u></li>
-</ul>
-<blockquote>
-<p>多维数组基于范围的for循环，除了最内层，其他所有循环的控制变量都应该是引用（转化为数组，如果不是引用会转化为指针)</p>
-<p>for (auto &amp;i : arr)</p>
-<p>​	for (auto &amp;j : i)</p>
-<p>​		for (auto k : j) {</p>
-<p>​			do_something(k);</p>
-<p>}</p>
-</blockquote>
-<div id="id-1"><strong>Ending</strong></div>
 ]]></description>
 </item>
 </channel>

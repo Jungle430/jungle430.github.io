@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Operating System Chapter10 状态机模型的应用 - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Operating System Chapter10 状态机模型的应用" />
+<meta property="og:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ Overview 复习 状态机：理论 数字电路：logisim.c 和 seven-seg.py Model checker: 理解并发程序执行的新方法 状态机：实践 thread-os.c 本次课回答的问题 Q: 状态机模型如此有用" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-03-28T13:10:52+08:00" />
+<meta property="article:modified_time" content="2023-03-28T13:10:52+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Operating System Chapter10 状态机模型的应用"/>
+<meta name="twitter:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ Overview 复习 状态机：理论 数字电路：logisim.c 和 seven-seg.py Model checker: 理解并发程序执行的新方法 状态机：实践 thread-os.c 本次课回答的问题 Q: 状态机模型如此有用"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" /><link rel="prev" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Operating System Chapter10 状态机模型的应用",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter10\/"
+        },"genre": "posts","keywords": "Operating System","wordcount":  1002 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter10\/","datePublished": "2023-03-28T13:10:52+08:00","dateModified": "2023-03-28T13:10:52+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter10 状态机模型的应用</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-28">2023-03-28</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1002 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#状态机理解我们的世界">状态机：理解我们的世界</a>
+      <ul>
+        <li><a href="#哲--学探讨">哲 ♂ 学探讨</a></li>
+        <li><a href="#哲--学探讨-contd">哲 ♂ 学探讨 (cont&rsquo;d)</a></li>
+        <li><a href="#状态机模型理解编译器和现代-cpu">状态机模型：理解编译器和现代 CPU</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="overview">Overview</h2>
+<p>复习</p>
+<ul>
+<li>状态机：理论
+<ul>
+<li>数字电路：<a href="https://jyywiki.cn/pages/OS/2022/demos/logisim.c" target="_blank" rel="noopener noreffer">logisim.c</a> 和 <a href="https://jyywiki.cn/pages/OS/2022/demos/seven-seg.py" target="_blank" rel="noopener noreffer">seven-seg.py</a></li>
+<li>Model checker: 理解并发程序执行的新方法</li>
+</ul>
+</li>
+<li>状态机：实践
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/thread-os.c" target="_blank" rel="noopener noreffer">thread-os.c</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>本次课回答的问题</p>
+<ul>
+<li><strong>Q</strong>: 状态机模型如此有用，还能更有用一点吗？</li>
+</ul>
+<hr>
+<p>本次课主要内容</p>
+<ul>
+<li>终于做完了铺垫，是时候让你感受到 “真正的力量” 了
+<ul>
+<li>都是没用的内容，当我口胡就行了</li>
+</ul>
+</li>
+</ul>
+<h2 id="状态机理解我们的世界">状态机：理解我们的世界</h2>
+<h3 id="哲--学探讨">哲 ♂ 学探讨</h3>
+<ul>
+<li>
+<p>我们的物理世界是 “确定规则” 的状态机吗？</p>
+<ul>
+<li>
+<p>宏观物理世界近似于 deterministic 的状态机 (经典力学)</p>
+</li>
+<li>
+<p>微观世界可能是 non-deterministic 的 (量子力学)</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>把物理世界建模成基本粒子的运动</p>
+<ul>
+<li><a href="https://playgameoflife.com/" target="_blank" rel="noopener noreffer">Conway&rsquo;s game of life</a> $\Longrightarrow$ <b>Turing Complete</b></li>
+</ul>
+<h3 id="哲--学探讨-contd">哲 ♂ 学探讨 (cont&rsquo;d)</h3>
+<p>可以在这个模型上严肃地定义很多概念：预测未来、时间旅行……</p>
+<ul>
+<li>成为你理解物理 (和计算机) 世界的参考</li>
+</ul>
+<hr>
+<ul>
+<li>例子
+<ul>
+<li>Cellular automata 不支持 “时间旅行”
+<ul>
+<li>怎么添加一个公理使它可以支持？
+<ul>
+<li>平行宇宙</li>
+<li>如果世界线需要合并？可以<a href="https://www.scientificamerican.com/article/time-travel-simulation-resolves-grandfather-paradox/" target="_blank" rel="noopener noreffer">收敛于某个分布</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Cellular automata 不支持 “预测外来”
+<ul>
+<li>能否添加一个 syscall 使它支持？
+<ul>
+<li><a href="https://www.scottaaronson.com/papers/philos.pdf" target="_blank" rel="noopener noreffer">Why philosophers should care about computational complexity, Ch. 10</a> (<b>jyy 强烈推荐，解释部分在10th-section</b>)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="状态机模型理解编译器和现代-cpu">状态机模型：理解编译器和现代 CPU</h3>
+<ul>
+<li>编译器：源代码$S$(状态机) → 二进制代码$C$(状态机)</li>
+</ul>
+<p>$$
+C=compile(S)
+$$</p>
+<ul>
+<li>
+<p>编译 (优化) 的正确性 (Soundness):</p>
+<ul>
+<li><font color="red"><em>S</em> 与 <em>C</em> 的可观测行为严格一致</font> （二进制落实到硬件也是如此，严格一致不是句句对应，而是状态机一致，比如一个时钟周期内执行两条指令 $\Longrightarrow$ <font color="red">instruction-level parallelism</font>）
+<ul>
+<li>system calls; volatile variable loads/stores; termination</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>超标量 (superscalar)/乱序执行处理器</p>
+<ul>
+<li>
+<p>允许在状态机上 “跳跃”</p>
+</li>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/ilp-demo.c" target="_blank" rel="noopener noreffer">ilp-demo.c</a></p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define LOOP 1000000000ul
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">void</span> <span class="n">loop</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LOOP</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rax;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rdi;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rsi;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rdx;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rcx;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r10;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r8;&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r9;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:::</span><span class="s">&#34;rax&#34;</span><span class="p">,</span> <span class="s">&#34;rdi&#34;</span><span class="p">,</span> <span class="s">&#34;rsi&#34;</span><span class="p">,</span> <span class="s">&#34;rdx&#34;</span><span class="p">,</span> <span class="s">&#34;rcx&#34;</span><span class="p">,</span> <span class="s">&#34;r10&#34;</span><span class="p">,</span> <span class="s">&#34;r8&#34;</span><span class="p">,</span> <span class="s">&#34;r9&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">st</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">loop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">ed</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">LOOP</span> <span class="o">*</span> <span class="p">(</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000000000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">ips</span> <span class="o">=</span> <span class="n">inst</span> <span class="o">/</span> <span class="p">((</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">CLOCKS_PER_SEC</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%.2lfG instructions/s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ips</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在优化下执行的效果</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ screenfetch            
+</span></span><span class="line"><span class="cl">..............                                  
+</span></span><span class="line"><span class="cl">            ..,<span class="p">;</span>:ccc,.                           kali@kali
+</span></span><span class="line"><span class="cl">          ......<span class="s1">&#39;&#39;&#39;;lxO.                         OS: Kali Linux 
+</span></span></span><span class="line"><span class="cl"><span class="s1">.....&#39;&#39;&#39;&#39;..........,:ld;                         Kernel: x86_64 Linux 6.0.0-kali3-amd64
+</span></span></span><span class="line"><span class="cl"><span class="s1">           .&#39;</span><span class="p">;;;</span>:::<span class="p">;</span>,,.x,                        Uptime: 49m
+</span></span><span class="line"><span class="cl">      ..<span class="s1">&#39;&#39;&#39;.            0Xxoc:,.  ...            Packages: 2707
+</span></span></span><span class="line"><span class="cl"><span class="s1">  ....                ,ONkc;,;cokOdc&#39;</span>,.          Shell: zsh 5.9
+</span></span><span class="line"><span class="cl"> .                   OMo           <span class="s1">&#39;:ddo.        Resolution: 1714x874
+</span></span></span><span class="line"><span class="cl"><span class="s1">                    dMc               :OO;       DE: Xfce
+</span></span></span><span class="line"><span class="cl"><span class="s1">                    0M.                 .:o.     WM: Xfwm4
+</span></span></span><span class="line"><span class="cl"><span class="s1">                    ;Wd                          WM Theme: Kali-Dark
+</span></span></span><span class="line"><span class="cl"><span class="s1">                     ;XO,                        GTK Theme: Kali-Dark [GTK2]
+</span></span></span><span class="line"><span class="cl"><span class="s1">                       ,d0Odlc;,..               Icon Theme: Flat-Remix-Blue-Dark
+</span></span></span><span class="line"><span class="cl"><span class="s1">                           ..&#39;</span>,<span class="p">;</span>:cdOOd::,.       Font: Cantarell <span class="m">11</span>
+</span></span><span class="line"><span class="cl">                                    .:d<span class="p">;</span>.<span class="s1">&#39;:;.    Disk: 19G / 80G (26%)
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                       &#39;</span>d,  .<span class="s1">&#39;   CPU: AMD Ryzen 9 5900HX with Radeon Graphics @ 4x 3.294GHz
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                         ;l   .. GPU: VMware SVGA II Adapter
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                          .o     RAM: 1501MiB / 1972MiB
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                            c   
+</span></span></span><span class="line"><span class="cl"><span class="s1">                                            .&#39;</span>  
+</span></span><span class="line"><span class="cl">                                             .  
+</span></span><span class="line"><span class="cl">                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ gcc -O2 ilp-demo.c -o ilp-demo   
+</span></span><span class="line"><span class="cl">                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./ilp-demo                      
+</span></span><span class="line"><span class="cl">19.06G instructions/s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./ilp-demo
+</span></span><span class="line"><span class="cl">19.38G instructions/s
+</span></span><span class="line"><span class="cl">                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./ilp-demo
+</span></span><span class="line"><span class="cl">19.19G instructions/s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>优化过后，每一个时钟周期可以执行远远超过一条指令</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-03-28</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用" data-hashtags="Operating System"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-hashtag="Operating System"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/" data-title="Operating System Chapter10 状态机模型的应用"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/operating-system/operating-system-chapter9/" class="prev" rel="prev" title="Operating System Chapter9 操作系统的状态机模型"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
