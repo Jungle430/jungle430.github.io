@@ -269,8 +269,320 @@ $$</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
-<li>优化过后，每一个时钟周期可以执行远远超过一条指令</li>
+<li>优化过后，<b>每一个时钟周期可以执行远远超过一条指令</b></li>
 </ul>
+<h2 id="查看状态机执行">查看状态机执行</h2>
+<h3 id="trace-和调试器">Trace 和调试器</h3>
+<ul>
+<li>
+<p>程序执行 = 状态机执行</p>
+<ul>
+<li>我们能不能 “hack” 进这个状态机
+<ul>
+<li>观察状态机的执行
+<ul>
+<li>strace/gdb</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>甚至记录和<font color="red">改变</font>状态机的执行</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ strace ./ilp-demo 
+</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./ilp-demo&#34;</span>, <span class="o">[</span><span class="s2">&#34;./ilp-demo&#34;</span><span class="o">]</span>, 0x7ffe10420e10 /* <span class="m">55</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55de2e4e2000
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 8192, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b2c000
+</span></span><span class="line"><span class="cl">access<span class="o">(</span><span class="s2">&#34;/etc/ld.so.preload&#34;</span>, R_OK<span class="o">)</span>      <span class="o">=</span> -1 ENOENT <span class="o">(</span>No such file or directory<span class="o">)</span>
+</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/etc/ld.so.cache&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span>
+</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0644, <span class="nv">st_size</span><span class="o">=</span>89062, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 89062, PROT_READ, MAP_PRIVATE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b16000
+</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/lib/x86_64-linux-gnu/libc.so.6&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span>
+</span></span><span class="line"><span class="cl">read<span class="o">(</span>3, <span class="s2">&#34;\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0&gt;\0\1\0\0\0Ps\2\0\0\0\0\0&#34;</span>..., 832<span class="o">)</span> <span class="o">=</span> <span class="m">832</span>
+</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span>
+</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0755, <span class="nv">st_size</span><span class="o">=</span>1922136, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span>
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 1970000, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_DENYWRITE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4935000
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb495b000, 1396736, PROT_READ<span class="p">|</span>PROT_EXEC, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x26000<span class="o">)</span> <span class="o">=</span> 0x7f9eb495b000
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb4ab0000, 339968, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x17b000<span class="o">)</span> <span class="o">=</span> 0x7f9eb4ab0000
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb4b03000, 24576, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x1ce000<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b03000
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb4b09000, 53072, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b09000
+</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 12288, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4932000
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x7f9eb4932740<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x7f9eb4932a10<span class="o">)</span>         <span class="o">=</span> <span class="m">5644</span>
+</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x7f9eb4932a20, 24<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x7f9eb4933060, 0x20, 0, 0x53053053<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7f9eb4b03000, 16384, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x55de2e4dc000, 4096, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7f9eb4b5e000, 8192, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">munmap<span class="o">(</span>0x7f9eb4b16000, 89062<span class="o">)</span>           <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>1796473<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>514062681<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>1, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFCHR<span class="p">|</span>0600, <span class="nv">st_rdev</span><span class="o">=</span>makedev<span class="o">(</span>0x88, 0<span class="o">)</span>, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\x2a\x03\xa3\xe2\x7d\xa4\x84\x07&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55de2e4e2000
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x55de2e503000<span class="o">)</span>                     <span class="o">=</span> 0x55de2e503000
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;19.52G instructions/s\n&#34;</span>, 2219.52G instructions/s
+</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">22</span>
+</span></span><span class="line"><span class="cl">exit_group<span class="o">(</span>0<span class="o">)</span>                           <span class="o">=</span> ?
+</span></span><span class="line"><span class="cl">+++ exited with <span class="m">0</span> +++
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>strace</code>调试最小的Hello OS，可以清楚地看到系统调用</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ strace ./minimal
+</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./minimal&#34;</span>, <span class="o">[</span><span class="s2">&#34;./minimal&#34;</span><span class="o">]</span>, 0x7ffefc958480 /* <span class="m">55</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;\33[01;31mHello, OS World\33[0m\n&#34;</span>, 28Hello, OS World
+</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">28</span>
+</span></span><span class="line"><span class="cl">exit<span class="o">(</span>1<span class="o">)</span>                                 <span class="o">=</span> ?
+</span></span><span class="line"><span class="cl">+++ exited with <span class="m">1</span> +++
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>-T看每一个系统调用花费的时间</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ strace -T ./ilp-demo
+</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./ilp-demo&#34;</span>, <span class="o">[</span><span class="s2">&#34;./ilp-demo&#34;</span><span class="o">]</span>, 0x7ffdfd498e18 /* <span class="m">55</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000258&gt;
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55a0fd277000 &lt;0.000005&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 8192, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c980a000 &lt;0.000113&gt;
+</span></span><span class="line"><span class="cl">access<span class="o">(</span><span class="s2">&#34;/etc/ld.so.preload&#34;</span>, R_OK<span class="o">)</span>      <span class="o">=</span> -1 ENOENT <span class="o">(</span>No such file or directory<span class="o">)</span> &lt;0.000076&gt;
+</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/etc/ld.so.cache&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span> &lt;0.000077&gt;
+</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0644, <span class="nv">st_size</span><span class="o">=</span>89062, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000077&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 89062, PROT_READ, MAP_PRIVATE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c97f4000 &lt;0.000074&gt;
+</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span> &lt;0.000072&gt;
+</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/lib/x86_64-linux-gnu/libc.so.6&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span> &lt;0.000076&gt;
+</span></span><span class="line"><span class="cl">read<span class="o">(</span>3, <span class="s2">&#34;\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0&gt;\0\1\0\0\0Ps\2\0\0\0\0\0&#34;</span>..., 832<span class="o">)</span> <span class="o">=</span> <span class="m">832</span> &lt;0.000072&gt;
+</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span> &lt;0.000071&gt;
+</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0755, <span class="nv">st_size</span><span class="o">=</span>1922136, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000076&gt;
+</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span> &lt;0.000071&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 1970000, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_DENYWRITE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c9613000 &lt;0.000084&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c9639000, 1396736, PROT_READ<span class="p">|</span>PROT_EXEC, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x26000<span class="o">)</span> <span class="o">=</span> 0x7fb9c9639000 &lt;0.000073&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c978e000, 339968, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x17b000<span class="o">)</span> <span class="o">=</span> 0x7fb9c978e000 &lt;0.000073&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c97e1000, 24576, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x1ce000<span class="o">)</span> <span class="o">=</span> 0x7fb9c97e1000 &lt;0.000060&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c97e7000, 53072, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c97e7000 &lt;0.000074&gt;
+</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span> &lt;0.000072&gt;
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 12288, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c9610000 &lt;0.000074&gt;
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x7fb9c9610740<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000073&gt;
+</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x7fb9c9610a10<span class="o">)</span>         <span class="o">=</span> <span class="m">8876</span> &lt;0.000071&gt;
+</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x7fb9c9610a20, 24<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span> &lt;0.000097&gt;
+</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x7fb9c9611060, 0x20, 0, 0x53053053<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000109&gt;
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7fb9c97e1000, 16384, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000079&gt;
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x55a0fcb07000, 4096, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000072&gt;
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7fb9c983c000, 8192, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000073&gt;
+</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000074&gt;
+</span></span><span class="line"><span class="cl">munmap<span class="o">(</span>0x7fb9c97f4000, 89062<span class="o">)</span>           <span class="o">=</span> <span class="m">0</span> &lt;0.000094&gt;
+</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>876239<span class="o">})</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000075&gt;
+</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>511881481<span class="o">})</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000199&gt;
+</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>1, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFCHR<span class="p">|</span>0600, <span class="nv">st_rdev</span><span class="o">=</span>makedev<span class="o">(</span>0x88, 0<span class="o">)</span>, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000090&gt;
+</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\x6e\x63\x59\xe8\xb3\xfe\x8a\x8d&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span> &lt;0.000143&gt;
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55a0fd277000 &lt;0.000106&gt;
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x55a0fd298000<span class="o">)</span>                     <span class="o">=</span> 0x55a0fd298000 &lt;0.000052&gt;
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;19.57G instructions/s\n&#34;</span>, 2219.57G instructions/s
+</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">22</span> &lt;0.000085&gt;
+</span></span><span class="line"><span class="cl">exit_group<span class="o">(</span>0<span class="o">)</span>                           <span class="o">=</span> ?
+</span></span><span class="line"><span class="cl">+++ exited with <span class="m">0</span> +++
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter10-1.png" title="/img/Operating System/chapter10-1.png" data-thumbnail="/img/Operating System/chapter10-1.png" data-sub-html="<h2>gdb layout src</h2>">
+        
+    </a><figcaption class="image-caption"><code>gdb layout src</code></figcaption>
+    </figure>
+<ul>
+<li>注意为了让<code>‘layout src</code>能够成功显示，编译时需要使用<code>gcc</code>的<code>-g</code>编译选项</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ gcc -O2 ilp-demo.c -o ilp-demo -g  
+</span></span><span class="line"><span class="cl">                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ gdb ilp-demo                     
+</span></span><span class="line"><span class="cl">GNU gdb <span class="o">(</span>Debian 13.1-2<span class="o">)</span> 13.1
+</span></span><span class="line"><span class="cl">Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2023</span> Free Software Foundation, Inc.
+</span></span><span class="line"><span class="cl">License GPLv3+: GNU GPL version <span class="m">3</span> or later &lt;http://gnu.org/licenses/gpl.html&gt;
+</span></span><span class="line"><span class="cl">This is free software: you are free to change and redistribute it.
+</span></span><span class="line"><span class="cl">There is NO WARRANTY, to the extent permitted by law.
+</span></span><span class="line"><span class="cl">Type <span class="s2">&#34;show copying&#34;</span> and <span class="s2">&#34;show warranty&#34;</span> <span class="k">for</span> details.
+</span></span><span class="line"><span class="cl">This GDB was configured as <span class="s2">&#34;x86_64-linux-gnu&#34;</span>.
+</span></span><span class="line"><span class="cl">Type <span class="s2">&#34;show configuration&#34;</span> <span class="k">for</span> configuration details.
+</span></span><span class="line"><span class="cl">For bug reporting instructions, please see:
+</span></span><span class="line"><span class="cl">&lt;https://www.gnu.org/software/gdb/bugs/&gt;.
+</span></span><span class="line"><span class="cl">Find the GDB manual and other documentation resources online at:
+</span></span><span class="line"><span class="cl">    &lt;http://www.gnu.org/software/gdb/documentation/&gt;.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">For help, <span class="nb">type</span> <span class="s2">&#34;help&#34;</span>.
+</span></span><span class="line"><span class="cl">Type <span class="s2">&#34;apropos word&#34;</span> to search <span class="k">for</span> commands related to <span class="s2">&#34;word&#34;</span>...
+</span></span><span class="line"><span class="cl">Reading symbols from ilp-demo...
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> start
+</span></span><span class="line"><span class="cl">Temporary breakpoint <span class="m">1</span> at 0x1060: file ilp-demo.c, line 22.
+</span></span><span class="line"><span class="cl">Starting program: /home/kali/chapter9/ilp-demo 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>Thread debugging using libthread_db enabled<span class="o">]</span>
+</span></span><span class="line"><span class="cl">Using host libthread_db library <span class="s2">&#34;/lib/x86_64-linux-gnu/libthread_db.so.1&#34;</span>.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Temporary breakpoint 1, main <span class="o">()</span> at ilp-demo.c:22
+</span></span><span class="line"><span class="cl"><span class="m">22</span>        clock_t <span class="nv">st</span> <span class="o">=</span> clock<span class="o">()</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> layout src
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="应用-1-time-travel-debugging">应用 (1): Time-Travel Debugging</h3>
+<ul>
+<li>
+<p>程序执行是随时间 “前进” 的$s_0 \rightarrow s_1 \rightarrow s_2 \rightarrow \dots$</p>
+</li>
+<li>
+<p>能否在时间上 “后退”？ (time-travel)</p>
+<ul>
+<li>经常 gdb 不小心 step 过了，从头再来……</li>
+<li>记录所有的$s_i$，就能实现任意的 time-traveling</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>凉性循环，看一会<code>rust</code></p>
+</blockquote>
 ]]></description>
 </item>
 <item>
