@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter4\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  3543 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  3738 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter4\/","datePublished": "2023-03-06T19:34:15+08:00","dateModified": "2023-03-06T19:34:15+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,7 +101,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter4 理解并发程序执行</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-06">2023-03-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3543 字</span>&nbsp;
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-06">2023-03-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3738 字</span>&nbsp;
                     <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟</span>&nbsp;</div>
             </div>
             
@@ -203,7 +203,12 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__sync_synchronize</span><span class="p">();</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="失败的尝试">失败的尝试</h4>
+</div><blockquote>
+<p><code>__sync_synchronize();</code>是GCC内置函数的一种，用于在编写多线程程序时确保在内存操作之前和之后的指令都不会被重排。</p>
+<p>具体来说，这个函数是一个内存栅栏，用于告诉编译器不要把本条指令前面和后面的内存操作顺序交换，也就是防止编译器进行指令重排，保证在这个函数之前和之后的内存操作按照代码中的顺序执行。</p>
+<p>这个函数在实现多线程锁、原子操作等场景中经常被使用，以确保线程间的同步和一致性。</p>
+</blockquote>
+<h4 id="失败的尝试">失败的尝试</h4>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1

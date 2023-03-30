@@ -583,6 +583,13 @@ $$</p>
 <blockquote>
 <p>凉性循环，看一会<code>rust</code></p>
 </blockquote>
+<ul>
+<li>记录所有$s_i$的开销太大（$s_i$由内存+寄存器组成）
+<ul>
+<li>但<font color="red">一条指令的side-effect通常有限</font></li>
+</ul>
+</li>
+</ul>
 ]]></description>
 </item>
 <item>
@@ -7311,7 +7318,12 @@ $$</p>
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__sync_synchronize</span><span class="p">();</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="失败的尝试">失败的尝试</h4>
+</div><blockquote>
+<p><code>__sync_synchronize();</code>是GCC内置函数的一种，用于在编写多线程程序时确保在内存操作之前和之后的指令都不会被重排。</p>
+<p>具体来说，这个函数是一个内存栅栏，用于告诉编译器不要把本条指令前面和后面的内存操作顺序交换，也就是防止编译器进行指令重排，保证在这个函数之前和之后的内存操作按照代码中的顺序执行。</p>
+<p>这个函数在实现多线程锁、原子操作等场景中经常被使用，以确保线程间的同步和一致性。</p>
+</blockquote>
+<h4 id="失败的尝试">失败的尝试</h4>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
