@@ -499,7 +499,7 @@ $$</p>
     </a><figcaption class="image-caption"><code>gdb layout src</code></figcaption>
     </figure>
 <ul>
-<li>注意为了让<code>‘layout src</code>能够成功显示，编译时需要使用<code>gcc</code>的<code>-g</code>编译选项</li>
+<li>注意为了让<code>layout src</code>能够成功显示，编译时需要使用<code>gcc</code>的<code>-g</code>编译选项</li>
 </ul>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -7417,7 +7417,7 @@ $$</p>
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">locked</span> <span class="o">!=</span> <span class="n">UNLOCK</span><span class="p">)</span> <span class="p">{</span> <span class="c1">//&lt;--------------------------------
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>                                        <span class="c1">//  |
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>                                                    <span class="c1">//  |  
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>         <span class="c1">//T1执行到了这里 此时locked = LOCK-|
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>       <span class="c1">//T1执行到了这里 此时locked = UNLOCK-|
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
@@ -7559,7 +7559,15 @@ $$</p>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="petersons-protocol-verified-">Peterson&rsquo;s Protocol Verified 🎖</h4>
+</div><blockquote>
+<p>有关上面的原子操作：</p>
+<p>这段代码定义了两个原子变量 <code>nested</code> 和 <code>count</code>，并实现了一个临界区 <code>critical_section()</code>。</p>
+<p>在 <code>critical_section()</code> 中，首先通过调用 <code>atomic_fetch_add(&amp;count, 1)</code> 将 <code>count</code> 原子变量的值加 1 并返回当前的值，保存在 <code>cnt</code> 中。</p>
+<p>然后通过调用 <code>atomic_fetch_add(&amp;nested, 1)</code> 将 <code>nested</code> 原子变量的值加 1，同时检查原子变量 <code>nested</code> 是否为 0。由于 <code>nested</code> 的初始值为 0，因此这里可以通过 <code>assert</code> 断言来验证。</p>
+<p>最后通过调用 <code>atomic_fetch_add(&amp;nested, -1)</code> 将 <code>nested</code> 原子变量的值减 1。</p>
+<p>整个 <code>critical_section()</code> 实现了一个简单的临界区，其中 <code>nested</code> 原子变量用于保证临界区同时只能被一个线程访问，而 <code>count</code> 原子变量用于记录临界区的进入次数。</p>
+</blockquote>
+<h4 id="petersons-protocol-verified-">Peterson&rsquo;s Protocol Verified 🎖</h4>
 <div class="details admonition tip open">
         <div class="details-summary admonition-title">
             <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
@@ -8213,6 +8221,88 @@ $$</p>
 </span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
 </span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
 </span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;blue&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;green&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_both</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Peterson</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39;  &#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">turn</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39;🏴&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="s1">&#39;🏳&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="s1">&#39;🏳&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;🏳&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="s1">&#39;🏴&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="s1">&#39;🏴&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
 </span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
