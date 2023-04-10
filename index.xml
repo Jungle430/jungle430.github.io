@@ -7676,6 +7676,10 @@ $$</p>
 <p>然后通过调用 <code>atomic_fetch_add(&amp;nested, 1)</code> 将 <code>nested</code> 原子变量的值加 1，同时检查原子变量 <code>nested</code> 是否为 0。由于 <code>nested</code> 的初始值为 0，因此这里可以通过 <code>assert</code> 断言来验证。</p>
 <p>最后通过调用 <code>atomic_fetch_add(&amp;nested, -1)</code> 将 <code>nested</code> 原子变量的值减 1。</p>
 <p>整个 <code>critical_section()</code> 实现了一个简单的临界区，其中 <code>nested</code> 原子变量用于保证临界区同时只能被一个线程访问，而 <code>count</code> 原子变量用于记录临界区的进入次数。</p>
+<hr>
+<p>在给 <code>nested</code> 这个 <code>atomic_int</code> 对象赋初值为 0 的情况下，断言 <code>assert(atomic_fetch_add(&amp;nested, 1) == 0)</code> 是可以通过的。</p>
+<p>这是因为 <code>atomic_fetch_add()</code> 函数是原子的，它会将 <code>nested</code> 的值加 1，并返回增加前的值。在这个代码中，<code>nested</code> 初始值为 0，然后通过 <code>atomic_fetch_add(&amp;nested, 1)</code> 将其增加为 1，并<font color="red">返回增加前的值</font> 0。因此，断言 <code>assert(atomic_fetch_add(&amp;nested, 1) == 0)</code> 会成功通过，因为 <code>atomic_fetch_add()</code> 返回的值与断言中的比较值相等。</p>
+<p>需要注意的是，<code>atomic_int</code> 是 C++ 标准库提供的原子类型，用于在多线程环境下进行原子操作，确保线程安全性。在多线程环境下，原子操作是不会被中断的，因此可以保证 <code>atomic_int</code> 类型对象的操作不会发生竞态条件等问题。但仍然需要谨慎使用，并根据具体情况考虑是否需要使用其他同步机制，如互斥锁、条件变量等。</p>
 </blockquote>
 <h4 id="petersons-protocol-verified-">Peterson&rsquo;s Protocol Verified 🎖</h4>
 <div class="details admonition tip open">

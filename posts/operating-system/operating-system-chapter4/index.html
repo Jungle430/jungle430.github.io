@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter4\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  4182 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  4461 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter4\/","datePublished": "2023-03-06T19:34:15+08:00","dateModified": "2023-03-06T19:34:15+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,7 +101,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter4 理解并发程序执行</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-06">2023-03-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4182 字</span>&nbsp;
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-06">2023-03-06</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4461 字</span>&nbsp;
                     <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟</span>&nbsp;</div>
             </div>
             
@@ -451,6 +451,10 @@
 <p>然后通过调用 <code>atomic_fetch_add(&amp;nested, 1)</code> 将 <code>nested</code> 原子变量的值加 1，同时检查原子变量 <code>nested</code> 是否为 0。由于 <code>nested</code> 的初始值为 0，因此这里可以通过 <code>assert</code> 断言来验证。</p>
 <p>最后通过调用 <code>atomic_fetch_add(&amp;nested, -1)</code> 将 <code>nested</code> 原子变量的值减 1。</p>
 <p>整个 <code>critical_section()</code> 实现了一个简单的临界区，其中 <code>nested</code> 原子变量用于保证临界区同时只能被一个线程访问，而 <code>count</code> 原子变量用于记录临界区的进入次数。</p>
+<hr>
+<p>在给 <code>nested</code> 这个 <code>atomic_int</code> 对象赋初值为 0 的情况下，断言 <code>assert(atomic_fetch_add(&amp;nested, 1) == 0)</code> 是可以通过的。</p>
+<p>这是因为 <code>atomic_fetch_add()</code> 函数是原子的，它会将 <code>nested</code> 的值加 1，并返回增加前的值。在这个代码中，<code>nested</code> 初始值为 0，然后通过 <code>atomic_fetch_add(&amp;nested, 1)</code> 将其增加为 1，并<font color="red">返回增加前的值</font> 0。因此，断言 <code>assert(atomic_fetch_add(&amp;nested, 1) == 0)</code> 会成功通过，因为 <code>atomic_fetch_add()</code> 返回的值与断言中的比较值相等。</p>
+<p>需要注意的是，<code>atomic_int</code> 是 C++ 标准库提供的原子类型，用于在多线程环境下进行原子操作，确保线程安全性。在多线程环境下，原子操作是不会被中断的，因此可以保证 <code>atomic_int</code> 类型对象的操作不会发生竞态条件等问题。但仍然需要谨慎使用，并根据具体情况考虑是否需要使用其他同步机制，如互斥锁、条件变量等。</p>
 </blockquote>
 <h4 id="petersons-protocol-verified-">Peterson&rsquo;s Protocol Verified 🎖</h4>
 <div class="details admonition tip open">
