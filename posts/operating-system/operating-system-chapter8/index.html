@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter8\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  5907 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  5923 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter8\/","datePublished": "2023-03-17T13:48:22+08:00","dateModified": "2023-03-17T13:48:22+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,7 +101,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter8 并发 bug 和应对</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-17">2023-03-17</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5907 字</span>&nbsp;
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-17">2023-03-17</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5923 字</span>&nbsp;
                     <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 12 分钟</span>&nbsp;</div>
             </div>
             
@@ -130,6 +130,7 @@
         <li><a href="#避免死锁-contd">避免死锁 (cont&rsquo;d)</a></li>
         <li><a href="#lock-ordering-应用-linux-kernel-rmapc">Lock Ordering: 应用 (Linux Kernel: rmap.c)</a></li>
         <li><a href="#但是你又-naive-了">但是……你又 Naive 了……</a></li>
+        <li><a href="#补充银行家算法">补充：银行家算法</a></li>
       </ul>
     </li>
     <li><a href="#并发-bug数据竞争-data-race-longrightarrow-不上锁不就没有死锁了吗">并发 Bug：数据竞争 (Data Race) $\Longrightarrow$ 不上锁不就没有死锁了吗？</a>
@@ -1072,6 +1073,27 @@
 <ul>
 <li>我们稍后回到这个问题，继续看更多的 bugs</li>
 </ul>
+<h3 id="补充银行家算法">补充：银行家算法</h3>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-11.png" title="/img/Operating System/chapter8-11.png" data-thumbnail="/img/Operating System/chapter8-11.png" data-sub-html="<h2>算法实现</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter8-11.png"
+            data-srcset="/img/Operating%20System/chapter8-11.png, /img/Operating%20System/chapter8-11.png 1.5x, /img/Operating%20System/chapter8-11.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter8-11.png" />
+    </a><figcaption class="image-caption"><code>算法实现</code></figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter8-11.png" title="/img/Operating System/chapter8-11.png" data-thumbnail="/img/Operating System/chapter8-11.png" data-sub-html="<h2>其他补充</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter8-11.png"
+            data-srcset="/img/Operating%20System/chapter8-11.png, /img/Operating%20System/chapter8-11.png 1.5x, /img/Operating%20System/chapter8-11.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter8-11.png" />
+    </a><figcaption class="image-caption"><code>其他补充</code></figcaption>
+    </figure>
 <h2 id="并发-bug数据竞争-data-race-longrightarrow-不上锁不就没有死锁了吗">并发 Bug：数据竞争 (Data Race) $\Longrightarrow$ 不上锁不就没有死锁了吗？</h2>
 <h3 id="数据竞争">数据竞争</h3>
 <blockquote>
