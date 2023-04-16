@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter6\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  23599 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  24441 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter6\/","datePublished": "2023-03-10T20:32:20+08:00","dateModified": "2023-03-10T20:32:20+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,8 +101,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter6 并发控制：同步</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-10">2023-03-10</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 23599 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 48 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-03-10">2023-03-10</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 24441 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 49 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -3169,6 +3169,58 @@ $$</p>
 <ul>
 <li>多队列调度比单队列调度具有更好的可扩展性，多队列的数量会随着处理器的增加而增加，也具有良好的缓存亲和度。当多队列调度也有它自己的问题：负载均衡（<code>Load Balance</code>）问题</li>
 </ul>
+<blockquote>
+<ul>
+<li>考虑如下的例子，在一个有4个进程，两个处理器的计算机系统中，有两个就绪队列，PA和PB在就绪队列Q1，PC和PD在就绪队列Q2</li>
+<li>如果采用基于轮转调度的多队列调度，那么两个处理器可以均匀地让4给进程分时使用处理器。这是一种理想的情况</li>
+<li><b>如果进程PB结束，而调度不进行进一步的干预，那么就会出现PA独占处理器1</b>，PC和PD分时共享处理器2</li>
+<li><b>如果PA也结束了，而调度还不进行进一步的干预，那么（<code>Load Imbalance</code>）就会出现</b>——处理器1空闲，而处理器2繁忙的情况，这就是典型的负载不均衡（<code>Load Imbalance</code>）的现象了。这就没有达到轮转调度的意图</li>
+</ul>
+</blockquote>
+<ul>
+<li>
+<p>所以<b>多队列调度需要解决负载不均衡</b>的问题</p>
+<ul>
+<li>
+<p>一个简单的思路就是<b>允许进程根据处理器的负载情况从一个处理器迁移到另外一个处理器上</b></p>
+<ul>
+<li>对于上面的例子，如果是处理器1空闲，处理器2繁忙的而情况，操作系统只需把处理器2上的进程分一半，迁移到处理器1即可</li>
+</ul>
+</li>
+<li>
+<p>当如果是处理器1上运行了PA，处理器2上运行了PC和PD，这就需要统计每个进程的执行时间，根据进程的执行时间，让进程在两个处理器间不停的迁移，达到在一定时间段内，每个进程所占用的处理器时间大致相同，这就达到了轮转调度的意图，并达到了负载均衡</p>
+</li>
+</ul>
+</li>
+<li>
+<p>比如下面的调度方式</p>
+</li>
+</ul>
+<p>$$
+\begin{align}
+&amp;处理器1：A\rightarrow A\rightarrow C \rightarrow A \rightarrow A \rightarrow C \rightarrow \dots \newline
+&amp;处理器2：C\rightarrow D\rightarrow D\rightarrow C\rightarrow D \rightarrow D \rightarrow \dots \newline
+&amp;或者是：\newline
+&amp;处理器1：A\rightarrow C\rightarrow A \rightarrow A \rightarrow C \rightarrow A \rightarrow \dots \newline
+&amp;处理器2：C\rightarrow D\rightarrow D\rightarrow C\rightarrow D \rightarrow D \rightarrow \dots \newline
+\end{align}
+$$</p>
+<ul>
+<li>
+<p>当然，这个例子是一种简单的理想情况，实际的多处理器计算机系统中运行的进程行为会很复杂，除了并行执行，还有同步互斥执行、各种/O操作等，这些都会对调度策略产生影响</p>
+</li>
+<li>
+<p><u>如果需要了解实际的操作系统调度策略和算法，建议阅读关于<code>UNIX</code>、<code>Linux</code>、<code>Windows</code>和各种<code>RTOS</code>等操作系统内核的书籍和文章，其中有关于这些操作系统的调度策略和算法的深入讲解</u></p>
+</li>
+</ul>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Completed<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content">2023-4-16 Finished at 23:43 PM</div>
+        </div>
+    </div>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
