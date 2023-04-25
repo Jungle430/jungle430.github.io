@@ -2183,30 +2183,191 @@ $$</p>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="避免死锁">避免死锁</h3>
+</div><h3 id="避免死锁死锁产生的四个必要条件">避免死锁（死锁产生的四个必要条件）</h3>
 <ul>
 <li>
 <p>死锁产生的四个<b>必要条件</b> (<a href="https://en.wikipedia.org/wiki/Edward_G._Coffman,_Jr." target="_blank" rel="noopener noreffer">Edward G. Coffman</a>, 1971):</p>
 <ul>
 <li>
-<p>互斥：一个资源每次只能被一个进程使用（例如🔒）</p>
+<p><b>互斥</b>：一个资源每次只能被一个进程使用（例如🔒）</p>
 </li>
 <li>
-<p>请求与保持：一个进程请求资阻塞时，不释放已获得的资源（比如失败版的哲学家吃饭，右手拿叉子被阻塞的时候不会把左手拿到的叉子释放掉）</p>
+<p><b>请求与保持</b>：一个进程请求资阻塞时，不释放已获得的资源（比如失败版的哲学家吃饭，右手拿叉子被阻塞的时候不会把左手拿到的叉子释放掉）</p>
 </li>
 <li>
-<p>不剥夺：进程已获得的资源不能强行剥夺（🔒没有优先级，获得之后任何人都拿不走）</p>
+<p><b>不剥夺</b>：进程已获得的资源不能强行剥夺（🔒没有优先级，获得之后任何人都拿不走）</p>
 </li>
 <li>
-<p>循环等待：若干进程之间形成<b>头尾相接的循环等待资源</b>关系（参考AA-Deadlock里面的mermaid图像以及十字路口的图像）</p>
+<p><b>循环等待</b>：若干进程之间形成<b>头尾相接的循环等待资源</b>关系（参考AA-Deadlock里面的mermaid图像以及十字路口的图像）。例子：有一组等待进程 <code>{P0, P1,..., Pn}</code>， <code>P0</code> 等待的资源被 <code>P1</code> 占有，<code>P1</code> 等待的资源被 <code>P2</code> 占有，&hellip;&hellip;，<code>Pn-1</code> 等待的资源被 <code>Pn</code> 占有，<code>Pn</code> 等待的资源被 <code>P0</code> 占有 $\rightarrow$ <b>画圈了</b></p>
 </li>
 </ul>
 </li>
+<li>
+<p><b>注意 ⚠️</b> ：这四个条件是产生死锁的 <b>必要条件</b> ，也就是说只要系统发生死锁，这些条件必然成立，而只要上述条件之一不满足，就不会发生死锁</p>
+</li>
 </ul>
+<p>$$
+\begin{align}
+&amp;Deadlock \rightarrow Four\ conditions\newline
+&amp;Deadlock \nleftarrow Four\ conditions\newline
+\end{align}
+$$</p>
 <blockquote>
 <p>“理解了死锁的原因，尤其是产生死锁的四个必要条件，就可以最大可能地避免、预防和解除死锁。所以，在系统设计、进程调度等方面<b>注意如何不让这四个必要条件成立，如何确定资源的合理分配算法，避免进程永久占据系统资源</b>。此外，也要防止进程在处于等待状态的情况下占用资源。因此，对资源的分配要给予合理的规划。” ——Bullshit $\Longrightarrow$ <font color="orange">经典教科书废话，这四个条件想要破除非常困难</font></p>
 </blockquote>
-<h3 id="避免死锁-contd">避免死锁 (cont&rsquo;d)</h3>
+<h3 id="写一个模拟产生死锁的代码">写一个模拟产生死锁的代码</h3>
+<div class="mermaid" id="id-2"></div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">sync</span>::<span class="p">{</span><span class="n">Arc</span><span class="p">,</span><span class="w"> </span><span class="n">Mutex</span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">thread</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">time</span>::<span class="n">Duration</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Mutex</span>::<span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Mutex</span>::<span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">y1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">y2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">handle1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x1</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;handle1 has own x: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">x</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">thread</span>::<span class="n">sleep</span><span class="p">(</span><span class="n">Duration</span>::<span class="n">from_secs</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y1</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;handle1 has own y: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">handle2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y2</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;handle2 has own y: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">thread</span>::<span class="n">sleep</span><span class="p">(</span><span class="n">Duration</span>::<span class="n">from_secs</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x2</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;handle2 has own x: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">x</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">handle1</span><span class="p">.</span><span class="n">join</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">handle2</span><span class="p">.</span><span class="n">join</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DeadLockDemo</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Object</span> <span class="n">resource1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">();</span><span class="c1">//资源 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Object</span> <span class="n">resource2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">();</span><span class="c1">//资源 2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">new</span> <span class="n">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">resource1</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;get resource1&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1000</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;waiting get resource2&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kd">synchronized</span> <span class="o">(</span><span class="n">resource2</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;get resource2&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">},</span> <span class="s">&#34;线程 1&#34;</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">new</span> <span class="n">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">resource2</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;get resource2&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1000</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;waiting get resource1&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kd">synchronized</span> <span class="o">(</span><span class="n">resource1</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;get resource1&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">},</span> <span class="s">&#34;线程 2&#34;</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="避免死锁-contd">避免死锁 (cont&rsquo;d)</h3>
 <ul>
 <li>
 <p>AA-Deadlock</p>
@@ -2461,7 +2622,7 @@ $$</p>
 <ul>
 <li>
 <p><b>比如说有X,A,B,C四把🔒，无论如何都要给这四把🔒排一下顺序</b></p>
-<div class="mermaid" id="id-2"></div>
+<div class="mermaid" id="id-3"></div>
 </li>
 </ul>
 </li>
@@ -2582,6 +2743,33 @@ $$</p>
 </ol>
 </li>
 </ul>
+<h4 id="八股补充">八股补充</h4>
+<ul>
+<li>
+<p>死锁四大必要条件上面都已经列出来了，很显然，<b>只要破坏四个必要条件中的任何一个就能够预防死锁的发生</b></p>
+</li>
+<li>
+<p>破坏第一个条件<strong>互斥条件</strong>：使得资源是可以同时访问的，这是种简单的方法，<b>磁盘就可以用这种方法管理</b>，但是我们要知道，有很多资源<strong>往往是不能同时访问的</strong>，<u>所以这种做法在大多数的场合是行不通的</u></p>
+</li>
+<li>
+<p>破坏第三个条件<strong>非抢占</strong>（<b>加入了优先级，可以剥夺互斥资源</b>）：也就是说可以采用<strong>剥夺式调度算法</strong>，但剥夺式调度方法目前一般仅适用于主存资源<strong>和</strong>处理器资源的分配，并不适用于所有的资源，会导致<strong>资源利用率下降</strong></p>
+</li>
+</ul>
+<h5 id="策略">策略</h5>
+<ul>
+<li><b>考虑破坏第二个条件和第四个条件</b></li>
+</ul>
+<ol>
+<li><b>静态分配策略</b></li>
+</ol>
+<p><b>静态分配策略可以破坏死锁产生的第二个条件（占有并等待）。</b></p>
+<p>所谓静态分配策略，就是指一个进程必须在执行前就申请到它所需要的全部资源，并且知道它所要的资源都得到满足之后才开始执行。进程要么占有所有的资源然后开始执行，要么不占有资源，不会出现占有一些资源等待一些资源的情况。（类似于哲学家吃饭的问题里面，一次性拿左右手餐具）</p>
+<p>静态分配策略逻辑简单，实现也很容易，但这种策略<b>严重地降低了资源利用率</b>。$\Longrightarrow$ 因为在每个进程所占有的资源中，有些资源是在比较靠后的执行时间里采用的，甚至有些资源是在额外的情况下才使用的，这样就可能造成一个进程占有了一些<b>几乎不用的资源而使其他需要该资源的进程产生等待</b>的情况（没有拿全资源，占着拿到的资源不干活）</p>
+<ol start="2">
+<li><b>层次分配策略</b></li>
+</ol>
+<p><b>层次分配策略破坏了产生死锁的第四个条件(循环等待)。</b></p>
+<p>在层次分配策略下，所有的资源被分成了多个层次，一个进程得到某一次的一个资源后，它只能再申请较高一层的资源；当一个进程要释放某层的一个资源时，必须先释放所占用的较高层的资源，按这种策略，是不可能出现循环等待链的，因为那样的话，就出现了已经申请了较高层的资源，反而去申请了较低层的资源，不符合层次分配策略。参考<a href="#%e9%81%bf%e5%85%8d%e6%ad%bb%e9%94%81" title="cont&#39;d" rel="">避免死锁 (cont&rsquo;d)</a></p>
 <h3 id="lock-ordering-应用-linux-kernel-rmapc">Lock Ordering: 应用 (Linux Kernel: rmap.c)</h3>
 <figure><a class="lightgallery" href="/img/Operating%20System/chapter8-5.png" title="/img/Operating System/chapter8-5.png" data-thumbnail="/img/Operating System/chapter8-5.png" data-sub-html="<h2>Linux Kernel：rmap.c中的Lock Ordering</h2>">
         
@@ -2605,12 +2793,13 @@ $$</p>
         
     </a><figcaption class="image-caption"><code>其他补充</code></figcaption>
     </figure>
+<p>银行家算法详情可见：<a href="https://blog.csdn.net/qq_33414271/article/details/80245715" target="_blank" rel="noopener noreffer">《一句话+一张图说清楚——银行家算法》</a></p>
 <h2 id="并发-bug数据竞争-data-race-longrightarrow-不上锁不就没有死锁了吗">并发 Bug：数据竞争 (Data Race) $\Longrightarrow$ 不上锁不就没有死锁了吗？</h2>
 <h3 id="数据竞争">数据竞争</h3>
 <blockquote>
 <p><font color="red"><b>不同的线程</b></font>同时访问<font color="red"><b>同一段内存</b></font>，且<font color="red"><b>至少有一个是写</b></font>。</p>
 </blockquote>
-<div class="mermaid" id="id-3"></div>
+<div class="mermaid" id="id-4"></div>
 <ul>
 <li>两个内存访问在 “赛跑”，<b>“跑赢” 的操作先执行</b> $\Longrightarrow$ 程序最终的结果与谁跑赢有关 $\Longrightarrow$ 计组中和的“读后写”与“写后读”有关的流水线排序问题
 <ul>
@@ -2640,7 +2829,7 @@ $$</p>
 <p>用互斥锁保护好共享数据</p>
 <p>消灭一切数据竞争</p>
 </blockquote>
-<div class="mermaid" id="id-4"></div>
+<div class="mermaid" id="id-5"></div>
 <h3 id="数据竞争例子">数据竞争：例子</h3>
 <ul>
 <li>以下代码概括了你们遇到数据竞争的大部分情况
@@ -3310,7 +3499,37 @@ $$</p>
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="总结">总结</h2>
+</div><h3 id="补充死锁检测--进程-资源分配图">补充：死锁检测 | 进程-资源分配图</h3>
+<ul>
+<li>
+<p>操作系统中的每一刻时刻的<strong>系统状态</strong>都可以用<strong>进程-资源分配图</strong>来表示，进程-资源分配图是描述进程和资源申请及分配关系的一种有向图，可用于<strong>检测系统是否处于死锁状态</strong></p>
+</li>
+<li>
+<p><b>用一个方框表示每一个资源类，方框中的黑点表示该资源类中的各个资源，每个键进程用一个圆圈表示，</b>用<strong>有向边</strong>来表示<strong>进程申请资源和资源被分配的情况</strong></p>
+</li>
+<li>
+<p>进程-资源分配图中存在环路并不一定是发生了死锁。因为循环等待资源仅仅是死锁发生的必要条件，而不是充分条件</p>
+</li>
+<li>
+<p><b>死锁检测步骤</b></p>
+</li>
+</ul>
+<ol>
+<li>如果进程-资源分配图中无环路，则此时系统没有发生死锁</li>
+<li>如果进程-资源分配图中有环路，<b>且每个资源类仅有一个资源</b>，则系统中已经发生了死锁</li>
+<li>如果进程-资源分配图中有环路，且涉及到的资源类有多个资源，此时系统未必会发生死锁。如果能在进程-资源分配图中找出一个<strong>既不阻塞又非独立的进程</strong> ，该进程能够在有限的时间内归还占有的资源，也就是把边给消除掉了，重复此过程，直到能在有限的时间内<strong>消除所有的边</strong> ，则不会发生死锁，否则会发生死锁。(消除边的过程类似于<strong>拓扑排序</strong>)</li>
+</ol>
+<ul>
+<li><b>死锁的解除</b></li>
+</ul>
+<p>当死锁检测程序检测到存在死锁发生时，应设法让其解除，让系统从死锁状态中恢复过来，常用的解除死锁的方法有以下四种：</p>
+<ol>
+<li><strong>立即结束所有进程的执行，重新启动操作系统</strong> ：这种方法简单，但以前所在的工作全部作废，损失很大。</li>
+<li><strong>撤销涉及死锁的所有进程，解除死锁后继续运行</strong> ：这种方法能彻底打破<strong>死锁的循环等待</strong>条件，但将付出很大代价，例如有些进程可能已经计算了很长时间，由于被撤销而使产生的部分结果也被消除了，再重新执行时还要再次进行计算。</li>
+<li><strong>逐个撤销涉及死锁的进程，回收其资源直至死锁解除。</strong></li>
+<li><strong>抢占资源</strong> ：从涉及死锁的一个或几个进程中抢占资源，把夺得的资源再分配给涉及死锁的进程直至死锁解除</li>
+</ol>
+<h2 id="总结">总结</h2>
 <p>本次课回答的问题</p>
 <ul>
 <li><strong>Q</strong>: 如何拯救人类不擅长的并发编程？</li>
