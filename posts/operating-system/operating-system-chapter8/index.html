@@ -1250,7 +1250,7 @@ $$</p>
 <li><b>层次分配策略</b></li>
 </ol>
 <p><b>层次分配策略破坏了产生死锁的第四个条件(循环等待)。</b></p>
-<p>在层次分配策略下，所有的资源被分成了多个层次，一个进程得到某一次的一个资源后，它只能再申请较高一层的资源；当一个进程要释放某层的一个资源时，必须先释放所占用的较高层的资源，按这种策略，是不可能出现循环等待链的，因为那样的话，就出现了已经申请了较高层的资源，反而去申请了较低层的资源，不符合层次分配策略。参考<a href="#%e9%81%bf%e5%85%8d%e6%ad%bb%e9%94%81" title="cont&#39;d" rel="">避免死锁 (cont&rsquo;d)</a></p>
+<p>在层次分配策略下，所有的资源被分成了多个层次，一个进程得到某一次的一个资源后，它只能再申请较高一层的资源；当一个进程要释放某层的一个资源时，必须先释放所占用的较高层的资源，按这种策略，是不可能出现循环等待链的，因为那样的话，就出现了已经申请了较高层的资源，反而去申请了较低层的资源，不符合层次分配策略。参考<a href="#%e9%81%bf%e5%85%8d%e6%ad%bb%e9%94%81-contd" rel="">避免死锁 (cont&rsquo;d)</a></p>
 <h3 id="lock-ordering-应用-linux-kernel-rmapc">Lock Ordering: 应用 (Linux Kernel: rmap.c)</h3>
 <figure><a class="lightgallery" href="/img/Operating%20System/chapter8-5.png" title="/img/Operating System/chapter8-5.png" data-thumbnail="/img/Operating System/chapter8-5.png" data-sub-html="<h2>Linux Kernel：rmap.c中的Lock Ordering</h2>">
         <img

@@ -4,7 +4,288 @@
         <link>https://Jungle430.github.io/tags/linux/</link>
         <description>Linux - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/linux/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/linux/" rel="self" type="application/rss+xml" /><item>
+    <title>操作系统——内存管理</title>
+    <link>https://Jungle430.github.io/posts/operating-system/support3/</link>
+    <pubDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support3/</guid>
+    <description><![CDATA[<h1 id="内存管理">内存管理</h1>
+<h2 id="导读">导读</h2>
+<ul>
+<li>
+<p>物理内存是操作系统需要管理的一个重要资源，让运行在一台机器上的多个应用程序不用“争抢”，都能随时得到想要的任意多的内存，是操作系统的想要达到的理想目标。<b>提高系统物理内存的动态使用效率，通过隔离应用的物理内存空间保证应用间的安全性，把“有限”物理内存变成“无限”虚拟内存，是操作系统的一系列重要的目标，</b>本章展现了操作系统为实现“理想”而要扩展的一系列功能</p>
+<ul>
+<li>通过动态内存分配，<b>提高了应用程序对内存的动态使用效率</b></li>
+<li>通过页表的<b>虚实内存映射机制</b>，简化了编译器对应用的地址空间设置</li>
+<li>通过页表的虚实内存映射机制，加强了应用之间，应用与内核之间的内存隔离，增强了系统安全</li>
+<li>通过页表的虚实内存映射机制，可以实现空分复用（提出，但没有实现）</li>
+</ul>
+</li>
+<li>
+<p>上一章，我们分别实现了多道程序和分时多任务系统，它们的核心机制都是任务切换。由于多道程序和分时多任务系统的设计初衷不同，它们在任务切换的时机和策略也不同。有趣的一点是，任务切换机制对于应用是完全<b>透明(Transparent)</b>的，<b><font color="red">应用可以不对内核实现该机制的策略做任何假定（除非要进行某些针对性优化），甚至可以完全不知道这机制的存在</font></b></p>
+</li>
+<li>
+<p><font color="red"><b>在大多数应用（也就是应用开发者）的视角中，它们会独占一整个 CPU 和特定（连续或不连续）的内存空间（平时写程序还真是这样）</b></font></p>
+</li>
+<li>
+<p>当然，通过上一章的学习，我们知道<u>在现代操作系统中，出于公平性的考虑，我们极少会让独占<code>CPU</code>这种情况发生</u></p>
+</li>
+<li>
+<p>所以应用自认为的独占<code>CPU</code>只是内核想让应用看到的一种<b>幻象(Illusion)</b>，而<code>CPU</code>计算资源被<b>时分复用(TDM, Time-Division Multiplexing)</b>的实质被内核通过恰当的抽象隐藏了起来，<b>对应用不可见</b></p>
+</li>
+<li>
+<p>与之相对，我们目前还没有对内存管理功能进行进一步拓展，仅仅是把程序放到某处的物理内存中</p>
+<ul>
+<li>在内存访问方面，所有的应用都直接通过物理地址访问物理内存，这使得应用开发者需要了解繁琐的物理地址空间布局，访问内存也很不方便</li>
+</ul>
+</li>
+<li>
+<p>在上一章中，出于任务切换的需要，所有的应用都在初始化阶段被加载到内存中并同时驻留下去直到它们全部运行结束。而且，所有的应用都直接通过物理地址访问物理内存。这会带来以下问题：</p>
+<ul>
+<li>
+<p><b>首先，内核提供给应用的内存访问接口不够透明，也不好用</b></p>
+<ul>
+<li>由于应用直接访问物理内存，这需要它在构建的时候就清楚所运行计算机的物理内存空间布局，还需规划自己需要被加载到哪个地址运行</li>
+<li>为了避免冲突可能还需要应用的开发者们对此进行协商，这显然是一件在今天看来不够通用且极端麻烦的事情</li>
+</ul>
+</li>
+<li>
+<p><b>其次，内核并没有对应用的访存行为进行任何保护措施，每个应用都有计算机系统中整个物理内存的读写权力</b></p>
+<ul>
+<li>
+<p>即使应用被限制在 U 特权级下运行，它还是能够造成很多麻烦：<b>比如它可以读写其他应用的数据来窃取信息或者破坏其它应用的正常运行（很危险！）</b></p>
+</li>
+<li>
+<p>甚至它还可以修改内核的代码段来替换掉原本的 <code>trap_handler</code> 函数，来挟持内核执行恶意代码。总之，这造成系统既不安全、也不稳定</p>
+</li>
+</ul>
+</li>
+<li>
+<p><b>再次，目前应用的内存使用空间在其运行前已经限定死了，内核不能灵活地给应用程序提供的运行时动态可用内存空间</b></p>
+<ul>
+<li><b>比如一个应用结束后，这个应用所占的空间就被释放了，但这块空间无法动态地给其它还在运行的应用使用</b></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>因此，为了简化应用开发，防止应用胡作非为，本章将更好地管理物理内存，并提供给应用一个抽象出来的更加透明易用、也更加安全的访存接口，这就是基于分页机制的虚拟内存</p>
+<ul>
+<li>
+<p><b>站在应用程序运行的角度看，就是存在一个从“0”地址开始的非常大的可读/可写/可执行的地址空间(<code>Address Space</code>)</b></p>
+</li>
+<li>
+<p>站在操作系统的角度看，每个应用被局限在分配给它的物理内存空间中运行，<b>无法读写其它应用和操作系统所在的内存空间</b></p>
+</li>
+</ul>
+</li>
+<li>
+<p>实现地址空间的第一步就是实现分页机制，建立好虚拟内存和物理内存的页映射关系。此过程需要硬件支持，硬件细节与具体CPU相关，涉及地址映射机制等，相对比较复杂。总体而言，我们需要思考如下问题</p>
+<ul>
+<li>
+<p>硬件中物理内存的范围是什么？</p>
+</li>
+<li>
+<p>哪些物理内存空间需要建立页映射关系？</p>
+</li>
+<li>
+<p>如何建立页表使能分页机制？</p>
+</li>
+<li>
+<p>如何确保<code>OS</code>能够在分页机制使能前后的不同时间段中都能正常寻址和执行代码？</p>
+</li>
+<li>
+<p>页目录表（一级）的起始地址设置在哪里？</p>
+</li>
+<li>
+<p>二级/三级等页表的起始地址设置在哪里，需要多大空间？</p>
+</li>
+<li>
+<p>如何设置页目录表项/页表项的内容？</p>
+</li>
+<li>
+<p>如果要让每个任务有自己的地址空间，那每个任务是否要有自己的页表？</p>
+</li>
+<li>
+<p>代表应用程序的任务和操作系统需要有各自的页表吗？</p>
+</li>
+<li>
+<p>在有了页表之后，任务和操作系统之间应该如何传递数据？</p>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<ul>
+<li>虚拟内存（<code>Virtual memory</code>）技术概念首次由德国的柏林工业大学（<code>Technische Universität Berlin</code>）博士生 <code>Fritz-Rudolf Güntsch</code> 提出</li>
+<li>在他的博士论文中设想了一台计算机，其内存地址空间大小为$ 10^5 $个字，<b>可精确映射到作为二级存储的磁鼓（大小也为$ 10^5 $个字）上</b>，<b><font color="red">应用程序读写的数据的实际位置由硬件和监控器（即操作系统）来管理和控制，并在物理主存(<code>RAM</code>)和辅存(二级存储)之间按需搬移数据</font></b></li>
+<li><b><font color="red">即主存中只放置应用程序最近访问的数据，而应用程序最近不访问的数据会搬移到辅存中，在应用程序需要时再搬回内存中</font></b></li>
+<li><b>这个搬移过程对应用程序是透明的</b></li>
+<li>虚拟内存的设想在 1959 年变成了现实。英国曼彻斯特大学的<code>Tom Kilburn</code>教授领导的团队于 1959 年展示了他们设计的<code>Atlas</code>计算机和<code>Atlas Supervisor</code>操作系统，开创了在今天仍然普遍使用的操作系统技术：<b>分页（<code>paging</code>）技术和虚拟内存（<code>virtual memory</code>，当时称为 <code>one-level storage system</code>）。他们的核心思想中的根本性创新是区分了“地址（<code>address</code>）”和“内存位置（<code>memory location</code>）”</b>。并因此创造了三项发明：
+<ul>
+<li><b>地址转换：硬件自动将处理器生成的每个地址转换为其当前内存位置</b></li>
+<li><b>按需分页（<code>demand paging</code>）：由硬件地址转换触发缺页中断后，由操作系统将缺失的数据页移动到主存储器中，并形成正确的地址转换映射</b></li>
+<li><b>页面置换算法：检查最无用（<code>least useful</code>）的页，并将其移回二级存储中，这样可以让经常访问的数据驻留在主存中</b></li>
+</ul>
+</li>
+<li>计算机科学家对<code>Atlas Supervisor</code>操作系统给予高度的评价。<code>Brinch Hansen</code> 认为它是操作系统史上最重大的突破。<code>Simon Lavington</code> 认为它是第一个可识别的现代操作系统</li>
+</ul>
+</blockquote>
+<h2 id="内存管理主要做了什么">内存管理主要做了什么？</h2>
+<ul>
+<li>
+<p><b>内存的分配与回收</b> ：对进程所需的内存进行分配和释放，<code>malloc</code> 函数：申请内存，<code>free</code> 函数：释放内存</p>
+</li>
+<li>
+<p><b>地址转换</b> ：将程序中的虚拟地址转换成内存中的物理地址</p>
+</li>
+<li>
+<p><b>内存扩充</b> ：当系统没有足够的内存时，利用虚拟内存技术或自动覆盖技术，从逻辑上扩充内存</p>
+</li>
+<li>
+<p><b>内存映射</b> ： 将一个文件直接映射到进程的进程空间中，<b>这样可以通过内存指针用读写内存的办法直接存取文件内容</b>，速度更快</p>
+</li>
+<li>
+<p><b>内存优化</b> ： 通过调整内存分配策略和回收算法来优化内存使用效率</p>
+</li>
+<li>
+<p><b>内存安全</b> ： 保证进程之间使用内存互不干扰，避免一些恶意程序通过修改内存来破坏系统的安全性</p>
+</li>
+<li>
+<p>…</p>
+</li>
+</ul>
+<h3 id="什么是内存碎片">什么是内存碎片？</h3>
+<ul>
+<li>
+<p>内存碎片是由内存的申请和释放产生的，通常分为下面两种</p>
+<ul>
+<li>
+<p><b>内部内存碎片(<code>Internal Memory Fragmentation</code>，简称为内部碎片)</b></p>
+<ul>
+<li><u>已经分配给进程使用但未被使用的内存</u></li>
+<li>导致内部内存碎片的主要原因是，<u>当采用固定比例比如2的幂次方进行内存分配时，<b>进程所分配的内存可能会比其实际所需要的大</b></u>
+<ul>
+<li>举个例子，一个进程只需要 65 字节的内存，但为其分配了$ 128（2^7） $大小的内存，那 63 字节的内存就成为了内部内存碎片</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><b>外部内存碎片(<code>External Memory Fragmentation</code>，简称为外部碎片)</b></p>
+<ul>
+<li>
+<p>由于未分配的连续内存区域太小，以至于不能满足任意进程所需要的内存分配请求，这些小片段且不连续的内存空间被称为外部碎片</p>
+</li>
+<li>
+<p>也就是说，外部内存碎片指的是那些并为分配给进程但又不能使用的内存。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Operating%20System/support3-1.png" title="/img/Operating System/support3-1.png" data-thumbnail="/img/Operating System/support3-1.png">
+        
+    </a>
+<h3 id="常见的内存管理方式有那些">常见的内存管理方式有那些？</h3>
+<ul>
+<li>内存管理方式可以简单分为下面两种
+<ul>
+<li><b>连续内存管理</b> ： 为一个用户程序分配一个连续的内存空间，<u>内存利用率一般不高</u></li>
+<li><b>非连续内存管理</b> ： 允许一个程序使用的内存分布在离散或者说不相邻的内存中，<u>相对更加灵活一些</u></li>
+</ul>
+</li>
+</ul>
+<h4 id="连续内存管理">连续内存管理</h4>
+<ul>
+<li>
+<p><b>块式管理</b>是早期计算机操作系统的一种连续内存管理方式，存在严重的内存碎片问题</p>
+</li>
+<li>
+<p><b>块式管理会将内存分为几个固定大小的块，<font color="red">每个块中只包含一个进程</font></b>。如果程序运行需要内存的话，操作系统就分配给它一块，<b>如果程序运行只需要很小的空间的话，分配的这块内存很大一部分几乎被浪费了</b></p>
+<ul>
+<li>这些在每个块中未被利用的空间，我们称之为<b>内部内存碎片</b></li>
+</ul>
+</li>
+<li>
+<p>除了内部内存碎片之外，由于两个内存块之间可能还会有外部内存碎片，这些不连续的外部内存碎片由于太小了无法再进行分配</p>
+</li>
+<li>
+<p>在<code>Linux</code>系统中，连续内存管理采用了 <strong>伙伴系统（<code>Buddy System</code>）算法</strong> 来实现，这是一种经典的连续内存分配算法，<b>可以有效解决外部内存碎片的问题</b></p>
+<ul>
+<li>
+<p>伙伴系统的主要思想是将内存按 2 的幂次划分（每一块内存大小都是 2 的幂次比如$ 2^6=64 KB$）。并将相邻的内存块组合成一对伙伴（注意：<strong>必须是相邻的才是伙伴</strong>）</p>
+</li>
+<li>
+<p><b>当进行内存分配时，伙伴系统会尝试找到大小最合适的内存块。</b>如果找到的内存块过大，就将其一分为二，分成两个大小相等的伙伴块。如果还是大的话，就继续切分，直到到达合适的大小为止</p>
+</li>
+<li>
+<p><b>假设两块相邻的内存块都被释放，系统会将这两个内存块合并，</b>进而形成一个更大的内存块，以便后续的内存分配。这样就可以减少内存碎片的问题，提高内存利用率</p>
+</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/Operating%20System/support3-2.png" title="/img/Operating System/support3-2.png" data-thumbnail="/img/Operating System/support3-2.png">
+        
+    </a>
+<ul>
+<li>虽然解决了外部内存碎片的问题，但伙伴系统仍然存在内存利用率不高的问题<b>（内部内存碎片）</b>
+<ul>
+<li>这主要是因为伙伴系统只能分配大小为$2^n$的内存块，因此<b>当需要分配的内存大小不是$2^n$的整数倍时，会浪费一定的内存空间</b></li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/support3-3.png" title="/img/Operating System/support3-3.png" data-thumbnail="/img/Operating System/support3-3.png" data-sub-html="<h2>如果要分配 65 大小的内存快，依然需要分配$2^7=128$大小的内存块</h2>">
+        
+    </a><figcaption class="image-caption">如果要分配 65 大小的内存快，依然需要分配$2^7=128$大小的内存块</figcaption>
+    </figure>
+<ul>
+<li>对于内部内存碎片的问题，<code>Linux</code>采用<b><code>SLAB</code></b>进行解决（非重点）</li>
+</ul>
+<h4 id="非连续内存管理">非连续内存管理</h4>
+<ul>
+<li>
+<p>非连续内存管理存在下面 3 种方式：</p>
+<ul>
+<li>
+<p><b>段式管理</b> ： 以段(—段连续的物理内存)的形式管理/分配物理内存</p>
+<ul>
+<li>应用程序的虚拟地址空间被分为大小不等的段，段是有实际意义的，每个段定义了一组逻辑信息，例如有<b>主程序段<code>MAIN</code>、子程序段<code>X</code>、数据段<code>D</code>及栈段<code>S</code>等</b></li>
+</ul>
+</li>
+<li>
+<p><b>页式管理</b> ： <b>把物理内存分为连续等长的物理页</b>，应用程序的虚拟地址空间划也被分为连续等长的虚拟页，现代操作系统广泛使用的一种内存管理方式</p>
+</li>
+<li>
+<p><b>段页式管理机制</b> ： <b>结合了段式管理和页式管理的一种内存管理机制，把物理内存先分成若干段，每个段又继续分成若干大小相等的页</b></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="虚拟内存">虚拟内存</h4>
+<ul>
+<li><strong>虚拟内存(<code>Virtual Memory</code>)</strong> 是计算机系统内存管理非常重要的一个技术，<u>本质上来说它只是逻辑存在的，是一个假想出来的内存空间，主要作用是作为进程访问主存（物理内存）的桥梁并简化内存管理</u></li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>总结来说，虚拟内存主要提供了下面这些能力</p>
+<ul>
+<li>
+<p><b>隔离进程</b>：<font color="red"><b>物理内存通过虚拟地址空间访问，虚拟地址空间与进程一一对应。</b></font></p>
+<ul>
+<li>每个进程都认为自己拥有了整个物理内存，进程之间彼此隔离，一个进程中的代码无法更改正在由另一进程或操作系统使用的物理内存</li>
+</ul>
+</li>
+<li>
+<p><b>提升物理内存利用率</b> ： 有了虚拟地址空间后，操作系统只需要将进程当前正在使用的部分数据或指令加载入物理内存</p>
+</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Linux x86 Program Start Up or - How the heck do we get to main()?</title>
     <link>https://Jungle430.github.io/posts/operating-system/support2/</link>
     <pubDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support2/</guid>
