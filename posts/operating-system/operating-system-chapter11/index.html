@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter11\/"
-        },"genre": "posts","keywords": "Operating System","wordcount":  6626 ,
+        },"genre": "posts","keywords": "Operating System","wordcount":  6932 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter11\/","datePublished": "2023-05-03T15:41:15+08:00","dateModified": "2023-05-03T15:41:15+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -101,7 +101,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter11 操作系统上的进程</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-05-03">2023-05-03</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6626 字</span>&nbsp;
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-05-03">2023-05-03</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6932 字</span>&nbsp;
                     <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 14 分钟</span>&nbsp;</div>
             </div>
             
@@ -128,6 +128,9 @@
         <li><a href="#状态机管理创建状态机">状态机管理：创建状态机</a></li>
         <li><a href="#fork-bomb">Fork Bomb</a></li>
         <li><a href="#代码解析-fork-bomb">代码解析: Fork Bomb</a></li>
+        <li><a href="#这次你们记住-fork-了">这次你们记住 Fork 了！</a></li>
+        <li><a href="#理解-fork-习题-1">理解 fork: 习题 (1)</a></li>
+        <li><a href="#理解-fork-习题-2">理解 fork: 习题 (2)</a></li>
       </ul>
     </li>
   </ul>
@@ -925,7 +928,7 @@
 </div><ul>
 <li>试试 <code>adb shell</code> (<a href="https://landley.net/toybox/" target="_blank" rel="noopener noreffer">toybox</a>)</li>
 </ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter11-1.png" title="/img/Operating System/chapter11-1.png" data-thumbnail="/img/Operating System/chapter11-1.png" data-sub-html="<h2>创建链接，创建目录，挂载了一些内核的文件系统，将操作系统一些内部状态暴漏给应用程序 -&gt; 变成linux</h2>">
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter11-1.png" title="/img/Operating System/chapter11-1.png" data-thumbnail="/img/Operating System/chapter11-1.png" data-sub-html="<h2>创建链接，创建目录，挂载了一些内核的文件系统，将操作系统一些内部状态暴露给应用程序 -&gt; 变成linux</h2>">
         <img
             class="lazyload"
             src="/svg/loading.min.svg"
@@ -933,7 +936,7 @@
             data-srcset="/img/Operating%20System/chapter11-1.png, /img/Operating%20System/chapter11-1.png 1.5x, /img/Operating%20System/chapter11-1.png 2x"
             data-sizes="auto"
             alt="/img/Operating System/chapter11-1.png" />
-    </a><figcaption class="image-caption"><code>创建链接，创建目录，挂载了一些内核的文件系统，将操作系统一些内部状态暴漏给应用程序 -&gt; 变成linux</code></figcaption>
+    </a><figcaption class="image-caption"><code>创建链接，创建目录，挂载了一些内核的文件系统，将操作系统一些内部状态暴露给应用程序 -&gt; 变成linux</code></figcaption>
     </figure>
 <figure><a class="lightgallery" href="/img/Operating%20System/chapter11-2.png" title="/img/Operating System/chapter11-2.png" data-thumbnail="/img/Operating System/chapter11-2.png" data-sub-html="<h2>命令也可以用</h2>">
         <img
@@ -1105,7 +1108,7 @@
 </span><span class="lnt">9
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">:<span class="o">(){</span>:<span class="p">|</span>:<span class="p">&amp;</span><span class="o">}</span><span class="p">;</span>:   <span class="c1"># 刚才的一行版本</span>
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">:<span class="o">(){</span> :<span class="p">|</span>:<span class="p">&amp;</span><span class="o">}</span><span class="p">;</span>:   <span class="c1"># 刚才的一行版本</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">:<span class="o">()</span> <span class="o">{</span>         <span class="c1"># 格式化一下</span>
 </span></span><span class="line"><span class="cl">  : <span class="p">|</span> : <span class="p">&amp;</span>
@@ -1114,6 +1117,160 @@
 </span></span><span class="line"><span class="cl">fork<span class="o">()</span> <span class="o">{</span>      <span class="c1"># bash: 允许冒号作为标识符……</span>
 </span></span><span class="line"><span class="cl">  fork <span class="p">|</span> fork <span class="p">&amp;</span>
 </span></span><span class="line"><span class="cl"><span class="o">}</span><span class="p">;</span> fork
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>具体过程</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<h3 id="这次你们记住-fork-了">这次你们记住 Fork 了！</h3>
+<ul>
+<li>因为状态机是复制的，因此总能找到 “父子关系”
+<ul>
+<li>因此有了进程树 (<code>pstree</code>)</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">systemd-+-accounts-daemon---2*<span class="o">[{</span>accounts-daemon<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-agetty
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-atd
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-automount---2*<span class="o">[{</span>automount<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-avahi-daemon---avahi-daemon
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-cron
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-dbus-daemon
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-irqbalance---<span class="o">{</span>irqbalance<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">|</span>-lxcfs---7*<span class="o">[{</span>lxcfs<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="理解-fork-习题-1">理解 fork: 习题 (1)</h3>
+<ul>
+<li>试着拿出一张纸，写出以下程序的输出结果
+<ul>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/fork-demo.c" target="_blank" rel="noopener noreffer">fork-demo.c</a></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pid_t</span> <span class="n">pid1</span> <span class="o">=</span> <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pid_t</span> <span class="n">pid2</span> <span class="o">=</span> <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pid_t</span> <span class="n">pid3</span> <span class="o">=</span> <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello World from (%d, %d, %d)</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pid1</span><span class="p">,</span> <span class="n">pid2</span><span class="p">,</span> <span class="n">pid3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>参考原来的<code>OS</code>作业</li>
+</ul>
+<blockquote>
+<p>Including the initial parent process, how many processes are created by the program shown in Figure 3.31?</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* fork a child process */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* fork another child process */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* and fork another */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><div class="mermaid" id="id-4"></div>
+$$
+1+3+3+1=8
+$$</p>
+<h3 id="理解-fork-习题-2">理解 fork: 习题 (2)</h3>
+<p>问以下程序的输出结果</p>
+<ul>
+<li>一个更好的版本: <a href="https://jyywiki.cn/pages/OS/2022/demos/fork-printf.c" target="_blank" rel="noopener noreffer">fork-printf.c</a>
+<ul>
+<li>用状态机的视角再试一次</li>
+<li>试一试：<code>./a.out</code> v.s. <code>./a.out | cat</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/wait.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">wait</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div></div><div class="post-footer" id="post-footer">
@@ -1149,4 +1306,4 @@ if ('serviceWorker' in navigator) {
 
         <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
                 <i class="fas fa-chevron-up fa-fw"></i>
-            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(\"CPU Reset\")\nB(\"fireware\")\nC(\"loader\")\nD(\"OS\")\nE(\"init\")\nF(\"创造整个世界\")\nA--\u003eB--\u003eC--\u003eD--\u003eE--Syscall--\u003eF","id-2":"graph LR\nA(init)\nB(\"init，返回创建进程的进程号\")\nC(\"init，子进程的返回值是0\")\nD(\"syscall\")\nA--fork--\u003eD\nD--\u003eB\nD--\u003eC"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(\"CPU Reset\")\nB(\"fireware\")\nC(\"loader\")\nD(\"OS\")\nE(\"init\")\nF(\"创造整个世界\")\nA--\u003eB--\u003eC--\u003eD--\u003eE--Syscall--\u003eF","id-2":"graph LR\nA(init)\nB(\"init，返回创建进程的进程号\")\nC(\"init，子进程的返回值是0\")\nD(\"syscall\")\nA--fork--\u003eD\nD--\u003eB\nD--\u003eC","id-3":"graph TB\nA(fork)\nB(\"fork|fork\")\nC(\"fork|fork\")\nD(\"fork|fork\")\nA--\u003eB\nB--\u003eC\nB--\u003eD\nE(\"...\")\nF(\"...\")\nG(\"...\")\nH(\"...\")\nD--\u003eE\nD--\u003eF\nC--\u003eG\nC--\u003eH","id-4":"graph LR\nA(main)\nB(pid1)\nC(pid2)\nD(pid3)\nA----B\nA----C\nA----D\nE(pid2)\nF(pid3)\nB----E\nB----F\nG(pid3)\nC----G\nH(pid3)\nE----H"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
