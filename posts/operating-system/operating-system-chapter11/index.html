@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Operating System Chapter11 操作系统上的进程 - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="Operating System Chapter11 操作系统上的进程" />
+<meta property="og:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ Overview 复习 操作系统内核的启动：CPU Reset → Firmware → Boot loader → Kernel _start() → &hellip; 本次课回答的问题 Q1: 操作系统启动后到底做了什么？ Q2: 操作系统如何管理程序 (进程" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-05-03T15:41:15+08:00" />
+<meta property="article:modified_time" content="2023-05-03T15:41:15+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Operating System Chapter11 操作系统上的进程"/>
+<meta name="twitter:description" content="Operating System $Nanjing\ University\rightarrow Yanyan\ Jiang\newline$ Overview 复习 操作系统内核的启动：CPU Reset → Firmware → Boot loader → Kernel _start() → &hellip; 本次课回答的问题 Q1: 操作系统启动后到底做了什么？ Q2: 操作系统如何管理程序 (进程"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" /><link rel="prev" href="https://Jungle430.github.io/posts/operating-system/support3/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Operating System Chapter11 操作系统上的进程",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter11\/"
+        },"genre": "posts","keywords": "Operating System","wordcount":  6626 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/operating-system\/operating-system-chapter11\/","datePublished": "2023-05-03T15:41:15+08:00","dateModified": "2023-05-03T15:41:15+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">Operating System Chapter11 操作系统上的进程</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/operating-system/"><i class="far fa-folder fa-fw"></i>Operating System</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-05-03">2023-05-03</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6626 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 14 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#操作系统启动后到底做了什么">操作系统启动后到底做了什么？</a>
+      <ul>
+        <li><a href="#从系统启动到第一个进程">从系统启动到第一个进程</a></li>
+        <li><a href="#定制最小的-linux">定制最小的 Linux</a></li>
+        <li><a href="#变魔术时间到">变魔术时间到</a></li>
+        <li><a href="#例子noilinux-lite">例子：NOILinux-lite</a></li>
+        <li><a href="#小结应用程序视角的操作系统">小结：应用程序视角的操作系统</a></li>
+      </ul>
+    </li>
+    <li><a href="#fork">fork()</a>
+      <ul>
+        <li><a href="#操作系统状态机的管理者">操作系统：状态机的管理者</a></li>
+        <li><a href="#状态机管理创建状态机">状态机管理：创建状态机</a></li>
+        <li><a href="#fork-bomb">Fork Bomb</a></li>
+        <li><a href="#代码解析-fork-bomb">代码解析: Fork Bomb</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="operating-system">Operating System</h1>
+<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
+<h2 id="overview">Overview</h2>
+<ul>
+<li>
+<p>复习</p>
+<ul>
+<li>操作系统内核的启动：<code>CPU Reset</code> → <code>Firmware</code> → <code>Boot loader</code> → <code>Kernel _start()</code> → &hellip;</li>
+</ul>
+</li>
+<li>
+<p>本次课回答的问题</p>
+<ul>
+<li>
+<p><code>Q1</code>: 操作系统启动后到底做了什么？</p>
+</li>
+<li>
+<p><code>Q2</code>: 操作系统如何管理程序 (进程)？</p>
+</li>
+</ul>
+</li>
+<li>
+<p>本次课主要内容</p>
+<ul>
+<li>
+<p>虚拟化：操作系统上的进程</p>
+</li>
+<li>
+<p>进程管理 <code>API</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="操作系统启动后到底做了什么">操作系统启动后到底做了什么？</h2>
+<h3 id="从系统启动到第一个进程">从系统启动到第一个进程</h3>
+<ul>
+<li>回顾 <a href="https://jyywiki.cn/pages/OS/2022/demos/thread-os.c" target="_blank" rel="noopener noreffer">thread-os.c</a> 的加载过程</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;am.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;klib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;klib-macros.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define MAX_CPU 8
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">union</span> <span class="n">task</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">union</span> <span class="n">task</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span>      <span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Context</span>    <span class="o">*</span><span class="n">context</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">stack</span><span class="p">[</span><span class="mi">8192</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Task</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Task</span> <span class="o">*</span><span class="n">currents</span><span class="p">[</span><span class="n">MAX_CPU</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define current currents[cpu_current()]
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// user-defined tasks
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span>   <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="n">atomic_xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">));</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span> <span class="n">atomic_xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">lock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Thread-%s on CPU #%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">cpu_current</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="n">unlock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="k">volatile</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Task</span> <span class="n">tasks</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;A&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;B&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;C&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;D&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;E&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ------------------
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">Context</span> <span class="o">*</span><span class="nf">on_interrupt</span><span class="p">(</span><span class="n">Event</span> <span class="n">ev</span><span class="p">,</span> <span class="n">Context</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">extern</span> <span class="n">Task</span> <span class="n">tasks</span><span class="p">[];</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">current</span><span class="p">)</span> <span class="n">current</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>          <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">while</span> <span class="p">((</span><span class="n">current</span> <span class="o">-</span> <span class="n">tasks</span><span class="p">)</span> <span class="o">%</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cpu_current</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mp_entry</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">iset</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">yield</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cte_init</span><span class="p">(</span><span class="n">on_interrupt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Task</span> <span class="o">*</span><span class="n">task</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Area</span> <span class="n">stack</span>    <span class="o">=</span> <span class="p">(</span><span class="n">Area</span><span class="p">)</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">task</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">kcontext</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">task</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">next</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">)];</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">mpe_init</span><span class="p">(</span><span class="n">mp_entry</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>操作系统会加载 “第一个程序”
+<ul>
+<li><code>RTFSC</code> (<code>latest Linux Kernel</code>)</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">try_to_run_init_process</span><span class="p">(</span><span class="s">&#34;/sbin/init&#34;</span><span class="p">)</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="n">try_to_run_init_process</span><span class="p">(</span><span class="s">&#34;/etc/init&#34;</span><span class="p">)</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="n">try_to_run_init_process</span><span class="p">(</span><span class="s">&#34;/bin/init&#34;</span><span class="p">)</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="n">try_to_run_init_process</span><span class="p">(</span><span class="s">&#34;/bin/sh&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">  	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">panic</span><span class="p">(</span><span class="s">&#34;No working init found.  Try passing init= option to kernel. &#34;</span>
+</span></span><span class="line"><span class="cl">	      <span class="s">&#34;See Linux Documentation/admin-guide/init.rst for guidance.&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>$\uparrow$如果没有指定启动选项 <code>init=</code>，按照 “默认列表” 尝试一遍，如果都不行，内核就拒绝启动(<code>panic</code>的部分)</li>
+<li><b>从此以后，<code>Linux Kernel</code> 就进入后台，成为 “中断/异常处理程序”</b></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ pstree             
+</span></span><span class="line"><span class="cl">init<span class="o">(</span>Ubuntu-22.─┬─SessionLeader───Relay<span class="o">(</span>55<span class="o">)</span>───sh───sh───sh───node─┬─node─┬─zsh───pstree
+</span></span><span class="line"><span class="cl">                │                                                 │      └─11*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                │                                                 ├─node─┬─clangd.main───9*<span class="o">[{</span>clangd.main<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                │                                                 │      ├─node───6*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                │                                                 │      ├─node───7*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                │                                                 │      └─11*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                │                                                 ├─node───12*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                │                                                 └─10*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                ├─SessionLeader───Relay<span class="o">(</span>486<span class="o">)</span>───node───6*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                ├─SessionLeader───Relay<span class="o">(</span>495<span class="o">)</span>───node───6*<span class="o">[{</span>node<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">                ├─init───<span class="o">{</span>init<span class="o">}</span>
+</span></span><span class="line"><span class="cl">                └─<span class="o">{</span>init<span class="o">(</span>Ubuntu-22.<span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>$\uparrow$上面是<code>wsl</code>的，和真机启动方式不太一样</li>
+<li>找了一台<code>Ubuntu</code>虚拟机，这回一样了</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">systemd─┬─ModemManager───2*<span class="o">[{</span>ModemManager<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─NetworkManager───2*<span class="o">[{</span>NetworkManager<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─ToDesk_Service───13*<span class="o">[{</span>ToDesk_Service<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─VGAuthService
+</span></span><span class="line"><span class="cl">        ├─accounts-daemon───2*<span class="o">[{</span>accounts-daemon<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─acpid
+</span></span><span class="line"><span class="cl">        ├─anacron
+</span></span><span class="line"><span class="cl">        ├─avahi-daemon───avahi-daemon
+</span></span><span class="line"><span class="cl">        ├─bluetoothd
+</span></span><span class="line"><span class="cl">        ├─colord───2*<span class="o">[{</span>colord<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─cron
+</span></span><span class="line"><span class="cl">        ├─cups-browsed───2*<span class="o">[{</span>cups-browsed<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─cupsd
+</span></span><span class="line"><span class="cl">        ├─dbus-daemon
+</span></span><span class="line"><span class="cl">        ├─dockerd─┬─containerd───7*<span class="o">[{</span>containerd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         └─8*<span class="o">[{</span>dockerd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─fwupd───4*<span class="o">[{</span>fwupd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─gdm3─┬─gdm-session-wor─┬─gdm-wayland-ses─┬─gnome-session-b───2*<span class="o">[{</span>gnome-session-b<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │      │                 │                 └─2*<span class="o">[{</span>gdm-wayland-ses<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │      │                 └─2*<span class="o">[{</span>gdm-session-wor<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │      └─2*<span class="o">[{</span>gdm3<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─geoclue───2*<span class="o">[{</span>geoclue<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─gnome-keyring-d───3*<span class="o">[{</span>gnome-keyring-d<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─irqbalance───<span class="o">{</span>irqbalance<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        ├─2*<span class="o">[</span>kerneloops<span class="o">]</span>
+</span></span><span class="line"><span class="cl">        ├─networkd-dispat
+</span></span><span class="line"><span class="cl">        ├─packagekitd───2*<span class="o">[{</span>packagekitd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─polkitd───2*<span class="o">[{</span>polkitd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─power-profiles-───2*<span class="o">[{</span>power-profiles-<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─rsyslogd───3*<span class="o">[{</span>rsyslogd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─rtkit-daemon───2*<span class="o">[{</span>rtkit-daemon<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─snapd───12*<span class="o">[{</span>snapd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─switcheroo-cont───2*<span class="o">[{</span>switcheroo-cont<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─systemd─┬─<span class="o">(</span>sd-pam<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        │         ├─at-spi2-registr───2*<span class="o">[{</span>at-spi2-registr<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─dbus-daemon
+</span></span><span class="line"><span class="cl">        │         ├─dconf-service───2*<span class="o">[{</span>dconf-service<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─evolution-addre───5*<span class="o">[{</span>evolution-addre<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─evolution-calen───8*<span class="o">[{</span>evolution-calen<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─evolution-sourc───3*<span class="o">[{</span>evolution-sourc<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─2*<span class="o">[</span>gjs───4*<span class="o">[{</span>gjs<span class="o">}]]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gnome-session-b─┬─at-spi-bus-laun─┬─dbus-daemon
+</span></span><span class="line"><span class="cl">        │         │                 │                 └─3*<span class="o">[{</span>at-spi-bus-laun<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │                 ├─evolution-alarm───5*<span class="o">[{</span>evolution-alarm<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │                 ├─gsd-disk-utilit───2*<span class="o">[{</span>gsd-disk-utilit<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │                 ├─update-notifier───3*<span class="o">[{</span>update-notifier<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │                 └─3*<span class="o">[{</span>gnome-session-b<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gnome-session-c───<span class="o">{</span>gnome-session-c<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        │         ├─gnome-shell─┬─Xwayland
+</span></span><span class="line"><span class="cl">        │         │             ├─gjs───5*<span class="o">[{</span>gjs<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │             └─9*<span class="o">[{</span>gnome-shell<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gnome-shell-cal───5*<span class="o">[{</span>gnome-shell-cal<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gnome-terminal-─┬─bash───pstree
+</span></span><span class="line"><span class="cl">        │         │                 └─3*<span class="o">[{</span>gnome-terminal-<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─goa-daemon───3*<span class="o">[{</span>goa-daemon<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─goa-identity-se───2*<span class="o">[{</span>goa-identity-se<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-a11y-settin───3*<span class="o">[{</span>gsd-a11y-settin<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-color───3*<span class="o">[{</span>gsd-color<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-datetime───3*<span class="o">[{</span>gsd-datetime<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-housekeepin───3*<span class="o">[{</span>gsd-housekeepin<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-keyboard───3*<span class="o">[{</span>gsd-keyboard<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-media-keys───3*<span class="o">[{</span>gsd-media-keys<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-power───3*<span class="o">[{</span>gsd-power<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-print-notif───2*<span class="o">[{</span>gsd-print-notif<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-printer───2*<span class="o">[{</span>gsd-printer<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-rfkill───2*<span class="o">[{</span>gsd-rfkill<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-screensaver───2*<span class="o">[{</span>gsd-screensaver<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-sharing───3*<span class="o">[{</span>gsd-sharing<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-smartcard───3*<span class="o">[{</span>gsd-smartcard<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-sound───3*<span class="o">[{</span>gsd-sound<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-wacom───3*<span class="o">[{</span>gsd-wacom<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gsd-xsettings───3*<span class="o">[{</span>gsd-xsettings<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfs-afc-volume───3*<span class="o">[{</span>gvfs-afc-volume<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfs-goa-volume───2*<span class="o">[{</span>gvfs-goa-volume<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfs-gphoto2-vo───2*<span class="o">[{</span>gvfs-gphoto2-vo<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfs-mtp-volume───2*<span class="o">[{</span>gvfs-mtp-volume<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfs-udisks2-vo───3*<span class="o">[{</span>gvfs-udisks2-vo<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfsd─┬─gvfsd-trash───2*<span class="o">[{</span>gvfsd-trash<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │       └─2*<span class="o">[{</span>gvfsd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfsd-fuse───5*<span class="o">[{</span>gvfsd-fuse<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─gvfsd-metadata───2*<span class="o">[{</span>gvfsd-metadata<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─ibus-portal───2*<span class="o">[{</span>ibus-portal<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─ibus-x11───2*<span class="o">[{</span>ibus-x11<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─pipewire───<span class="o">{</span>pipewire<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        │         ├─pipewire-media-───<span class="o">{</span>pipewire-media-<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        │         ├─pulseaudio───3*<span class="o">[{</span>pulseaudio<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─sh───ibus-daemon─┬─ibus-engine-lib───3*<span class="o">[{</span>ibus-engine-lib<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │                  ├─ibus-extension-───3*<span class="o">[{</span>ibus-extension-<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │                  ├─ibus-memconf───2*<span class="o">[{</span>ibus-memconf<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         │                  └─2*<span class="o">[{</span>ibus-daemon<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─snap-store───6*<span class="o">[{</span>snap-store<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─snapd-desktop-i───snapd-desktop-i───3*<span class="o">[{</span>snapd-desktop-i<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─tracker-miner-f───5*<span class="o">[{</span>tracker-miner-f<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─vmtoolsd───3*<span class="o">[{</span>vmtoolsd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─xdg-desktop-por───5*<span class="o">[{</span>xdg-desktop-por<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         ├─2*<span class="o">[</span>xdg-desktop-por───3*<span class="o">[{</span>xdg-desktop-por<span class="o">}]]</span>
+</span></span><span class="line"><span class="cl">        │         ├─xdg-document-po─┬─fusermount3
+</span></span><span class="line"><span class="cl">        │         │                 └─5*<span class="o">[{</span>xdg-document-po<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        │         └─xdg-permission-───2*<span class="o">[{</span>xdg-permission-<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─systemd-journal
+</span></span><span class="line"><span class="cl">        ├─systemd-logind
+</span></span><span class="line"><span class="cl">        ├─systemd-oomd
+</span></span><span class="line"><span class="cl">        ├─systemd-resolve
+</span></span><span class="line"><span class="cl">        ├─systemd-timesyn───<span class="o">{</span>systemd-timesyn<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        ├─systemd-udevd
+</span></span><span class="line"><span class="cl">        ├─udisksd───4*<span class="o">[{</span>udisksd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─unattended-upgr───<span class="o">{</span>unattended-upgr<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        ├─upowerd───2*<span class="o">[{</span>upowerd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─vmtoolsd───3*<span class="o">[{</span>vmtoolsd<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        ├─vmware-vmblock-───2*<span class="o">[{</span>vmware-vmblock-<span class="o">}]</span>
+</span></span><span class="line"><span class="cl">        └─wpa_supplicant
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><b>操作系统只创建树根上面的进程，剩下所有的进程都是由树根上的进程创建的</b></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ls /sbin/init -l
+</span></span><span class="line"><span class="cl">lrwxrwxrwx <span class="m">1</span> root root <span class="m">20</span> Sep <span class="m">10</span>  <span class="m">2022</span> /sbin/init -&gt; /lib/systemd/systemd
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ls /etc/init.d -l
+</span></span><span class="line"><span class="cl">total <span class="m">88</span>
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">3740</span> Feb <span class="m">23</span>  <span class="m">2022</span> apparmor
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">2915</span> May <span class="m">10</span>  <span class="m">2022</span> apport
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1175</span> Dec <span class="m">26</span>  <span class="m">2021</span> binfmt-support
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1232</span> Nov <span class="m">23</span>  <span class="m">2021</span> console-setup.sh
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">3062</span> Mar <span class="m">18</span>  <span class="m">2021</span> cron
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">3152</span> Jun <span class="m">28</span>  <span class="m">2021</span> dbus
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1748</span> Feb <span class="m">21</span>  <span class="m">2022</span> hwclock.sh
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">2638</span> Oct <span class="m">30</span>  <span class="m">2021</span> irqbalance
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1479</span> Jul <span class="m">24</span>  <span class="m">2021</span> keyboard-setup.sh
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">2044</span> Jan  <span class="m">8</span>  <span class="m">2021</span> kmod
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1386</span> Feb <span class="m">23</span>  <span class="m">2022</span> plymouth
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root  <span class="m">760</span> Feb <span class="m">23</span>  <span class="m">2022</span> plymouth-log
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root  <span class="m">959</span> Feb <span class="m">25</span>  <span class="m">2022</span> procps
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">4417</span> Oct <span class="m">12</span>  <span class="m">2022</span> rsync
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1222</span> Feb <span class="m">18</span>  <span class="m">2021</span> screen-cleanup
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">6871</span> Mar  <span class="m">8</span>  <span class="m">2022</span> udev
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">2083</span> Sep <span class="m">19</span>  <span class="m">2021</span> ufw
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1391</span> Feb <span class="m">19</span>  <span class="m">2021</span> unattended-upgrades
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">1306</span> Feb <span class="m">21</span>  <span class="m">2022</span> uuidd
+</span></span><span class="line"><span class="cl">-rwxr-xr-x <span class="m">1</span> root root <span class="m">2762</span> Oct <span class="m">19</span>  <span class="m">2021</span> x11-common
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ls /bin/sh -l
+</span></span><span class="line"><span class="cl">lrwxrwxrwx <span class="m">1</span> root root <span class="m">4</span> Feb <span class="m">11</span> 05:35 /bin/sh -&gt; dash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>程序：状态机</p>
+<ul>
+<li>
+<p>C 代码视角：语句</p>
+</li>
+<li>
+<p>汇编/机器代码视角：指令</p>
+</li>
+<li>
+<p>与操作系统交互的方式：<code>syscall</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="定制最小的-linux">定制最小的 Linux</h3>
+<ul>
+<li>
+<p>没有存储设备，只有包含两个文件的 “<code>initramfs</code>”</p>
+</li>
+<li>
+<p><a href="https://box.nju.edu.cn/f/3f67e092e1ba441187d9/?dl=1" target="_blank" rel="noopener noreffer">linux-minimal.zip</a></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ tree .
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">├── bin
+</span></span><span class="line"><span class="cl">│   └── busybox <span class="o">(</span>可以在我们的Linux里直接执行<span class="o">)</span>
+</span></span><span class="line"><span class="cl">└── init
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>加上 <code>vmlinuz</code> (内核镜像) 就可以在 <code>QEMU</code> 里启动了</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>可以直接在文件系统中添加静态链接的二进制文件</p>
+<ul>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/minimal.S" target="_blank" rel="noopener noreffer">minimal.S</a></p>
+</li>
+<li>
+<p><a href="https://jyywiki.cn/pages/OS/2022/demos/logisim.c" target="_blank" rel="noopener noreffer">logisim.c</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>Makefile</code></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="line"><span class="cl"><span class="nf">.PHONY</span><span class="o">:</span> <span class="n">initramfs</span> <span class="n">run</span> <span class="n">clean</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">$(</span><span class="nv">shell</span> <span class="nv">mkdir</span> -<span class="nv">p</span> <span class="nv">build</span><span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">initramfs</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	@cd initramfs <span class="o">&amp;&amp;</span> find . -print0 <span class="p">|</span> cpio --null -ov --format<span class="o">=</span>newc <span class="p">|</span> gzip -9 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	  &gt; ../build/initramfs.cpio.gz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">run</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	@qemu-system-x86_64 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	  -nographic <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	  -serial mon:stdio <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	  -m <span class="m">128</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	  -kernel vmlinuz <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	  -initrd build/initramfs.cpio.gz <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>	  -append <span class="s2">&#34;console=ttyS0 quiet acpi=off&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">clean</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">	@rm -rf build
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>安装<code>qemu</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt-get install qemu
+</span></span><span class="line"><span class="cl">sudo apt-get install qemu-system
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>运行</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">make run
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>进入<code>qemu</code> $\rightarrow$ <code>Ctrl a; c</code></p>
+</li>
+<li>
+<p>查看状态</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sh: can<span class="s1">&#39;t access tty; job control turned off
+</span></span></span><span class="line"><span class="cl"><span class="s1">/ # QEMU 6.2.0 monitor - type &#39;</span>help<span class="err">&#39;</span> <span class="k">for</span> more information
+</span></span><span class="line"><span class="cl"><span class="o">(</span>qemu<span class="o">)</span> info registers 
+</span></span><span class="line"><span class="cl"><span class="nv">RAX</span><span class="o">=</span>0001a94000000000 <span class="nv">RBX</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="nv">RCX</span><span class="o">=</span><span class="m">0000000000000001</span> <span class="nv">RDX</span><span class="o">=</span>0000000000000ca2
+</span></span><span class="line"><span class="cl"><span class="nv">RSI</span><span class="o">=</span><span class="m">0000000000000087</span> <span class="nv">RDI</span><span class="o">=</span><span class="m">0000000000000087</span> <span class="nv">RBP</span><span class="o">=</span>ffffffffa3c03e28 <span class="nv">RSP</span><span class="o">=</span>ffffffffa3c03e08
+</span></span><span class="line"><span class="cl"><span class="nv">R8</span> <span class="o">=</span>ffff88a5c781df80 <span class="nv">R9</span> <span class="o">=</span><span class="m">0000000000000200</span> <span class="nv">R10</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="nv">R11</span><span class="o">=</span><span class="m">0000000000000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">R12</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="nv">R13</span><span class="o">=</span>ffffffffa3c13780 <span class="nv">R14</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="nv">R15</span><span class="o">=</span><span class="m">0000000000000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">RIP</span><span class="o">=</span>ffffffffa30d564e <span class="nv">RFL</span><span class="o">=</span><span class="m">00000246</span> <span class="o">[</span>---Z-P-<span class="o">]</span> <span class="nv">CPL</span><span class="o">=</span><span class="m">0</span> <span class="nv">II</span><span class="o">=</span><span class="m">0</span> <span class="nv">A20</span><span class="o">=</span><span class="m">1</span> <span class="nv">SMM</span><span class="o">=</span><span class="m">0</span> <span class="nv">HLT</span><span class="o">=</span><span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="nv">ES</span> <span class="o">=</span><span class="m">0000</span> <span class="m">0000000000000000</span> <span class="m">00000000</span> <span class="m">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CS</span> <span class="o">=</span><span class="m">0010</span> <span class="m">0000000000000000</span> ffffffff 00af9b00 <span class="nv">DPL</span><span class="o">=</span><span class="m">0</span> CS64 <span class="o">[</span>-RA<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">SS</span> <span class="o">=</span><span class="m">0018</span> <span class="m">0000000000000000</span> ffffffff 00cf9300 <span class="nv">DPL</span><span class="o">=</span><span class="m">0</span> DS   <span class="o">[</span>-WA<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">DS</span> <span class="o">=</span><span class="m">0000</span> <span class="m">0000000000000000</span> <span class="m">00000000</span> <span class="m">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">FS</span> <span class="o">=</span><span class="m">0000</span> <span class="m">0000000000000000</span> <span class="m">00000000</span> <span class="m">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GS</span> <span class="o">=</span><span class="m">0000</span> ffff88a5c7800000 <span class="m">00000000</span> <span class="m">00000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">LDT</span><span class="o">=</span><span class="m">0000</span> <span class="m">0000000000000000</span> <span class="m">00000000</span> <span class="m">00008200</span> <span class="nv">DPL</span><span class="o">=</span><span class="m">0</span> LDT
+</span></span><span class="line"><span class="cl"><span class="nv">TR</span> <span class="o">=</span><span class="m">0040</span> fffffe0000003000 0000206f <span class="m">00008900</span> <span class="nv">DPL</span><span class="o">=</span><span class="m">0</span> TSS64-avl
+</span></span><span class="line"><span class="cl"><span class="nv">GDT</span><span class="o">=</span>     fffffe0000001000 0000007f
+</span></span><span class="line"><span class="cl"><span class="nv">IDT</span><span class="o">=</span>     fffffe0000000000 00000fff
+</span></span><span class="line"><span class="cl"><span class="nv">CR0</span><span class="o">=</span><span class="m">80050033</span> <span class="nv">CR2</span><span class="o">=</span>0000000000e22c18 <span class="nv">CR3</span><span class="o">=</span>0000000003ca8000 <span class="nv">CR4</span><span class="o">=</span>000006f0
+</span></span><span class="line"><span class="cl"><span class="nv">DR0</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="nv">DR1</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="nv">DR2</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="nv">DR3</span><span class="o">=</span><span class="m">0000000000000000</span> 
+</span></span><span class="line"><span class="cl"><span class="nv">DR6</span><span class="o">=</span>00000000ffff0ff0 <span class="nv">DR7</span><span class="o">=</span><span class="m">0000000000000400</span>
+</span></span><span class="line"><span class="cl"><span class="nv">EFER</span><span class="o">=</span>0000000000000d01
+</span></span><span class="line"><span class="cl"><span class="nv">FCW</span><span class="o">=</span>037f <span class="nv">FSW</span><span class="o">=</span><span class="m">0000</span> <span class="o">[</span><span class="nv">ST</span><span class="o">=</span>0<span class="o">]</span> <span class="nv">FTW</span><span class="o">=</span><span class="m">00</span> <span class="nv">MXCSR</span><span class="o">=</span>00001f80
+</span></span><span class="line"><span class="cl"><span class="nv">FPR0</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span> <span class="nv">FPR1</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">FPR2</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span> <span class="nv">FPR3</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">FPR4</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span> <span class="nv">FPR5</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">FPR6</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span> <span class="nv">FPR7</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM00</span><span class="o">=</span>0000000000e20450 <span class="m">0000000000000400</span> <span class="nv">XMM01</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM02</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span> <span class="nv">XMM03</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM04</span><span class="o">=</span>ffffffffffffffff ffffffff00000000 <span class="nv">XMM05</span><span class="o">=</span><span class="m">0000000048094038</span> <span class="m">3028201810080072</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM06</span><span class="o">=</span>0000000000ff0000 000000ff00000000 <span class="nv">XMM07</span><span class="o">=</span><span class="m">0000000400000004</span> <span class="m">0000000400000004</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM08</span><span class="o">=</span>00000000008d93e0 00000000008d93e0 <span class="nv">XMM09</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM10</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span> <span class="nv">XMM11</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM12</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span> <span class="nv">XMM13</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span>
+</span></span><span class="line"><span class="cl"><span class="nv">XMM14</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span> <span class="nv">XMM15</span><span class="o">=</span><span class="m">0000000000000000</span> <span class="m">0000000000000000</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="变魔术时间到">变魔术时间到</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">c1</span><span class="o">=</span><span class="s2">&#34;arch ash base64 cat chattr chgrp chmod chown conspy cp cpio cttyhack date dd df dmesg dnsdomainname dumpkmap echo ed egrep false fatattr fdflush fgrep fsync getopt grep gunzip gzip hostname hush ionice iostat ipcalc kbd_mode kill link linux32 linux64 ln login ls lsattr lzop makemime mkdir mknod mktemp more mount mountpoint mpstat mt mv netstat nice nuke pidof ping ping6 pipe_progress printenv ps pwd reformime resume rev rm rmdir rpm run-parts scriptreplay sed setarch setpriv setserial sh sleep stat stty su sync tar touch true umount uname usleep vi watch zcat&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">c2</span><span class="o">=</span><span class="s2">&#34;[ [[ awk basename bc beep blkdiscard bunzip2 bzcat bzip2 cal chpst chrt chvt cksum clear cmp comm crontab cryptpw cut dc deallocvt diff dirname dos2unix dpkg dpkg-deb du dumpleases eject env envdir envuidgid expand expr factor fallocate fgconsole find flock fold free ftpget ftpput fuser groups hd head hexdump hexedit hostid id install ipcrm ipcs killall last less logger logname lpq lpr lsof lspci lsscsi lsusb lzcat lzma man md5sum mesg microcom mkfifo mkpasswd nc nl nmeter nohup nproc nsenter nslookup od openvt passwd paste patch pgrep pkill pmap printf pscan&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">c3</span><span class="o">=</span><span class="s2">&#34;pstree pwdx readlink realpath renice reset resize rpm2cpio runsv runsvdir rx script seq setfattr setkeycodes setsid setuidgid sha1sum sha256sum sha3sum sha512sum showkey shred shuf smemcap softlimit sort split ssl_client strings sum sv svc svok tac tail taskset tcpsvd tee telnet test tftp time timeout top tr traceroute traceroute6 truncate ts tty ttysize udhcpc6 udpsvd unexpand uniq unix2dos unlink unlzma unshare unxz unzip uptime users uudecode uuencode vlock volname w wall wc wget which who whoami whois xargs xxd xz xzcat yes&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> cmd in <span class="nv">$c1</span> <span class="nv">$c2</span> <span class="nv">$c3</span><span class="p">;</span> <span class="k">do</span>
+</span></span><span class="line"><span class="cl">  /bin/busybox ln -s /bin/busybox /bin/<span class="nv">$cmd</span>
+</span></span><span class="line"><span class="cl"><span class="k">done</span>
+</span></span><span class="line"><span class="cl">mkdir -p /proc <span class="o">&amp;&amp;</span> mount -t proc  none /proc
+</span></span><span class="line"><span class="cl">mkdir -p /sys  <span class="o">&amp;&amp;</span> mount -t sysfs none /sys
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">PS1</span><span class="o">=</span><span class="s1">&#39;(linux) &#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>试试 <code>adb shell</code> (<a href="https://landley.net/toybox/" target="_blank" rel="noopener noreffer">toybox</a>)</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter11-1.png" title="/img/Operating System/chapter11-1.png" data-thumbnail="/img/Operating System/chapter11-1.png" data-sub-html="<h2>创建链接，创建目录，挂载了一些内核的文件系统，将操作系统一些内部状态暴漏给应用程序 -&gt; 变成linux</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter11-1.png"
+            data-srcset="/img/Operating%20System/chapter11-1.png, /img/Operating%20System/chapter11-1.png 1.5x, /img/Operating%20System/chapter11-1.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter11-1.png" />
+    </a><figcaption class="image-caption"><code>创建链接，创建目录，挂载了一些内核的文件系统，将操作系统一些内部状态暴漏给应用程序 -&gt; 变成linux</code></figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter11-2.png" title="/img/Operating System/chapter11-2.png" data-thumbnail="/img/Operating System/chapter11-2.png" data-sub-html="<h2>命令也可以用</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Operating%20System/chapter11-2.png"
+            data-srcset="/img/Operating%20System/chapter11-2.png, /img/Operating%20System/chapter11-2.png 1.5x, /img/Operating%20System/chapter11-2.png 2x"
+            data-sizes="auto"
+            alt="/img/Operating System/chapter11-2.png" />
+    </a><figcaption class="image-caption"><code>命令也可以用</code></figcaption>
+    </figure>
+<ul>
+<li>过程</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<h3 id="例子noilinux-lite">例子：NOILinux-lite</h3>
+<ul>
+<li>
+<p>2021 年，<code>CCF</code> 以迅雷不及掩耳盗铃之势发布了 <code>NOILinux 2.0</code></p>
+<ul>
+<li>
+<p><code>Ubuntu 20.04 Desktop (x86-64 only)</code></p>
+</li>
+<li>
+<p>真就不管那些 <code>32-bit</code> 的老爷机和老爷系统的死活了？</p>
+</li>
+</ul>
+</li>
+<li>
+<p>和刚才的 “最小” 系统但本质一样</p>
+<ul>
+<li>
+<p>有更多设备 (磁盘、网卡等)</p>
+</li>
+<li>
+<p><code>initramfs</code> 里挂载了磁盘</p>
+</li>
+<li>
+<p>磁盘里安装了最少的编译运行环境 (<code>g++, ...</code>) 和一个<code>Web</code>服务</p>
+</li>
+<li>
+<p><code>switch_root</code> (<code>pivot_root</code> 系统调用) 完成 “启动”</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="小结应用程序视角的操作系统">小结：应用程序视角的操作系统</h3>
+<ul>
+<li><code>Linux</code> 操作系统启动流程
+<ul>
+<li><code>CPU Reset</code> → <code>Firmware</code> → <code>Loader</code> →<code> Kernel _start()</code> → 第一个程序 <code>/bin/init</code> → 程序 (状态机) 执行 + 系统调用</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>操作系统为 (所有) 程序提供 <code>API</code></p>
+<ul>
+<li>
+<p>进程 (状态机) 管理</p>
+<ul>
+<li><b><font color="red"><code>fork, execve, exit</code> - 状态机的创建/改变/删除 ← 今天的主题</font></b></li>
+</ul>
+</li>
+<li>
+<p>存储（内存） (地址空间) 管理</p>
+<ul>
+<li><code>mmap</code> - 虚拟地址空间管理</li>
+</ul>
+</li>
+<li>
+<p>文件 (数据对象) 管理</p>
+<ul>
+<li><code>open, close, read, write</code> - 文件访问管理
+<ul>
+<li><code>mkdir, link, unlink</code> - 目录管理</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="fork">fork()</h2>
+<h3 id="操作系统状态机的管理者">操作系统：状态机的管理者</h3>
+<ul>
+<li>
+<p>C 程序 = 状态机</p>
+<ul>
+<li>
+<p>初始状态：<code>main(argc, argv)</code></p>
+</li>
+<li>
+<p>程序可以直接在处理器上执行</p>
+</li>
+</ul>
+</li>
+<li>
+<p><font color="red">虚拟化：操作系统在物理内存中保存多个状态机（管理好多个状态机，每一次都可以选择一个状态机执行一步）</font></p>
+</li>
+<li>
+<p>通过<b>虚拟内存</b>实现<b>每次 “拿出来一个执行”</b></p>
+</li>
+<li>
+<p><b>中断后进入操作系统代码，“换一个执行”</b></p>
+</li>
+</ul>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>
+<p><font color="red"><b>除了fork的返回值<code>pid</code>，剩下的都一样，并且互相独立（第一个进程的指针访问不了第二个进程的内存）</b></font></p>
+</li>
+<li>
+<p><b>之后进入并发状态，执行那个由操作系统决定</b></p>
+</li>
+</ul>
+<h3 id="状态机管理创建状态机">状态机管理：创建状态机</h3>
+<blockquote>
+<p>如果要创建状态机，我们应该提供什么样的<code> API</code>？</p>
+</blockquote>
+<ul>
+<li>
+<p><code>UNIX</code> 的答案: <code>fork</code></p>
+<ul>
+<li>做一份状态机完整的复制 (内存、寄存器现场)</li>
+</ul>
+</li>
+<li>
+<p><code>int fork();</code></p>
+<ul>
+<li>
+<p>立即复制状态机 (完整的内存)</p>
+</li>
+<li>
+<p>新创建进程返回 0</p>
+</li>
+<li>
+<p>执行 fork 的进程返回子进程的进程号</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="fork-bomb">Fork Bomb</h3>
+<ul>
+<li>
+<p>模拟状态机需要资源</p>
+<ul>
+<li>
+<p>只要不停地创建进程，系统还是会挂掉的</p>
+</li>
+<li>
+<p><code>Don't try it (or try it in docker)</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="代码解析-fork-bomb">代码解析: Fork Bomb</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">:<span class="o">(){</span>:<span class="p">|</span>:<span class="p">&amp;</span><span class="o">}</span><span class="p">;</span>:   <span class="c1"># 刚才的一行版本</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">:<span class="o">()</span> <span class="o">{</span>         <span class="c1"># 格式化一下</span>
+</span></span><span class="line"><span class="cl">  : <span class="p">|</span> : <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span><span class="p">;</span> :
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">fork<span class="o">()</span> <span class="o">{</span>      <span class="c1"># bash: 允许冒号作为标识符……</span>
+</span></span><span class="line"><span class="cl">  fork <span class="p">|</span> fork <span class="p">&amp;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span><span class="p">;</span> fork
+</span></span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/operating-system/">Operating System</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-05-03</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程" data-hashtags="Operating System"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-hashtag="Operating System"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/" data-title="Operating System Chapter11 操作系统上的进程"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/operating-system/support3/" class="prev" rel="prev" title="操作系统——内存管理"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(\"CPU Reset\")\nB(\"fireware\")\nC(\"loader\")\nD(\"OS\")\nE(\"init\")\nF(\"创造整个世界\")\nA--\u003eB--\u003eC--\u003eD--\u003eE--Syscall--\u003eF","id-2":"graph LR\nA(init)\nB(\"init，返回创建进程的进程号\")\nC(\"init，子进程的返回值是0\")\nD(\"syscall\")\nA--fork--\u003eD\nD--\u003eB\nD--\u003eC"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>
