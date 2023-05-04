@@ -938,7 +938,7 @@
 <p>新创建进程返回 0</p>
 </li>
 <li>
-<p>执行 fork 的进程返回子进程的进程号</p>
+<p>执行 <code>fork</code> 的进程返回子进程的进程号</p>
 </li>
 </ul>
 </li>
@@ -1136,7 +1136,1012 @@ $$</p>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div>]]></description>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./fork-printf        
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">                                                                                                                                                              
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./fork-printf <span class="p">|</span> wc -l
+</span></span><span class="line"><span class="cl"><span class="m">8</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>why ?</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./fork-printf <span class="p">|</span> cat
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>???</code></li>
+</ul>
+<blockquote>
+<ul>
+<li>计算机系统里没有魔法。机器永远是对的。</li>
+</ul>
+</blockquote>
+<ul>
+<li>先看一个例子<code>demo.c</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ gcc demo.c -o demo   
+</span></span><span class="line"><span class="cl">                                                                                                                                                              
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./demo
+</span></span><span class="line"><span class="cl">zsh: segmentation fault  ./demo
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>没有输出<code>Hello</code></p>
+</li>
+<li>
+<p>改一下</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ gcc demo.c -o demo
+</span></span><span class="line"><span class="cl">                                                                                                                                                              
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./demo            
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">zsh: segmentation fault  ./demo
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>联系之前的学校的实验</li>
+</ul>
+<p><code>main.c</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/wait.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;a&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">fflush</span><span class="p">(</span><span class="n">stdout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pid_t</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Error!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">execl</span><span class="p">(</span><span class="s">&#34;child&#34;</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">wait</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;c&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>child.c</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;b&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<ul>
+<li>缓冲区问题</li>
+</ul>
+<p>在调用<code>fork()</code>前先<code>printf(&quot;a&quot;)</code>，在<code>fork()</code>后的子进程里<code>printf(&quot;b&quot;)</code>，这样结果按理来说是打印<code>&quot;ab&quot;</code>，但是运行出来反而是<code>&quot;ba&quot;</code>。 这个问题的原因是<code>c</code>语言的输出缓冲，<b>在调用<code>printf()</code>函数时，数据先被存放在缓冲区中，待缓冲区满了或者遇到了换行符<code>&quot;\n&quot;</code>时才会输出到屏幕上。</b><code>printf(&quot;a&quot;)</code>语句输出字符<code>&quot;a&quot;</code>，但由于缓冲区未满，字符<code>&quot;a&quot;</code>并没有被立即输出。<b>当程序调用<code>fork()</code>函数创建子进程时，子进程也继承了父进程的缓冲区，这时缓冲区中的数据包括字符&quot;a&quot;也被复制到了子进程的缓冲区中。</b>接着，在子进程中，<code>printf(&quot;b&quot;)</code>语句输出字符<code>&quot;b&quot;</code>，由于子进程的缓冲区已经满了，因此字符<code>&quot;a&quot;</code>和字符<code>&quot;b&quot;</code>都被输出到屏幕上，此时的输出结果是<code>&quot;ba&quot;</code>。</p>
+<p>解决的方法是在<code>printf(&quot;a&quot;)</code>语句后加上<code>fflush(stdout)</code>语句，强制将缓冲区的数据输出到屏幕上，这样输出的结果就是<code>&quot;ab&quot;</code>。</p>
+</blockquote>
+<div class="mermaid" id="id-5"></div>
+<ul>
+<li>
+<p><code>linebuffer</code>：遇到<code>\n</code>通过系统调用将缓冲区的内容输出</p>
+</li>
+<li>
+<p><code>fullbuffer</code>：到达设定容量后才会将缓冲区的内容输出</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>下面来分析</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./fork-printf <span class="p">|</span> cat
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="mermaid" id="id-6"></div>
+<figure><a class="lightgallery" href="/img/Operating%20System/chapter11-3.jpg" title="/img/Operating System/chapter11-3.jpg" data-thumbnail="/img/Operating System/chapter11-3.jpg" data-sub-html="<h2>树状图</h2>">
+        
+    </a><figcaption class="image-caption"><code>树状图</code></figcaption>
+    </figure>
+<ul>
+<li>另一种解决方案：<code>setbuf(stdout,NULL);</code>强行将标准输出流设置为不缓冲</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/wait.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">setbuf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fork</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">wait</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./fork-printf <span class="p">|</span> cat             
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">Hello
+</span></span><span class="line"><span class="cl">                                                                                                                                                   
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./fork-printf <span class="p">|</span> wc -l
+</span></span><span class="line"><span class="cl"><span class="m">6</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="理解-fork-习题-3">理解 fork: 习题 (3)</h3>
+<ul>
+<li>
+<p>多线程程序的某个线程执行 <code>fork()</code>，应该发生什么？</p>
+<ul>
+<li>这是个很有趣的问题：创造 <code>fork</code> 时创始人并没有考虑线程</li>
+</ul>
+</li>
+<li>
+<p>我们可能作出以下设计：</p>
+<ul>
+<li>
+<p>仅有执行 <code>fork</code> 的线程被复制，其他线程 “卡死”</p>
+</li>
+<li>
+<p>仅有执行 <code>fork</code> 的线程被复制，其他线程退出</p>
+</li>
+<li>
+<p>所有的线程都被复制并继续执行</p>
+<ul>
+<li>这三种设计分别会带来什么问题？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="execve">execve()</h2>
+<h3 id="状态机管理替换状态机">状态机管理：替换状态机</h3>
+<blockquote>
+<p>光有 <code>fork</code> 还不够，怎么 “执行别的程序”？</p>
+</blockquote>
+<ul>
+<li><code>UNIX</code> 的答案: <code>execve</code>
+<ul>
+<li><b>将当前运行的状态机<font color="red">重置</font>成成另一个程序的初始状态</b></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">execve</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">filename</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="k">const</span> <span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="k">const</span> <span class="n">envp</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>执行名为 <code>filename</code> 的程序</p>
+</li>
+<li>
+<p>允许对新状态机设置参数 <code>argv</code> (v) 和环境变量 <code>envp</code> (e)，数组形式，以空指针<code>NULL</code>来结尾</p>
+<ul>
+<li>刚好对应了 <code>main()</code> 的参数！</li>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/execve-demo.c" target="_blank" rel="noopener noreffer">execve-demo.c</a></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">char</span> <span class="o">*</span> <span class="k">const</span> <span class="n">argv</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;/bin/bash&#34;</span><span class="p">,</span> <span class="s">&#34;-c&#34;</span><span class="p">,</span> <span class="s">&#34;env&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">char</span> <span class="o">*</span> <span class="k">const</span> <span class="n">envp</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;HELLO=WORLD&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="n">execve</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">argv</span><span class="p">,</span> <span class="n">envp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Hello, World!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./execve-demo
+</span></span><span class="line"><span class="cl"><span class="nv">PWD</span><span class="o">=</span>/mnt/d/work <span class="k">for</span> vscode/chapter11
+</span></span><span class="line"><span class="cl"><span class="nv">HELLO</span><span class="o">=</span>WORLD
+</span></span><span class="line"><span class="cl"><span class="nv">SHLVL</span><span class="o">=</span><span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="nv">_</span><span class="o">=</span>/usr/bin/env
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>printf</code>没有被执行（原来的状态机没有了）</li>
+<li>参照</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ bash -c ls
+</span></span><span class="line"><span class="cl">demo  demo.c  execve-demo  execve-demo.c  fork-demo  fork-demo.c  fork-printf  fork-printf.c  l.zip  linux-minimal  thread-os.c
+</span></span><span class="line"><span class="cl">                                                                                                                                                   
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ bash -c env
+</span></span><span class="line"><span class="cl"><span class="nv">SHELL</span><span class="o">=</span>/usr/bin/zsh
+</span></span><span class="line"><span class="cl"><span class="nv">USER_ZDOTDIR</span><span class="o">=</span>/home/jungle
+</span></span><span class="line"><span class="cl"><span class="nv">COLORTERM</span><span class="o">=</span>truecolor
+</span></span><span class="line"><span class="cl"><span class="nv">WSL2_GUI_APPS_ENABLED</span><span class="o">=</span><span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="nv">TERM_PROGRAM_VERSION</span><span class="o">=</span>1.78.0
+</span></span><span class="line"><span class="cl"><span class="nv">WSL_DISTRO_NAME</span><span class="o">=</span>Ubuntu-22.04
+</span></span><span class="line"><span class="cl"><span class="nv">LESS_TERMCAP_se</span><span class="o">=</span>
+</span></span><span class="line"><span class="cl"><span class="nv">LESS_TERMCAP_so</span><span class="o">=</span>
+</span></span><span class="line"><span class="cl"><span class="nv">NAME</span><span class="o">=</span>LAPTOP-A7S3TAA4
+</span></span><span class="line"><span class="cl"><span class="nv">PWD</span><span class="o">=</span>/mnt/d/work <span class="k">for</span> vscode/chapter11
+</span></span><span class="line"><span class="cl"><span class="nv">LOGNAME</span><span class="o">=</span>jungle
+</span></span><span class="line"><span class="cl"><span class="nv">_</span><span class="o">=</span>/usr/bin/env
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="环境变量">环境变量</h3>
+<p>“应用程序执行的环境”</p>
+<ul>
+<li>
+<p>使用<code>env</code>命令查看</p>
+<ul>
+<li><code>PATH</code>: 可执行文件搜索路径</li>
+<li><code>PWD</code>: 当前路径</li>
+<li><code>HOME</code>: home 目录</li>
+<li><code>DISPLAY</code>: 图形输出</li>
+<li><code>PS1</code>: shell 的提示符</li>
+</ul>
+</li>
+<li>
+<dl>
+<dt><code>export</code></dt>
+<dd>
+<p>告诉 shell 在创建子进程时设置环境变量</p>
+</dd>
+</dl>
+<ul>
+<li>小技巧：<code>export ARCH=x86_64-qemu</code> 或 <code>export ARCH=native</code></li>
+<li>上学期的 <code>AM_HOME</code> 终于破案了（这是南大的，邮专上学期还在写数据结构）</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ <span class="nb">export</span> <span class="nv">HELLO</span><span class="o">=</span>WORLD
+</span></span><span class="line"><span class="cl">                                                                                                                                                   
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ env <span class="p">|</span> grep HELLO
+</span></span><span class="line"><span class="cl"><span class="nv">HELLO</span><span class="o">=</span>WORLD
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter11-4.png" title="/img/Operating System/chapter11-4.png" data-thumbnail="/img/Operating System/chapter11-4.png" data-sub-html="<h2>第一个调用总是execve()</h2>">
+        
+    </a><figcaption class="image-caption"><code>第一个调用总是execve()</code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>参考<a href="https://jungle430.github.io/posts/operating-system/support2/#%E4%BB%8E%E6%88%91%E4%BB%AC%E7%BB%88%E7%AB%AF%E6%95%B2%E5%9B%9E%E8%BD%A6%E5%88%B0%E7%A8%8B%E5%BA%8F%E8%A2%AB%E8%BD%BD%E5%85%A5%E6%89%A7%E8%A1%8C%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88" target="_blank" rel="noopener noreffer">《Linux x86 Program Start Up or - How the heck do we get to main()?》</a></p>
+</li>
+<li>
+<p>执行<code>execve(bash)</code>的调用</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7f373bcba000, 8192, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">munmap<span class="o">(</span>0x7f373bc74000, 46367<span class="o">)</span>           <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;/bin/bash&#34;</span>, <span class="o">[</span><span class="s2">&#34;/bin/bash&#34;</span>, <span class="s2">&#34;-c&#34;</span>, <span class="s2">&#34;env&#34;</span><span class="o">]</span>, 0x7fffa5c787c0 /* <span class="m">1</span> var */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x559dfe4ca000
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>0x3001 /* ARCH_??? */, 0x7ffe8ef996f0<span class="o">)</span> <span class="o">=</span> -1 EINVAL <span class="o">(</span>Invalid argument<span class="o">)</span>
+</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 8192, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7f476f6f0000
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>最终输出的<code>syscall</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;PWD=/mnt/d/work for vscode/chapt&#34;</span>..., <span class="nv">37PWD</span><span class="o">=</span>/mnt/d/work <span class="k">for</span> vscode/chapter11
+</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">37</span>
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;HELLO=WORLD\n&#34;</span>, <span class="nv">12HELLO</span><span class="o">=</span>WORLD
+</span></span><span class="line"><span class="cl"><span class="o">)</span>           <span class="o">=</span> <span class="m">12</span>
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;SHLVL=0\n&#34;</span>, <span class="nv">8SHLVL</span><span class="o">=</span><span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="o">)</span>                <span class="o">=</span> <span class="m">8</span>
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;_=/usr/bin/env\n&#34;</span>, <span class="nv">15_</span><span class="o">=</span>/usr/bin/env
+</span></span><span class="line"><span class="cl"><span class="o">)</span>        <span class="o">=</span> <span class="m">15</span>
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="环境变量path">环境变量：<code>PATH</code></h3>
+<ul>
+<li>可执行文件搜索路径
+<ul>
+<li>还记得 <code>gcc</code> 的 <code>strace</code> 结果吗？</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">[</span>pid 28369<span class="o">]</span> execve<span class="o">(</span><span class="s2">&#34;/usr/local/sbin/as&#34;</span>, <span class="o">[</span><span class="s2">&#34;as&#34;</span>, <span class="s2">&#34;--64&#34;</span>, ...
+</span></span><span class="line"><span class="cl"><span class="o">[</span>pid 28369<span class="o">]</span> execve<span class="o">(</span><span class="s2">&#34;/usr/local/bin/as&#34;</span>, <span class="o">[</span><span class="s2">&#34;as&#34;</span>, <span class="s2">&#34;--64&#34;</span>, ...
+</span></span><span class="line"><span class="cl"><span class="o">[</span>pid 28369<span class="o">]</span> execve<span class="o">(</span><span class="s2">&#34;/usr/sbin/as&#34;</span>, <span class="o">[</span><span class="s2">&#34;as&#34;</span>, <span class="s2">&#34;--64&#34;</span>, ...
+</span></span><span class="line"><span class="cl"><span class="o">[</span>pid 28369<span class="o">]</span> execve<span class="o">(</span><span class="s2">&#34;/usr/bin/as&#34;</span>, <span class="o">[</span><span class="s2">&#34;as&#34;</span>, <span class="s2">&#34;--64&#34;</span>, ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>这个搜索顺序恰好是 <code>PATH</code> 里指定的顺序</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ <span class="nv">PATH</span><span class="o">=</span><span class="s2">&#34;&#34;</span> /usr/bin/gcc a.c
+</span></span><span class="line"><span class="cl">gcc: error trying to <span class="nb">exec</span> <span class="s1">&#39;as&#39;</span>: execvp: No such file or directory
+</span></span><span class="line"><span class="cl">$ <span class="nv">PATH</span><span class="o">=</span><span class="s2">&#34;/usr/bin/&#34;</span> gcc a.c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><b><font color="red"><code>fork</code>是状态机的复制，<code>execve</code>是状态机的重置，环境变量就是重置状态机的参数</font></b></li>
+</ul>
+<h2 id="_exit">_exit()</h2>
+<h3 id="状态机管理终止状态机">状态机管理：终止状态机</h3>
+<blockquote>
+<p>有了<code> fork</code>, <code>execve</code> 我们就能自由执行任何程序了，最后只缺一个销毁状态机的函数！</p>
+</blockquote>
+<ul>
+<li><code>UNIX</code> 的答案: <code>_exit</code>
+<ul>
+<li>立即摧毁状态机</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">_exit</span><span class="p">(</span><span class="kt">int</span> <span class="n">status</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>销毁当前状态机，并允许有一个返回值</p>
+</li>
+<li>
+<p>子进程终止会通知父进程 (后续课程解释)</p>
+</li>
+<li>
+<p>这个简单……</p>
+<ul>
+<li>但问题来了：多线程程序怎么办？</li>
+</ul>
+</li>
+</ul>
+<h3 id="结束程序执行的三种方法">结束程序执行的三种方法</h3>
+<ul>
+<li>
+<p><code>exit</code> 的几种写法 (它们是<font color="red">不同</font>)</p>
+<ul>
+<li>
+<p><code>exit(0)</code> $\rightarrow$ <code>stdlib.h</code> 中声明的<code>libc</code>函数</p>
+<ul>
+<li>会调用 <code>atexit</code></li>
+</ul>
+</li>
+<li>
+<p><code>_exit(0)</code> - glibc 的 syscall wrapper</p>
+<ul>
+<li>执行 “<code>exit_group</code>” 系统调用终止整个进程 (所有线程)
+<ul>
+<li>细心的同学已经在 strace 中发现了</li>
+</ul>
+</li>
+<li>不会调用 <code>atexit</code></li>
+</ul>
+</li>
+<li>
+<p><code>syscall(SYS_exit, 0)</code></p>
+<ul>
+<li>执行 “<code>exit</code>” 系统调用终止当前线程</li>
+<li>不会调用 <code>atexit</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="不妨试一试">不妨试一试</h3>
+<ul>
+<li>结束当前进程执行的四种方式
+<ul>
+<li><code>return</code>, <code>exit</code>, <code>_exit</code>, <code>syscall</code></li>
+<li><a href="https://jyywiki.cn/pages/OS/2022/demos/exit-demo.c" target="_blank" rel="noopener noreffer">exit-demo.c</a>
+<ul>
+<li>用<code>strace</code>观察程序的执行</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Goodbye, Cruel OS World!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">atexit</span><span class="p">(</span><span class="n">func</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">return</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#34;exit&#34;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#34;_exit&#34;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#34;__exit&#34;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">syscall</span><span class="p">(</span><span class="n">SYS_exit</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./exit-demo
+</span></span><span class="line"><span class="cl">Goodbye, Cruel OS World!
+</span></span><span class="line"><span class="cl">                                                                                                                                                              
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./exit-demo <span class="nb">exit</span>
+</span></span><span class="line"><span class="cl">Goodbye, Cruel OS World!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>使用<code>static</code>编译，省去链接过程，便于查看<code>strace</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ strace ./exit-demo
+</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./exit-demo&#34;</span>, <span class="o">[</span><span class="s2">&#34;./exit-demo&#34;</span><span class="o">]</span>, 0x7ffdaa2866a0 /* <span class="m">42</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>0x3001 /* ARCH_??? */, 0x7ffd390434e0<span class="o">)</span> <span class="o">=</span> -1 EINVAL <span class="o">(</span>Invalid argument<span class="o">)</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x9b6000
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x9b6dc0<span class="o">)</span>                           <span class="o">=</span> 0x9b6dc0
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x9b63c0<span class="o">)</span>       <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x9b6690<span class="o">)</span>               <span class="o">=</span> <span class="m">8090</span>
+</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x9b66a0, 24<span class="o">)</span>           <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x9b6d60, 0x20, 0, 0x53053053<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">uname<span class="o">({</span><span class="nv">sysname</span><span class="o">=</span><span class="s2">&#34;Linux&#34;</span>, <span class="nv">nodename</span><span class="o">=</span><span class="s2">&#34;LAPTOP-A7S3TAA4&#34;</span>, ...<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">readlink<span class="o">(</span><span class="s2">&#34;/proc/self/exe&#34;</span>, <span class="s2">&#34;/mnt/d/work for vscode/chapter11&#34;</span>..., 4096<span class="o">)</span> <span class="o">=</span> <span class="m">42</span>
+</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\xfc\x1b\x9a\x3b\x0c\x0d\xf6\x62&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x9d7dc0<span class="o">)</span>                           <span class="o">=</span> 0x9d7dc0
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x9d8000<span class="o">)</span>                           <span class="o">=</span> 0x9d8000
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x4c1000, 16384, PROT_READ<span class="o">)</span>    <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>1, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFCHR<span class="p">|</span>0620, <span class="nv">st_rdev</span><span class="o">=</span>makedev<span class="o">(</span>0x88, 0x7<span class="o">)</span>, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;Goodbye, Cruel OS World!\n&#34;</span>, 25Goodbye, Cruel OS World!
+</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">25</span>
+</span></span><span class="line"><span class="cl">exit_group<span class="o">(</span>1<span class="o">)</span>                           <span class="o">=</span> ?
+</span></span><span class="line"><span class="cl">+++ exited with <span class="m">1</span> +++
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ strace ./exit-demo _exit
+</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./exit-demo&#34;</span>, <span class="o">[</span><span class="s2">&#34;./exit-demo&#34;</span>, <span class="s2">&#34;_exit&#34;</span><span class="o">]</span>, 0x7ffdcbeb2108 /* <span class="m">42</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>0x3001 /* ARCH_??? */, 0x7fff2fcb4900<span class="o">)</span> <span class="o">=</span> -1 EINVAL <span class="o">(</span>Invalid argument<span class="o">)</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x1346000
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x1346dc0<span class="o">)</span>                          <span class="o">=</span> 0x1346dc0
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x13463c0<span class="o">)</span>      <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x1346690<span class="o">)</span>              <span class="o">=</span> <span class="m">8124</span>
+</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x13466a0, 24<span class="o">)</span>          <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x1346d60, 0x20, 0, 0x53053053<span class="o">)</span>    <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">uname<span class="o">({</span><span class="nv">sysname</span><span class="o">=</span><span class="s2">&#34;Linux&#34;</span>, <span class="nv">nodename</span><span class="o">=</span><span class="s2">&#34;LAPTOP-A7S3TAA4&#34;</span>, ...<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">readlink<span class="o">(</span><span class="s2">&#34;/proc/self/exe&#34;</span>, <span class="s2">&#34;/mnt/d/work for vscode/chapter11&#34;</span>..., 4096<span class="o">)</span> <span class="o">=</span> <span class="m">42</span>
+</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\x1f\x9d\x12\x25\xe1\x65\xc9\x7b&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x1367dc0<span class="o">)</span>                          <span class="o">=</span> 0x1367dc0
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x1368000<span class="o">)</span>                          <span class="o">=</span> 0x1368000
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x4c1000, 16384, PROT_READ<span class="o">)</span>    <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">exit_group<span class="o">(</span>0<span class="o">)</span>                           <span class="o">=</span> ?
+</span></span><span class="line"><span class="cl">+++ exited with <span class="m">0</span> +++
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ./exit-demo _exit   
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>没有<code>Goodbye</code>了</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter11<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ strace ./exit-demo __exit
+</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./exit-demo&#34;</span>, <span class="o">[</span><span class="s2">&#34;./exit-demo&#34;</span>, <span class="s2">&#34;__exit&#34;</span><span class="o">]</span>, 0x7ffeca752f48 /* <span class="m">42</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>0x3001 /* ARCH_??? */, 0x7ffe37ad6940<span class="o">)</span> <span class="o">=</span> -1 EINVAL <span class="o">(</span>Invalid argument<span class="o">)</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x15df000
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x15dfdc0<span class="o">)</span>                          <span class="o">=</span> 0x15dfdc0
+</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x15df3c0<span class="o">)</span>      <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x15df690<span class="o">)</span>              <span class="o">=</span> <span class="m">8256</span>
+</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x15df6a0, 24<span class="o">)</span>          <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x15dfd60, 0x20, 0, 0x53053053<span class="o">)</span>    <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">uname<span class="o">({</span><span class="nv">sysname</span><span class="o">=</span><span class="s2">&#34;Linux&#34;</span>, <span class="nv">nodename</span><span class="o">=</span><span class="s2">&#34;LAPTOP-A7S3TAA4&#34;</span>, ...<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">readlink<span class="o">(</span><span class="s2">&#34;/proc/self/exe&#34;</span>, <span class="s2">&#34;/mnt/d/work for vscode/chapter11&#34;</span>..., 4096<span class="o">)</span> <span class="o">=</span> <span class="m">42</span>
+</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\xed\x64\xb4\xdb\x93\xb2\x77\xd0&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span>
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x1600dc0<span class="o">)</span>                          <span class="o">=</span> 0x1600dc0
+</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x1601000<span class="o">)</span>                          <span class="o">=</span> 0x1601000
+</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x4c1000, 16384, PROT_READ<span class="o">)</span>    <span class="o">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">exit<span class="o">(</span>0<span class="o">)</span>                                 <span class="o">=</span> ?
+</span></span><span class="line"><span class="cl">+++ exited with <span class="m">0</span> +++
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>exit</code>只关闭一个线程，<code>_exit</code> $\rightarrow^{Syscall}$ <code>exit_group</code>会把整个所有的线程都删掉</li>
+<li><code>linux</code>默认用的<code>_exit</code>，安全</li>
+</ul>
+<h2 id="总结">总结</h2>
+<ul>
+<li>
+<p>本次课回答的问题</p>
+<ul>
+<li>
+<p><strong>Q1</strong>: 操作系统启动后到底做了什么？</p>
+</li>
+<li>
+<p><strong>Q2</strong>: 操作系统如何管理程序 (进程)？</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Take-away messages</p>
+<ul>
+<li>
+<p>对 “操作系统” 的完整理解</p>
+</li>
+<li>
+<p>CPU Reset → Firmware → Loader → Kernel <code>_start()</code> → 执行第一个程序 <code>/bin/init</code> → 中断/异常处理程序</p>
+</li>
+<li>
+<p>一个最小的 Linux 系统的例子</p>
+</li>
+</ul>
+</li>
+<li>
+<p>进程管理 API</p>
+<ul>
+<li>fork, execve, exit: 状态机的复制、重置、销毁</li>
+<li>理论上就可以实现 “各种功能” 了！</li>
+</ul>
+</li>
+</ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
+]]></description>
 </item>
 <item>
     <title>操作系统——内存管理</title>
@@ -2892,6 +3897,7 @@ $$</p>
 </ul>
 </li>
 </ul>
+<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>
 <item>
