@@ -4,9 +4,549 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 05 May 2023 13:35:01 &#43;0800</lastBuildDate>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 14 May 2023 21:51:22 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>Go Module与测试</title>
+    <link>https://Jungle430.github.io/posts/go/module_and_test/</link>
+    <pubDate>Sun, 14 May 2023 21:51:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/module_and_test/</guid>
+    <description><![CDATA[<h1 id="go-module">Go Module</h1>
+<h2 id="简介">简介</h2>
+<ul>
+<li>通过<code>go.mod</code>文件管理依赖包版本</li>
+<li>通过<code>go get/go mod</code>指令工具管理依赖包</li>
+<li>终极目标
+<ul>
+<li>定义版本规则和管理项目依赖关系</li>
+</ul>
+</li>
+</ul>
+<h2 id="依赖管理三要素">依赖管理三要素</h2>
+<ol>
+<li>配置文件，描述依赖 <code>go.mod</code>(类比<code>cargo</code>)</li>
+<li>中心仓库管理依赖库 <code>Proxy</code>(类比<a href="https://crates.io" target="_blank" rel="noopener noreffer"><strong>crates.io</strong></a>)</li>
+<li>本地工具 <code>go get/mod</code></li>
+</ol>
+<h2 id="配置gomod">配置go.mod</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">module</span> <span class="nx">example</span><span class="o">/</span><span class="nx">project</span><span class="o">/</span><span class="nx">app</span> <span class="nx">依赖管理的基本单元</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="nx">有的时候大项目里面的小项目就得则么写</span><span class="err">，</span><span class="nx">类比c</span><span class="o">++</span><span class="nx">中src下面的CMakeList</span><span class="p">.</span><span class="nx">txt</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="nx">或者一个大包</span><span class="err">，</span><span class="nx">但是别人只想用里面的小包</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">go</span> <span class="mf">1.16</span> <span class="nx">原生库</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">require</span><span class="p">(</span> <span class="nx">单元依赖</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">example</span><span class="o">/</span><span class="nx">lib1</span> <span class="nx">v1</span><span class="mf">.0.2</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">example</span><span class="o">/</span><span class="nx">lib2</span> <span class="nx">v1</span><span class="mf">.0.0</span> <span class="c1">//indirect
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">example</span><span class="o">/</span><span class="nx">lib6</span> <span class="nx">v3</span><span class="mf">.2.0</span><span class="o">+</span><span class="nx">incompatible</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="依赖配置-version">依赖配置-version</h2>
+<ul>
+<li>
+<p>语义化版本</p>
+<ul>
+<li><code>${MAJOR}.${MINOR}.${PATCH}</code>
+<ul>
+<li>MAJOR:大版本，不同的MAJOR间认为是代码不兼容的</li>
+<li>MINOR:新增函数或功能，需要保持MAJOR下的兼容性</li>
+<li>PATCH:部分<code>bug</code>的修复</li>
+</ul>
+</li>
+<li>V1.3.0</li>
+<li>V2.3.0</li>
+</ul>
+</li>
+<li>
+<p>基于<code>commit</code>伪版本</p>
+<ul>
+<li>vX.0.0-yyyymmddhhmmss-abcdefg1234
+<ul>
+<li>版本前缀-时间戳-哈希码前缀</li>
+<li>v0.0.0-20220401081311-c38fb921298</li>
+<li>v1.0.0-20201130134442-10cb123792679c6c</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>indirtect</strong></p>
+</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>A -&gt; B:直接依赖</p>
+</li>
+<li>
+<p>A -&gt; C:间接依赖，使用<strong>indirtect</strong>进行标识</p>
+</li>
+<li>
+<p><strong>incompatible</strong></p>
+<ul>
+<li>对于没有<code>go.mod</code>文件而且主版本2+的依赖，会+incompatible</li>
+</ul>
+</li>
+<li>
+<p>最低兼容算法</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/Module_and_test.jpg" title="/img/Go/Module_and_test.jpg" data-thumbnail="/img/Go/Module_and_test.jpg" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h2 id="依赖分发-回源">依赖分发-回源</h2>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>
+<p>问题</p>
+<ul>
+<li>无法保证构建的稳定性和依赖的可用性</li>
+<li>增加第三方压力</li>
+</ul>
+</li>
+<li>
+<p>解决方法<strong>Proxy</strong></p>
+</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<ul>
+<li>(类比<a href="https://crates.io" target="_blank" rel="noopener noreffer"><strong>crates.io</strong></a>)，自己构建大仓库保证稳定性</li>
+</ul>
+<p><code>GOPROXY=&quot;https://proxy1.cn, https://proxy2.cn, direct&quot;</code>(direct表示源站)</p>
+<div class="mermaid" id="id-4"></div>
+<ul>
+<li>我的配置:<code>GOPROXY=https://proxy.golang.com.cn,direct</code></li>
+</ul>
+<h2 id="工具-go-get">工具-go get</h2>
+<ul>
+<li>go get example.org/pkg
+<ul>
+<li>@update 默认</li>
+<li>@none 删除依赖</li>
+<li>@v1.1.2 <code>tag</code>版本，语义版本</li>
+<li>@23dfdd5 特定的<code>commit</code></li>
+<li>@master 分支最新的<code>commit</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="工具-go-mod">工具-go mod</h2>
+<ul>
+<li>go mod
+<ul>
+<li>init 初始化，创建go.mod文件</li>
+<li>download 下载模块到本地缓存</li>
+<li>tidy 增加需要的依赖，删除不需要的依赖</li>
+</ul>
+</li>
+</ul>
+<h2 id="总结">总结</h2>
+<ol>
+<li>go.mod</li>
+<li>Proxy</li>
+<li>go get/mod</li>
+</ol>
+<h2 id="测试">测试</h2>
+<h2 id="单元测试流程">单元测试流程</h2>
+<div class="mermaid" id="id-5"></div>
+<ul>
+<li>测试单元
+<ul>
+<li>函数</li>
+<li>模块</li>
+<li>&hellip;</li>
+</ul>
+</li>
+</ul>
+<h2 id="规则">规则</h2>
+<ul>
+<li>
+<p>所有测试文件以<code>_test.go</code>结尾(如<code>publish_post_test.go</code>)</p>
+</li>
+<li>
+<p><code>func TestXxx(*testing.T)</code>(如<code>func TestPublishPost(t *testing.T)</code>)</p>
+</li>
+<li>
+<p>初始化逻辑放到TestMain中</p>
+</li>
+<li>
+<p>例子<code>publish_post.go</code></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">HelloTom</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="s">&#34;Jerry&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>publish_post_test.go</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;testing&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">TestMain</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">output</span> <span class="o">:=</span> <span class="nf">HelloTom</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">exceptOutput</span> <span class="o">:=</span> <span class="s">&#34;Tom&#34;</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">output</span> <span class="o">!=</span> <span class="nx">exceptOutput</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">t</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;Expect %v, but output %v&#34;</span><span class="p">,</span> <span class="nx">exceptOutput</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>(校对部分建议使用开源的assert包)</p>
+<ul>
+<li>执行效果</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ go <span class="nb">test</span>
+</span></span><span class="line"><span class="cl">--- FAIL: TestMain <span class="o">(</span>0.00s<span class="o">)</span>
+</span></span><span class="line"><span class="cl">    publish_post_test.go:9: Expect Tom, but output Jerry
+</span></span><span class="line"><span class="cl">FAIL
+</span></span><span class="line"><span class="cl"><span class="nb">exit</span> status <span class="m">1</span>
+</span></span><span class="line"><span class="cl">FAIL    learing_go      0.261s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="覆盖率">覆盖率</h2>
+<ul>
+<li>
+<p>覆盖度，越高代码的正确性越好</p>
+</li>
+<li>
+<p>示例</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">HelloTom</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="s">&#34;Jerry&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">JudgePassLine</span><span class="p">(</span><span class="nx">score</span> <span class="kt">int16</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">score</span> <span class="o">&gt;=</span> <span class="mi">60</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">     <span class="s">&#34;testing&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">TestMain</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">output</span> <span class="o">:=</span> <span class="nf">HelloTom</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">exceptOutput</span> <span class="o">:=</span> <span class="s">&#34;Jerry&#34;</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">output</span> <span class="o">!=</span> <span class="nx">exceptOutput</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">t</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;Expect %v, but output %v&#34;</span><span class="p">,</span> <span class="nx">exceptOutput</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">isPass</span> <span class="o">:=</span> <span class="nf">JudgePassLine</span><span class="p">(</span><span class="mi">70</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">isPass</span> <span class="o">!=</span> <span class="kc">true</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">t</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;Expect %v, but output %v&#34;</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">isPass</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ go <span class="nb">test</span> --cover
+</span></span><span class="line"><span class="cl">PASS
+</span></span><span class="line"><span class="cl">coverage: 27.3% of statements
+</span></span><span class="line"><span class="cl">ok      learing_go      0.260s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>如果加上修改</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">JudgePassLine</span><span class="p">(</span><span class="nx">score</span> <span class="kt">int16</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="nx">score</span> <span class="o">&gt;=</span> <span class="mi">60</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ go <span class="nb">test</span> .<span class="se">\p</span>ublish_post_test.go .<span class="se">\p</span>ublish_post.go --cover
+</span></span><span class="line"><span class="cl">ok      command-line-arguments  0.254s  coverage: 100.0% of statements
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="单元测试-依赖">单元测试-依赖</h2>
+<div class="mermaid" id="id-6"></div>
+<div class="mermaid" id="id-7"></div>
+<ul>
+<li>
+<p>幂等：每次运行结果一样（应该涉及了并发的问题，暴力测试）</p>
+</li>
+<li>
+<p>稳定：任何时间，任何函数进行独立运行</p>
+</li>
+<li>
+<p>Mock</p>
+<ul>
+<li><a href="https://github.com/bouk/monkey" target="_blank" rel="noopener noreffer">monkey</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="基准测试">基准测试</h2>
+<ul>
+<li>
+<p>优化分析代码</p>
+</li>
+<li>
+<p>内置</p>
+</li>
+<li>
+<p>示例</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">     <span class="s">&#34;math/rand&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">ServerIndex</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="kt">int</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">InitServerIndex</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">ServerIndex</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">100</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">Select</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="nx">ServerIndex</span><span class="p">[</span><span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">     <span class="s">&#34;testing&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">BenchmarkSelect</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nf">InitServerIndex</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">b</span><span class="p">.</span><span class="nf">ResetTimer</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">Select</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">BenchmarkSelectParallel</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nf">InitServerIndex</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">b</span><span class="p">.</span><span class="nf">ResetTimer</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">b</span><span class="p">.</span><span class="nf">RunParallel</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">PB</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Next</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="nf">Select</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">Running tool: D:<span class="se">\G</span>o<span class="se">\b</span>in<span class="se">\g</span>o.exe <span class="nb">test</span> -benchmem -run<span class="o">=</span>^$ -bench ^BenchmarkSelect$ learing_go
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">goos: windows
+</span></span><span class="line"><span class="cl">goarch: amd64
+</span></span><span class="line"><span class="cl">pkg: learing_go
+</span></span><span class="line"><span class="cl">cpu: AMD Ryzen <span class="m">9</span> 5900HX with Radeon Graphics        
+</span></span><span class="line"><span class="cl">BenchmarkSelect-16     <span class="m">175706265</span>          6.498 ns/op        <span class="m">0</span> B/op        <span class="m">0</span> allocs/op
+</span></span><span class="line"><span class="cl">PASS
+</span></span><span class="line"><span class="cl">ok   learing_go 2.053s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">Running tool: D:<span class="se">\G</span>o<span class="se">\b</span>in<span class="se">\g</span>o.exe <span class="nb">test</span> -benchmem -run<span class="o">=</span>^$ -bench ^BenchmarkSelectParallel$ learing_go
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">goos: windows
+</span></span><span class="line"><span class="cl">goarch: amd64
+</span></span><span class="line"><span class="cl">pkg: learing_go
+</span></span><span class="line"><span class="cl">cpu: AMD Ryzen <span class="m">9</span> 5900HX with Radeon Graphics        
+</span></span><span class="line"><span class="cl">BenchmarkSelectParallel-16     <span class="m">30002550</span>         38.89 ns/op        <span class="m">0</span> B/op        <span class="m">0</span> allocs/op
+</span></span><span class="line"><span class="cl">PASS
+</span></span><span class="line"><span class="cl">ok   learing_go 1.409s
+</span></span></code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item>
+<item>
     <title>Operating System Chapter12 进程的地址空间</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter12/</link>
     <pubDate>Fri, 05 May 2023 13:35:01 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter12/</guid>
@@ -14470,1296 +15010,6 @@ $$</p>
 </ul>
 </li>
 <li>Fast/slow paths: 性能优化的重要途径</li>
-</ul>
-<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
-]]></description>
-</item>
-<item>
-    <title>Operating System Chapter4 理解并发程序执行</title>
-    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</link>
-    <pubDate>Mon, 06 Mar 2023 19:34:15 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</guid>
-    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
-<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
-<div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><div class="typeit"><div id="id-1" class=""></div></div>
-<p>晚上看的，<b>Peterson</b>算法好™️的👨，证明等过两天有时间给看了</div>
-        </div>
-    </div>
-<h2 id="理解并发程序执行">理解并发程序执行</h2>
-<h3 id="复习">复习</h3>
-<ul>
-<li>一般程序执行</li>
-</ul>
-<div class="mermaid" id="id-2"></div>
-<p>线程的栈帧会用一个<code>list</code>来存放</p>
-<ul>
-<li>多线程</li>
-</ul>
-<div class="mermaid" id="id-3"></div>
-<p>T1,T2随机来回转换执行</p>
-<ul>
-<li><b>并发程序 = 多个执行流、共享内存的<u>状态机</u></b></li>
-</ul>
-<h3 id="画状态机理解并发程序">画状态机理解并发程序</h3>
-<blockquote>
-<p><u>互斥：保证两个线程不能同时执行一段代码</u></p>
-</blockquote>
-<ul>
-<li>插入 “神秘代码”，使得 <a href="https://jyywiki.cn/pages/OS/2022/demos/sum.c" target="_blank" rel="noopener noreffer">sum.c</a> (或者任意其他代码) 能够正常工作</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="c1">// 神秘代码
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="c1">// 神秘代码
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>可以通过<code>__sync_synchronize();</code>来保证原子操作</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">__sync_synchronize</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 或 int t = x;
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__sync_synchronize</span><span class="p">();</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p><code>__sync_synchronize();</code>是GCC内置函数的一种，用于在编写多线程程序时确保在内存操作之前和之后的指令都不会被重排。</p>
-<p>具体来说，这个函数是一个内存栅栏，用于告诉编译器不要把本条指令前面和后面的内存操作顺序交换，也就是防止编译器进行指令重排，保证在这个函数之前和之后的内存操作按照代码中的顺序执行。</p>
-<p>这个函数在实现多线程锁、原子操作等场景中经常被使用，以确保线程间的同步和一致性。</p>
-</blockquote>
-<h4 id="失败的尝试">失败的尝试</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">locked</span> <span class="o">!=</span> <span class="n">UNLOCK</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="c1">// critical section
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>原因</p>
-<ul>
-<li>看到的状态到真正做下一件事之间的状态是否被人改了？（<u>看到的东西仅仅只是一个历史，离做还有几个周期，而做是根据这个<b>“历史”</b>的状态来决定的</u>）$\Longrightarrow$ 和人眼看着东西对比，人眼是<b>一直在看的</b>，而CPU并行执行程序的时候，看这个指令执行完了之后可能CPU会去执行另一个线程的几条指令，这种情况下相当于这个人<b>看完后闭上眼睛等了几秒</b>，然后根据几秒前所看的东西来判断自己要干啥，<b>可是这个东西在前几秒可能已经让另一个线程的某些指令改过了</b></li>
-<li><b>处理器默认不保证 load + store 的原子性（单操作可以保证）</b></li>
-</ul>
-</li>
-<li>
-<p>一种失败的情况</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define N 100000000
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define LOCK 1
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define UNLOCK 0
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>  <span class="c1">//T2在这个时候也执行到了locked != UNLOCK的判断，而lock = LOCK,T2也进去了，没锁住！
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">locked</span> <span class="o">!=</span> <span class="n">UNLOCK</span><span class="p">)</span> <span class="p">{</span> <span class="c1">//&lt;--------------------------------
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>                                        <span class="c1">//  |
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>                                                    <span class="c1">//  |  
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">locked</span> <span class="o">=</span> <span class="n">LOCK</span><span class="p">;</span>       <span class="c1">//T1执行到了这里 此时locked = UNLOCK-|
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="n">locked</span> <span class="o">=</span> <span class="n">UNLOCK</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;sum = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="正确性不明的奇怪尝试-peterson-算法">正确性不明的奇怪尝试 (<code>Peterson</code> 算法)</h4>
-<ul>
-<li>
-<p>A 和 B 争用厕所的包厢</p>
-</li>
-<li>
-<p>想进入包厢之前，A/B 都要先举起自己的旗子</p>
-<ul>
-<li>A 确认旗子举好以后，往厕所门上贴上 <b>“B 正在使用”</b> 的标签</li>
-<li>B 确认旗子举好以后，往厕所门上贴上 <b>“A 正在使用”</b> 的标签</li>
-</ul>
-</li>
-<li>
-<p>然后<b>如果对方的旗子举起来，且门上的名字不是自己</b>，等待</p>
-<ul>
-<li>否则可以进入包厢</li>
-</ul>
-</li>
-<li>
-<p><b>出包厢后，放下自己的旗子</b></p>
-</li>
-<li>
-<p>示例代码：<a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-simple.c" target="_blank" rel="noopener noreffer">peterson-simple.c</a></p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define A 1
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define B 2
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="n">atomic_int</span> <span class="n">nested</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">atomic_long</span> <span class="n">count</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">long</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="k">volatile</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TA</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=1 */</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=2 */</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">B</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=3 */</span> <span class="k">while</span> <span class="p">(</span><span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">turn</span> <span class="o">==</span> <span class="n">B</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">      <span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=4 */</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TB</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=1 */</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=2 */</span> <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=3 */</span> <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">turn</span> <span class="o">==</span> <span class="n">A</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">      <span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/* PC=4 */</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TA</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TB</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p>有关上面的原子操作：</p>
-<p>这段代码定义了两个原子变量 <code>nested</code> 和 <code>count</code>，并实现了一个临界区 <code>critical_section()</code>。</p>
-<p>在 <code>critical_section()</code> 中，首先通过调用 <code>atomic_fetch_add(&amp;count, 1)</code> 将 <code>count</code> 原子变量的值加 1 并返回当前的值，保存在 <code>cnt</code> 中。</p>
-<p>然后通过调用 <code>atomic_fetch_add(&amp;nested, 1)</code> 将 <code>nested</code> 原子变量的值加 1，同时检查原子变量 <code>nested</code> 是否为 0。由于 <code>nested</code> 的初始值为 0，因此这里可以通过 <code>assert</code> 断言来验证。</p>
-<p>最后通过调用 <code>atomic_fetch_add(&amp;nested, -1)</code> 将 <code>nested</code> 原子变量的值减 1。</p>
-<p>整个 <code>critical_section()</code> 实现了一个简单的临界区，其中 <code>nested</code> 原子变量用于保证临界区同时只能被一个线程访问，而 <code>count</code> 原子变量用于记录临界区的进入次数。</p>
-<hr>
-<p>在给 <code>nested</code> 这个 <code>atomic_int</code> 对象赋初值为 0 的情况下，断言 <code>assert(atomic_fetch_add(&amp;nested, 1) == 0)</code> 是可以通过的。</p>
-<p>这是因为 <code>atomic_fetch_add()</code> 函数是原子的，它会将 <code>nested</code> 的值加 1，并返回增加前的值。在这个代码中，<code>nested</code> 初始值为 0，然后通过 <code>atomic_fetch_add(&amp;nested, 1)</code> 将其增加为 1，并<font color="red">返回增加前的值</font> 0。因此，断言 <code>assert(atomic_fetch_add(&amp;nested, 1) == 0)</code> 会成功通过，因为 <code>atomic_fetch_add()</code> 返回的值与断言中的比较值相等。</p>
-<p>需要注意的是，<code>atomic_int</code> 是 C++ 标准库提供的原子类型，用于在多线程环境下进行原子操作，确保线程安全性。在多线程环境下，原子操作是不会被中断的，因此可以保证 <code>atomic_int</code> 类型对象的操作不会发生竞态条件等问题。但仍然需要谨慎使用，并根据具体情况考虑是否需要使用其他同步机制，如互斥锁、条件变量等。</p>
-</blockquote>
-<h4 id="petersons-protocol-verified-">Peterson&rsquo;s Protocol Verified 🎖</h4>
-<div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><div class="typeit"><div id="id-4" class=""></div></div>
-<p>原来证明和判断可以用状态🌳来证明（和全数学相比可能不严谨，但是从CS的角度来说够用了）</p>
-<p>先😴，回来再看</p>
-</div>
-        </div>
-    </div>
-<blockquote>
-<p>我们 (在完全不理解算法的前提下) 证明了 Sequential 内存模型下 Peterson&rsquo;s Protocol 的 Safety。它能够实现互斥。</p>
-</blockquote>
-<ul>
-<li>“<a href="https://zoo.cs.yale.edu/classes/cs323/doc/Peterson.pdf" target="_blank" rel="noopener noreffer">Myths about the mutual exclusion problem</a>” (IPL, 1981，<code>Peterson</code>算法论文，<u>终于给了一个对于我们来说理解起来<b>相对</b>容易的一个算法</u>)</li>
-<li>之前有关锁的一些复杂算法：<a href="https://jyywiki.cn/pages/OS/2022/demos/dekker.py" target="_blank" rel="noopener noreffer">dekker.py</a></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Dekker</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flag</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl">    <span class="n">turn</span> <span class="o">=</span> <span class="mi">0</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="p">,</span> <span class="n">another</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">another</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="n">another</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                    <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-</span></span><span class="line"><span class="cl">                    <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="n">another</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                        <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">                    <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="n">another</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-</span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="n">this</span><span class="p">,</span> <span class="n">another</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">another</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="n">another</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                    <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-</span></span><span class="line"><span class="cl">                    <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="n">another</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                        <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">                    <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="n">another</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="n">this</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;blue&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;green&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_both</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>一些现状
-<ul>
-<li>今天有非常坚 (内) 实 (卷) 的理论体系</li>
-<li>小心编译器和多处理器硬件（编译器优化，CPU指令流水线优化）
-<ul>
-<li><a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-barrier.c" target="_blank" rel="noopener noreffer">peterson-barrier.c</a>（<b>改良版，防止编译器优化造成的结果和预期不符</b>）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define A 1
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define B 2
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define BARRIER __sync_synchronize()
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="n">atomic_int</span> <span class="n">nested</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="n">atomic_long</span> <span class="n">count</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">critical_section</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">long</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d threads in the critical section @ count=%ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">cnt</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">assert</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="n">atomic_fetch_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nested</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="k">volatile</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">turn</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TA</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">turn</span> <span class="o">=</span> <span class="n">B</span><span class="p">;</span>                <span class="n">BARRIER</span><span class="p">;</span> <span class="c1">// &lt;- this is critcal for x86
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">y</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>         <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">turn</span> <span class="o">!=</span> <span class="n">B</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>  <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">TB</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">turn</span> <span class="o">=</span> <span class="n">A</span><span class="p">;</span>                <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">x</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>         <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">turn</span> <span class="o">!=</span> <span class="n">A</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>  <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="n">critical_section</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="n">BARRIER</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TA</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">create</span><span class="p">(</span><span class="n">TB</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>课后思考：<b>哪些 barrier 是多余的吗？</b></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define BARRIER __sync_synchronize() </span><span class="c1">//重点研究这个宏的作用
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="自动-画状态机理解并发程序">(自动) 画状态机理解并发程序</h3>
-<div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><div class="typeit"><div id="id-5" class=""></div></div>
-<p>体育课累歇逼了，晚上给看完</div>
-        </div>
-    </div>
-<ul>
-<li>
-<p>并发算法的设计困境</p>
-<ul>
-<li>
-<p>不敢不画：谁知道有什么奇怪情况会发生？</p>
-</li>
-<li>
-<p>不敢乱画：画错了就都完了</p>
-</li>
-</ul>
-</li>
-<li>
-<p>解决方法</p>
-<ul>
-<li>让电脑帮我们画（因为画状态机就是一个<b>机械</b>的事情）</li>
-</ul>
-</li>
-</ul>
-<p><a href="https://jyywiki.cn/pages/OS/2022/demos/model-checker.py" target="_blank" rel="noopener noreffer">model-checker.py</a></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">  1
-</span><span class="lnt">  2
-</span><span class="lnt">  3
-</span><span class="lnt">  4
-</span><span class="lnt">  5
-</span><span class="lnt">  6
-</span><span class="lnt">  7
-</span><span class="lnt">  8
-</span><span class="lnt">  9
-</span><span class="lnt"> 10
-</span><span class="lnt"> 11
-</span><span class="lnt"> 12
-</span><span class="lnt"> 13
-</span><span class="lnt"> 14
-</span><span class="lnt"> 15
-</span><span class="lnt"> 16
-</span><span class="lnt"> 17
-</span><span class="lnt"> 18
-</span><span class="lnt"> 19
-</span><span class="lnt"> 20
-</span><span class="lnt"> 21
-</span><span class="lnt"> 22
-</span><span class="lnt"> 23
-</span><span class="lnt"> 24
-</span><span class="lnt"> 25
-</span><span class="lnt"> 26
-</span><span class="lnt"> 27
-</span><span class="lnt"> 28
-</span><span class="lnt"> 29
-</span><span class="lnt"> 30
-</span><span class="lnt"> 31
-</span><span class="lnt"> 32
-</span><span class="lnt"> 33
-</span><span class="lnt"> 34
-</span><span class="lnt"> 35
-</span><span class="lnt"> 36
-</span><span class="lnt"> 37
-</span><span class="lnt"> 38
-</span><span class="lnt"> 39
-</span><span class="lnt"> 40
-</span><span class="lnt"> 41
-</span><span class="lnt"> 42
-</span><span class="lnt"> 43
-</span><span class="lnt"> 44
-</span><span class="lnt"> 45
-</span><span class="lnt"> 46
-</span><span class="lnt"> 47
-</span><span class="lnt"> 48
-</span><span class="lnt"> 49
-</span><span class="lnt"> 50
-</span><span class="lnt"> 51
-</span><span class="lnt"> 52
-</span><span class="lnt"> 53
-</span><span class="lnt"> 54
-</span><span class="lnt"> 55
-</span><span class="lnt"> 56
-</span><span class="lnt"> 57
-</span><span class="lnt"> 58
-</span><span class="lnt"> 59
-</span><span class="lnt"> 60
-</span><span class="lnt"> 61
-</span><span class="lnt"> 62
-</span><span class="lnt"> 63
-</span><span class="lnt"> 64
-</span><span class="lnt"> 65
-</span><span class="lnt"> 66
-</span><span class="lnt"> 67
-</span><span class="lnt"> 68
-</span><span class="lnt"> 69
-</span><span class="lnt"> 70
-</span><span class="lnt"> 71
-</span><span class="lnt"> 72
-</span><span class="lnt"> 73
-</span><span class="lnt"> 74
-</span><span class="lnt"> 75
-</span><span class="lnt"> 76
-</span><span class="lnt"> 77
-</span><span class="lnt"> 78
-</span><span class="lnt"> 79
-</span><span class="lnt"> 80
-</span><span class="lnt"> 81
-</span><span class="lnt"> 82
-</span><span class="lnt"> 83
-</span><span class="lnt"> 84
-</span><span class="lnt"> 85
-</span><span class="lnt"> 86
-</span><span class="lnt"> 87
-</span><span class="lnt"> 88
-</span><span class="lnt"> 89
-</span><span class="lnt"> 90
-</span><span class="lnt"> 91
-</span><span class="lnt"> 92
-</span><span class="lnt"> 93
-</span><span class="lnt"> 94
-</span><span class="lnt"> 95
-</span><span class="lnt"> 96
-</span><span class="lnt"> 97
-</span><span class="lnt"> 98
-</span><span class="lnt"> 99
-</span><span class="lnt">100
-</span><span class="lnt">101
-</span><span class="lnt">102
-</span><span class="lnt">103
-</span><span class="lnt">104
-</span><span class="lnt">105
-</span><span class="lnt">106
-</span><span class="lnt">107
-</span><span class="lnt">108
-</span><span class="lnt">109
-</span><span class="lnt">110
-</span><span class="lnt">111
-</span><span class="lnt">112
-</span><span class="lnt">113
-</span><span class="lnt">114
-</span><span class="lnt">115
-</span><span class="lnt">116
-</span><span class="lnt">117
-</span><span class="lnt">118
-</span><span class="lnt">119
-</span><span class="lnt">120
-</span><span class="lnt">121
-</span><span class="lnt">122
-</span><span class="lnt">123
-</span><span class="lnt">124
-</span><span class="lnt">125
-</span><span class="lnt">126
-</span><span class="lnt">127
-</span><span class="lnt">128
-</span><span class="lnt">129
-</span><span class="lnt">130
-</span><span class="lnt">131
-</span><span class="lnt">132
-</span><span class="lnt">133
-</span><span class="lnt">134
-</span><span class="lnt">135
-</span><span class="lnt">136
-</span><span class="lnt">137
-</span><span class="lnt">138
-</span><span class="lnt">139
-</span><span class="lnt">140
-</span><span class="lnt">141
-</span><span class="lnt">142
-</span><span class="lnt">143
-</span><span class="lnt">144
-</span><span class="lnt">145
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">inspect</span><span class="o">,</span> <span class="nn">ast</span><span class="o">,</span> <span class="nn">astor</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">sys</span>
-</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">threads</span><span class="p">,</span> <span class="n">marker_fn</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">thread</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Decorate a member function as a thread&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">global</span> <span class="n">threads</span>
-</span></span><span class="line"><span class="cl">    <span class="n">threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">fn</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">marker</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Decorate a member function as a state marker&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">global</span> <span class="n">marker_fn</span>
-</span></span><span class="line"><span class="cl">    <span class="n">marker_fn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">localvar</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">varname</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Return local variable value of thread t in state s&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">{}))[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">checkpoint</span><span class="p">():</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Instrumented `yield checkpoint()` goes here&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">f</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">frame</span> <span class="c1"># stack[1] is the caller of checkpoint()</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">f_lineno</span><span class="p">,</span> <span class="p">{</span> <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">f_locals</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;self&#39;</span> <span class="p">})</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">hack</span><span class="p">(</span><span class="n">Class</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Hack Class to instrument @mc.thread functions&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">class</span> <span class="nc">Instrument</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">NodeTransformer</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">def</span> <span class="nf">generic_visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">in_fn</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                    <span class="c1"># a @mc.thread function -&gt; instrument it</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">in_fn</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">decorator_list</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="p">[]</span>
-</span></span><span class="line"><span class="cl">                <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">decorator_list</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                    <span class="c1"># a decorated function like @mc.mark -&gt; remove it</span>
-</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="kc">None</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">            <span class="n">body</span> <span class="o">=</span> <span class="p">[]</span>
-</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="p">[]):</span>
-</span></span><span class="line"><span class="cl">                <span class="c1"># prepend each line with `yield checkpoint()`</span>
-</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">in_fn</span><span class="p">:</span> <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">ast</span><span class="o">.</span><span class="n">Expr</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">Yield</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">                        <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">(</span><span class="n">checkpoint</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Load</span><span class="p">()),</span>
-</span></span><span class="line"><span class="cl">                            <span class="n">args</span><span class="o">=</span><span class="p">[],</span> <span class="n">keywords</span><span class="o">=</span><span class="p">[])))</span> <span class="p">)</span>
-</span></span><span class="line"><span class="cl">                <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generic_visit</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">in_fn</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">            <span class="n">node</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">body</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">node</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="s1">&#39;hacked&#39;</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="n">hacked_ast</span> <span class="o">=</span> <span class="n">Instrument</span><span class="p">()</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">Class</span><span class="o">.</span><span class="n">source</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">        <span class="n">hacked_src</span><span class="p">,</span> <span class="nb">vars</span> <span class="o">=</span> <span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">hacked_ast</span><span class="p">),</span> <span class="p">{}</span>
-</span></span><span class="line"><span class="cl">        <span class="c1"># set a breakpoint() here to see **magic happens**!</span>
-</span></span><span class="line"><span class="cl">        <span class="n">exec</span><span class="p">(</span><span class="n">hacked_src</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">vars</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">Class</span><span class="o">.</span><span class="n">hacked</span><span class="p">,</span> <span class="n">Class</span><span class="o">.</span><span class="n">hacked_src</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">[</span><span class="n">Class</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">hacked_src</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Class</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Execute trace (like [0,0,0,2,2,1,1,1]) on Class&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">attrs</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">            <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">yield</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">obj</span> <span class="o">=</span> <span class="n">hack</span><span class="p">(</span><span class="n">Class</span><span class="p">)</span><span class="o">.</span><span class="n">hacked</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl"> 
-</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="o">=</span> <span class="p">[]</span>
-</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">        <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">T</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">())</span> <span class="c1"># a generator for a thread</span>
-</span></span><span class="line"><span class="cl">    <span class="n">S</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="p">:</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">threads</span><span class="p">)</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="n">trace</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">        <span class="n">chosen</span><span class="p">,</span> <span class="n">tname</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">threads</span><span class="p">[</span><span class="n">trace</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">trace</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-</span></span><span class="line"><span class="cl">        <span class="k">try</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">T</span><span class="p">[</span><span class="n">chosen</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">                <span class="n">S</span><span class="p">[</span><span class="n">tname</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">chosen</span><span class="p">]</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="n">S</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">tname</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="n">T</span><span class="p">[</span><span class="n">chosen</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="n">S</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">obj</span><span class="p">,</span> <span class="n">S</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Class</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span>
-</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">execute</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;s</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">State</span><span class="o">.</span><span class="n">freeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@staticmethod</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">freeze</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="s1">&#39;&#39;&#39;Create an object&#39;s hashable frozen (immutable) counterpart&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">obj</span>
-</span></span><span class="line"><span class="cl">        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">State</span><span class="o">.</span><span class="n">freeze</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">                <span class="nb">zip</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="p">(</span><span class="n">State</span><span class="o">.</span><span class="n">freeze</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-</span></span><span class="line"><span class="cl">            <span class="p">))</span>
-</span></span><span class="line"><span class="cl">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot freeze&#39;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Serialize all model checking results&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;CLASS(</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">Class</span><span class="o">.</span><span class="n">hacked_src</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">sid</span> <span class="o">=</span> <span class="p">{</span> <span class="n">s0</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sid</span><span class="p">:</span> 
-</span></span><span class="line"><span class="cl">            <span class="n">sid</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;s</span><span class="si">{</span><span class="n">sid</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">vertices</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-</span></span><span class="line"><span class="cl">        <span class="n">mk</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">obj</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">state</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">marker_fn</span> <span class="k">if</span> <span class="n">f</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">obj</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">state</span><span class="p">)]</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;STATE(</span><span class="si">{</span><span class="n">name</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">state</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">mk</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">chosen</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TRANS(</span><span class="si">{</span><span class="n">name</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">name</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">threads</span><span class="p">[</span><span class="n">chosen</span><span class="p">])</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">check_bfs</span><span class="p">(</span><span class="n">Class</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;&#39;Enumerate all possible thread interleavings of @mc.thread functions&#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">s0</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="p">[])</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1"># breadth-first search to find all possible thread interleavings</span>
-</span></span><span class="line"><span class="cl">    <span class="n">queue</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">s0</span><span class="p">],</span> <span class="p">{</span><span class="n">s0</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">s0</span><span class="p">},</span> <span class="p">[]</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">        <span class="n">u</span><span class="p">,</span> <span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">queue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">chosen</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">threads</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">            <span class="n">v</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">trace</span> <span class="o">+</span> <span class="p">[</span><span class="n">chosen</span><span class="p">])</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">                <span class="n">vertices</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-</span></span><span class="line"><span class="cl">            <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">chosen</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">serialize</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">src</span><span class="p">,</span> <span class="nb">vars</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="p">{}</span>
-</span></span><span class="line"><span class="cl"><span class="n">exec</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">vars</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">Class</span> <span class="o">=</span> <span class="p">[</span><span class="n">C</span> <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">vars</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="nb">setattr</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">check_bfs</span><span class="p">(</span><span class="n">Class</span><span class="p">)</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>$Model$ $\Longrightarrow$ $Input$</p>
-</li>
-<li>
-<p>$checker$ $\Longrightarrow$ 遍历所有状态</p>
-</li>
-<li>
-<p>通过一些class来说明你的并发算法：<a href="https://jyywiki.cn/pages/OS/2022/demos/mutex-bad.py" target="_blank" rel="noopener noreffer">mutex-bad.py</a>, <a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-flag.py" target="_blank" rel="noopener noreffer">peterson-flag.py</a>, <a href="https://jyywiki.cn/pages/OS/2022/demos/dekker.py" target="_blank" rel="noopener noreffer">dekker.py</a></p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Mutex</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">==</span> <span class="s1">&#39;🔒&#39;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;🔒&#39;</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">==</span> <span class="s1">&#39;🔒&#39;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;🔒&#39;</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;blue&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;green&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_both</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Peterson</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39;  &#39;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">turn</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39;🏴&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="s1">&#39;🏳&#39;</span>
-</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="s1">&#39;🏳&#39;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;🏳&#39;</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="s1">&#39;🏴&#39;</span>
-</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">==</span> <span class="s1">&#39;🏴&#39;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;blue&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;green&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_both</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>使用例</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">python3 model-checker.py peterson-flag.py
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>后面跟着model的参数脚本即可</p>
-</li>
-<li>
-<p>为什么输出模式这么反人类 $\Longrightarrow$ 因为输出是给程序看的，后面的python脚本可以写一些lambda表达式来提取信息 $\Longrightarrow$ 加到后期的工具<a href="http://jyywiki.cn/pages/OS/2022/demos/visualize.py" target="_blank" rel="noopener noreffer">visualize.py</a>，直接可视化（很像之前<b>zweix</b>大佬的<a href="https://github.com/zweix123/jyyslide-md" target="_blank" rel="noopener noreffer">jyyslide-md</a>）的markdown转html的感觉很像</p>
-</li>
-<li>
-<p>安装相关模块，除了pip的以外Linux的机器上要安装graphviz</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt install graphviz
-</span></span><span class="line"><span class="cl">pip install graphviz
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>然后通过管道通信和重定向</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">python3 model-checker.py peterson-flag.py <span class="p">|</span> python3 visualize.py &gt; a.html
-</span></span><span class="line"><span class="cl">open a.html
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><a href="https://github.com/Jungle430/check-for-NJU-OS" target="_blank" rel="noopener noreffer">一个checker的demo</a></p>
-<h4 id="代码导读python-generator">代码导读：Python Generator</h4>
-<p>死循环也能返回？</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">numbers</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="n">init</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">        <span class="n">n</span> <span class="o">+=</span> <span class="n">step</span>
-</span></span><span class="line"><span class="cl">        <span class="k">yield</span> <span class="n">n</span>
-</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span>
-</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">generator</span> <span class="nb">object</span> <span class="n">numbers</span> <span class="n">at</span> <span class="mh">0x107f873c0</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="mi">1</span>
-</span></span><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="n">g</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="mi">2</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><code>yield</code>让死循环返回，但又<b>不是完全返回</b></li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter4-1.png" title="/img/Operating System/chapter4-1.png" data-thumbnail="/img/Operating System/chapter4-1.png" data-sub-html="<h2>效果 $\Longrightarrow$ g就是一个状态机</h2>">
-        
-    </a><figcaption class="image-caption">效果 $\Longrightarrow$ g就是一个<code>状态机</code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>文章<a href="https://blog.csdn.net/mieleizhi0522/article/details/82142856" target="_blank" rel="noopener noreffer">《python中yield的用法详解——最简单，最清晰的解释》</a></p>
-</li>
-<li>
-<p>这里就模仿了线程的执行<u>使用<code>yield</code>的特性</u></p>
-</li>
-</ul>
-<h4 id="model-checker-实现">Model Checker: 实现</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Mutex</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">T1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">==</span> <span class="s1">&#39;🔒&#39;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">                <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="k">yield</span> <span class="n">checkpoint</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;🔒&#39;</span>
-</span></span><span class="line"><span class="cl">            <span class="o">...</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">thread_state</span> <span class="o">=</span> <span class="n">mutex_obj</span><span class="p">()</span><span class="o">.</span><span class="n">T1</span><span class="p">()</span> 
-</span></span><span class="line"><span class="cl"><span class="n">thread_state</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span> <span class="c1"># 单步执行一行; see: execute()</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="model-checker-实现-contd">Model Checker: 实现 (cont&rsquo;d)</h4>
-<p>什么是状态空间？</p>
-<ul>
-<li>所有可能的状态机执行序列</li>
-<li><code>BFS</code> 生成，合并重复状态</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">[0]      T1
-</span></span><span class="line"><span class="cl">[1]      T2
-</span></span><span class="line"><span class="cl">[0,0]    T1 -&gt; T1
-</span></span><span class="line"><span class="cl">[0,1]    T1 -&gt; T2
-</span></span><span class="line"><span class="cl">[0,0,0]  T1 -&gt; T1 -&gt; T1
-</span></span><span class="line"><span class="cl">[0,0,1]  T1 -&gt; T1 -&gt; T2
-</span></span><span class="line"><span class="cl">[0,1,0]  T1 -&gt; T2 -&gt; T1
-</span></span><span class="line"><span class="cl">...      ...
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="model-checking-和工具的故事">Model Checking 和工具的故事</h3>
-<blockquote>
-<p>Model checking is a method for formally verifying finite-state systems——只要能为系统建立模型，就能用 prove by brute-force 证明正确/找到错误。</p>
-</blockquote>
-<p>Model checker 的一切就是状态机！</p>
-<ul>
-<li>Safety: 红色的状态不可到达
-<ul>
-<li><em>G</em>(<em>V</em>,<em>E</em>) 上的可达性问题</li>
-</ul>
-</li>
-<li>(Strong) Liveness: 从任意状态出发，都能到达绿/蓝色状态
-<ul>
-<li><em>G</em>(<em>V</em>,<em>E</em>) 上的什么问题？</li>
-</ul>
-</li>
-<li>如何展示这个状态机？</li>
-<li>如何能避免无效的探索？</li>
-</ul>
-<h4 id="更多的-model-checker">更多的 Model Checker</h4>
-<p>真实程序的状态空间太大？</p>
-<ul>
-<li><a href="https://dl.acm.org/doi/abs/10.1145/263699.263717" target="_blank" rel="noopener noreffer">Model checking for programming languages using VeriSoft</a> (POPL'97, 第一个 “software model checker”)</li>
-<li><a href="https://dl.acm.org/doi/10.5555/1855741.1855760" target="_blank" rel="noopener noreffer">Finding and reproducing Heisenbugs in concurrent programs</a> (OSDI'08, Small Scope Hypothesis 🪳🪳🪳)</li>
-<li><a href="https://dl.acm.org/doi/10.1145/1189256.1189259" target="_blank" rel="noopener noreffer">Using model checking to find serious file system errors</a> (OSDI'04, Best Paper 🏅，可以用在不并发的系统上)</li>
-</ul>
-<hr>
-<p>不满足于简单的内存模型？</p>
-<ul>
-<li><a href="https://dl.acm.org/doi/abs/10.1145/3445814.3446748" target="_blank" rel="noopener noreffer">VSync: Push-button verification and optimization for synchronization primitives on weak memory models</a> (ASPLOS'21, Distinguished Paper 🏅)</li>
-</ul>
-<h3 id="总结">总结</h3>
-<p>本次课回答的问题</p>
-<ul>
-<li><strong>Q</strong>: 如何理解各种并发程序？</li>
-</ul>
-<hr>
-<p>Take-away message</p>
-<ul>
-<li>并发程序 = 状态机
-<ul>
-<li>线程共享内存</li>
-<li>每一步非确定选择线程执行</li>
-</ul>
-</li>
-<li>画状态机就对了
-<ul>
-<li>当然，用工具帮你画 (model checker)</li>
-</ul>
-</li>
 </ul>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>

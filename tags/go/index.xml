@@ -1,0 +1,548 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Go - 标签 - Jungle&#39;s Blog</title>
+        <link>https://Jungle430.github.io/tags/go/</link>
+        <description>Go - 标签 - Jungle&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 14 May 2023 21:51:22 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/go/" rel="self" type="application/rss+xml" /><item>
+    <title>Go Module与测试</title>
+    <link>https://Jungle430.github.io/posts/go/module_and_test/</link>
+    <pubDate>Sun, 14 May 2023 21:51:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/module_and_test/</guid>
+    <description><![CDATA[<h1 id="go-module">Go Module</h1>
+<h2 id="简介">简介</h2>
+<ul>
+<li>通过<code>go.mod</code>文件管理依赖包版本</li>
+<li>通过<code>go get/go mod</code>指令工具管理依赖包</li>
+<li>终极目标
+<ul>
+<li>定义版本规则和管理项目依赖关系</li>
+</ul>
+</li>
+</ul>
+<h2 id="依赖管理三要素">依赖管理三要素</h2>
+<ol>
+<li>配置文件，描述依赖 <code>go.mod</code>(类比<code>cargo</code>)</li>
+<li>中心仓库管理依赖库 <code>Proxy</code>(类比<a href="https://crates.io" target="_blank" rel="noopener noreffer"><strong>crates.io</strong></a>)</li>
+<li>本地工具 <code>go get/mod</code></li>
+</ol>
+<h2 id="配置gomod">配置go.mod</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">module</span> <span class="nx">example</span><span class="o">/</span><span class="nx">project</span><span class="o">/</span><span class="nx">app</span> <span class="nx">依赖管理的基本单元</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="nx">有的时候大项目里面的小项目就得则么写</span><span class="err">，</span><span class="nx">类比c</span><span class="o">++</span><span class="nx">中src下面的CMakeList</span><span class="p">.</span><span class="nx">txt</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="nx">或者一个大包</span><span class="err">，</span><span class="nx">但是别人只想用里面的小包</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">go</span> <span class="mf">1.16</span> <span class="nx">原生库</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">require</span><span class="p">(</span> <span class="nx">单元依赖</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">example</span><span class="o">/</span><span class="nx">lib1</span> <span class="nx">v1</span><span class="mf">.0.2</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">example</span><span class="o">/</span><span class="nx">lib2</span> <span class="nx">v1</span><span class="mf">.0.0</span> <span class="c1">//indirect
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">example</span><span class="o">/</span><span class="nx">lib6</span> <span class="nx">v3</span><span class="mf">.2.0</span><span class="o">+</span><span class="nx">incompatible</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="依赖配置-version">依赖配置-version</h2>
+<ul>
+<li>
+<p>语义化版本</p>
+<ul>
+<li><code>${MAJOR}.${MINOR}.${PATCH}</code>
+<ul>
+<li>MAJOR:大版本，不同的MAJOR间认为是代码不兼容的</li>
+<li>MINOR:新增函数或功能，需要保持MAJOR下的兼容性</li>
+<li>PATCH:部分<code>bug</code>的修复</li>
+</ul>
+</li>
+<li>V1.3.0</li>
+<li>V2.3.0</li>
+</ul>
+</li>
+<li>
+<p>基于<code>commit</code>伪版本</p>
+<ul>
+<li>vX.0.0-yyyymmddhhmmss-abcdefg1234
+<ul>
+<li>版本前缀-时间戳-哈希码前缀</li>
+<li>v0.0.0-20220401081311-c38fb921298</li>
+<li>v1.0.0-20201130134442-10cb123792679c6c</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>indirtect</strong></p>
+</li>
+</ul>
+<div class="mermaid" id="id-1"></div>
+<ul>
+<li>
+<p>A -&gt; B:直接依赖</p>
+</li>
+<li>
+<p>A -&gt; C:间接依赖，使用<strong>indirtect</strong>进行标识</p>
+</li>
+<li>
+<p><strong>incompatible</strong></p>
+<ul>
+<li>对于没有<code>go.mod</code>文件而且主版本2+的依赖，会+incompatible</li>
+</ul>
+</li>
+<li>
+<p>最低兼容算法</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/Module_and_test.jpg" title="/img/Go/Module_and_test.jpg" data-thumbnail="/img/Go/Module_and_test.jpg" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h2 id="依赖分发-回源">依赖分发-回源</h2>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>
+<p>问题</p>
+<ul>
+<li>无法保证构建的稳定性和依赖的可用性</li>
+<li>增加第三方压力</li>
+</ul>
+</li>
+<li>
+<p>解决方法<strong>Proxy</strong></p>
+</li>
+</ul>
+<div class="mermaid" id="id-3"></div>
+<ul>
+<li>(类比<a href="https://crates.io" target="_blank" rel="noopener noreffer"><strong>crates.io</strong></a>)，自己构建大仓库保证稳定性</li>
+</ul>
+<p><code>GOPROXY=&quot;https://proxy1.cn, https://proxy2.cn, direct&quot;</code>(direct表示源站)</p>
+<div class="mermaid" id="id-4"></div>
+<ul>
+<li>我的配置:<code>GOPROXY=https://proxy.golang.com.cn,direct</code></li>
+</ul>
+<h2 id="工具-go-get">工具-go get</h2>
+<ul>
+<li>go get example.org/pkg
+<ul>
+<li>@update 默认</li>
+<li>@none 删除依赖</li>
+<li>@v1.1.2 <code>tag</code>版本，语义版本</li>
+<li>@23dfdd5 特定的<code>commit</code></li>
+<li>@master 分支最新的<code>commit</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="工具-go-mod">工具-go mod</h2>
+<ul>
+<li>go mod
+<ul>
+<li>init 初始化，创建go.mod文件</li>
+<li>download 下载模块到本地缓存</li>
+<li>tidy 增加需要的依赖，删除不需要的依赖</li>
+</ul>
+</li>
+</ul>
+<h2 id="总结">总结</h2>
+<ol>
+<li>go.mod</li>
+<li>Proxy</li>
+<li>go get/mod</li>
+</ol>
+<h2 id="测试">测试</h2>
+<h2 id="单元测试流程">单元测试流程</h2>
+<div class="mermaid" id="id-5"></div>
+<ul>
+<li>测试单元
+<ul>
+<li>函数</li>
+<li>模块</li>
+<li>&hellip;</li>
+</ul>
+</li>
+</ul>
+<h2 id="规则">规则</h2>
+<ul>
+<li>
+<p>所有测试文件以<code>_test.go</code>结尾(如<code>publish_post_test.go</code>)</p>
+</li>
+<li>
+<p><code>func TestXxx(*testing.T)</code>(如<code>func TestPublishPost(t *testing.T)</code>)</p>
+</li>
+<li>
+<p>初始化逻辑放到TestMain中</p>
+</li>
+<li>
+<p>例子<code>publish_post.go</code></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">HelloTom</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="s">&#34;Jerry&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>publish_post_test.go</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;testing&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">TestMain</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">output</span> <span class="o">:=</span> <span class="nf">HelloTom</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">exceptOutput</span> <span class="o">:=</span> <span class="s">&#34;Tom&#34;</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">output</span> <span class="o">!=</span> <span class="nx">exceptOutput</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">t</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;Expect %v, but output %v&#34;</span><span class="p">,</span> <span class="nx">exceptOutput</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>(校对部分建议使用开源的assert包)</p>
+<ul>
+<li>执行效果</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ go <span class="nb">test</span>
+</span></span><span class="line"><span class="cl">--- FAIL: TestMain <span class="o">(</span>0.00s<span class="o">)</span>
+</span></span><span class="line"><span class="cl">    publish_post_test.go:9: Expect Tom, but output Jerry
+</span></span><span class="line"><span class="cl">FAIL
+</span></span><span class="line"><span class="cl"><span class="nb">exit</span> status <span class="m">1</span>
+</span></span><span class="line"><span class="cl">FAIL    learing_go      0.261s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="覆盖率">覆盖率</h2>
+<ul>
+<li>
+<p>覆盖度，越高代码的正确性越好</p>
+</li>
+<li>
+<p>示例</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">HelloTom</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="s">&#34;Jerry&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">JudgePassLine</span><span class="p">(</span><span class="nx">score</span> <span class="kt">int16</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">score</span> <span class="o">&gt;=</span> <span class="mi">60</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">     <span class="s">&#34;testing&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">TestMain</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">output</span> <span class="o">:=</span> <span class="nf">HelloTom</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">exceptOutput</span> <span class="o">:=</span> <span class="s">&#34;Jerry&#34;</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">output</span> <span class="o">!=</span> <span class="nx">exceptOutput</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">t</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;Expect %v, but output %v&#34;</span><span class="p">,</span> <span class="nx">exceptOutput</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">isPass</span> <span class="o">:=</span> <span class="nf">JudgePassLine</span><span class="p">(</span><span class="mi">70</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="k">if</span> <span class="nx">isPass</span> <span class="o">!=</span> <span class="kc">true</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">t</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;Expect %v, but output %v&#34;</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">isPass</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ go <span class="nb">test</span> --cover
+</span></span><span class="line"><span class="cl">PASS
+</span></span><span class="line"><span class="cl">coverage: 27.3% of statements
+</span></span><span class="line"><span class="cl">ok      learing_go      0.260s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>如果加上修改</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">JudgePassLine</span><span class="p">(</span><span class="nx">score</span> <span class="kt">int16</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="nx">score</span> <span class="o">&gt;=</span> <span class="mi">60</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ go <span class="nb">test</span> .<span class="se">\p</span>ublish_post_test.go .<span class="se">\p</span>ublish_post.go --cover
+</span></span><span class="line"><span class="cl">ok      command-line-arguments  0.254s  coverage: 100.0% of statements
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="单元测试-依赖">单元测试-依赖</h2>
+<div class="mermaid" id="id-6"></div>
+<div class="mermaid" id="id-7"></div>
+<ul>
+<li>
+<p>幂等：每次运行结果一样（应该涉及了并发的问题，暴力测试）</p>
+</li>
+<li>
+<p>稳定：任何时间，任何函数进行独立运行</p>
+</li>
+<li>
+<p>Mock</p>
+<ul>
+<li><a href="https://github.com/bouk/monkey" target="_blank" rel="noopener noreffer">monkey</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="基准测试">基准测试</h2>
+<ul>
+<li>
+<p>优化分析代码</p>
+</li>
+<li>
+<p>内置</p>
+</li>
+<li>
+<p>示例</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">     <span class="s">&#34;math/rand&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">ServerIndex</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="kt">int</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">InitServerIndex</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">ServerIndex</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">100</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">Select</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="nx">ServerIndex</span><span class="p">[</span><span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">     <span class="s">&#34;testing&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">BenchmarkSelect</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nf">InitServerIndex</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">b</span><span class="p">.</span><span class="nf">ResetTimer</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">Select</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">BenchmarkSelectParallel</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     <span class="nf">InitServerIndex</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">b</span><span class="p">.</span><span class="nf">ResetTimer</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">     <span class="nx">b</span><span class="p">.</span><span class="nf">RunParallel</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">PB</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Next</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="nf">Select</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">Running tool: D:<span class="se">\G</span>o<span class="se">\b</span>in<span class="se">\g</span>o.exe <span class="nb">test</span> -benchmem -run<span class="o">=</span>^$ -bench ^BenchmarkSelect$ learing_go
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">goos: windows
+</span></span><span class="line"><span class="cl">goarch: amd64
+</span></span><span class="line"><span class="cl">pkg: learing_go
+</span></span><span class="line"><span class="cl">cpu: AMD Ryzen <span class="m">9</span> 5900HX with Radeon Graphics        
+</span></span><span class="line"><span class="cl">BenchmarkSelect-16     <span class="m">175706265</span>          6.498 ns/op        <span class="m">0</span> B/op        <span class="m">0</span> allocs/op
+</span></span><span class="line"><span class="cl">PASS
+</span></span><span class="line"><span class="cl">ok   learing_go 2.053s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">Running tool: D:<span class="se">\G</span>o<span class="se">\b</span>in<span class="se">\g</span>o.exe <span class="nb">test</span> -benchmem -run<span class="o">=</span>^$ -bench ^BenchmarkSelectParallel$ learing_go
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">goos: windows
+</span></span><span class="line"><span class="cl">goarch: amd64
+</span></span><span class="line"><span class="cl">pkg: learing_go
+</span></span><span class="line"><span class="cl">cpu: AMD Ryzen <span class="m">9</span> 5900HX with Radeon Graphics        
+</span></span><span class="line"><span class="cl">BenchmarkSelectParallel-16     <span class="m">30002550</span>         38.89 ns/op        <span class="m">0</span> B/op        <span class="m">0</span> allocs/op
+</span></span><span class="line"><span class="cl">PASS
+</span></span><span class="line"><span class="cl">ok   learing_go 1.409s
+</span></span></code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item>
+</channel>
+</rss>
