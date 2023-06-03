@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>消息队列 - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="消息队列" />
+<meta property="og:description" content="消息队列 走进消息队列 场景 案例一：有一天晚上我们上完课，回到宿舍，想着新出的游戏机，但又摸了摸钱包，太贵了买不起，这个时候你突然想到，今天抖音" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/go/message-queue/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-06-03T16:04:20+08:00" />
+<meta property="article:modified_time" content="2023-06-03T16:04:20+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="消息队列"/>
+<meta name="twitter:description" content="消息队列 走进消息队列 场景 案例一：有一天晚上我们上完课，回到宿舍，想着新出的游戏机，但又摸了摸钱包，太贵了买不起，这个时候你突然想到，今天抖音"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/go/message-queue/" /><link rel="prev" href="https://Jungle430.github.io/posts/go/module_and_test/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "消息队列",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/go\/message-queue\/"
+        },"genre": "posts","keywords": "Message-Queue, Kafka","wordcount":  1528 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/go\/message-queue\/","datePublished": "2023-06-03T16:04:20+08:00","dateModified": "2023-06-03T16:04:20+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">消息队列</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/go/"><i class="far fa-folder fa-fw"></i>Go</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-06-03">2023-06-03</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1528 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#走进消息队列">走进消息队列</a>
+      <ul>
+        <li><a href="#场景">场景</a></li>
+        <li><a href="#解决问题">解决问题</a></li>
+      </ul>
+    </li>
+    <li><a href="#什么是消息队列">什么是消息队列？</a>
+      <ul>
+        <li><a href="#业界消息队列对比">业界消息队列对比</a></li>
+        <li><a href="#消息队列kafka">消息队列<code>Kafka</code></a>
+          <ul>
+            <li><a href="#如何使用kafka">如何使用<code>Kafka</code></a></li>
+            <li><a href="#消息的处理流程">消息的处理流程</a>
+              <ul>
+                <li><a href="#发送消息">发送消息</a></li>
+                <li><a href="#存储消息">存储消息</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="消息队列">消息队列</h1>
+<h2 id="走进消息队列">走进消息队列</h2>
+<h3 id="场景">场景</h3>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image1.png" title="/img/Go/message-queue/image1.png" data-thumbnail="/img/Go/message-queue/image1.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image1.png"
+            data-srcset="/img/Go/message-queue/image1.png, /img/Go/message-queue/image1.png 1.5x, /img/Go/message-queue/image1.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image1.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>案例一：有一天晚上我们上完课，回到宿舍，想着新出的游戏机，但又摸了摸钱包，太贵了买不起，这个时候你突然想到，今天抖音直播搞活动，瞬间你掏出了手机打开抖音搜索，找到直播间以后，你打开了心心念念的游戏机详情页，看到价格只要500。
+<ul>
+<li>这个时候我们分析一下，就我们上面这几步操作，在我们的程序背后，做了什么事情。</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image2.png" title="/img/Go/message-queue/image2.png" data-thumbnail="/img/Go/message-queue/image2.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image2.png"
+            data-srcset="/img/Go/message-queue/image2.png, /img/Go/message-queue/image2.png 1.5x, /img/Go/message-queue/image2.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image2.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>案例二：服务能力有限（到点上车，无数用户在对面狂点手机+黄牛的脚本）</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image3.png" title="/img/Go/message-queue/image3.png" data-thumbnail="/img/Go/message-queue/image3.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image3.png"
+            data-srcset="/img/Go/message-queue/image3.png, /img/Go/message-queue/image3.png 1.5x, /img/Go/message-queue/image3.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image3.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>案例三：链路耗时长尾（下单之后一直在转圈圈）</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image4.png" title="/img/Go/message-queue/image4.png" data-thumbnail="/img/Go/message-queue/image4.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image4.png"
+            data-srcset="/img/Go/message-queue/image4.png, /img/Go/message-queue/image4.png 1.5x, /img/Go/message-queue/image4.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image4.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>案例四：日志存储</p>
+<ul>
+<li>如果完事之后发现本地日志丢掉了怎么办？</li>
+</ul>
+</li>
+<li>
+<p>面对上面的四个场景，我们有什么解决办法吗？</p>
+</li>
+</ul>
+<h3 id="解决问题">解决问题</h3>
+<ul>
+<li>案例一
+<ul>
+<li>解决方案：解耦</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image5.png" title="/img/Go/message-queue/image5.png" data-thumbnail="/img/Go/message-queue/image5.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image5.png"
+            data-srcset="/img/Go/message-queue/image5.png, /img/Go/message-queue/image5.png 1.5x, /img/Go/message-queue/image5.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image5.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>类似生产者消费者模型（或者是<code>go</code>的<code>channel</code>），即使数据库方面宕机但是消息仍然被保存下来，部分请求还是可以被处理掉</p>
+</li>
+<li>
+<p>案例二</p>
+<ul>
+<li>解决方案：削峰</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image6.png" title="/img/Go/message-queue/image6.png" data-thumbnail="/img/Go/message-queue/image6.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image6.png"
+            data-srcset="/img/Go/message-queue/image6.png, /img/Go/message-queue/image6.png 1.5x, /img/Go/message-queue/image6.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image6.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>加了一层缓冲机制</p>
+</li>
+<li>
+<p>案例三</p>
+<ul>
+<li>解决方案：异步</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image7.png" title="/img/Go/message-queue/image7.png" data-thumbnail="/img/Go/message-queue/image7.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image7.png"
+            data-srcset="/img/Go/message-queue/image7.png, /img/Go/message-queue/image7.png 1.5x, /img/Go/message-queue/image7.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image7.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>前两个请求处理完成之后用户会马上得到响应，不再干等着，耗时的通知商家响应方是商家，所以慢一点问题不太大</p>
+</li>
+<li>
+<p>三个过程从原来的<strong>单线程顺序处理</strong>变成<strong>多线程异步处理</strong></p>
+</li>
+<li>
+<p>案例四</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image8.png" title="/img/Go/message-queue/image8.png" data-thumbnail="/img/Go/message-queue/image8.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image8.png"
+            data-srcset="/img/Go/message-queue/image8.png, /img/Go/message-queue/image8.png 1.5x, /img/Go/message-queue/image8.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image8.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h2 id="什么是消息队列">什么是消息队列？</h2>
+<blockquote>
+<p>消息队列(MQ)，指保存<strong>消息</strong>的一个<strong>容器</strong>，本质是个<strong>队列</strong>。但是这个队列需要满足<strong>高吞吐，高并发，并且高可用</strong></p>
+</blockquote>
+<div class="mermaid" id="id-1"></div>
+<h3 id="业界消息队列对比">业界消息队列对比</h3>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image9.png" title="/img/Go/message-queue/image9.png" data-thumbnail="/img/Go/message-queue/image9.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image9.png"
+            data-srcset="/img/Go/message-queue/image9.png, /img/Go/message-queue/image9.png 1.5x, /img/Go/message-queue/image9.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image9.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h3 id="消息队列kafka">消息队列<code>Kafka</code></h3>
+<ul>
+<li>使用场景：离线的消息处理当中（日志信息，<code>Metrics</code>数据，用户行为 $\Longrightarrow$ 搜索，点赞，评论，收藏）</li>
+</ul>
+<h4 id="如何使用kafka">如何使用<code>Kafka</code></h4>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>基本概念
+<ul>
+<li><code>Topic</code>：逻辑队列，不同的<code>Topic</code>可以建立不同的<code>Topic</code></li>
+<li><code>Cluster</code>：物理集群，每个集群中可以建立多个不同的<code>Topic</code></li>
+<li><code>Producer</code>：生产者，负责将业务消息发送到<code>Topic</code>中</li>
+<li><code>Consumer</code>：消费者，负责消费<code>Topic</code>中的消息</li>
+<li><code>ConsumerGroup</code>：消费者组，不同组<code>Consumer</code>互不干涉</li>
+<li>同一个<code>Topic</code>中的<code>Partion</code>可以并发处理，提高吞吐量</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image10.png" title="/img/Go/message-queue/image10.png" data-thumbnail="/img/Go/message-queue/image10.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image10.png"
+            data-srcset="/img/Go/message-queue/image10.png, /img/Go/message-queue/image10.png 1.5x, /img/Go/message-queue/image10.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image10.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<hr>
+<ul>
+<li>Offset</li>
+</ul>
+<blockquote>
+<p><strong>Offset</strong>:消息在Partion内的相对位置信息，可以理解为唯一ID，<strong>在partion内部是严格递增的</strong></p>
+</blockquote>
+<hr>
+<ul>
+<li>Replica</li>
+</ul>
+<blockquote>
+<p>每个分片有多个<strong>Replica</strong>，<strong>Leader Replica</strong>将会从$LSR$中选出</p>
+</blockquote>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image11.png" title="/img/Go/message-queue/image11.png" data-thumbnail="/img/Go/message-queue/image11.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image11.png"
+            data-srcset="/img/Go/message-queue/image11.png, /img/Go/message-queue/image11.png 1.5x, /img/Go/message-queue/image11.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image11.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>Leader:对外进行读写</p>
+</li>
+<li>
+<p>Foller:不断将数据从Leader上面拉取下来，努力和Leader保持一个一致的状态，如果和Leader差距过大会被踢出ISR（参考Replica3）</p>
+</li>
+<li>
+<p>ISR的作用：如果ISR里面的leader对应的机器发生了宕机等故障，<strong>ISR会从里面的Foller中选择一个让其重新成为Leader</strong>，保证服务器继续运行，保证了<strong>高可用性</strong></p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>数据复制</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image12.png" title="/img/Go/message-queue/image12.png" data-thumbnail="/img/Go/message-queue/image12.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image12.png"
+            data-srcset="/img/Go/message-queue/image12.png, /img/Go/message-queue/image12.png 1.5x, /img/Go/message-queue/image12.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image12.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>其中有一个Broker同时也扮演了Controller的角色。Controller是整个集群的大脑，负责对副本和Broker的分配</li>
+</ul>
+<hr>
+<ul>
+<li><code>Kafka</code>架构</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image13.png" title="/img/Go/message-queue/image13.png" data-thumbnail="/img/Go/message-queue/image13.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image13.png"
+            data-srcset="/img/Go/message-queue/image13.png, /img/Go/message-queue/image13.png 1.5x, /img/Go/message-queue/image13.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image13.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h4 id="消息的处理流程">消息的处理流程</h4>
+<div class="mermaid" id="id-3"></div>
+<h5 id="发送消息">发送消息</h5>
+<ul>
+<li>如果发送一条消息，等待其成功后再发送下一条消息会有什么问题？</li>
+</ul>
+<div class="mermaid" id="id-4"></div>
+<hr>
+<ul>
+<li>批量发送消息可以增加吞吐量，<strong>但是如果网络带宽不够怎么办</strong>？</li>
+</ul>
+<div class="mermaid" id="id-5"></div>
+<ul>
+<li>解决方法：进行压缩，减少消息大小，目前支持的有:Snappy,Gzip,LZ4,ZSTD压缩算法</li>
+</ul>
+<div class="mermaid" id="id-6"></div>
+<h5 id="存储消息">存储消息</h5>
+<div class="mermaid" id="id-7"></div>
+<ul>
+<li>
+<p>如何存储到磁盘？</p>
+</li>
+<li>
+<p><code>Borker</code>的文件结构</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image14.png" title="/img/Go/message-queue/image14.png" data-thumbnail="/img/Go/message-queue/image14.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image14.png"
+            data-srcset="/img/Go/message-queue/image14.png, /img/Go/message-queue/image14.png 1.5x, /img/Go/message-queue/image14.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image14.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>磁盘结构：由于寻道成本比较高，所以<u>顺序写入可以减少寻道带来的时间成本</u></li>
+</ul>
+<hr>
+<ul>
+<li><code>Broker</code>-顺序写</li>
+</ul>
+<div class="mermaid" id="id-8"></div>
+<ul>
+<li>采用顺序写的方式进行写入（磁盘末尾追加，减少动磁头的次数），以提高写入效率</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><code>Broker</code>-如何找到消息</p>
+</li>
+<li>
+<p><code>Consumer </code>通过发送<code>FetchRequest</code>请求消息数据，<code>Broker </code>会将指定<code>Offset</code>处的消息，按照时间窗口和消息大小窗口发送给<code> Consumer</code>，<u>寻找数据这个细节是如何做到的呢?</u></p>
+</li>
+</ul>
+<div class="mermaid" id="id-9"></div>
+<ul>
+<li>
+<p>例子：寻找<code>offer=28</code></p>
+<ul>
+<li>
+<p><b>二分法</b>查找小于目标<code>offer</code>的最大文件</p>
+</li>
+<li>
+<p>接着通过偏移量去对应的地址里面继续查找</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image15.png" title="/img/Go/message-queue/image15.png" data-thumbnail="/img/Go/message-queue/image15.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image15.png"
+            data-srcset="/img/Go/message-queue/image15.png, /img/Go/message-queue/image15.png 1.5x, /img/Go/message-queue/image15.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image15.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<hr>
+<ul>
+<li><code>Broker</code>-时间戳索引文件
+<ul>
+<li>二分法找到<strong>小于目标时间戳的最大索引位置</strong>，再通过<code>offset</code>的方式找到最终数据</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image16.png" title="/img/Go/message-queue/image16.png" data-thumbnail="/img/Go/message-queue/image16.png" data-sub-html="<h2> </h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/Go/message-queue/image16.png"
+            data-srcset="/img/Go/message-queue/image16.png, /img/Go/message-queue/image16.png 1.5x, /img/Go/message-queue/image16.png 2x"
+            data-sizes="auto"
+            alt="/img/Go/message-queue/image16.png" />
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/message-queue/">Message-Queue</a>
+                </span><span><a href="/tags/kafka/">Kafka</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2023-06-03</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列" data-hashtags="Message-Queue,Kafka"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-hashtag="Message-Queue"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/go/message-queue/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/go/message-queue/" data-title="消息队列"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/go/module_and_test/" class="prev" rel="prev" title="Go Module与测试"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/autocomplete/autocomplete.min.js"></script><script src="/lib/lunr/lunr.min.js"></script><script src="/lib/lunr/lunr.stemmer.support.min.js"></script><script src="/lib/lunr/lunr.zh.min.js"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script src="/lib/mermaid/mermaid.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"data":{"id-1":"graph LR\nA(produce)\nB(Message)\nC(Message)\nD(Message)\nE(consume)\nA--\"input\"--\u003eB---C---D--\"output\"--\u003eE","id-2":"graph TB\nA(创建集群)\nB(\"新增Topic,设置好分区片数量\")\nC(编写生产者逻辑)\nD(编写消费者逻辑)\nA--\u003eB--\u003eC--\u003eD","id-3":"graph LR\nA(Producer)\nB(Broker)\nC(Consumer)\nA--\u003eB--\u003eC","id-4":"graph LR\nA(Producer)\nB(Broker)\nA--\"Message\"--\u003eB\nB--\"Success\"--\u003eA","id-5":"graph LR\nA(Producer)\nB(Broker)\nA--\"Batch(Message1, Message2, Message3)\"--\u003eB\nB--\"Success\"--\u003eA","id-6":"graph LR\nA(Producer)\nB(Broker)\nA--\"Batch(Message1, Message2...)\n            压缩 \n Batch(message1, message2...)\"--\u003eB\nB--\"Success\"--\u003eA","id-7":"graph LR\nA(\"Borker\")\nB(\"本地磁盘\")\nA--\"Batch(Message1, Message2, Message3)\"--\u003eB","id-8":"graph LR\nA(Message)\nB(Message)\nC(Message)\nD(...)\nE(末尾追加)\nA---B---C---D---E","id-9":"graph LR\nA(Consumer)\nB(Broker)\nA--\"FetchRequest\"--\u003eB\nB--\"Message\"--\u003eA"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50}};</script><script src="/js/theme.min.js"></script></body></html>

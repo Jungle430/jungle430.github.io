@@ -4,7 +4,19 @@
         <link>https://Jungle430.github.io/tags/</link>
         <description>Tags - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 14 May 2023 21:51:22 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/" rel="self" type="application/rss+xml" /><item>
+    <title>Kafka</title>
+    <link>https://Jungle430.github.io/tags/kafka/</link>
+    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/tags/kafka/</guid>
+    <description><![CDATA[]]></description>
+</item>
+<item>
+    <title>Message-Queue</title>
+    <link>https://Jungle430.github.io/tags/message-queue/</link>
+    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/tags/message-queue/</guid>
+    <description><![CDATA[]]></description>
+</item>
+<item>
     <title>Go</title>
     <link>https://Jungle430.github.io/tags/go/</link>
     <pubDate>Sun, 14 May 2023 21:51:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/tags/go/</guid>
@@ -50,18 +62,6 @@
     <title>Database Systems</title>
     <link>https://Jungle430.github.io/tags/database-systems/</link>
     <pubDate>Wed, 22 Feb 2023 15:23:14 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/tags/database-systems/</guid>
-    <description><![CDATA[]]></description>
-</item>
-<item>
-    <title>Computer Organization and Architecture</title>
-    <link>https://Jungle430.github.io/tags/computer-organization-and-architecture/</link>
-    <pubDate>Wed, 01 Feb 2023 01:31:38 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/tags/computer-organization-and-architecture/</guid>
-    <description><![CDATA[]]></description>
-</item>
-<item>
-    <title>OpenCV</title>
-    <link>https://Jungle430.github.io/tags/opencv/</link>
-    <pubDate>Mon, 09 Jan 2023 14:20:53 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/tags/opencv/</guid>
     <description><![CDATA[]]></description>
 </item>
 </channel>

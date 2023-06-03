@@ -4,9 +4,275 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 14 May 2023 21:51:22 &#43;0800</lastBuildDate>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>消息队列</title>
+    <link>https://Jungle430.github.io/posts/go/message-queue/</link>
+    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/message-queue/</guid>
+    <description><![CDATA[<h1 id="消息队列">消息队列</h1>
+<h2 id="走进消息队列">走进消息队列</h2>
+<h3 id="场景">场景</h3>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image1.png" title="/img/Go/message-queue/image1.png" data-thumbnail="/img/Go/message-queue/image1.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>案例一：有一天晚上我们上完课，回到宿舍，想着新出的游戏机，但又摸了摸钱包，太贵了买不起，这个时候你突然想到，今天抖音直播搞活动，瞬间你掏出了手机打开抖音搜索，找到直播间以后，你打开了心心念念的游戏机详情页，看到价格只要500。
+<ul>
+<li>这个时候我们分析一下，就我们上面这几步操作，在我们的程序背后，做了什么事情。</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image2.png" title="/img/Go/message-queue/image2.png" data-thumbnail="/img/Go/message-queue/image2.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>案例二：服务能力有限（到点上车，无数用户在对面狂点手机+黄牛的脚本）</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image3.png" title="/img/Go/message-queue/image3.png" data-thumbnail="/img/Go/message-queue/image3.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>案例三：链路耗时长尾（下单之后一直在转圈圈）</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image4.png" title="/img/Go/message-queue/image4.png" data-thumbnail="/img/Go/message-queue/image4.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>案例四：日志存储</p>
+<ul>
+<li>如果完事之后发现本地日志丢掉了怎么办？</li>
+</ul>
+</li>
+<li>
+<p>面对上面的四个场景，我们有什么解决办法吗？</p>
+</li>
+</ul>
+<h3 id="解决问题">解决问题</h3>
+<ul>
+<li>案例一
+<ul>
+<li>解决方案：解耦</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image5.png" title="/img/Go/message-queue/image5.png" data-thumbnail="/img/Go/message-queue/image5.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>类似生产者消费者模型（或者是<code>go</code>的<code>channel</code>），即使数据库方面宕机但是消息仍然被保存下来，部分请求还是可以被处理掉</p>
+</li>
+<li>
+<p>案例二</p>
+<ul>
+<li>解决方案：削峰</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image6.png" title="/img/Go/message-queue/image6.png" data-thumbnail="/img/Go/message-queue/image6.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>加了一层缓冲机制</p>
+</li>
+<li>
+<p>案例三</p>
+<ul>
+<li>解决方案：异步</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image7.png" title="/img/Go/message-queue/image7.png" data-thumbnail="/img/Go/message-queue/image7.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>前两个请求处理完成之后用户会马上得到响应，不再干等着，耗时的通知商家响应方是商家，所以慢一点问题不太大</p>
+</li>
+<li>
+<p>三个过程从原来的<strong>单线程顺序处理</strong>变成<strong>多线程异步处理</strong></p>
+</li>
+<li>
+<p>案例四</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image8.png" title="/img/Go/message-queue/image8.png" data-thumbnail="/img/Go/message-queue/image8.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h2 id="什么是消息队列">什么是消息队列？</h2>
+<blockquote>
+<p>消息队列(MQ)，指保存<strong>消息</strong>的一个<strong>容器</strong>，本质是个<strong>队列</strong>。但是这个队列需要满足<strong>高吞吐，高并发，并且高可用</strong></p>
+</blockquote>
+<div class="mermaid" id="id-1"></div>
+<h3 id="业界消息队列对比">业界消息队列对比</h3>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image9.png" title="/img/Go/message-queue/image9.png" data-thumbnail="/img/Go/message-queue/image9.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h3 id="消息队列kafka">消息队列<code>Kafka</code></h3>
+<ul>
+<li>使用场景：离线的消息处理当中（日志信息，<code>Metrics</code>数据，用户行为 $\Longrightarrow$ 搜索，点赞，评论，收藏）</li>
+</ul>
+<h4 id="如何使用kafka">如何使用<code>Kafka</code></h4>
+<div class="mermaid" id="id-2"></div>
+<ul>
+<li>基本概念
+<ul>
+<li><code>Topic</code>：逻辑队列，不同的<code>Topic</code>可以建立不同的<code>Topic</code></li>
+<li><code>Cluster</code>：物理集群，每个集群中可以建立多个不同的<code>Topic</code></li>
+<li><code>Producer</code>：生产者，负责将业务消息发送到<code>Topic</code>中</li>
+<li><code>Consumer</code>：消费者，负责消费<code>Topic</code>中的消息</li>
+<li><code>ConsumerGroup</code>：消费者组，不同组<code>Consumer</code>互不干涉</li>
+<li>同一个<code>Topic</code>中的<code>Partion</code>可以并发处理，提高吞吐量</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image10.png" title="/img/Go/message-queue/image10.png" data-thumbnail="/img/Go/message-queue/image10.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<hr>
+<ul>
+<li>Offset</li>
+</ul>
+<blockquote>
+<p><strong>Offset</strong>:消息在Partion内的相对位置信息，可以理解为唯一ID，<strong>在partion内部是严格递增的</strong></p>
+</blockquote>
+<hr>
+<ul>
+<li>Replica</li>
+</ul>
+<blockquote>
+<p>每个分片有多个<strong>Replica</strong>，<strong>Leader Replica</strong>将会从$LSR$中选出</p>
+</blockquote>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image11.png" title="/img/Go/message-queue/image11.png" data-thumbnail="/img/Go/message-queue/image11.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>
+<p>Leader:对外进行读写</p>
+</li>
+<li>
+<p>Foller:不断将数据从Leader上面拉取下来，努力和Leader保持一个一致的状态，如果和Leader差距过大会被踢出ISR（参考Replica3）</p>
+</li>
+<li>
+<p>ISR的作用：如果ISR里面的leader对应的机器发生了宕机等故障，<strong>ISR会从里面的Foller中选择一个让其重新成为Leader</strong>，保证服务器继续运行，保证了<strong>高可用性</strong></p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>数据复制</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image12.png" title="/img/Go/message-queue/image12.png" data-thumbnail="/img/Go/message-queue/image12.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>其中有一个Broker同时也扮演了Controller的角色。Controller是整个集群的大脑，负责对副本和Broker的分配</li>
+</ul>
+<hr>
+<ul>
+<li><code>Kafka</code>架构</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image13.png" title="/img/Go/message-queue/image13.png" data-thumbnail="/img/Go/message-queue/image13.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<h4 id="消息的处理流程">消息的处理流程</h4>
+<div class="mermaid" id="id-3"></div>
+<h5 id="发送消息">发送消息</h5>
+<ul>
+<li>如果发送一条消息，等待其成功后再发送下一条消息会有什么问题？</li>
+</ul>
+<div class="mermaid" id="id-4"></div>
+<hr>
+<ul>
+<li>批量发送消息可以增加吞吐量，<strong>但是如果网络带宽不够怎么办</strong>？</li>
+</ul>
+<div class="mermaid" id="id-5"></div>
+<ul>
+<li>解决方法：进行压缩，减少消息大小，目前支持的有:Snappy,Gzip,LZ4,ZSTD压缩算法</li>
+</ul>
+<div class="mermaid" id="id-6"></div>
+<h5 id="存储消息">存储消息</h5>
+<div class="mermaid" id="id-7"></div>
+<ul>
+<li>
+<p>如何存储到磁盘？</p>
+</li>
+<li>
+<p><code>Borker</code>的文件结构</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image14.png" title="/img/Go/message-queue/image14.png" data-thumbnail="/img/Go/message-queue/image14.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>磁盘结构：由于寻道成本比较高，所以<u>顺序写入可以减少寻道带来的时间成本</u></li>
+</ul>
+<hr>
+<ul>
+<li><code>Broker</code>-顺序写</li>
+</ul>
+<div class="mermaid" id="id-8"></div>
+<ul>
+<li>采用顺序写的方式进行写入（磁盘末尾追加，减少动磁头的次数），以提高写入效率</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><code>Broker</code>-如何找到消息</p>
+</li>
+<li>
+<p><code>Consumer </code>通过发送<code>FetchRequest</code>请求消息数据，<code>Broker </code>会将指定<code>Offset</code>处的消息，按照时间窗口和消息大小窗口发送给<code> Consumer</code>，<u>寻找数据这个细节是如何做到的呢?</u></p>
+</li>
+</ul>
+<div class="mermaid" id="id-9"></div>
+<ul>
+<li>
+<p>例子：寻找<code>offer=28</code></p>
+<ul>
+<li>
+<p><b>二分法</b>查找小于目标<code>offer</code>的最大文件</p>
+</li>
+<li>
+<p>接着通过偏移量去对应的地址里面继续查找</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image15.png" title="/img/Go/message-queue/image15.png" data-thumbnail="/img/Go/message-queue/image15.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<hr>
+<ul>
+<li><code>Broker</code>-时间戳索引文件
+<ul>
+<li>二分法找到<strong>小于目标时间戳的最大索引位置</strong>，再通过<code>offset</code>的方式找到最终数据</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/message-queue/image16.png" title="/img/Go/message-queue/image16.png" data-thumbnail="/img/Go/message-queue/image16.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+]]></description>
+</item>
+<item>
     <title>Go Module与测试</title>
     <link>https://Jungle430.github.io/posts/go/module_and_test/</link>
     <pubDate>Sun, 14 May 2023 21:51:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/module_and_test/</guid>
@@ -13523,1494 +13789,6 @@ $$</p>
             <div class="admonition-content">2023-4-16 Finished at 23:43 PM</div>
         </div>
     </div>
-<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
-]]></description>
-</item>
-<item>
-    <title>Operating System Chapter5 并发控制：互斥</title>
-    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</link>
-    <pubDate>Wed, 08 Mar 2023 17:23:11 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</guid>
-    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
-<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
-<div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><p>Update in 2023-03-08 17:30</p>
-<p>继续看，并发真™️👨</p>
-</div>
-        </div>
-    </div>
-<h2 id="overview">Overview</h2>
-<p>复习</p>
-<ul>
-<li>状态机、状态机、状态机</li>
-</ul>
-<hr>
-<p>本次课回答的问题</p>
-<ul>
-<li><strong>Q</strong>: 如何在多处理器上实现线程互斥？</li>
-</ul>
-<hr>
-<p>本次课主要内容</p>
-<ul>
-<li>自旋锁的实现</li>
-<li>互斥锁的实现</li>
-</ul>
-<h2 id="共享内存上的互斥">共享内存上的互斥</h2>
-<h3 id="回顾并发编程">回顾：并发编程</h3>
-<p>理解并发的工具</p>
-<ul>
-<li>线程 = 人 (大脑能完成局部存储和计算)</li>
-<li>共享内存 = 物理世界 (物理世界天生并行)</li>
-<li>一切都是状态机</li>
-</ul>
-<h3 id="回顾互斥算法">回顾：互斥算法</h3>
-<p>互斥 (mutual exclusion)，“互相排斥”</p>
-<ul>
-<li>实现 <code>lock_t</code> 数据结构和 <code>lock/unlock</code> API:</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="p">...</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">lock_t</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">(</span><span class="n">lock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">);</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<p>一把 “排他性” 的锁——对于锁对象 <code>lk</code></p>
-<ul>
-<li>如果某个线程持有锁，则其他线程的 <code>lock</code> 不能返回</li>
-</ul>
-<h3 id="在共享内存上实现互斥">在共享内存上实现互斥</h3>
-<p>失败的尝试</p>
-<ul>
-<li><a href="https://jyywiki.cn/pages/OS/2022/demos/mutex-bad.py" target="_blank" rel="noopener noreffer">mutex-bad.py</a></li>
-</ul>
-<hr>
-<p>(部分) 成功的尝试</p>
-<ul>
-<li><a href="https://jyywiki.cn/pages/OS/2022/demos/peterson-barrier.c" target="_blank" rel="noopener noreffer">peterson-barrier.c</a></li>
-</ul>
-<hr>
-<p>实现互斥的根本困难：不能同时读/写共享内存</p>
-<ul>
-<li>load (环顾四周) 的时候不能写，只能 “看一眼就把眼睛闭上”
-<ul>
-<li>看到的东西马上就过时了</li>
-</ul>
-</li>
-<li>store (改变物理世界状态) 的时候不能读，只能 “闭着眼睛动手”
-<ul>
-<li>也不知道把什么改成了什么</li>
-</ul>
-</li>
-<li>这是<del>简单、粗暴 (稳定)、有效</del>的《操作系统》课</li>
-</ul>
-<h2 id="自旋锁-spin-lock">自旋锁 (Spin Lock)</h2>
-<h3 id="解决问题的两种方法">解决问题的两种方法</h3>
-<blockquote>
-<p>提出算法、解决问题 (Dekker/Peterson/&hellip;&rsquo;s Protocols)</p>
-</blockquote>
-<p>或者……</p>
-<blockquote>
-<p>改变假设 (软件不够，硬件来凑$\Longrightarrow$ x86架构的风格，软件指令做不好直接写一个指令集让硬件这么做hhh)</p>
-</blockquote>
-<hr>
-<p>假设硬件能为我们提供一条 “瞬间完成” 的读 + 写指令</p>
-<ul>
-<li>请所有人闭上眼睛，看一眼 (load)，然后贴上标签 (store)
-<ul>
-<li>如果多人同时请求，硬件选出一个 “胜者”</li>
-<li>“败者” 要等 “胜者” 完成后才能继续执行</li>
-</ul>
-</li>
-</ul>
-<h3 id="x86-原子操作lock-指令前缀">x86 原子操作：<code>LOCK</code> 指令前缀</h3>
-<p>例子：<a href="https://jyywiki.cn/pages/OS/2022/demos/sum-atomic.c" target="_blank" rel="noopener noreffer"><code>sum-atomic.c</code></a></p>
-<ul>
-<li><code>sum = 200000000</code></li>
-</ul>
-<hr>
-<p>Atomic exchange (load + store)</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">xchg</span><span class="p">(</span><span class="k">volatile</span> <span class="kt">int</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">newval</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">result</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span> <span class="p">(</span><span class="s">&#34;lock xchg %0, %1&#34;</span>
-</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="s">&#34;+m&#34;</span><span class="p">(</span><span class="o">*</span><span class="n">addr</span><span class="p">),</span> <span class="s">&#34;=a&#34;</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">:</span> <span class="s">&#34;1&#34;</span><span class="p">(</span><span class="n">newval</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><b>重点就是asm内联汇编那句，这里是“一气呵成”的</b></p>
-</li>
-<li>
-<p>更多的原子指令：<a href="https://en.cppreference.com/w/cpp/header/stdatomic.h" target="_blank" rel="noopener noreffer">stdatomic.h</a> (C11)</p>
-</li>
-</ul>
-<h3 id="用-xchg-实现互斥也就是自旋锁的本质实现过程">用 <code>xchg</code> 实现互斥（也就是自旋锁的本质实现过程）</h3>
-<ul>
-<li>xchg在之前的<a href="https://jungle430.github.io/posts/operating-system/support2" target="_blank" rel="noopener noreffer">文章</a>中有提到过</li>
-</ul>
-<p>如何协调宿舍若干位同学上厕所问题？</p>
-<ul>
-<li>在厕所门口放一个桌子 (共享变量)
-<ul>
-<li>初始时，桌上是 🔑</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p>实现互斥的协议</p>
-<ul>
-<li>想上厕所的同学 (一条 xchg 指令)
-<ul>
-<li>天黑请闭眼</li>
-<li>看一眼桌子上有什么 (🔑 或 🔞)</li>
-<li>把 🔞 放到桌上 (覆盖之前有的任何东西)</li>
-<li>天亮请睁眼；看到 🔑 才可以进厕所哦</li>
-</ul>
-</li>
-<li>出厕所的同学
-<ul>
-<li>把 🔑 放到桌上</li>
-</ul>
-</li>
-</ul>
-<h3 id="实现互斥自旋锁">实现互斥：自旋锁</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">table</span> <span class="o">=</span> <span class="n">YES</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl"><span class="nl">retry</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">got</span> <span class="o">=</span> <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">table</span><span class="p">,</span> <span class="n">NOPE</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">got</span> <span class="o">==</span> <span class="n">NOPE</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="k">goto</span> <span class="n">retry</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">got</span> <span class="o">==</span> <span class="n">YES</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">table</span><span class="p">,</span> <span class="n">YES</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span> <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">;</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span> <span class="n">xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>重要的还是xchg这个东西，保证那一步是原子性的，就没有其他事情了</li>
-</ul>
-<h3 id="实现互斥自旋锁-contd">实现互斥：自旋锁 (cont&rsquo;d)</h3>
-<p>并发编程：千万小心</p>
-<ul>
-<li>做详尽的测试 (在此省略，你们做 Labs 就知道了)</li>
-<li>尽可能地证明 (<a href="https://jyywiki.cn/pages/OS/2022/demos/model-checker.py" target="_blank" rel="noopener noreffer">model-checker.py</a> 和 <a href="https://jyywiki.cn/pages/OS/2022/demos/spinlock.py" target="_blank" rel="noopener noreffer">spinlock.py</a>)</li>
-</ul>
-<hr>
-<p>原子指令的模型</p>
-<ul>
-<li>保证之前的 store 都写入内存</li>
-<li>保证 load/store 不与原子指令乱序</li>
-</ul>
-<h3 id="原子指令的诞生bus-lock-80486">原子指令的诞生：Bus Lock (80486)</h3>
-<div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><p>Update in 2023-03-09 10:00</p>
-<p>早起开完SB大会，✋接着看</p>
-<p>咖啡机里面的咖啡真提神，估计下午毛概得狠狠睡一把</p>
-</div>
-        </div>
-    </div>
-<ul>
-<li>486 (20-50MHz) 就支持 <code>dual-socket</code> 了</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter5-1.jpg" title="/img/Operating System/chapter5-1.jpg" data-thumbnail="/img/Operating System/chapter5-1.jpg" data-sub-html="<h2>80486</h2>">
-        
-    </a><figcaption class="image-caption">80486</figcaption>
-    </figure>
-<div class="mermaid" id="id-1"></div>
-<ul>
-<li>
-<p>如果CPU1需要执行<code>add x, 1</code>，那么需要分成3步</p>
-<ul>
-<li>从memory里面load</li>
-<li>再把这个值add 1之后先放入一个内部的寄存器里</li>
-<li>再store把m的值写回内存里</li>
-</ul>
-</li>
-<li>
-<p>为什么486时代会诞生<b>LOCK</b>这样的指令呢？</p>
-<ul>
-<li>因为涉及了两个CPU面对同一个memory的状况，所以需要对memory进行lock的操作</li>
-</ul>
-</li>
-<li>
-<p>设计方法</p>
-<ul>
-<li>x86的指令集有指令的前缀（比如<code>rep</code>），我们让<code>lock</code>也变成一个<b>指令前缀</b></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">lock + |指令|
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><u>当CPU开始读指令的时候，它会先读到lock指令，这个时候就上锁（也即是对应的CPU拿到了总线的锁）</u></li>
-<li><u>等到CPU拿到总线的锁之后，它会再执行后面的部分</u></li>
-<li><u>把有关指令执行完成之后再把锁释放掉</u></li>
-</ul>
-<h4 id="负担">负担</h4>
-<ul>
-<li><b>今天的CPU与memory之间都有各自的cache，而且cache已经和CPU集成在一个元件上面了，而且是多级cache</b></li>
-<li><b>486时代仅仅只有外面的一块cache（而且这块cache在主板上），所以说只要CPU拿到了总线🔒的控制权，就把自己和外面的一切隔离开了</b></li>
-</ul>
-<div class="mermaid" id="id-2"></div>
-<ul>
-<li>
-<p><b>多级cache会使得lock变得很麻烦</b></p>
-</li>
-<li>
-<p>例子：一个数据在两个CPU的cache里面都有副本</p>
-</li>
-</ul>
-<div class="mermaid" id="id-3"></div>
-<ul>
-<li><b>这个时候如果CPU1要lock访问m的话，就要将cache21里面的m副本“踢掉”</b> $\Longrightarrow$ 也就是今天inter一个很大的历史包袱：缓存的一致性 $\Longrightarrow$ 解决方案：将所有的cache用总线连接起来</li>
-</ul>
-<div class="mermaid" id="id-4"></div>
-<ul>
-<li>一旦其中有一个数据需要被lock，那么总线需要遍历一遍所有CPU的cache，如果发现了该数据的副本，就要将该数据从其他CPU的cache里面“踢掉”，<b>这是很浪费时间的</b></li>
-</ul>
-<h3 id="lock-指令的现代实现">Lock 指令的现代实现</h3>
-<p>在 L1 cache 层保持一致性 (ring/mesh bus)</p>
-<ul>
-<li>相当于每个 cache line 有分别的锁</li>
-<li>store(x) 进入 L1 缓存即保证对其他处理器可见
-<ul>
-<li>但要小心 store buffer 和乱序执行</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p>L1 cache line 根据状态进行协调</p>
-<ul>
-<li>M (Modified), 脏值</li>
-<li>E (Exclusive), 独占访问</li>
-<li>S (Shared), 只读共享</li>
-<li>I (Invalid), 不拥有 cache line</li>
-</ul>
-<h3 id="risc-v-另一种原子操作的设计">RISC-V: 另一种原子操作的设计</h3>
-<p>考虑常见的原子操作：</p>
-<ul>
-<li>atomic test-and-set
-<ul>
-<li><code>reg = load(x); if (reg == XX) { store(x, YY); }</code></li>
-</ul>
-</li>
-<li>lock xchg
-<ul>
-<li><code>reg = load(x); store(x, XX);</code></li>
-</ul>
-</li>
-<li>lock add
-<ul>
-<li><code>t = load(x); t++; store(x, t);</code></li>
-</ul>
-</li>
-</ul>
-<hr>
-<p><b>它们的本质都是</b></p>
-<ol>
-<li>load</li>
-<li>exec (处理器本地寄存器的运算)</li>
-<li>store</li>
-</ol>
-<h3 id="load-reservedstore-conditional-lrsc">Load-Reserved/Store-Conditional (LR/SC)</h3>
-<ul>
-<li>LR: 在内存上标记 reserved (盯上你了)，中断、其他处理器写入都会导致标记消除
-<ul>
-<li><b>我先读，读完之后在这个物品上面做一个标记</b></li>
-<li><b>标记一直在物品上，同时在做本地的计算</b></li>
-<li><b>本地计算算完了，该写了</b></li>
-<li><b>写的时候要先检测标记，只有标记还在的时候才可以写，否则返回fail，只能再次尝试重新上锁写入</b></li>
-</ul>
-</li>
-<li><u>本地内存的计算不重要，重要的是<b>共享内存的计算</b></u></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">lr.w rd, (rs1)
-</span></span><span class="line"><span class="cl">  rd = M[rs1]
-</span></span><span class="line"><span class="cl">  reserve M[rs1]
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<ul>
-<li>SC: 如果 “盯上” 未被解除，则写入</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sc.w rd, rs2, (rs1)
-</span></span><span class="line"><span class="cl">  if still reserved:
-</span></span><span class="line"><span class="cl">    M[rs1] = rs2
-</span></span><span class="line"><span class="cl">    rd = 0
-</span></span><span class="line"><span class="cl">  else:
-</span></span><span class="line"><span class="cl">    rd = nonzero
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="compare-and-swap-的-lrsc-实现">Compare-and-Swap 的 LR/SC 实现</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">cas</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cmp_val</span><span class="p">,</span> <span class="kt">int</span> <span class="n">new_val</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">old_val</span> <span class="o">=</span> <span class="o">*</span><span class="n">addr</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">old_val</span> <span class="o">==</span> <span class="n">cmp_val</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">addr</span> <span class="o">=</span> <span class="n">new_val</span><span class="p">;</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cas:
-</span></span><span class="line"><span class="cl">  lr.w  t0, (a0)       # Load original value.
-</span></span><span class="line"><span class="cl">  bne   t0, a1, fail   # Doesn’t match, so fail.
-</span></span><span class="line"><span class="cl">  sc.w  t0, a2, (a0)   # Try to update.
-</span></span><span class="line"><span class="cl">  bnez  t0, cas        # Retry if store-conditional failed.
-</span></span><span class="line"><span class="cl">  li a0, 0             # Set return to success.
-</span></span><span class="line"><span class="cl">  jr ra                # Return.
-</span></span><span class="line"><span class="cl">fail:
-</span></span><span class="line"><span class="cl">  li a0, 1             # Set return to failure.
-</span></span><span class="line"><span class="cl">  jr ra                # Return
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>lr，sc还可以检测🔒的拥堵程度</li>
-</ul>
-<h4 id="lrsc-的硬件实现">LR/SC 的硬件实现</h4>
-<ul>
-<li>
-<p>BOOM (Berkeley Out-of-Order Processor)</p>
-</li>
-<li>
-<p><a href="https://github.com/riscv-boom/riscv-boom" target="_blank" rel="noopener noreffer">riscv-boom</a></p>
-</li>
-<li>
-<p><a href="https://github.com/riscv-boom/riscv-boom/blob/master/src/main/scala/lsu/dcache.scala#L655" target="_blank" rel="noopener noreffer">lsu/dcache.scala</a></p>
-</li>
-<li>
-<p>留意s2_sc_fail的条件</p>
-<ul>
-<li>s2 是流水线 Stage 2</li>
-</ul>
-</li>
-<li>
-<p>(yzh 扒出的代码)</p>
-</li>
-</ul>
-<h2 id="互斥锁-mutex-lock">互斥锁 (Mutex Lock)</h2>
-<h3 id="自旋锁的缺陷">自旋锁的缺陷</h3>
-<ul>
-<li>
-<p>性能问题 (0)</p>
-<ul>
-<li>自旋 (共享变量) 会触发<b>处理器间的缓存同步，延迟增加（总线遍历cache踢副本）</b></li>
-</ul>
-</li>
-<li>
-<p>性能问题 (1)</p>
-<ul>
-<li>
-<p>除了进入临界区的线程，其他处理器上的线程都在空转<b>（看自旋锁的实现代码，没有拿到🔒的线程在空转死循环）</b></p>
-<ul>
-<li>会造成多CPU机器利用率过低的问题（就有🔒的在工作）</li>
-</ul>
-</li>
-<li>
-<p><b>争抢锁的处理器越多，利用率越低</b></p>
-</li>
-</ul>
-</li>
-<li>
-<p>性能问题 (2)</p>
-<ul>
-<li>获得自旋锁的线程<b>可能被操作系统切换出去（出现在单CPU时间片轮转的条件下，轮转时间片导致拿🔒的线程休眠，相当于你拿着🔒回宿舍睡觉，全教室的人只能等着你 $\Longrightarrow$ 还在死循环里面空转）</b>
-<ul>
-<li>操作系统不 “感知” 线程在做什么</li>
-<li>(但为什么不能呢？) $\Longrightarrow$ 课后思考</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p><b>实现 100% 的资源浪费</b></p>
-</li>
-</ul>
-<div class="mermaid" id="id-5"></div>
-<h3 id="scalability-性能的新维度">Scalability: 性能的新维度</h3>
-<blockquote>
-<p><u>同一份计算任务，时间 (CPU cycles) 和空间 (mapped memory) 会随处理器数量的增长而变化</u>。</p>
-<p><b>注意和数据结构里面的计算数据量n区别，这里面衡量的标准是依据处理器的数量而定的</b></p>
-</blockquote>
-<ul>
-<li><a href="https://jyywiki.cn/pages/OS/2022/demos/sum-scalability.c" target="_blank" rel="noopener noreffer">sum-scalability.c</a>，<a href="https://jyywiki.cn/pages/OS/2022/demos/stat.py" target="_blank" rel="noopener noreffer">stat.py</a></li>
-<li><a href="https://jyywiki.cn/pages/OS/2022/demos/thread-sync.h" target="_blank" rel="noopener noreffer">thread-sync.h</a></li>
-<li>严谨的统计很难
-<ul>
-<li>CPU 动态功耗（散热跟不上只能做一峰⌚真👨（悲 ）</li>
-<li>系统中的其他进程</li>
-<li>……</li>
-</ul>
-</li>
-<li><a href="https://www.cse.unsw.edu.au/~gernot/benchmarking-crimes.html" target="_blank" rel="noopener noreffer">Benchmarking crimes</a></li>
-</ul>
-<p>sum-scalability.c，里面用的就是<b>自旋锁</b>，在自旋锁的保护下执行sum++</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;thread-sync.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define N 10000000
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="n">spinlock_t</span> <span class="n">lock</span> <span class="o">=</span> <span class="n">SPIN_INIT</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="n">n</span><span class="p">,</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Tsum</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">sum</span><span class="o">++</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lock</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">2</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">nthread</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">n</span> <span class="o">=</span> <span class="n">N</span> <span class="o">/</span> <span class="n">nthread</span><span class="p">;</span> <span class="c1">//nthread是线程数量，n就是平摊下来每个线程要执行的sum++（也就是🔒）的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nthread</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">create</span><span class="p">(</span><span class="n">Tsum</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="n">join</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">sum</span> <span class="o">==</span> <span class="n">n</span> <span class="o">*</span> <span class="n">nthread</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>自旋锁的实现(来自<code>thread-sync.h</code>)</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">spin_lock</span><span class="p">(</span><span class="n">spinlock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">intptr_t</span> <span class="n">value</span> <span class="o">=</span> <span class="n">atomic_xchg</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="k">break</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">spin_unlock</span><span class="p">(</span><span class="n">spinlock_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">atomic_xchg</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><p>Update in 2023-03-09 15:20</p>
-<p>绷不住直接😪了，睡醒继续</p>
-</div>
-        </div>
-    </div>
-<ul>
-<li>运行</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">gcc sum-scalability.c -O2 -lpthread
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 15:25:37 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">1</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.043s
-</span></span><span class="line"><span class="cl">user    0m0.016s
-</span></span><span class="line"><span class="cl">sys     0m0.021s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 15:25:40 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">2</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.229s
-</span></span><span class="line"><span class="cl">user    0m0.337s
-</span></span><span class="line"><span class="cl">sys     0m0.071s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 15:25:44 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">4</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.337s
-</span></span><span class="line"><span class="cl">user    0m0.393s
-</span></span><span class="line"><span class="cl">sys     0m0.166s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 15:26:21 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">32</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m1.316s
-</span></span><span class="line"><span class="cl">user    0m2.176s
-</span></span><span class="line"><span class="cl">sys     0m0.288s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 15:26:35 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">32</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m1.230s
-</span></span><span class="line"><span class="cl">user    0m2.040s
-</span></span><span class="line"><span class="cl">sys     0m0.255s
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>现象：<b>同样的工作量，线程越多，效率越低</b></li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter5-2.jpg" title="/img/Operating System/chapter5-2.jpg" data-thumbnail="/img/Operating System/chapter5-2.jpg" data-sub-html="<h2>图像</h2>">
-        
-    </a><figcaption class="image-caption">图像</figcaption>
-    </figure>
-<h3 id="自旋锁的使用场景">自旋锁的使用场景</h3>
-<ul>
-<li><b>两个重要的约束</b>
-<ul>
-<li>临界区几乎不“拥堵”$\Longrightarrow$ <b>几乎就只有一个线程进入临界区</b> $\Longrightarrow$ 这样争抢🔒的状况就会很少</li>
-<li>持有自旋锁时禁止执行流切换 $\Longrightarrow$ 翻译成上面的人话就是禁止拿着🔒回宿舍😴 $\Longrightarrow$ <b>但是，我们的应用程序是做不到这一点的（如果应用程序能够防止自己在时间片轮转的时候被切出去，那么一个while(1);就能让电脑崩溃，操作系统是绝对禁止这样的事情的）</b></li>
-</ul>
-</li>
-</ul>
-<h4 id="使用场景操作系统内核的并发数据结构-短临界区">使用场景：操作系统内核的并发数据结构 (短临界区)</h4>
-<ul>
-<li><b>操作系统可以关闭中断和抢占</b> $\Longrightarrow$ 这就是和应用程序不一样的地方
-<ul>
-<li>保证锁的持有者在很短的时间内可以释放锁</li>
-</ul>
-</li>
-<li>(如果是虚拟机呢&hellip;😂)
-<ul>
-<li>PAUSE 指令会触发 VM Exit $\Longrightarrow$ 防止有故障把物理机给卡死</li>
-</ul>
-</li>
-<li>但依旧很难做好
-<ul>
-<li><a href="https://www.usenix.org/conference/osdi10/analysis-linux-scalability-many-cores" target="_blank" rel="noopener noreffer">An analysis of Linux scalability to many cores</a> (OSDI'10) （10年paper，吐槽Linux内核的自旋锁有多烂）</li>
-</ul>
-</li>
-</ul>
-<h3 id="实现线程--长临界区的互斥">实现线程 + 长临界区的互斥</h3>
-<blockquote>
-<p>作业那么多，与其干等 Online Judge 发布，不如把自己 (CPU) 让给其他作业 (线程) 执行？</p>
-<p><u>说白了就是有事情卡住了就去干别的，别就瞎🐔8️⃣干等着这一件事（这也就是比自旋锁高明的地方）</u></p>
-</blockquote>
-<p>“让” 不是 C 语言代码可以做到的 (C 代码只能计算)</p>
-<ul>
-<li>
-<p>把锁的实现放到操作系统里就好啦！$\Longrightarrow$ 系统调用</p>
-<ul>
-<li>
-<p><code>syscall(SYSCALL_lock, &amp;lk);</code></p>
-<ul>
-<li><b>试图获得 <code>lk</code>，但如果失败，<u>就切换到其他线程</u> $\Longrightarrow$ 这个就是精髓</b></li>
-</ul>
-</li>
-<li>
-<p><code>syscall(SYSCALL_unlock, &amp;lk);</code></p>
-<ul>
-<li><b>释放 <code>lk</code>，如果有等待锁的线程就唤醒</b></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class="details admonition tip open">
-        <div class="details-summary admonition-title">
-            <i class="icon fas fa-lightbulb fa-fw"></i>Update<i class="details-icon fas fa-angle-right fa-fw"></i>
-        </div>
-        <div class="details-content">
-            <div class="admonition-content"><p>Update in 2023-03-09 19:15</p>
-<p>干拌面吃完真撑的慌，下回还是吃汤面</p>
-<p>晚上看完</p>
-</div>
-        </div>
-    </div>
-<h3 id="实现线程--长临界区的互斥-contd">实现线程 + 长临界区的互斥 (cont&rsquo;d)</h3>
-<ul>
-<li>
-<p><b>操作系统 = 更衣室管理员</b></p>
-</li>
-<li>
-<p>先到的人 (线程)</p>
-<ul>
-<li>成功获得手环，进入游泳馆</li>
-<li><code>*lock = 🔒</code>，系统调用直接返回</li>
-</ul>
-</li>
-<li>
-<p>后到的人 (线程)</p>
-<ul>
-<li>不能进入游泳馆，排队等待</li>
-<li><b>线程放入等待队列，执行线程切换 (yield)</b></li>
-</ul>
-</li>
-<li>
-<p>洗完澡出来的人 (线程)</p>
-<ul>
-<li>
-<p>交还手环给管理员；管理员把手环再交给排队的人</p>
-</li>
-<li>
-<p><b>如果等待队列不空，从等待队列中取出一个线程允许执行</b></p>
-</li>
-<li>
-<p><b>如果等待队列为空，<code>*lock = ✅</code></b></p>
-</li>
-</ul>
-</li>
-<li>
-<p><b><font color="red">管理员 (OS) 使用<u>自旋锁</u>确保自己处理手环的过程是原子的</font></b></p>
-</li>
-</ul>
-<h2 id="futex--spin--mutex">Futex = Spin + Mutex</h2>
-<h3 id="关于互斥的一些分析">关于互斥的一些分析</h3>
-<ul>
-<li>
-<p>自旋锁 (线程直接共享 locked)</p>
-<ul>
-<li>
-<p>更快的 fast path</p>
-<ul>
-<li>xchg 成功 → 立即进入临界区，开销很小</li>
-</ul>
-</li>
-<li>
-<p>更慢的 slow path</p>
-<ul>
-<li>xchg 失败 → 浪费 CPU 自旋等待（交换一些不是🔒，没用的东西）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>睡眠（互斥）锁 (通过系统调用访问 locked)</p>
-<ul>
-<li>
-<p>更快的 slow path</p>
-<ul>
-<li>上锁失败线程不再占用 CPU</li>
-</ul>
-</li>
-<li>
-<p>更慢的 fast path</p>
-<ul>
-<li>即便上锁成功也需要<u>进出内核 (syscall)</u> $\Longrightarrow$ 速度相对比较慢</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="futex-fast-userspace-mutexes">Futex: Fast Userspace muTexes</h3>
-<blockquote>
-<p>解决方案：全都要</p>
-</blockquote>
-<div class="mermaid" id="id-6"></div>
-<ul>
-<li>
-<p><b><font color="red">性能优化的最常见技巧</font></b></p>
-<ul>
-<li>看 average (frequent) case 而不是 worst case $\Longrightarrow$ <b>这里是和算法题做对比，算法题要保证所有可能的情况都可以被高效计算（worst case），而操作系统要求的则是大部分情况都可以被快速处理，少数的情况处理地慢也可以（average）</b></li>
-</ul>
-</li>
-<li>
-<p>POSIX 线程库中的互斥锁 (<code>pthread_mutex</code>) $\Longrightarrow$ 两种🔒的好处都得了</p>
-</li>
-<li>
-<p>我们将<a href="https://jyywiki.cn/pages/OS/2022/demos/sum-scalability.c" target="_blank" rel="noopener noreffer">sum-scalability.c</a>里面的自旋锁换成互斥锁</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">mutex_t</span> <span class="n">lock</span> <span class="o">=</span> <span class="n">MUTEX_INIT</span><span class="p">();</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>互斥锁的实现（通过syscall）</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mutex_lock</span><span class="p">(</span><span class="n">mutex_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span>   <span class="p">{</span> <span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="n">lk</span><span class="p">);</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mutex_unlock</span><span class="p">(</span><span class="n">mutex_t</span> <span class="o">*</span><span class="n">lk</span><span class="p">)</span> <span class="p">{</span> <span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="n">lk</span><span class="p">);</span> <span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>编译+测试</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"> 2023-03-09 20:11:45 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → gcc sum-scalability.c -O2 -lpthread
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 20:16:06 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">1</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.065s
-</span></span><span class="line"><span class="cl">user    0m0.037s
-</span></span><span class="line"><span class="cl">sys     0m0.019s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 20:16:12 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">2</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.180s
-</span></span><span class="line"><span class="cl">user    0m0.121s
-</span></span><span class="line"><span class="cl">sys     0m0.185s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 20:16:26 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">4</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.179s
-</span></span><span class="line"><span class="cl">user    0m0.156s
-</span></span><span class="line"><span class="cl">sys     0m0.152s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 20:16:28 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">32</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.106s
-</span></span><span class="line"><span class="cl">user    0m0.100s
-</span></span><span class="line"><span class="cl">sys     0m0.039s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"> 2023-03-09 20:20:18 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → <span class="nb">time</span> ./a.out <span class="m">64</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">real    0m0.087s
-</span></span><span class="line"><span class="cl">user    0m0.056s
-</span></span><span class="line"><span class="cl">sys     0m0.060s
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><b>可以看到当线程数量变多的时候，<code>pthread_mutex</code>处理的效率要远高于自旋锁</b></p>
-</li>
-<li>
-<p>观察系统调用 (strace) $\Longrightarrow$ 太长了就复制一段</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">  1
-</span><span class="lnt">  2
-</span><span class="lnt">  3
-</span><span class="lnt">  4
-</span><span class="lnt">  5
-</span><span class="lnt">  6
-</span><span class="lnt">  7
-</span><span class="lnt">  8
-</span><span class="lnt">  9
-</span><span class="lnt"> 10
-</span><span class="lnt"> 11
-</span><span class="lnt"> 12
-</span><span class="lnt"> 13
-</span><span class="lnt"> 14
-</span><span class="lnt"> 15
-</span><span class="lnt"> 16
-</span><span class="lnt"> 17
-</span><span class="lnt"> 18
-</span><span class="lnt"> 19
-</span><span class="lnt"> 20
-</span><span class="lnt"> 21
-</span><span class="lnt"> 22
-</span><span class="lnt"> 23
-</span><span class="lnt"> 24
-</span><span class="lnt"> 25
-</span><span class="lnt"> 26
-</span><span class="lnt"> 27
-</span><span class="lnt"> 28
-</span><span class="lnt"> 29
-</span><span class="lnt"> 30
-</span><span class="lnt"> 31
-</span><span class="lnt"> 32
-</span><span class="lnt"> 33
-</span><span class="lnt"> 34
-</span><span class="lnt"> 35
-</span><span class="lnt"> 36
-</span><span class="lnt"> 37
-</span><span class="lnt"> 38
-</span><span class="lnt"> 39
-</span><span class="lnt"> 40
-</span><span class="lnt"> 41
-</span><span class="lnt"> 42
-</span><span class="lnt"> 43
-</span><span class="lnt"> 44
-</span><span class="lnt"> 45
-</span><span class="lnt"> 46
-</span><span class="lnt"> 47
-</span><span class="lnt"> 48
-</span><span class="lnt"> 49
-</span><span class="lnt"> 50
-</span><span class="lnt"> 51
-</span><span class="lnt"> 52
-</span><span class="lnt"> 53
-</span><span class="lnt"> 54
-</span><span class="lnt"> 55
-</span><span class="lnt"> 56
-</span><span class="lnt"> 57
-</span><span class="lnt"> 58
-</span><span class="lnt"> 59
-</span><span class="lnt"> 60
-</span><span class="lnt"> 61
-</span><span class="lnt"> 62
-</span><span class="lnt"> 63
-</span><span class="lnt"> 64
-</span><span class="lnt"> 65
-</span><span class="lnt"> 66
-</span><span class="lnt"> 67
-</span><span class="lnt"> 68
-</span><span class="lnt"> 69
-</span><span class="lnt"> 70
-</span><span class="lnt"> 71
-</span><span class="lnt"> 72
-</span><span class="lnt"> 73
-</span><span class="lnt"> 74
-</span><span class="lnt"> 75
-</span><span class="lnt"> 76
-</span><span class="lnt"> 77
-</span><span class="lnt"> 78
-</span><span class="lnt"> 79
-</span><span class="lnt"> 80
-</span><span class="lnt"> 81
-</span><span class="lnt"> 82
-</span><span class="lnt"> 83
-</span><span class="lnt"> 84
-</span><span class="lnt"> 85
-</span><span class="lnt"> 86
-</span><span class="lnt"> 87
-</span><span class="lnt"> 88
-</span><span class="lnt"> 89
-</span><span class="lnt"> 90
-</span><span class="lnt"> 91
-</span><span class="lnt"> 92
-</span><span class="lnt"> 93
-</span><span class="lnt"> 94
-</span><span class="lnt"> 95
-</span><span class="lnt"> 96
-</span><span class="lnt"> 97
-</span><span class="lnt"> 98
-</span><span class="lnt"> 99
-</span><span class="lnt">100
-</span><span class="lnt">101
-</span><span class="lnt">102
-</span><span class="lnt">103
-</span><span class="lnt">104
-</span><span class="lnt">105
-</span><span class="lnt">106
-</span><span class="lnt">107
-</span><span class="lnt">108
-</span><span class="lnt">109
-</span><span class="lnt">110
-</span><span class="lnt">111
-</span><span class="lnt">112
-</span><span class="lnt">113
-</span><span class="lnt">114
-</span><span class="lnt">115
-</span><span class="lnt">116
-</span><span class="lnt">117
-</span><span class="lnt">118
-</span><span class="lnt">119
-</span><span class="lnt">120
-</span><span class="lnt">121
-</span><span class="lnt">122
-</span><span class="lnt">123
-</span><span class="lnt">124
-</span><span class="lnt">125
-</span><span class="lnt">126
-</span><span class="lnt">127
-</span><span class="lnt">128
-</span><span class="lnt">129
-</span><span class="lnt">130
-</span><span class="lnt">131
-</span><span class="lnt">132
-</span><span class="lnt">133
-</span><span class="lnt">134
-</span><span class="lnt">135
-</span><span class="lnt">136
-</span><span class="lnt">137
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">2023-03-09 20:11:24 ⌚  jungle-virtual-machine in ~/chapter5
-</span></span><span class="line"><span class="cl">○ → strace -f ./a.out <span class="m">64</span>
-</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./a.out&#34;</span>, <span class="o">[</span><span class="s2">&#34;./a.out&#34;</span>, <span class="s2">&#34;64&#34;</span><span class="o">]</span>, 0x7ffe8bbc7370 /* <span class="m">64</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55d83eca4000
-</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>0x3001 /* ARCH_??? */, 0x7ffcb38f0700<span class="o">)</span> <span class="o">=</span> -1 EINVAL <span class="o">(</span>无效的参数<span class="o">)</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 8192, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fda56b2a000
-</span></span><span class="line"><span class="cl">access<span class="o">(</span><span class="s2">&#34;/etc/ld.so.preload&#34;</span>, R_OK<span class="o">)</span>      <span class="o">=</span> -1 ENOENT <span class="o">(</span>没有那个文件或目录<span class="o">)</span>
-</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/etc/ld.so.cache&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span>
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0644, <span class="nv">st_size</span><span class="o">=</span>76495, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 76495, PROT_READ, MAP_PRIVATE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7fda56b17000
-</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/lib/x86_64-linux-gnu/libc.so.6&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span>
-</span></span><span class="line"><span class="cl">read<span class="o">(</span>3, <span class="s2">&#34;\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0&gt;\0\1\0\0\0P\237\2\0\0\0\0\0&#34;</span>..., 832<span class="o">)</span> <span class="o">=</span> <span class="m">832</span>
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span>
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\4\0\0\0 \0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0&#34;</span>..., 48, 848<span class="o">)</span> <span class="o">=</span> <span class="m">48</span>
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\4\0\0\0\24\0\0\0\3\0\0\0GNU\0i8\235HZ\227\223\333\350s\360\352,\223\340.&#34;</span>..., 68, 896<span class="o">)</span> <span class="o">=</span> <span class="m">68</span>
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0644, <span class="nv">st_size</span><span class="o">=</span>2216304, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 2260560, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_DENYWRITE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7fda56800000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fda56828000, 1658880, PROT_READ<span class="p">|</span>PROT_EXEC, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x28000<span class="o">)</span> <span class="o">=</span> 0x7fda56828000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fda569bd000, 360448, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x1bd000<span class="o">)</span> <span class="o">=</span> 0x7fda569bd000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fda56a15000, 24576, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x214000<span class="o">)</span> <span class="o">=</span> 0x7fda56a15000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fda56a1b000, 52816, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fda56a1b000
-</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 12288, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fda56b14000
-</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x7fda56b14740<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x7fda56b14a10<span class="o">)</span>         <span class="o">=</span> <span class="m">4614</span>
-</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x7fda56b14a20, 24<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x7fda56b150e0, 0x20, 0, 0x53053053<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7fda56a15000, 16384, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x55d83cf2f000, 4096, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7fda56b64000, 8192, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">munmap<span class="o">(</span>0x7fda56b17000, 76495<span class="o">)</span>           <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">rt_sigaction<span class="o">(</span>SIGRT_1, <span class="o">{</span><span class="nv">sa_handler</span><span class="o">=</span>0x7fda568918f0, <span class="nv">sa_mask</span><span class="o">=[]</span>, <span class="nv">sa_flags</span><span class="o">=</span>SA_RESTORER<span class="p">|</span>SA_ONSTACK<span class="p">|</span>SA_RESTART<span class="p">|</span>SA_SIGINFO, <span class="nv">sa_restorer</span><span class="o">=</span>0x7fda56842520<span class="o">}</span>, NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">rt_sigprocmask<span class="o">(</span>SIG_UNBLOCK, <span class="o">[</span>RTMIN RT_1<span class="o">]</span>, NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 8392704, PROT_NONE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS<span class="p">|</span>MAP_STACK, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fda55fff000
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7fda56000000, 8388608, PROT_READ<span class="p">|</span>PROT_WRITE<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\xc0\x0d\x30\x79\xa6\xc0\x9a\x32&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span>
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55d83eca4000
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x55d83ecc5000<span class="o">)</span>                     <span class="o">=</span> 0x55d83ecc5000
-</span></span><span class="line"><span class="cl">rt_sigprocmask<span class="o">(</span>SIG_BLOCK, ~<span class="o">[]</span>, <span class="o">[]</span>, 8<span class="o">)</span>   <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">clone3<span class="o">({</span><span class="nv">flags</span><span class="o">=</span>CLONE_VM<span class="p">|</span>CLONE_FS<span class="p">|</span>CLONE_FILES<span class="p">|</span>CLONE_SIGHAND<span class="p">|</span>CLONE_THREAD<span class="p">|</span>CLONE_SYSVSEM<span class="p">|</span>CLONE_SETTLS<span class="p">|</span>CLONE_PARENT_SETTID<span class="p">|</span>CLONE_CHILD_CLEARTID, <span class="nv">child_tid</span><span class="o">=</span>0x7fda567ff910, <span class="nv">parent_tid</span><span class="o">=</span>0x7fda567ff910, <span class="nv">exit_signal</span><span class="o">=</span>0, <span class="nv">stack</span><span class="o">=</span>0x7fda55fff000, <span class="nv">stack_size</span><span class="o">=</span>0x7fff00, <span class="nv">tls</span><span class="o">=</span>0x7fda567ff640<span class="o">}</span>strace: Process <span class="m">4615</span> <span class="nv">attached</span>
-</span></span><span class="line"><span class="cl"> <span class="o">=</span>&gt; <span class="o">{</span><span class="nv">parent_tid</span><span class="o">=[</span>4615<span class="o">]}</span>, 88<span class="o">)</span> <span class="o">=</span> <span class="m">4615</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_SETMASK, <span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> rseq<span class="o">(</span>0x7fda567fffe0, 0x20, 0, 0x53053053 &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... rseq resumed&gt;<span class="o">)</span>         <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mmap<span class="o">(</span>NULL, 8392704, PROT_NONE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS<span class="p">|</span>MAP_STACK, -1, <span class="m">0</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> set_robust_list<span class="o">(</span>0x7fda567ff920, <span class="m">24</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mmap resumed&gt;<span class="o">)</span>         <span class="o">=</span> 0x7fda557fe000
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... set_robust_list resumed&gt;<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mprotect<span class="o">(</span>0x7fda557ff000, 8388608, PROT_READ<span class="p">|</span>PROT_WRITE &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_SETMASK, <span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mprotect resumed&gt;<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_BLOCK, ~<span class="o">[]</span>, <span class="o">[]</span>, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> clone3<span class="o">({</span><span class="nv">flags</span><span class="o">=</span>CLONE_VM<span class="p">|</span>CLONE_FS<span class="p">|</span>CLONE_FILES<span class="p">|</span>CLONE_SIGHAND<span class="p">|</span>CLONE_THREAD<span class="p">|</span>CLONE_SYSVSEM<span class="p">|</span>CLONE_SETTLS<span class="p">|</span>CLONE_PARENT_SETTID<span class="p">|</span>CLONE_CHILD_CLEARTID, <span class="nv">child_tid</span><span class="o">=</span>0x7fda55ffe910, <span class="nv">parent_tid</span><span class="o">=</span>0x7fda55ffe910, <span class="nv">exit_signal</span><span class="o">=</span>0, <span class="nv">stack</span><span class="o">=</span>0x7fda557fe000, <span class="nv">stack_size</span><span class="o">=</span>0x7fff00, <span class="nv">tls</span><span class="o">=</span>0x7fda55ffe640<span class="o">}</span>strace: Process <span class="m">4616</span> <span class="nv">attached</span>
-</span></span><span class="line"><span class="cl"> <span class="o">=</span>&gt; <span class="o">{</span><span class="nv">parent_tid</span><span class="o">=[</span>4616<span class="o">]}</span>, 88<span class="o">)</span> <span class="o">=</span> <span class="m">4616</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> rseq<span class="o">(</span>0x7fda55ffefe0, 0x20, 0, 0x53053053 &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_SETMASK, <span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... rseq resumed&gt;<span class="o">)</span>         <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mmap<span class="o">(</span>NULL, 8392704, PROT_NONE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS<span class="p">|</span>MAP_STACK, -1, <span class="m">0</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> set_robust_list<span class="o">(</span>0x7fda55ffe920, <span class="m">24</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mmap resumed&gt;<span class="o">)</span>         <span class="o">=</span> 0x7fda54ffd000
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... set_robust_list resumed&gt;<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mprotect<span class="o">(</span>0x7fda54ffe000, 8388608, PROT_READ<span class="p">|</span>PROT_WRITE &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_SETMASK, <span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mprotect resumed&gt;<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_BLOCK, ~<span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;<span class="o">[]</span>, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> -1 EAGAIN <span class="o">(</span>资源暂时不可用<span class="o">)</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> clone3<span class="o">({</span><span class="nv">flags</span><span class="o">=</span>CLONE_VM<span class="p">|</span>CLONE_FS<span class="p">|</span>CLONE_FILES<span class="p">|</span>CLONE_SIGHAND<span class="p">|</span>CLONE_THREAD<span class="p">|</span>CLONE_SYSVSEM<span class="p">|</span>CLONE_SETTLS<span class="p">|</span>CLONE_PARENT_SETTID<span class="p">|</span>CLONE_CHILD_CLEARTID, <span class="nv">child_tid</span><span class="o">=</span>0x7fda557fd910, <span class="nv">parent_tid</span><span class="o">=</span>0x7fda557fd910, <span class="nv">exit_signal</span><span class="o">=</span>0, <span class="nv">stack</span><span class="o">=</span>0x7fda54ffd000, <span class="nv">stack_size</span><span class="o">=</span>0x7fff00, <span class="nv">tls</span><span class="o">=</span>0x7fda557fd640<span class="o">}</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, 1<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">strace: Process <span class="m">4617</span> attached
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> -1 EAGAIN <span class="o">(</span>资源暂时不可用<span class="o">)</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... clone3 resumed&gt; <span class="o">=</span>&gt; <span class="o">{</span><span class="nv">parent_tid</span><span class="o">=[</span>4617<span class="o">]}</span>, 88<span class="o">)</span> <span class="o">=</span> <span class="m">4617</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> rseq<span class="o">(</span>0x7fda557fdfe0, 0x20, 0, 0x53053053 &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_SETMASK, <span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> &lt;... rseq resumed&gt;<span class="o">)</span>         <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mmap<span class="o">(</span>NULL, 8392704, PROT_NONE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS<span class="p">|</span>MAP_STACK, -1, <span class="m">0</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> set_robust_list<span class="o">(</span>0x7fda557fd920, <span class="m">24</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mmap resumed&gt;<span class="o">)</span>         <span class="o">=</span> 0x7fda547fc000
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> &lt;... set_robust_list resumed&gt;<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mprotect<span class="o">(</span>0x7fda547fd000, 8388608, PROT_READ<span class="p">|</span>PROT_WRITE &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_SETMASK, <span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">1</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mprotect resumed&gt;<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_BLOCK, ~<span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;<span class="o">[]</span>, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> clone3<span class="o">({</span><span class="nv">flags</span><span class="o">=</span>CLONE_VM<span class="p">|</span>CLONE_FS<span class="p">|</span>CLONE_FILES<span class="p">|</span>CLONE_SIGHAND<span class="p">|</span>CLONE_THREAD<span class="p">|</span>CLONE_SYSVSEM<span class="p">|</span>CLONE_SETTLS<span class="p">|</span>CLONE_PARENT_SETTID<span class="p">|</span>CLONE_CHILD_CLEARTID, <span class="nv">child_tid</span><span class="o">=</span>0x7fda54ffc910, <span class="nv">parent_tid</span><span class="o">=</span>0x7fda54ffc910, <span class="nv">exit_signal</span><span class="o">=</span>0, <span class="nv">stack</span><span class="o">=</span>0x7fda547fc000, <span class="nv">stack_size</span><span class="o">=</span>0x7fff00, <span class="nv">tls</span><span class="o">=</span>0x7fda54ffc640<span class="o">}</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">1</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... clone3 resumed&gt; <span class="o">=</span>&gt; <span class="o">{</span><span class="nv">parent_tid</span><span class="o">=[</span>4618<span class="o">]}</span>, 88<span class="o">)</span> <span class="o">=</span> <span class="m">4618</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">1</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_SETMASK, <span class="o">[]</span>, NULL, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mmap<span class="o">(</span>NULL, 8392704, PROT_NONE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS<span class="p">|</span>MAP_STACK, -1, <span class="m">0</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">1</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mmap resumed&gt;<span class="o">)</span>         <span class="o">=</span> 0x7fda53ffb000
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> mprotect<span class="o">(</span>0x7fda53ffc000, 8388608, PROT_READ<span class="p">|</span>PROT_WRITE &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> -1 EAGAIN <span class="o">(</span>资源暂时不可用<span class="o">)</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... mprotect resumed&gt;<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4617<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> rt_sigprocmask<span class="o">(</span>SIG_BLOCK, ~<span class="o">[]</span>,  &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> &lt;... rt_sigprocmask resumed&gt;<span class="o">[]</span>, 8<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4614<span class="o">]</span> clone3<span class="o">({</span><span class="nv">flags</span><span class="o">=</span>CLONE_VM<span class="p">|</span>CLONE_FS<span class="p">|</span>CLONE_FILES<span class="p">|</span>CLONE_SIGHAND<span class="p">|</span>CLONE_THREAD<span class="p">|</span>CLONE_SYSVSEM<span class="p">|</span>CLONE_SETTLS<span class="p">|</span>CLONE_PARENT_SETTID<span class="p">|</span>CLONE_CHILD_CLEARTID, <span class="nv">child_tid</span><span class="o">=</span>0x7fda547fb910, <span class="nv">parent_tid</span><span class="o">=</span>0x7fda547fb910, <span class="nv">exit_signal</span><span class="o">=</span>0, <span class="nv">stack</span><span class="o">=</span>0x7fda53ffb000, <span class="nv">stack_size</span><span class="o">=</span>0x7fff00, <span class="nv">tls</span><span class="o">=</span>0x7fda547fb640<span class="o">}</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> futex<span class="o">(</span>0x55d83cf30060, FUTEX_WAKE_PRIVATE, <span class="m">1</span> &lt;unfinished ...&gt;
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4615<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> -1 EAGAIN <span class="o">(</span>资源暂时不可用<span class="o">)</span>
-</span></span><span class="line"><span class="cl"><span class="o">[</span>pid  4616<span class="o">]</span> &lt;... futex resumed&gt;<span class="o">)</span>        <span class="o">=</span> <span class="m">0</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>里面有很多类似73行的语句<code>[pid  4616] futex(0x55d83cf30060, FUTEX_WAIT_PRIVATE, 2, NULL &lt;unfinished ...&gt;</code></li>
-</ul>
-<blockquote>
-<p><strong>一、什么是futex？</strong></p>
-<p>futex是Fast Userspace muTEX的缩写，该机制是由Rusty Russell、Hubertus Franke和Mathew Kirkwood在2.5.7版本的内核中引入，虽然名字中有互斥锁（mutex）的含义，但实际它是一种用于用户空间应用程序的通用同步工具（基于futex可以在userspace实现互斥锁、读写锁、condition variable等同步机制）。Futex组成包括：</p>
-<ul>
-<li>内核空间的等待队列</li>
-<li>用户空间层的32-bit futex word（所有平台都是32bit，包括64位平台）</li>
-</ul>
-<p><b>在没有竞争的场景下，锁的获取和释放性能都非常高，不需要内核的参与，仅仅是通过用户空间的原子操作来修改futex word的状态即可</b>。在有竞争的场景下，如果线程无法获取futex锁，那么把自己放入到 wait queue中（陷入内核，有系统调用的开销），而在owner task释放锁的时候，如果检测到有竞争（等待队列中有阻塞任务），就会通过系统调用来唤醒等待队列中的任务，使其恢复执行，继续去持锁。如果没有竞争，那么也无需陷入内核。</p>
-<p>摘自：<a href="https://zhuanlan.zhihu.com/p/568678633" target="_blank" rel="noopener noreffer">《什么是futex？》</a></p>
-</blockquote>
-<blockquote>
-<p>Futex（Fast Userspace Mutex）是一种用户空间锁，它是Linux内核提供的一种同步原语，用于控制多个进程或线程之间的访问共享资源。Futex主要用于实现更高级别的同步原语，例如条件变量和读写锁。Futex提供了一种低开销的锁机制，当锁被持有时，它可以避免将线程或进程阻塞在内核空间。</p>
-<p>在Futex中，锁的状态保存在用户空间中，而不是内核空间中，当线程或进程需要获取锁时，它会尝试将锁的状态从“未锁定”改为“锁定”状态。如果成功，线程或进程就可以访问共享资源。如果锁已被其他线程或进程占用，则它将在用户空间内忙等待，直到锁被释放。</p>
-<p>Futex还支持一些其他的操作，例如等待一个特定的值或比较并交换值，这些操作可以用于实现条件变量和读写锁等高级别的同步原语。由于Futex的低开销和高效性，它成为了Linux系统中许多高级别同步原语的基础。</p>
-<p>来自<a href="https://openai.com/blog/chatgpt" target="_blank" rel="noopener noreffer">ChatGPT</a></p>
-</blockquote>
-<ul>
-<li>
-<p><b>如果我们仔细观察就会发现，futex调用的数量远远小于lock和unlock的数量</b></p>
-</li>
-<li>
-<p>gdb 调试</p>
-<ul>
-<li><code>set scheduler-locking on</code>, <code>info threads</code>, <code>thread X</code></li>
-</ul>
-</li>
-</ul>
-<h3 id="futex-fast-userspace-mutexes-contd">Futex: Fast Userspace muTexes (cont&rsquo;d)</h3>
-<p>先在用户空间自旋</p>
-<ul>
-<li>如果获得锁，直接进入</li>
-<li>未能获得锁，系统调用</li>
-<li>解锁以后也需要系统调用
-<ul>
-<li><a href="https://jyywiki.cn/pages/OS/2022/demos/futex.py" target="_blank" rel="noopener noreffer">futex.py</a></li>
-<li>更好的设计可以在 fast-path 不进行系统调用</li>
-</ul>
-</li>
-</ul>
-<p>futex.py</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span><span class="lnt">61
-</span><span class="lnt">62
-</span><span class="lnt">63
-</span><span class="lnt">64
-</span><span class="lnt">65
-</span><span class="lnt">66
-</span><span class="lnt">67
-</span><span class="lnt">68
-</span><span class="lnt">69
-</span><span class="lnt">70
-</span><span class="lnt">71
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Futex</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="n">locked</span><span class="p">,</span> <span class="n">waits</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">tryacquire</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="c1"># Test-and-set (cmpxchg)</span>
-</span></span><span class="line"><span class="cl">            <span class="c1"># Same effect, but more efficient than xchg</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;🔒&#39;</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="s1">&#39;🔒&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;🔒&#39;</span><span class="p">:</span>     <span class="c1"># User</span>
-</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">+</span> <span class="s1">&#39;1&#39;</span> <span class="c1"># Kernel</span>
-</span></span><span class="line"><span class="cl">                <span class="k">while</span> <span class="s1">&#39;1&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">:</span>      <span class="c1"># Kernel</span>
-</span></span><span class="line"><span class="cl">                    <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>                         <span class="c1"># User</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>                            <span class="c1"># User</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>                    <span class="c1"># Kernel</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;🔒&#39;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">+</span> <span class="s1">&#39;2&#39;</span>
-</span></span><span class="line"><span class="cl">                <span class="k">while</span> <span class="s1">&#39;2&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                    <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@thread</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">t3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tryacquire</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;🔒&#39;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span> <span class="o">+</span> <span class="s1">&#39;3&#39;</span>
-</span></span><span class="line"><span class="cl">                <span class="k">while</span> <span class="s1">&#39;3&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waits</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">                    <span class="k">pass</span>
-</span></span><span class="line"><span class="cl">            <span class="n">cs</span> <span class="o">=</span> <span class="kc">True</span>
-</span></span><span class="line"><span class="cl">            <span class="k">del</span> <span class="n">cs</span>
-</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;blue&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;green&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_t3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;t3&#39;</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;yellow&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@marker</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">mark_both</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;t1&#39;</span><span class="p">,</span> <span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="s1">&#39;t3&#39;</span><span class="p">]:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">localvar</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="s1">&#39;cs&#39;</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>python代码的优势：如果你想让一句代码原子执行——&gt;加入<code>yield breakpoint()</code></p>
-</li>
-<li>
-<p><code>python3 model-checker.py futex.py | python3 visualize.py -t &gt; a.html </code>重定向，可视化</p>
-</li>
-<li>
-<p><a href="https://github.com/Jungle430/check-for-NJU-OS" target="_blank" rel="noopener noreffer">样例仓库</a></p>
-</li>
-</ul>
-<hr>
-<p>RTFM (劝退)</p>
-<ul>
-<li>futex (7), futex (2)</li>
-<li><a href="https://lwn.net/Articles/360699/" target="_blank" rel="noopener noreffer">A futex overview and update</a> (LWN)</li>
-<li><a href="https://jyywiki.cn/pages/OS/manuals/futexes-are-tricky.pdf" target="_blank" rel="noopener noreffer">Futexes are tricky</a> (论 model checker 的重要性) $\Longrightarrow$ <u>同时也提示我们从最简单的写起，千万不要觉得自己行就装🖊搞大的</u></li>
-<li>(我们不讲并发算法)</li>
-</ul>
-<h2 id="总结">总结</h2>
-<p>本次课回答的问题</p>
-<ul>
-<li><strong>Q</strong>: 如何在多处理器系统上实现互斥？</li>
-</ul>
-<hr>
-<p>Take-away message</p>
-<ul>
-<li>软件不够，硬件来凑 (自旋锁)</li>
-<li>用户不够，内核来凑 (互斥锁)
-<ul>
-<li><b><font color="red">找到你依赖的假设，并大胆地打破它</font></b></li>
-</ul>
-</li>
-<li>Fast/slow paths: 性能优化的重要途径</li>
-</ul>
 <p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>
