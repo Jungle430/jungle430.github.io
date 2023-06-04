@@ -4,7 +4,379 @@
         <link>https://Jungle430.github.io/tags/data-structure/</link>
         <description>Data Structure - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 18 Nov 2022 22:05:21 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/data-structure/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/data-structure/" rel="self" type="application/rss+xml" /><item>
+    <title>Go 1.19 排序算法</title>
+    <link>https://Jungle430.github.io/posts/go/pdqsort/</link>
+    <pubDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/pdqsort/</guid>
+    <description><![CDATA[<h1 id="go-119-排序算法-pdqsort">Go 1.19 排序算法-$pdqsort$</h1>
+<h2 id="三种经典排序算法的对比">三种经典排序算法的对比</h2>
+<ul>
+<li>所有短元素和元素有序的情况下，<strong>插入排序性能最好</strong></li>
+<li>在大部分情况下，快速排序都有较好的<strong>综合性能</strong></li>
+<li>几乎在任何情况下，堆排序都表现的<strong>比较稳定</strong></li>
+</ul>
+<hr>
+<ul>
+<li>能否结合上面三种排序算法的优点，设计出一个排序算法使得</li>
+</ul>
+<p>$$
+\begin{align}
+&amp;Best \Longrightarrow O(n)\newline
+&amp;Avg \Longrightarrow O(n\log n)\newline
+&amp;Worst \Longrightarrow O(n\log n)\newline
+\end{align}
+$$</p>
+<h2 id="pdqsort">pdqsort</h2>
+<ul>
+<li>简介</li>
+</ul>
+<blockquote>
+<ul>
+<li>
+<p>$pdqsort(pattern-defeating-quicksort)$</p>
+</li>
+<li>
+<p>是一种<em>不稳定</em>的<strong>混合</strong>排序算法，它的不同版本被应用在<code>C++ Boost,Rust</code>以及<code>Go</code>1.19中。它对常见的序列类型做了特殊的优化，使得<strong>在不同条件下都拥有不错的性能</strong></p>
+</li>
+</ul>
+</blockquote>
+<ul>
+<li>复习不稳定:$96_a,96_b \rightarrow^{sort} 96_b,96_a$</li>
+</ul>
+<h3 id="version-1">version 1</h3>
+<ul>
+<li>
+<p>结合三种排序的优点</p>
+<ul>
+<li>短序列使用插入排序</li>
+<li>其他情况使用快排</li>
+<li>如果快速排序表现不佳，则使用<strong>堆排序</strong>保证$Worst$情况下仍有$O(n\log n)$的复杂度</li>
+</ul>
+</li>
+<li>
+<p>Q&amp;A</p>
+<ul>
+<li>短序列的具体长度是多少？
+<ul>
+<li>12~32，不同语言和场景下会有不同，<strong>在泛型版本中根据测试选定为24</strong></li>
+</ul>
+</li>
+<li>怎么得知快排表现不佳，切换到堆排序?
+<ul>
+<li>当<strong>最终</strong>的$pivot$的位置离序列两端很接近时$(&lt; \frac{length}{8})$（其实就是分的太少），判定其表现不佳，当这种情况达到$limit(bits.Len(length))$时，切换到堆排序</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/pdqsort/image1.png" title="/img/Go/pdqsort/image1.png" data-thumbnail="/img/Go/pdqsort/image1.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>改进：<code>choose pivot</code>尽量能够选中中位数，改进<code>choose pivot</code></li>
+</ul>
+<h3 id="version-2">version 2</h3>
+<ul>
+<li>
+<p><code>version1</code>中选择<code>pivot</code>的方式是选择首个元素，算法简单但是效率低</p>
+</li>
+<li>
+<p>遍历数组，寻找真正的中位数 $\Longrightarrow$ 遍历代价太高</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>平衡</p>
+<ul>
+<li>寻找<code>pivot</code>所需要的开销</li>
+<li><code>pivot</code>带来的性能优化</li>
+</ul>
+</li>
+<li>
+<p>解决方案</p>
+<ul>
+<li>寻找近似中位数</li>
+</ul>
+</li>
+<li>
+<p>根据不同的长度选择<code>pivot</code>策略</p>
+<ul>
+<li>短序列$(\le 8)$：选择固定元素</li>
+<li>中序列$(\le 50)$：采样选用三个元素，<a href="https://brilliant.org/wiki/median-finding-algorithm/#citation-1" target="_blank" rel="noopener noreffer"><code>median of three</code></a></li>
+<li>长度列$(&gt;50)$：采样九个元素，<a href="https://www.johndcook.com/blog/2009/06/23/tukey-median-ninther/" target="_blank" rel="noopener noreffer"><code>median of medians</code></a></li>
+</ul>
+</li>
+<li>
+<p><u><code>pivot</code>的采样方式可以让我们“感知”当前序列的状态</u></p>
+<ul>
+<li>采样都为逆序 $\Longrightarrow$ 猜测当前序列可能为<strong>逆序</strong> $\Longrightarrow$ <code>reverse(array)</code></li>
+<li>采样都为顺序 $\Longrightarrow$ 猜测当前序列可能为<strong>顺序</strong> $\Longrightarrow$ <code>insertsort(array)</code>
+<ul>
+<li>注：这里面的插入排序实际使用的是<code>partiallnsertionSort</code>，即有限制次数的插入排序，来限制其最坏情况</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/pdqsort/image2.png" title="/img/Go/pdqsort/image2.png" data-thumbnail="/img/Go/pdqsort/image2.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>改进
+<ul>
+<li>优化了<code>pivot</code>的选择策略（近似中位数）</li>
+<li>根据采样来感知序列状态，适当使用其他方法来提高收益(<code>reverse</code>和<code>partiallnsertionSort</code>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="final-version">final version</h3>
+<ul>
+<li>
+<p>还有什么情况没有被考虑到，可以被优化？</p>
+<ul>
+<li><strong>重复度较高</strong></li>
+</ul>
+</li>
+<li>
+<p>可以在选择<code>pivot</code>的时候“感知”重复度？</p>
+<ul>
+<li>不是很好，因为采样不是很多，很难拿到相同的元素</li>
+</ul>
+</li>
+<li>
+<p>解决方案</p>
+<ul>
+<li><u>如果两次<code>partion</code>生成的<code>pivot</code>相同，即对<code>partition</code>进行了无效分割，此时认为<code>piovt</code>的值为重复元素</u>（比上面的方法有更高的采样率）</li>
+</ul>
+</li>
+<li>
+<p>优化-重复元素较多的情况(<code>partitionEqual</code>)</p>
+<ul>
+<li>当检测到此时的<code>pivot</code>和上次相同时 (发生在<code>leftSubArray</code>) ，使用<code>partitionEqual</code>将重复元素排列在一起，减少重复元素对于<code>pivot</code>选择的干扰</li>
+</ul>
+</li>
+<li>
+<p>优化-当<code>pivot</code>选择策略表现不佳时，随机交换元素</p>
+<ul>
+<li>避免一些极端情况使得<code>QuickSort</code>总是表现不佳，以及一些黑客攻击情况（随机交换来增加不确定性）</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/Go/pdqsort/image3.png" title="/img/Go/pdqsort/image3.png" data-thumbnail="/img/Go/pdqsort/image3.png" data-sub-html="<h2> </h2>">
+        
+    </a><figcaption class="image-caption"><code> </code></figcaption>
+    </figure>
+<ul>
+<li>最终效果</li>
+</ul>
+<p>$$
+\begin{align}
+&amp;Best \Longrightarrow O(n)\newline
+&amp;Avg \Longrightarrow O(n\log n)\newline
+&amp;Worst \Longrightarrow O(n\log n)\newline
+\end{align}
+$$</p>
+<h2 id="总结">总结</h2>
+<ul>
+<li>
+<p>高性能的排序算法是如何设计的?</p>
+<ul>
+<li>根据不同情况选择不同策略，取长补短</li>
+</ul>
+</li>
+<li>
+<p>生产环境中使用的的排序算法和课本上的排序算法有什么区别?</p>
+<ul>
+<li>理论算法注重理论性能，例如时间、空间复杂度等。生产环境中的算法需要面对不同的实践场景，更加注重实践性能</li>
+</ul>
+</li>
+<li>
+<p>Go 语言($\le 1.18$)的排序算法是快速排序么?</p>
+<ul>
+<li>实际一直是<strong>混合排序算法，主体是快速排序</strong>。$Go \le 1.18 $时的算法也是基于快速排序，和<code>pdgsort</code>的区别在于<code>fallback</code>时机、<code>pivot </code>选择策略、是否有针对不同<code>pattern</code>优化等</li>
+</ul>
+</li>
+<li>
+<p>附<code>Go 1.20</code>$pdqsort$源码</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// pdqsort sorts data[a:b].
+</span></span></span><span class="line"><span class="cl"><span class="c1">// The algorithm based on pattern-defeating quicksort(pdqsort), but without the optimizations from BlockQuicksort.
+</span></span></span><span class="line"><span class="cl"><span class="c1">// pdqsort paper: https://arxiv.org/pdf/2106.05123.pdf
+</span></span></span><span class="line"><span class="cl"><span class="c1">// C++ implementation: https://github.com/orlp/pdqsort
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Rust implementation: https://docs.rs/pdqsort/latest/pdqsort/
+</span></span></span><span class="line"><span class="cl"><span class="c1">// limit is the number of allowed bad (very unbalanced) pivots before falling back to heapsort.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">pdqsort</span><span class="p">(</span><span class="nx">data</span> <span class="nx">Interface</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">limit</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">const</span> <span class="nx">maxInsertion</span> <span class="p">=</span> <span class="mi">12</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">wasBalanced</span>    <span class="p">=</span> <span class="kc">true</span> <span class="c1">// whether the last partitioning was reasonably balanced
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">wasPartitioned</span> <span class="p">=</span> <span class="kc">true</span> <span class="c1">// whether the slice was already partitioned
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">length</span> <span class="o">:=</span> <span class="nx">b</span> <span class="o">-</span> <span class="nx">a</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">length</span> <span class="o">&lt;=</span> <span class="nx">maxInsertion</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">insertionSort</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="k">return</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="c1">// Fall back to heapsort if too many bad choices were made.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="nx">limit</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">heapSort</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="k">return</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="c1">// If the last partitioning was imbalanced, we need to breaking patterns.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="p">!</span><span class="nx">wasBalanced</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">breakPatterns</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">limit</span><span class="o">--</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="nx">pivot</span><span class="p">,</span> <span class="nx">hint</span> <span class="o">:=</span> <span class="nf">choosePivot</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">hint</span> <span class="o">==</span> <span class="nx">decreasingHint</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">reverseRange</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="c1">// The chosen pivot was pivot-a elements after the start of the array.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="c1">// After reversing it is pivot-a elements before the end of the array.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="c1">// The idea came from Rust&#39;s implementation.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="nx">pivot</span> <span class="p">=</span> <span class="p">(</span><span class="nx">b</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="nx">pivot</span> <span class="o">-</span> <span class="nx">a</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">hint</span> <span class="p">=</span> <span class="nx">increasingHint</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="c1">// The slice is likely already sorted.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="nx">wasBalanced</span> <span class="o">&amp;&amp;</span> <span class="nx">wasPartitioned</span> <span class="o">&amp;&amp;</span> <span class="nx">hint</span> <span class="o">==</span> <span class="nx">increasingHint</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="nf">partialInsertionSort</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="k">return</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="c1">// Probably the slice contains many duplicate elements, partition the slice into
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="c1">// elements equal to and elements greater than the pivot.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="nx">a</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="p">!</span><span class="nx">data</span><span class="p">.</span><span class="nf">Less</span><span class="p">(</span><span class="nx">a</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">pivot</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">mid</span> <span class="o">:=</span> <span class="nf">partitionEqual</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">pivot</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">a</span> <span class="p">=</span> <span class="nx">mid</span>
+</span></span><span class="line"><span class="cl">			<span class="k">continue</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="nx">mid</span><span class="p">,</span> <span class="nx">alreadyPartitioned</span> <span class="o">:=</span> <span class="nf">partition</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">pivot</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">wasPartitioned</span> <span class="p">=</span> <span class="nx">alreadyPartitioned</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="nx">leftLen</span><span class="p">,</span> <span class="nx">rightLen</span> <span class="o">:=</span> <span class="nx">mid</span><span class="o">-</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="o">-</span><span class="nx">mid</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">balanceThreshold</span> <span class="o">:=</span> <span class="nx">length</span> <span class="o">/</span> <span class="mi">8</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">leftLen</span> <span class="p">&lt;</span> <span class="nx">rightLen</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">wasBalanced</span> <span class="p">=</span> <span class="nx">leftLen</span> <span class="o">&gt;=</span> <span class="nx">balanceThreshold</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">pdqsort</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">mid</span><span class="p">,</span> <span class="nx">limit</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">a</span> <span class="p">=</span> <span class="nx">mid</span> <span class="o">+</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">wasBalanced</span> <span class="p">=</span> <span class="nx">rightLen</span> <span class="o">&gt;=</span> <span class="nx">balanceThreshold</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">pdqsort</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">mid</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">limit</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">b</span> <span class="p">=</span> <span class="nx">mid</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><code>github</code>上面的提交:https://github.com/golang/go/issues/50154</p>
+</li>
+<li>
+<p><a href="https://arxiv.org/pdf/2106.05123.pdf" target="_blank" rel="noopener noreffer">Pattern-defeating Quicksort</a></p>
+</li>
+<li>
+<p><a href="https://mp.weixin.qq.com/s/5HqfRGqPyAhFt0krPgMHOQ" target="_blank" rel="noopener noreffer">公众号文章</a></p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><code>Go</code>的源码还是不错的，起码不至于像<code>C++</code>那样群魔乱舞，考完试抽时间看看</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>Sorting</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/</link>
     <pubDate>Fri, 18 Nov 2022 22:05:21 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/</guid>
@@ -6473,710 +6845,6 @@ implementation of the operations.</p>
 <li>Data structures + Algorithms = Program</li>
 <li>ADT = DS + Operations</li>
 </ol>
-]]></description>
-</item>
-<item>
-    <title>Tree</title>
-    <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/tree/</link>
-    <pubDate>Sun, 06 Nov 2022 18:28:12 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/tree/</guid>
-    <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
-<h2 id="tree">Tree</h2>
-<h3 id="definition">Definition</h3>
-<blockquote>
-<p>One natural way to define a tree is recursively.</p>
-<p>A tree is a collection of nodes. The collection can be empty;</p>
-<p>otherwise, a tree consists of a distinguished node r,called root, and zero or more nonempty (sub)trees
-$T_1, T_2, … T_k$, each of whose roots are connected
-by a direct edge from r.</p>
-</blockquote>
-<div class="mermaid" id="id-1"></div>
-<div class="mermaid" id="id-2"></div>
-<h3 id="terminology">Terminology</h3>
-<blockquote>
-<p>Parent: Node A is the parent of node B, if B is the root of one subtree of A.</p>
-<p>Child: Node B is the child of node A, if A is the parent of B.</p>
-<p>Sibling:Nodes with the same parent are siblings</p>
-<p>Leaf:A node is called a leaf if it has no children.</p>
-<p>Branch Node(OR internal node):Any node of a tree that has child nodes(the number of child nodes is more than 0)</p>
-<p>Ancestor: Node A is an ancestor of node B,if A is either the parent of B or is the parent of some ancestor of B.</p>
-<p>Descendant: Node B is the descendant of node A, if A is an ancestor of node B.</p>
-<p>Level of a Node:Level of the root of a tree is 1, and the level of any other nodes in the tree is one more than the level of its
-parent</p>
-<p>Depth of a Tree:The depth of a tree is the maximum level of any leaf in the tree (also called the height of a tree).</p>
-<p>Degree of a node:The number of children of a node.</p>
-<p>Degree of a tree:The max-degree of the node of a tree.</p>
-</blockquote>
-<h3 id="adt">ADT</h3>
-<p>{</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">ADT Tree{Data objects :{D = {ai| ai∈ElementSet, (i=1,2,…,n, n≥0)}
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">Relationships of Data Elements:{ Recursive Definition of a tree }
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">Basic Operations:
-</span></span><span class="line"><span class="cl">INITTREE（＆T）；
-</span></span><span class="line"><span class="cl">DESTROYTREE（＆T）；
-</span></span><span class="line"><span class="cl">……
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>} ADT Tree</p>
-<h3 id="operations">Operations</h3>
-<p>{</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">INITTREE(＆T);
-</span></span><span class="line"><span class="cl">DESTROYTREE(＆T);
-</span></span><span class="line"><span class="cl">CREATETREE(＆T，DEFINITION);
-</span></span><span class="line"><span class="cl">CLEARTREE(＆T);
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">TREEEMPTY(T);
-</span></span><span class="line"><span class="cl">TREEDEPTH(T);
-</span></span><span class="line"><span class="cl">ROOT(T);
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">ASSIGN(T，CUR_E，VALUE);
-</span></span><span class="line"><span class="cl">PARENT(T，CUR_E);
-</span></span><span class="line"><span class="cl">LEFTCHILD(T，CUR_E);
-</span></span><span class="line"><span class="cl">RIGHTSIBLING(T，CUR_E);
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">INSERTCHILD(＆T，＆P，i，C)；
-</span></span><span class="line"><span class="cl">DELETECHILD(＆T，＆P，i)；
-</span></span><span class="line"><span class="cl">TRAVERSETREE(T，VISIT())；
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">......
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>}</p>
-<p>Emphasis</p>
-<p>!!!A binary tree is a tree in which no node can have more
-than two children.</p>
-<p>Five kinds of forms</p>
-<ol>
-<li>Empty binary tree</li>
-<li>Binary tree with only one node</li>
-<li>Binary without any right tree</li>
-<li>Binary with left and right trees</li>
-<li>Binary tree with no left tree</li>
-</ol>
-<div class="mermaid" id="id-3"></div>
-<h3 id="full-binary-tree">Full Binary Tree</h3>
-<p>A full binary tree of depth k is a binary tree of depth k having $2^k-1$ nodes</p>
-<h3 id="complete-binary-tree">Complete Binary Tree</h3>
-<p>A complete binary tree: a binary tree with n nodes and depth k is complete if its nodes correspond to the nodes numbered from 1 to n in the full binary tree of depth k</p>
-<h3 id="skewed-tree">Skewed Tree</h3>
-<div class="mermaid" id="id-4"></div>
-<h3 id="properties-of-binary-trees">Properties of binary trees</h3>
-<h4 id="maximum-number-of-nodes">Maximum number of nodes</h4>
-<p>Maximum number of nodes</p>
-<ol>
-<li>$The\ maximum\ number\ of\ nodes\ on\ level\ i\ of\ a\ binary\ tree\ is\  2^{i-1}, i\geq 1$</li>
-<li>$The\ maximum\ number\ of\ nodes\ in\ a\ binary\ tree\ of\ depth\ k\ is\  2^{k-1}, k\geq 1.(\sum^{k-1}_02^k = 2^k - 1)$</li>
-</ol>
-<p>Relation between number of leaf nodes and degree-2 nodes</p>
-<p>For any nonempty binary tree T, if $n_0$ is the number of leaf nodes and $n_2$ is the number of nodes of degree 2,then $n_0 = n_2 + 1(n_0 = 2^{i-1}\ and\ n_2 = 2^{i - 1} - 1)$</p>
-<p>!!!The height（depth）of a [complete binary tree] with n nodes is
-$\lfloor\log_2n\rfloor + 1$</p>
-<p>$2^{k-1}-1 &lt; n \leq 2^k – 1$</p>
-<p>$2^{k-1}\leq n &lt; 2^k$</p>
-<p>$k-1\leq \log_2n &lt;k$</p>
-<p>$k=\lfloor\log_2n\rfloor + 1$</p>
-<p>If a complete binary tree with n nodes is represented sequentially, then for any node with index i, $1 \leq i \leq n$,we have</p>
-<ol>
-<li>parent(i) is at $\lfloor\frac{i}{2}\rfloor$ if $i \not= 1$. If i = 1, i is the root and has no parent.</li>
-<li>LeftChild(i) is at $2i$ if $2i \leq n$. If $2i &gt; n$, then i has no left child</li>
-<li>RightChild(i) is at $2i+1$ if $2i+1 \leq n$. If $2i +1 &gt; n$, then i has no right child</li>
-</ol>
-<h3 id="array-implementation-of-stacks">Array implementation of stacks</h3>
-<p>Too much memory is wasted!</p>
-<h3 id="linked-implement-of-tree">Linked implement of Tree</h3>
-<h4 id="linked-implement-of-binary-tree">Linked implement of Binary Tree</h4>
-<div class="mermaid" id="id-5"></div>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">BiTNode</span> <span class="p">{</span> <span class="c1">// Node structure
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">TElemType</span> <span class="n">data</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="nc">BiTNode</span> <span class="o">*</span><span class="n">lchild</span><span class="p">,</span> <span class="o">*</span><span class="n">rchild</span><span class="p">;</span> <span class="c1">// left, right child pointer
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="n">BiTNode</span><span class="p">,</span> <span class="o">*</span><span class="n">BiTree</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>CreateBinTree</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">Status</span> <span class="nf">CreateBiTree</span><span class="p">(</span><span class="n">BiTree</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span> 
-</span></span><span class="line"><span class="cl">    <span class="n">scanf</span><span class="p">(</span><span class="err">“</span><span class="o">%</span><span class="n">c</span><span class="err">”</span><span class="p">,</span><span class="o">&amp;</span><span class="n">ch</span><span class="p">);</span> <span class="c1">// ABDG###E##C#F##
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">ch</span> <span class="o">==</span> <span class="err">‘#’</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">        <span class="n">T</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">T</span> <span class="o">=</span> <span class="p">(</span><span class="n">BiTNode</span> <span class="o">*</span><span class="p">)</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span> <span class="p">(</span><span class="n">BiTNode</span><span class="p">))))</span> 
-</span></span><span class="line"><span class="cl">            <span class="n">exit</span><span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="n">T</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="n">ch</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">CreateBiTree</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">CreateBiTree</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="c1">//CreateBiTree
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="triple-linked-list">Triple Linked List</h4>
-<div class="mermaid" id="id-6"></div>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">TriTNode</span> <span class="p">{</span> <span class="c1">// Node
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">TElemType</span> <span class="n">data</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="nc">TriTNode</span> <span class="o">*</span><span class="n">lchild</span><span class="p">,</span> <span class="o">*</span><span class="n">rchild</span><span class="p">;</span> <span class="c1">// Left &amp; Right Children
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">struct</span> <span class="nc">TriTNode</span> <span class="o">*</span><span class="n">parent</span><span class="p">;</span> <span class="c1">//Parent
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="n">TriTNode</span><span class="p">,</span> <span class="o">*</span><span class="n">TriTree</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="application-of-binary-trees-expression-trees">Application of Binary Trees: Expression Trees</h4>
-<p>$(a+b * c)+((d * e+f) * g)$</p>
-<div class="mermaid" id="id-7"></div>
-<p>Algorithm to convert postfix expression into expression tree</p>
-<p>Read the expression one symbol at a time</p>
-<ol>
-<li>If symbols are operands, build a single node tree and push it on the stack</li>
-<li>If the symbol is an operator, then two trees, T1 and T2, are popped from the stack (T1 is popped first) and a new tree is formed whose root is the operator and whose left and right children are T2 and T1, respectively</li>
-<li>And then push the pointer to the tree on the stack</li>
-</ol>
-<h3 id="preliminaries-traversal-strategy">Preliminaries: Traversal Strategy</h3>
-<h4 id="preorder-traversal-strategy">preorder traversal strategy</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//recursive
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">preorderTraverse</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">root</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">visit</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">preorderTraverse</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">leftChild</span><span class="p">,</span> <span class="n">visit</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">preorderTraverse</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">,</span> <span class="n">visit</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">//no recursive
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinaryTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">visitAlongVine</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">stack</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">visit</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">leftChild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinaryTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">preorderTraverse</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">root</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">stack</span><span class="p">{};</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">visitAlongVine</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">visit</span><span class="p">,</span> <span class="n">stack</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="k">break</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="n">root</span> <span class="o">=</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="inorder-traversal-strategy">Inorder traversal strategy</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//recursive
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">InorderTraverse</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">root</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">InorderTraverse</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">leftChild</span><span class="p">,</span> <span class="n">visit</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">visit</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">InorderTraverse</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">,</span> <span class="n">visit</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">//no recursive
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinaryTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">goAlongVine</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">stack</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">leftChild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinaryTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">InorderTraverse</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">root</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">stack</span><span class="p">{};</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">goAlongVine</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">stack</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="k">break</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="n">root</span> <span class="o">=</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">visit</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="postorder-traversal-strategy">Postorder traversal strategy</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">//recursive
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">PostorderTraverse</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">root</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">PostorderTraverse</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">leftChild</span><span class="p">,</span> <span class="n">visit</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">PostorderTraverse</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">,</span> <span class="n">visit</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">visit</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">//no recursive
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinaryTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">gotoLeftmostLeaf</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">stack</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">())</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">leftChild</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">rightChild</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">                <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">            <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">leftChild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinaryTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">PostorderTraverse</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">root</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">stack</span><span class="o">&lt;</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">stack</span><span class="p">{};</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span> <span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">root</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">stack</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">leftChild</span> <span class="o">!=</span> <span class="n">root</span> <span class="o">&amp;&amp;</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">rightChild</span> <span class="o">!=</span> <span class="n">root</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="n">gotoLeftmostLeaf</span><span class="p">(</span><span class="n">stack</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="n">root</span> <span class="o">=</span> <span class="n">stack</span><span class="p">.</span><span class="n">top</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">visit</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="level-order-traversal-strategy">Level order traversal strategy</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">BinTree</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">LevelTraverse</span><span class="p">(</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">root</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">visit</span><span class="p">)(</span><span class="n">T</span> <span class="o">&amp;</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">queue</span><span class="p">{};</span>
-</span></span><span class="line"><span class="cl">    <span class="n">queue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">root</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">queue</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">BinNodePosi</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="n">front</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">queue</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">visit</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">leftChild</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="n">queue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">leftChild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">rightChild</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="n">queue</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">rightChild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="application">Application</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">CountLeaf</span> <span class="p">(</span><span class="n">BiTree</span> <span class="n">T</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">count</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">((</span><span class="o">!</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">        <span class="n">count</span><span class="o">++</span><span class="p">;</span> <span class="c1">// Count leaf node
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">CountLeaf</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span> 
-</span></span><span class="line"><span class="cl">        <span class="n">CountLeaf</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span> 
-</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="c1">// if
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span> <span class="c1">// CountLeaf
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">depth</span><span class="p">(</span><span class="n">BiTree</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">dep1</span><span class="p">,</span><span class="n">dep2</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">T</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">dep1</span> <span class="o">=</span> <span class="n">depth</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="n">dep2</span> <span class="o">=</span> <span class="n">depth</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">dep1</span> <span class="o">&gt;</span> <span class="n">dep2</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="p">(</span><span class="n">dep1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="k">else</span> 
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="p">(</span><span class="n">dep2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="reduction-tree">Reduction tree</h4>
-<p>preorder or postorder + Inorder is OK</p>
-<h4 id="threaded-binary-trees">Threaded Binary Trees</h4>
-<blockquote>
-<p>$n\ nodes\ (Binary\ linked\ list):$</p>
-</blockquote>
-<p>$number\ of\ pointers=2n$</p>
-<p>$one\ node\ have\ it&rsquo;s\ own\ pointer, expect\ root\ node$</p>
-<p>$so\ the\ number\ of\ empty\ pointers=2n-(n-1)=n+1$</p>
-<p>Definition: Threaded Binary Trees use n+1 null pointer field to store node&rsquo;s precursor and successor information</p>
-<p>Example: preorder traverse:$A\ B\ C\ D\ E\ F\ G\ H\ K$
-so in Threaded Binary Tree:</p>
-<div class="mermaid" id="id-8"></div>
-<p>implementation</p>
-<p>Add &ldquo;Ltag&rdquo; and &ldquo;Rtag&rdquo; to the binary linked list as two flag fields</p>
-<p>$[lchild] [Ltag] [data] [Rtag] [rchild]$</p>
-<blockquote>
-<p>if has LeftChild</p>
-<blockquote>
-<p>Ltag = 0</p>
-<p>lchild = LeftChild</p>
-</blockquote>
-<p>else</p>
-<blockquote>
-<p>Ltag = 1</p>
-<p>lchild = preorder</p>
-</blockquote>
-<p>if has RightChild</p>
-<blockquote>
-<p>Rtag = 0</p>
-<p>rchild = RightChild</p>
-</blockquote>
-<p>else</p>
-<blockquote>
-<p>Rtag = 1</p>
-<p>rchild = successor</p>
-</blockquote>
-</blockquote>
-<p>Add a head node whose lchild points to the root of the binary tree, Ltag = 0, Rtag = 0</p>
-<p>And this node is used as the precursor of the first node traversed and the successor of the last node</p>
-<p>Finally, the head pointer is used to point to the node</p>
-<p>empty Threaded binary tree</p>
-<div class="mermaid" id="id-9"></div>
-<p>A binary tree of this structure is also called a binary tree threaded list</p>
-<p>A pointer to a precursor or successor is called a thread</p>
-<p>A binary tree with a clue is called a threaded binary tree</p>
-<p>The process of traversing a binary tree with a rule to turn it into a threaded binary tree is called threading</p>
-<h4 id="look-for-successor-in-inorder-threaded-binary-trees">Look for successor in Inorder Threaded Binary Trees</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">BiThrNode</span> <span class="o">*</span><span class="nf">nextnode</span><span class="p">(</span><span class="n">BiThrNode</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="p">{</span> 
-</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">Rtag</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//Find the leftmost node in the right subtree    
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">next</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span> 
-</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">Ltag</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">        <span class="n">next</span> <span class="o">=</span> <span class="n">next</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">next</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="look-for-predecessor-in-inorder-threaded-binary-trees">Look for predecessor in Inorder Threaded Binary Trees</h4>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">BiThrNode</span> <span class="o">*</span><span class="nf">priornode</span><span class="p">(</span><span class="n">BiThrNode</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="p">{</span> 
-</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">Ltag</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//Find the rightmost node of the left subtree
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">pre</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span> 
-</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">pre</span><span class="o">-&gt;</span><span class="n">Rtag</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">        <span class="n">pre</span> <span class="o">=</span> <span class="n">pre</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">pre</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="tree-and-forest">Tree and Forest</h3>
-<blockquote>
-<p>A forest is a set of $n \geq 0$ disjoint trees</p>
-</blockquote>
-<p>Forest</p>
-<div class="mermaid" id="id-10"></div>
-<p>Tree</p>
-<div class="mermaid" id="id-11"></div>
-<h3 id="trees-implementation">Trees Implementation</h3>
-<h4 id="parent-pointer-implementation">Parent Pointer Implementation</h4>
-<p>have a pointer that points the parent</p>
-<blockquote>
-<p>Advantage: lookup parent easily</p>
-</blockquote>
-<h4 id="lists-of-children">Lists of Children</h4>
-<p>From1</p>
-<p>$[data] [child_1] [child_2] &hellip; [child_d], d\ is\ the\ tree&rsquo;s\ degree$</p>
-<p>Problem: Null pointers waste space</p>
-<p>From2</p>
-<p>$[data] [degree] [child_1] [child_2] &hellip; [child_{degree}], degree\ is\ the\ node&rsquo;s\ degree$</p>
-<p>Problem: nodes structure is inconsistent</p>
-<p>From3</p>
-<div class="mermaid" id="id-12"></div>
-<div class="mermaid" id="id-13"></div>
-<p>From4</p>
-<div class="mermaid" id="id-14"></div>
-<div class="mermaid" id="id-15"></div>
-<h4 id="leftmost-childright-sibling">Leftmost Child/Right Sibling</h4>
-<div class="mermaid" id="id-16"></div>
-<h3 id="implementation-of-leftmost-childright-sibling">Implementation of Leftmost Child/Right Sibling</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">TreeNode</span> <span class="o">*</span> <span class="n">PtrToNode</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">TreeNode</span> <span class="p">{</span> 
-</span></span><span class="line"><span class="cl">    <span class="n">ElementType</span> <span class="n">element</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">PtrToNode</span> <span class="n">FirstChild</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">PtrToNode</span> <span class="n">NextSibling</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">};</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p>FirstChild pointer: arrow that points downward</p>
-<p>NextSibling pointer: arrow that goes left to right</p>
-</blockquote>
-<p>Transform a binary tree into forest</p>
-<ol>
-<li>keep current root node and its left subtree as one of a tree of the forest, the right subtree as the other trees</li>
-<li>Repeat step above until the right subtree in the node is empty</li>
-</ol>
-<h3 id="huffman-tree">Huffman Tree</h3>
-<blockquote>
-<p>Path Length: The length of path is the number of edges on the path</p>
-</blockquote>
-<p>Weighted Path Length, WPL</p>
-<p>$WPL=\sum_{i=1}^kW_iL_i$</p>
-<blockquote>
-<p>$w_i$ is the weight of the i-th leaf</p>
-<p>$L_i$ is the path length from root to the i-th leaf</p>
-</blockquote>
-<p>Definition:
-Huffman Tree: the binary tree with the minimum weighted Path Length</p>
-<h4 id="prefix-code">Prefix code</h4>
-<p>No codeword is a prefix of any other codeword</p>
-<h4 id="huffmans-algorithm">Huffman’s Algorithm</h4>
-<p>Build tree bottom-up, so that the lowest weight leaves are    farthest from the root</p>
-<p>Repeatedly:</p>
-<ol>
-<li>Find two trees of the lowest weight</li>
-<li>Merge them to form a new tree whose weight is the sum of their weights</li>
-</ol>
-<h4 id="determinant-tree">Determinant Tree</h4>
-<p>Reduce the number of decisions according to the frequency of the condition</p>
-<blockquote>
-<p>The number of nodes in the binary tree with degree 0 minus one equals the number of nodes with degree 2</p>
-</blockquote>
 ]]></description>
 </item>
 </channel>
