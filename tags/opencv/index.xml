@@ -3,11 +3,11 @@
         <title>OpenCV - 标签 - Jungle&#39;s Blog</title>
         <link>https://Jungle430.github.io/tags/opencv/</link>
         <description>OpenCV - 标签 - Jungle&#39;s Blog</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Mon, 09 Jan 2023 14:20:53 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/opencv/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 09 Jan 2023 14:20:53 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/opencv/" rel="self" type="application/rss+xml" /><item>
     <title>OpenCV Chapter7 背景建模与光流估计</title>
     <link>https://Jungle430.github.io/posts/opencv/opencv-chapter7/</link>
-    <pubDate>Mon, 09 Jan 2023 14:20:53 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter7/</guid>
+    <pubDate>Mon, 09 Jan 2023 14:20:53 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter7/</guid>
     <description><![CDATA[<h1 id="opencv">OpenCV</h1>
 <h2 id="背景建模">背景建模</h2>
 <h3 id="帧差法">帧差法</h3>
@@ -328,7 +328,7 @@ $A^TA$可逆条件,设两个特征值为$\lambda_1,\lambda_2$,两个值<strong>�
 <item>
     <title>OpenCV Chapter6 角点检测，SIFT和特征匹配</title>
     <link>https://Jungle430.github.io/posts/opencv/opencv-chapter6/</link>
-    <pubDate>Sat, 07 Jan 2023 13:43:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter6/</guid>
+    <pubDate>Sat, 07 Jan 2023 13:43:02 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter6/</guid>
     <description><![CDATA[<h1 id="opencv">OpenCV</h1>
 <h2 id="图像特征-harris角点检测">图像特征-harris角点检测</h2>
 <h3 id="角点定义">角点定义</h3>
@@ -736,7 +736,7 @@ $$</p>
 <item>
     <title>OpenCV Chapter5 直方图，均衡化与傅里叶变换</title>
     <link>https://Jungle430.github.io/posts/opencv/opencv-chapter5/</link>
-    <pubDate>Wed, 04 Jan 2023 18:54:56 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter5/</guid>
+    <pubDate>Wed, 04 Jan 2023 18:54:56 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter5/</guid>
     <description><![CDATA[<h1 id="opencv">OpenCV</h1>
 <h2 id="直方图">直方图</h2>
 <p>统计每一个像素值出现的次数</p>
@@ -1252,7 +1252,7 @@ $$</p>
 <item>
     <title>OpenCV Chapter4 图像金字塔，图像轮廓以及模板匹配</title>
     <link>https://Jungle430.github.io/posts/opencv/opencv-chapter4/</link>
-    <pubDate>Tue, 03 Jan 2023 20:33:51 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter4/</guid>
+    <pubDate>Tue, 03 Jan 2023 20:33:51 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter4/</guid>
     <description><![CDATA[<h1 id="opencv">OpenCV</h1>
 <h2 id="图像金字塔">图像金字塔</h2>
 <p>通过不停的变换让图像越来越小</p>
@@ -1733,7 +1733,7 @@ $$</p>
 <item>
     <title>OpenCV Chapter3 图像梯度与Canny边缘检测</title>
     <link>https://Jungle430.github.io/posts/opencv/opencv-chapter3/</link>
-    <pubDate>Mon, 02 Jan 2023 23:22:32 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter3/</guid>
+    <pubDate>Mon, 02 Jan 2023 23:22:32 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter3/</guid>
     <description><![CDATA[<h1 id="opencv">OpenCV</h1>
 <h2 id="图像梯度">图像梯度</h2>
 <h3 id="sobel算子">Sobel算子</h3>
@@ -2193,7 +2193,7 @@ $$</p>
 <item>
     <title>OpenCV Chapter2 卷积下的运算</title>
     <link>https://Jungle430.github.io/posts/opencv/opencv-chapter2/</link>
-    <pubDate>Mon, 02 Jan 2023 15:42:13 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter2/</guid>
+    <pubDate>Mon, 02 Jan 2023 15:42:13 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter2/</guid>
     <description><![CDATA[<h1 id="opencv">OpenCV</h1>
 <h2 id="图像平滑处理">图像平滑处理</h2>
 <h3 id="前导知识卷积convolution">前导知识：卷积$(convolution)$</h3>
@@ -2945,7 +2945,7 @@ $$</p>
 <item>
     <title>OpenCV Chapter1 基本操作与阈值处理</title>
     <link>https://Jungle430.github.io/posts/opencv/opencv-chapter1/</link>
-    <pubDate>Fri, 30 Dec 2022 21:52:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter1/</guid>
+    <pubDate>Fri, 30 Dec 2022 21:52:20 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/opencv/opencv-chapter1/</guid>
     <description><![CDATA[<h1 id="opencv">OpenCV</h1>
 <h2 id="图像基本操作">图像基本操作</h2>
 <h3 id="计算机眼中的图像">计算机眼中的图像</h3>

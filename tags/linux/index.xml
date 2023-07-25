@@ -3,11 +3,11 @@
         <title>Linux - 标签 - Jungle&#39;s Blog</title>
         <link>https://Jungle430.github.io/tags/linux/</link>
         <description>Linux - 标签 - Jungle&#39;s Blog</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/linux/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/linux/" rel="self" type="application/rss+xml" /><item>
     <title>操作系统——内存管理</title>
     <link>https://Jungle430.github.io/posts/operating-system/support3/</link>
-    <pubDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support3/</guid>
+    <pubDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support3/</guid>
     <description><![CDATA[<h1 id="内存管理">内存管理</h1>
 <h2 id="导读">导读</h2>
 <ul>
@@ -741,7 +741,7 @@
 <item>
     <title>Operating System Chapter10 状态机模型的应用</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</link>
-    <pubDate>Tue, 28 Mar 2023 13:10:52 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</guid>
+    <pubDate>Tue, 28 Mar 2023 13:10:52 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</guid>
     <description><![CDATA[<h1 id="operating-system">Operating System</h1>
 <p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <h2 id="overview">Overview</h2>
@@ -1832,7 +1832,7 @@ $$</p>
 <item>
     <title>Linux x86 Program Start Up or - How the heck do we get to main()?</title>
     <link>https://Jungle430.github.io/posts/operating-system/support2/</link>
-    <pubDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support2/</guid>
+    <pubDate>Sat, 04 Mar 2023 15:47:02 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support2/</guid>
     <description><![CDATA[<h2 id="概述">概述</h2>
 <ul>
 <li>

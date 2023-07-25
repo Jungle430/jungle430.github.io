@@ -3,11 +3,11 @@
         <title>algorithm - 标签 - Jungle&#39;s Blog</title>
         <link>https://Jungle430.github.io/tags/algorithm/</link>
         <description>algorithm - 标签 - Jungle&#39;s Blog</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/algorithm/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/algorithm/" rel="self" type="application/rss+xml" /><item>
     <title>Go 1.19 排序算法</title>
     <link>https://Jungle430.github.io/posts/go/pdqsort/</link>
-    <pubDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/pdqsort/</guid>
+    <pubDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/pdqsort/</guid>
     <description><![CDATA[<h1 id="go-119-排序算法-pdqsort">Go 1.19 排序算法-$pdqsort$</h1>
 <h2 id="三种经典排序算法的对比">三种经典排序算法的对比</h2>
 <ul>

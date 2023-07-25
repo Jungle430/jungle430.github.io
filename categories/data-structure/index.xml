@@ -3,11 +3,11 @@
         <title>Data Structure - 分类 - Jungle&#39;s Blog</title>
         <link>https://Jungle430.github.io/categories/data-structure/</link>
         <description>Data Structure - 分类 - Jungle&#39;s Blog</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Fri, 18 Nov 2022 22:05:21 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/data-structure/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Fri, 18 Nov 2022 22:05:21 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/data-structure/" rel="self" type="application/rss+xml" /><item>
     <title>Sorting</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/</link>
-    <pubDate>Fri, 18 Nov 2022 22:05:21 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/</guid>
+    <pubDate>Fri, 18 Nov 2022 22:05:21 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="sorting">Sorting</h2>
 <h3 id="quicksort">QuickSort</h3>
@@ -983,7 +983,7 @@ $$</p>
 <item>
     <title>Searching</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/</link>
-    <pubDate>Fri, 18 Nov 2022 14:47:32 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/</guid>
+    <pubDate>Fri, 18 Nov 2022 14:47:32 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/searching/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="searching">Searching</h2>
 <h3 id="read-map">Read Map</h3>
@@ -2092,7 +2092,7 @@ $$</p>
 <item>
     <title>Graph</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/</link>
-    <pubDate>Fri, 11 Nov 2022 19:53:36 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/</guid>
+    <pubDate>Fri, 11 Nov 2022 19:53:36 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/graph/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="graph">Graph</h2>
 <p>Definition: A graph G consists of two sets</p>
@@ -3815,7 +3815,7 @@ If there is no such edge, then D[i]= +$\infty\newline$</p>
 <item>
     <title>Dynamic Programming</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/dynamic-programming/</link>
-    <pubDate>Tue, 08 Nov 2022 11:39:47 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/dynamic-programming/</guid>
+    <pubDate>Tue, 08 Nov 2022 11:39:47 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/dynamic-programming/</guid>
     <description><![CDATA[<h1 id="something-about-dynamic-programming">Something About Dynamic Programming</h1>
 <h2 id="fibonacci-by-dynamic-programming">$Fibonacci\ By\ Dynamic\ Programming$</h2>
 <div class="highlight"><div class="chroma">
@@ -4046,7 +4046,7 @@ If there is no such edge, then D[i]= +$\infty\newline$</p>
 <item>
     <title>String</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/string/</link>
-    <pubDate>Sun, 06 Nov 2022 22:37:05 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/string/</guid>
+    <pubDate>Sun, 06 Nov 2022 22:37:05 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/string/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="string">String</h2>
 <h3 id="structurerightarrow-list">$Structure\rightarrow list$</h3>
@@ -4420,7 +4420,7 @@ Operation： ……
 <item>
     <title>Stack and Queue</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/</link>
-    <pubDate>Sun, 06 Nov 2022 22:36:10 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/</guid>
+    <pubDate>Sun, 06 Nov 2022 22:36:10 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/stack-and-queue/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="stack-and-queue">Stack and Queue</h2>
 <h3 id="stack">Stack</h3>
@@ -5230,7 +5230,7 @@ IsEmpty:check whether the queue has an element or not
 <item>
     <title>List</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/list/</link>
-    <pubDate>Sun, 06 Nov 2022 22:35:11 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/list/</guid>
+    <pubDate>Sun, 06 Nov 2022 22:35:11 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/list/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="list">List</h2>
 <h3 id="definition">Definition</h3>
@@ -6107,7 +6107,7 @@ rearranging the entries.</li>
 <item>
     <title>Algorithms Analysis</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/algorithms-analysis/</link>
-    <pubDate>Sun, 06 Nov 2022 22:33:52 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/algorithms-analysis/</guid>
+    <pubDate>Sun, 06 Nov 2022 22:33:52 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/algorithms-analysis/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="algorithms-analysis">Algorithms Analysis</h2>
 <h2 id="algorithm">Algorithm</h2>
@@ -6340,7 +6340,7 @@ $= i^2 + i(1 + 2 + 3 + &hellip; + i) = i^2 + i^3 = O(i^3)$</p>
 <item>
     <title>Introduction</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/</link>
-    <pubDate>Sun, 06 Nov 2022 22:31:52 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/</guid>
+    <pubDate>Sun, 06 Nov 2022 22:31:52 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/introduction/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="introduction">Introduction</h2>
 <h2 id="data">Data</h2>
@@ -6478,7 +6478,7 @@ implementation of the operations.</p>
 <item>
     <title>Tree</title>
     <link>https://Jungle430.github.io/posts/data-structures-and-algorithms/tree/</link>
-    <pubDate>Sun, 06 Nov 2022 18:28:12 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/tree/</guid>
+    <pubDate>Sun, 06 Nov 2022 18:28:12 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/data-structures-and-algorithms/tree/</guid>
     <description><![CDATA[<h1 id="data-structure">Data Structure</h1>
 <h2 id="tree">Tree</h2>
 <h3 id="definition">Definition</h3>

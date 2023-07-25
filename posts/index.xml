@@ -3,11 +3,11 @@
         <title>所有文章 - Jungle&#39;s Blog</title>
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
     <title>Go 1.19 排序算法</title>
     <link>https://Jungle430.github.io/posts/go/pdqsort/</link>
-    <pubDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/pdqsort/</guid>
+    <pubDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/pdqsort/</guid>
     <description><![CDATA[<h1 id="go-119-排序算法-pdqsort">Go 1.19 排序算法-$pdqsort$</h1>
 <h2 id="三种经典排序算法的对比">三种经典排序算法的对比</h2>
 <ul>
@@ -379,7 +379,7 @@ $$</p>
 <item>
     <title>消息队列</title>
     <link>https://Jungle430.github.io/posts/go/message-queue/</link>
-    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/message-queue/</guid>
+    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/message-queue/</guid>
     <description><![CDATA[<h1 id="消息队列">消息队列</h1>
 <h2 id="走进消息队列">走进消息队列</h2>
 <h3 id="场景">场景</h3>
@@ -645,7 +645,7 @@ $$</p>
 <item>
     <title>Go Module与测试</title>
     <link>https://Jungle430.github.io/posts/go/module_and_test/</link>
-    <pubDate>Sun, 14 May 2023 21:51:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/module_and_test/</guid>
+    <pubDate>Sun, 14 May 2023 21:51:22 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/module_and_test/</guid>
     <description><![CDATA[<h1 id="go-module">Go Module</h1>
 <h2 id="简介">简介</h2>
 <ul>
@@ -1185,7 +1185,7 @@ $$</p>
 <item>
     <title>Operating System Chapter12 进程的地址空间</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter12/</link>
-    <pubDate>Fri, 05 May 2023 13:35:01 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter12/</guid>
+    <pubDate>Fri, 05 May 2023 13:35:01 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter12/</guid>
     <description><![CDATA[<h1 id="operating-system">Operating System</h1>
 <p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <h2 id="overview">Overview</h2>
@@ -3521,7 +3521,7 @@ $$</p>
 <item>
     <title>Operating System Chapter11 操作系统上的进程</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/</link>
-    <pubDate>Wed, 03 May 2023 15:41:15 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/</guid>
+    <pubDate>Wed, 03 May 2023 15:41:15 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter11/</guid>
     <description><![CDATA[<h1 id="operating-system">Operating System</h1>
 <p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <h2 id="overview">Overview</h2>
@@ -5658,7 +5658,7 @@ $$</p>
 <item>
     <title>操作系统——内存管理</title>
     <link>https://Jungle430.github.io/posts/operating-system/support3/</link>
-    <pubDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support3/</guid>
+    <pubDate>Fri, 28 Apr 2023 17:34:50 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/support3/</guid>
     <description><![CDATA[<h1 id="内存管理">内存管理</h1>
 <h2 id="导读">导读</h2>
 <ul>
@@ -6392,7 +6392,7 @@ $$</p>
 <item>
     <title>Operating System Chapter10 状态机模型的应用</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</link>
-    <pubDate>Tue, 28 Mar 2023 13:10:52 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</guid>
+    <pubDate>Tue, 28 Mar 2023 13:10:52 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</guid>
     <description><![CDATA[<h1 id="operating-system">Operating System</h1>
 <p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <h2 id="overview">Overview</h2>
@@ -7483,7 +7483,7 @@ $$</p>
 <item>
     <title>Operating System Chapter9 操作系统的状态机模型</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</link>
-    <pubDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</guid>
+    <pubDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</guid>
     <description><![CDATA[<h1 id="operating-system">Operating System</h1>
 <p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <h2 id="overview">Overview</h2>
@@ -8611,7 +8611,7 @@ $$</p>
 <item>
     <title>Operating System Chapter8 并发 bug 和应对</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</link>
-    <pubDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</guid>
+    <pubDate>Fri, 17 Mar 2023 13:48:22 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter8/</guid>
     <description><![CDATA[<h1 id="operating-system">Operating System</h1>
 <p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <h2 id="overview">Overview</h2>
@@ -10445,7 +10445,7 @@ $$</p>
 <item>
     <title>Operating System Chapter7 真实世界的并发编程</title>
     <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter7/</link>
-    <pubDate>Wed, 15 Mar 2023 13:26:02 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter7/</guid>
+    <pubDate>Wed, 15 Mar 2023 13:26:02 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter7/</guid>
     <description><![CDATA[<h1 id="operating-system">Operating System</h1>
 <p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
 <h2 id="overview">Overview</h2>

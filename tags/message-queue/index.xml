@@ -3,11 +3,11 @@
         <title>Message-Queue - 标签 - Jungle&#39;s Blog</title>
         <link>https://Jungle430.github.io/tags/message-queue/</link>
         <description>Message-Queue - 标签 - Jungle&#39;s Blog</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>1239946358@qq.com (Jungle)</managingEditor>
-            <webMaster>1239946358@qq.com (Jungle)</webMaster><lastBuildDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/message-queue/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/message-queue/" rel="self" type="application/rss+xml" /><item>
     <title>消息队列</title>
     <link>https://Jungle430.github.io/posts/go/message-queue/</link>
-    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>1239946358@qq.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/message-queue/</guid>
+    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/message-queue/</guid>
     <description><![CDATA[<h1 id="消息队列">消息队列</h1>
 <h2 id="走进消息队列">走进消息队列</h2>
 <h3 id="场景">场景</h3>
