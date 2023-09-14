@@ -4,7 +4,13 @@
         <link>https://Jungle430.github.io/tags/</link>
         <description>Tags - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Thu, 14 Sep 2023 17:54:38 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/" rel="self" type="application/rss+xml" /><item>
+    <title>docker</title>
+    <link>https://Jungle430.github.io/tags/docker/</link>
+    <pubDate>Thu, 14 Sep 2023 17:54:38 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/tags/docker/</guid>
+    <description><![CDATA[]]></description>
+</item>
+<item>
     <title>algorithm</title>
     <link>https://Jungle430.github.io/tags/algorithm/</link>
     <pubDate>Sun, 04 Jun 2023 19:46:20 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/tags/algorithm/</guid>
@@ -56,12 +62,6 @@
     <title>Java</title>
     <link>https://Jungle430.github.io/tags/java/</link>
     <pubDate>Tue, 28 Feb 2023 23:59:46 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/tags/java/</guid>
-    <description><![CDATA[]]></description>
-</item>
-<item>
-    <title>C&#43;&#43;</title>
-    <link>https://Jungle430.github.io/tags/c&#43;&#43;/</link>
-    <pubDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/tags/c&#43;&#43;/</guid>
     <description><![CDATA[]]></description>
 </item>
 </channel>
