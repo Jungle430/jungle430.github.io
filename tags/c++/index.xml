@@ -4,7 +4,382 @@
         <link>https://Jungle430.github.io/tags/c&#43;&#43;/</link>
         <description>C&#43;&#43; - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/c&#43;&#43;/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 11 Mar 2024 14:26:44 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/c&#43;&#43;/" rel="self" type="application/rss+xml" /><item>
+    <title>LRU and LRU-K</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/lru_and_lru-k/</link>
+    <pubDate>Mon, 11 Mar 2024 14:26:44 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/lru_and_lru-k/</guid>
+    <description><![CDATA[<h1 id="lru-and-lru-k">LRU and LRU-k</h1>
+<ul>
+<li>注：本文章为<a href="https://15445.courses.cs.cmu.edu/spring2024" target="_blank" rel="noopener noreffer">CMU15445-2024-spring</a> project1-task1的部分讲解，为了遵守<a href="https://www.cs.cmu.edu/~pavlo/" target="_blank" rel="noopener noreffer">Andy Pavlo</a>对于学术的要求，<strong>有关实验中的代码一律不予公开</strong>，只会讲解思路</li>
+</ul>
+<h2 id="实验要求">实验要求</h2>
+<blockquote>
+<p>This component is responsible for tracking page usage in the buffer pool. You will implement a new class called <code>LRUKReplacer</code> in <code>src/include/buffer/lru_k_replacer.h</code> and its corresponding implementation file in <code>src/buffer/lru_k_replacer.cpp</code>. Note that <code>LRUKReplacer</code> is a stand-alone class and is not related to any of the other <code>Replacer</code> classes. You are expected to implement only the LRU-K replacement policy. You don&rsquo;t have to implement LRU or a clock replacement policy, even if there is a corresponding file for it.</p>
+<p>The LRU-K algorithm evicts a frame whose backward k-distance is maximum of all frames in the replacer. Backward k-distance is computed as the difference in time between current timestamp and the timestamp of kth previous access. A frame with fewer than k historical accesses is given +inf as its backward k-distance. <strong>When multiple frames have +inf backward k-distance, the replacer evicts the frame with the earliest overall timestamp (i.e., the frame whose least-recent recorded access is the overall least recent access).</strong></p>
+<p>The maximum size for the <code>LRUKReplacer</code> is the same as the size of the buffer pool since it contains placeholders for all of the frames in the <code>BufferPoolManager</code>. However, at any given moment, not all the frames in the replacer are considered to be evictable. The size of <code>LRUKReplacer</code> is represented by the number of <em>evictable</em> frames. The <code>LRUKReplacer</code> is initialized to have no frames in it. Then, only when a frame is marked as evictable, replacer&rsquo;s size will increase.</p>
+<p>You will need to implement the <em>LRU-K</em> policy discussed in this course. You will need to implement the following methods as defined in the header file (<code>src/include/buffer/lru_k_replacer.h</code>) and in the source file (<code>src/buffer/lru_k_replacer.cpp</code>):</p>
+<ul>
+<li><code>Evict(frame_id_t* frame_id)</code> : Evict the frame with largest backward k-distance compared to all other <strong>evictable</strong> frames being tracked by the <code>Replacer</code>. Store the frame id in the output parameter and return <code>True</code>. If there are no evictable frames return <code>False</code>.</li>
+<li><code>RecordAccess(frame_id_t frame_id)</code> : Record that given frame id is accessed at current timestamp. This method should be called after a page is pinned in the <code>BufferPoolManager</code>.</li>
+<li><code>Remove(frame_id_t frame_id)</code> : Clear all access history associated with a frame. This method should be called only when a page is deleted in the <code>BufferPoolManager</code>.</li>
+<li><code>SetEvictable(frame_id_t frame_id, bool set_evictable)</code> : This method controls whether a frame is evictable or not. It also controls <code>LRUKReplacer</code>&rsquo;s size. You&rsquo;ll know when to call this function when you implement the <code>BufferPoolManager</code>. To be specific, when pin count of a page reaches 0, its corresponding frame is marked evictable and replacer&rsquo;s size is incremented.</li>
+<li><code>Size()</code> : This method returns the number of evictable frames that are currently in the <code>LRUKReplacer</code>.</li>
+</ul>
+<p>The implementation details are up to you. You are allowed to use built-in STL containers. You may assume that you will not run out of memory, but you must make sure that your implementation is thread-safe.</p>
+</blockquote>
+<ul>
+<li>本文不会考虑thread-safe的问题，主要是为了讲解两种算法的模型</li>
+</ul>
+<h2 id="内容分析">内容分析</h2>
+<ul>
+<li>这个实验的主要内容是为了实现一个<code>BUFFER POOL</code>，用于将存储数据的页暂时存储在内存中，但是一台机器的内容始终都是有限的，一旦到达阈值，我们就要踢出去一些页（从内容中移除，刷到磁盘上面去），那么怎么踢呢？本实验提供给我们的算法是LRU-K算法</li>
+</ul>
+<h2 id="lru">LRU</h2>
+<ul>
+<li>
+<p>学过OS/计算机组成的朋友一定对这个算法不陌生，以往对于cache中数据的处理中LRU就是常用的一个手法，但是我们该如何实现呢？这也就是<a href="https://leetcode.cn/problems/lru-cache/description/" target="_blank" rel="noopener noreffer">leetcode-146</a>，首先选取数据结构上的模型</p>
+</li>
+<li>
+<p>首先存储数据标准或者整个数据的数据结构肯定是一个列表，但是这个列表我们是选数组还是链表呢？<u>在LRU算法中，常常会发生的事情是之前用的数据在没有被踢出cache之前会再次被使用，而且我们踢数据通常就是在列表的末尾踢掉的，如果这个数据再次被使用，应该将其移动到列表头部</u>，那对于移动数据均摊下来时间复杂度是$O(n)$的数组近乎是一场效率上的灾难，所以这个时候删除和插入数据的时间复杂度仅有$O(1)$的链表就成了首选</p>
+</li>
+<li>
+<p>但是我们选了链表之后又有一个问题，对于get(key) -&gt; value这样的操作，时间复杂度会升高到$O(n)$，我们还是不能容忍这样的效率，所以我们可以再用一部分空间来换取时间：加上一张&lt;key, pointer of node&gt;的哈希表，这样通过key可以直接定位到链表中的节点，时间复杂度就降到了O(1)</p>
+</li>
+<li>
+<p>C++库的选取：因为15445要用C++，所以本题也为C++实现，这里面会遇到一个选择：list是使用STL提供好的还是手搓？我先使用的STL中的list，然后哈希表中的value存储的是list的迭代器，但是这样会出现一个隐式的bug：STL的list存在迭代器失效问题，而这个东西又是在一定条件下出现的，很难预测，所以这里手搓了一个双向链表，哈希表中的value直接换成链表中node的地址就可以了</p>
+</li>
+</ul>
+<h2 id="lc-146实现">lc-146实现</h2>
+<ul>
+<li>节点node</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#pragma once
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">namespace</span> <span class="n">selfDS</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">K</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">_doubleLinkedListNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">K</span> <span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">V</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">prev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_doubleLinkedListNode</span><span class="p">()</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">explicit</span> <span class="nf">_doubleLinkedListNode</span><span class="p">(</span><span class="n">K</span> <span class="n">key</span><span class="p">,</span> <span class="n">V</span> <span class="n">value</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="o">:</span> <span class="n">key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">value</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">prev</span><span class="p">(</span><span class="k">nullptr</span><span class="p">),</span> <span class="n">next</span><span class="p">(</span><span class="k">nullptr</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getKey</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setValue</span><span class="p">(</span><span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">remove</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">addAfter</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="o">*</span><span class="n">newNode</span> <span class="o">=</span> <span class="k">new</span> <span class="n">_doubleLinkedListNode</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">newNode</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">newNode</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="n">newNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">newNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">addAfter</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">node</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getNext</span><span class="p">()</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">_doubleLinkedListNode</span> <span class="o">*</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setNext</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getPrev</span><span class="p">()</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">_doubleLinkedListNode</span> <span class="o">*</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setPrev</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">~</span><span class="n">_doubleLinkedListNode</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>  <span class="c1">// namespace selfDS
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>LRU模板实现</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#pragma once
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// k-v store, by LRU algorithm
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&lt;cstddef&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;optional&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unordered_map&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;doubleLinkedlistNode.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">K</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">LRU</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">_head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">_tail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">capacity</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">length</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*&gt;</span> <span class="n">_map</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="k">explicit</span> <span class="n">LRU</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">capacity</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="o">:</span> <span class="n">capacity</span><span class="p">(</span><span class="n">capacity</span><span class="p">),</span> <span class="n">length</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_map</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*&gt;</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span> <span class="o">=</span> <span class="k">new</span> <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="n">K</span><span class="p">(),</span> <span class="n">V</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_tail</span> <span class="o">=</span> <span class="k">new</span> <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="n">K</span><span class="p">(),</span> <span class="n">V</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="o">-&gt;</span><span class="n">setNext</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_tail</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_tail</span><span class="o">-&gt;</span><span class="n">setPrev</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="na">[[nodiscard]]</span> <span class="k">auto</span> <span class="n">get</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">pointer</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">[</span><span class="n">key</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">      <span class="n">pointer</span><span class="o">-&gt;</span><span class="n">remove</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="o">-&gt;</span><span class="n">addAfter</span><span class="p">(</span><span class="n">pointer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="p">(</span><span class="n">pointer</span><span class="o">-&gt;</span><span class="n">getValue</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">nullopt</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">put</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">pointer</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">[</span><span class="n">key</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">      <span class="n">pointer</span><span class="o">-&gt;</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">pointer</span><span class="o">-&gt;</span><span class="n">remove</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="o">-&gt;</span><span class="n">addAfter</span><span class="p">(</span><span class="n">pointer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">length</span> <span class="o">==</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">pointer</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_tail</span><span class="o">-&gt;</span><span class="n">getPrev</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pointer</span><span class="o">-&gt;</span><span class="n">remove</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">pointer</span><span class="o">-&gt;</span><span class="n">getKey</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="k">delete</span> <span class="n">pointer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">-&gt;</span><span class="n">length</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="o">-&gt;</span><span class="n">addAfter</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="o">-&gt;</span><span class="n">getNext</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">this</span><span class="o">-&gt;</span><span class="n">length</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">~</span><span class="n">LRU</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="o">-&gt;</span><span class="n">getNext</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_tail</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">temp</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">getNext</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">delete</span> <span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">x</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">delete</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_tail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>题解直接将模板实例化就可以了</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">LRUCache</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">LRU</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">lru</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="k">explicit</span> <span class="n">LRUCache</span><span class="p">(</span><span class="kt">int</span> <span class="n">capacity</span><span class="p">)</span> <span class="o">:</span> <span class="n">lru</span><span class="p">(</span><span class="n">capacity</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="nf">get</span><span class="p">(</span><span class="kt">int</span> <span class="n">key</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">).</span><span class="n">value_or</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="nf">put</span><span class="p">(</span><span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lru-k">LRU-K</h2>
+<ul>
+<li>
+<p>从上文看，LRU算法对于cache数据的管理已经很好了，但是这里面为什么又要引入LRU-K算法呢？</p>
+</li>
+<li>
+<p>LRU算法存在的问题是，当存在大量的一次性操作时，会把历史的缓存冲刷掉，而新进入cache的数据有可能之后不会再访问了，被冲刷掉的数据是之前保留下来的比较“有用”的数据，这就是<strong>缓存污染</strong>问题</p>
+</li>
+<li>
+<p>LRU-K的思路是，永远最先驱逐访问次数小于K次的page。网上的很多讲解是直接维护两个链表，一个叫做history list，另一个叫buffer list。新加入的数据总会先进入history list，当访问次数等于指定的次数K次时，就会从history list删除，并移动到buffer list的头部</p>
+</li>
+<li>
+<p>Buffer list服从LRU算法，History List可以服从任意替换算法，在实验手册中，要求驱逐最早进入history list的page，采用的是FIFO策略</p>
+</li>
+<li>
+<p>以上就是LRU和LRU-K算法的解释</p>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>《C&#43;&#43; Primer》 字符串，向量和数组</title>
     <link>https://Jungle430.github.io/posts/cpp-primer/chapter3/</link>
     <pubDate>Wed, 22 Feb 2023 22:31:49 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cpp-primer/chapter3/</guid>
