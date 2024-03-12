@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/lru_and_lru-k\/"
-        },"genre": "posts","keywords": "Database Systems, C\u002b\u002b","wordcount":  2319 ,
+        },"genre": "posts","keywords": "Database Systems, C\u002b\u002b","wordcount":  2611 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/lru_and_lru-k\/","datePublished": "2024-03-11T14:26:44+08:00","dateModified": "2024-03-11T14:26:44+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -69,8 +69,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">LRU and LRU-K</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-11">2024-03-11</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2319 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-11">2024-03-11</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2611 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -85,6 +85,7 @@
     <li><a href="#lru">LRU</a></li>
     <li><a href="#lc-146实现">lc-146实现</a></li>
     <li><a href="#lru-k">LRU-K</a></li>
+    <li><a href="#补充">补充</a></li>
   </ul>
 </nav></div>
                 </div><div class="content" id="content"><h1 id="lru-and-lru-k">LRU and LRU-k</h1>
@@ -455,6 +456,11 @@
 <li>
 <p>以上就是LRU和LRU-K算法的解释</p>
 </li>
+</ul>
+<h2 id="补充">补充</h2>
+<ul>
+<li>由于该版的实验<strong>page中有是否可以移除的标志位</strong>，如果为false表明该页无法被移除，所以说移除page的算法需要在原有的LRU-K算法的基础上面改进，按照优先级别先从History List的头向后扫描，如果有可以移除的page就直接移除，如果说History List中的页都无法移除，那么就需要从Buffer List的尾部向前扫描，发现可以移除的page就直接移除</li>
+<li>这种情况的改变将删除操作的时间复杂度从$O(1)$上升到了$O(n)$，但是因为理想的模型和实际并不相符，实际中有一些page就是规定不应该被移除，所以为了和实际相符只能损失一小部分效率（毕竟主存和磁盘的容量比很小）</li>
 </ul>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
