@@ -4,7 +4,374 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 11 Mar 2024 14:26:44 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 24 Mar 2024 22:00:23 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #02: Modern SQL</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter2/</link>
+    <pubDate>Sun, 24 Mar 2024 22:00:23 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter2/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-02-modern-sql">Lecture #02: Modern SQL</h2>
+<h3 id="关系型数据库sql">关系型数据库|SQL</h3>
+<ul>
+<li>
+<p>在历经上个世纪的探索和总结后，关系型数据库被发明了出来，其使用的语言也规范为了SQL</p>
+</li>
+<li>
+<p>SQL可以分为三类</p>
+<ul>
+<li>数据操作语言(DML):SELECT,INSERT,UPDATE,DELETE</li>
+<li>数据定义语言(DDL):用于定义表，视图等</li>
+<li>数据控制语言(DCL):用于访问控制，保证数据库的安全</li>
+</ul>
+</li>
+<li>
+<p>SQL也和其他编程语言一样，每隔几年会更新一次，目前规定最低标准是SQL-92</p>
+<blockquote>
+<p>Some of the major updates released with each new edition of the SQL standard are shown below.</p>
+<p>• SQL:1999 Regular expressions, Triggers</p>
+<p>• SQL:2003 XML, Windows, Sequences</p>
+<p>• SQL:2008 Truncation, Fancy sorting</p>
+<p>• SQL:2011 Temporal DBs, Pipelined DML</p>
+<p>• SQL:2016 JSON, Polymorphic tables</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="joins">Joins</h3>
+<ul>
+<li>合并一个或多个表中的列生成新表，主要用于需要使用多个表中数据的操作</li>
+<li>例子：查学生成绩</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">sid</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">login</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">UNIQUE</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">age</span><span class="w"> </span><span class="nb">SMALLINT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">gpa</span><span class="w"> </span><span class="nb">FLOAT</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">course</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cid</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">sid</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="p">(</span><span class="n">sid</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cid</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">course</span><span class="w"> </span><span class="p">(</span><span class="n">cid</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">grade</span><span class="w"> </span><span class="nb">CHAR</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Example: Which students got an A in 15-721?</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">name</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">grade</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;A&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;15-721&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">AND</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">sid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">sid</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="aggregates">Aggregates</h3>
+<ul>
+<li>接受Tuples，对整体进行计算，几乎只能用于SELECT输出列表</li>
+</ul>
+<blockquote>
+<p>• AVG(COL): The average of the values in COL</p>
+<p>• MIN(COL): The minimum value in COL</p>
+<p>• MAX(COL): The maximum value in COL</p>
+<p>• COUNT(COL): The number of tuples in the relation</p>
+</blockquote>
+<ul>
+<li>Example: Get # of students with a ‘@cs’ login.</li>
+<li>下面三个查询是等价的(第三个是COUNT里面填入数字统计出来的都是行数)</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">login</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%@cs&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">login</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">login</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%@cs&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">login</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%@cs&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>可以在一个SELECT中使用多个聚合函数</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">gpa</span><span class="p">),</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">login</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%@cs&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>一些聚合函数支持<code>DISTINCT </code>的关键字（比如<code>COUNT, SUM, AVG)</code>），这样在计算的时候就直接去重了（<code>unique</code>）</p>
+</li>
+<li>
+<p>使用聚合函数/分组后除了聚合函数其他的输出都是undefined，尽量不要使用</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">gpa</span><span class="p">),</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">sid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">sid</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>如果想让列属性是defined的话，那就必须在<code>GROUP BY</code>中加入该属性（也就是用这个属性分组）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">gpa</span><span class="p">),</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">sid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">sid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>如果想要过滤聚合函数的数据，需要使用HAVING</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">gpa</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_gpa</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">sid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">sid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">HAVING</span><span class="w"> </span><span class="n">avg_gpa</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">3</span><span class="p">.</span><span class="mi">9</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">#</span><span class="w"> </span><span class="err">规范写法</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">gpa</span><span class="p">),</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">sid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">sid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">cid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">HAVING</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">gpa</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">3</span><span class="p">.</span><span class="mi">9</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="string-operations">String Operations</h3>
+<ul>
+<li>SQL区分字符串大小写，使用单引号</li>
+<li><strong>Pattern Matching</strong>: The LIKE keyword is used for string matching in predicates.</li>
+</ul>
+<blockquote>
+<ul>
+<li>“%” matches any substrings (including empty).</li>
+<li>“_” matches any one character</li>
+</ul>
+</blockquote>
+<ul>
+<li><strong>String Functions</strong>:SQL-92 defines string functions. Many database systems implement other functions in
+addition to those in the standard. Examples of standard string functions include SUBSTRING(S, B, E) and
+UPPER(S).</li>
+<li><strong>Concatenation</strong>: Two vertical bars (“||”) will concatenate two or more strings together into a single string.</li>
+</ul>
+<h3 id="date-and-time">Date and Time</h3>
+<ul>
+<li>Operations to manipulate DATE and TIME attributes. Can be used in either output or predicates. The specific
+syntax for date and time operations varies wildly across systems.</li>
+</ul>
+<h3 id="output-redirection">Output Redirection</h3>
+<ul>
+<li>
+<p>可以将查询的结果直接存储在另一张表中</p>
+</li>
+<li>
+<p><strong>New Table</strong>: Store the output of the query into a new (permanent) table.</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">cid</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">CourseIds</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>Existing Table</strong>: Store the output of the query into a table that already exists in the database. <u>The target table must have the same number of columns with the same types as the target table, but the names of the columns in the output query do not have to match.</u></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">CourseIds</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">cid</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="output-control">Output Control</h3>
+<ul>
+<li>排序使用ORDER BY，默认是升序排序ASC，如果使用降序请显示标明DESC</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">sid</span><span class="p">,</span><span class="w"> </span><span class="n">grade</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">cid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;15-721&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">grade</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>可以使用多个ORDER BY效果就是先排序A，A相同比较B</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">sid</span><span class="p">,</span><span class="w"> </span><span class="n">grade</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">cid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;15-721&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">grade</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">sid</span><span class="w"> </span><span class="k">ASC</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在ORDER BY中可以计算/使用函数</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">sid</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">cid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;15-721&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">UPPER</span><span class="p">(</span><span class="n">grade</span><span class="p">)</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">sid</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">ASC</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>可以使用LIMIT限制数据范围</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">sid</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">login</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%@cs&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">sid</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">login</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%@cs&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="k">OFFSET</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="nested-queries">Nested Queries</h3>
+<ul>
+<li>在查询中使用其他查询的结果，<strong>嵌套查询通常很难被优化</strong></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">sid</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">e</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">sid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">sid</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">sid</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="n">sid</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>Nested Query Results Expressions:</p>
+<p>• ALL: Must satisfy expression for all rows in sub-query.</p>
+<p>• ANY: Must satisfy expression for at least one row in sub-query.</p>
+<p>• IN: Equivalent to =ANY().</p>
+<p>• EXISTS: At least one row is returned</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">course</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">course</span><span class="p">.</span><span class="n">cid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">enrolled</span><span class="p">.</span><span class="n">cid</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="window-functions">Window Functions</h3>
+]]></description>
+</item>
+<item>
     <title>LRU and LRU-K</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/lru_and_lru-k/</link>
     <pubDate>Mon, 11 Mar 2024 14:26:44 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/lru_and_lru-k/</guid>
@@ -9154,1134 +9521,6 @@ $$</p>
 </li>
 </ul>
 </li>
-</ul>
-</li>
-</ul>
-<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
-]]></description>
-</item>
-<item>
-    <title>Operating System Chapter9 操作系统的状态机模型</title>
-    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</link>
-    <pubDate>Sat, 25 Mar 2023 23:21:44 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter9/</guid>
-    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
-<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
-<h2 id="overview">Overview</h2>
-<p>复习</p>
-<ul>
-<li>并发……就这么……讲完了……
-<ul>
-<li>理解的方式：“玩一玩” 示例代码</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p>本次课回答的问题</p>
-<ul>
-<li><strong>Q</strong>: 听说操作系统也是程序。那到底是鸡生蛋还是蛋生鸡？</li>
-</ul>
-<hr>
-<p>本次课主要内容</p>
-<ul>
-<li>软件和硬件的桥梁</li>
-<li>操作系统的加载和初始化</li>
-<li>AbstractMachine 代码导读</li>
-</ul>
-<h2 id="自己动手写操作系统">自己动手写操作系统</h2>
-<h3 id="时事热评">时事热评</h3>
-<p><a href="https://www.bilibili.com/video/BV14T4y1D7y8" target="_blank" rel="noopener noreffer">小学生写了三个月的操作系统是什么样的？</a></p>
-<ul>
-<li>看到 i386 就知道了嘛</li>
-</ul>
-<h3 id="本学期的-oslabs">本学期的 OSLabs</h3>
-<p>热身实验</p>
-<ul>
-<li>Lab0 (amgame): 熟悉代码框架</li>
-</ul>
-<hr>
-<p>正经实验</p>
-<ul>
-<li>
-<p>Lab1 (pmm): Physical memory management</p>
-<ul>
-<li>多处理器 (bare-metal) 上的 kalloc/free</li>
-</ul>
-</li>
-<li>
-<p>Lab2 (kmt): Kernel multi-threading</p>
-<ul>
-<li>中断和异常驱动的上下文 (线程) 切换</li>
-</ul>
-</li>
-<li>
-<p>Lab3 (uproc): User processes</p>
-<ul>
-<li>虚拟地址空间、用户态进程和系统调用</li>
-</ul>
-</li>
-<li>
-<p>Lab4 (vfs): Virtual file system</p>
-<ul>
-<li>devfs, procfs, 简单的文件系统；ELF 加载器</li>
-</ul>
-</li>
-</ul>
-<h3 id="大学的真正意义">大学的真正意义</h3>
-<blockquote>
-<p>将已有的知识和方法重新消化，为大家建立好 “台阶”，在有限的时间里迅速<font color="red">赶上数十年来建立起的学科体系</font></p>
-</blockquote>
-<hr>
-<ul>
-<li>
-<p>例子：破除 “写操作系统很难”、“写操作系统很牛” 的错误认识</p>
-<ul>
-<li>
-<p>操作系统真的就是个 C 程序</p>
-</li>
-<li>
-<p>你只是需要 “被正确告知” 一些额外的知识</p>
-<ul>
-<li>然后写代码、吃苦头</li>
-<li>从而建立正确的 “专业世界观”</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="例子">例子</h3>
-<ul>
-<li>
-<p>“专业世界观” 的例子 (这些都没啥，paper 都发不了)</p>
-<ul>
-<li>
-<p>写 x86 模拟器的时候，不知道哪条指令错了，怎么办？</p>
-</li>
-<li>
-<p>做操作系统实验的时候，如果遇到神秘 CPU Reset，怎么办？</p>
-</li>
-<li>
-<p>做实验做不下去的时候，该实现什么工具？</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>“专业世界观” 的学习方法</p>
-<ul>
-<li>
-<p>经典研究论文 (OSDI, SOSP, ATC, EuroSys, &hellip;)</p>
-</li>
-<li>
-<p>久经考验的经典教学材料 (xv6, OSTEP, CSAPP, &hellip;)</p>
-</li>
-<li>
-<p>海量的开源工具 (GNU 系列, qemu, gdb, &hellip;)</p>
-</li>
-<li>
-<p>第三方资料，慎用 (tutorials, osdev wiki, &hellip;)</p>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="硬件和软件的桥梁">硬件和软件的桥梁</h2>
-<h3 id="c-程序">C 程序</h3>
-<ul>
-<li>
-<p>我们已经知道如何写一个 “最小” 的 C 程序了：</p>
-<ul>
-<li>
-<p><a href="https://jyywiki.cn/pages/OS/2022/demos/minimal.S" target="_blank" rel="noopener noreffer">minimal.S</a></p>
-</li>
-<li>
-<p>不需要链接任何库，就能在操作系统上运行</p>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="p">.</span><span class="n">globl</span> <span class="n">_start</span>
-</span></span><span class="line"><span class="cl"><span class="nl">_start</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_write</span><span class="p">,</span> <span class="o">%</span><span class="n">rax</span>   <span class="c1">// write(
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="c1">//   fd=1,
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="n">st</span><span class="p">,</span>        <span class="o">%</span><span class="n">rsi</span>   <span class="c1">//   buf=st,
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="p">(</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">),</span> <span class="o">%</span><span class="n">rdx</span>   <span class="c1">//   count=ed-st
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">syscall</span>                 <span class="c1">// );
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">  <span class="n">movq</span> <span class="err">$</span><span class="n">SYS_exit</span><span class="p">,</span>  <span class="o">%</span><span class="n">rax</span>   <span class="c1">// exit(
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">movq</span> <span class="err">$</span><span class="mi">1</span><span class="p">,</span>         <span class="o">%</span><span class="n">rdi</span>   <span class="c1">//   status=1
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">syscall</span>                 <span class="c1">// );
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="nl">st</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">  <span class="p">.</span><span class="n">ascii</span> <span class="s">&#34;</span><span class="se">\033</span><span class="s">[01;31mHello, OS World</span><span class="se">\033</span><span class="s">[0m</span><span class="se">\n</span><span class="s">&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="nl">ed</span><span class="p">:</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>“程序 = 状态机” 没问题</p>
-</li>
-<li>
-<p>带来更多的疑问</p>
-<ul>
-<li><font color="red">但谁创建的这个状态机？？？</font>
-<ul>
-<li>当然是操作系统了……呃…… $\Longrightarrow$ 参考<a href="https://jungle430.github.io/posts/operating-system/support2/#%E4%BB%8E%E6%88%91%E4%BB%AC%E7%BB%88%E7%AB%AF%E6%95%B2%E5%9B%9E%E8%BD%A6%E5%88%B0%E7%A8%8B%E5%BA%8F%E8%A2%AB%E8%BD%BD%E5%85%A5%E6%89%A7%E8%A1%8C%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88" target="_blank" rel="noopener noreffer">从我们终端敲回车到程序被载入执行的过程中发生了什么？</a></li>
-</ul>
-</li>
-<li><font color="red">这个程序可以在没有操作系统的硬件上运行吗？</font>
-<ul>
-<li>“启动” 状态机是由 “加载器” 完成的</li>
-<li>加载器也是一段程序 (状态机)</li>
-<li>这个程序由是由谁加载的？</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ file minimal
-</span></span><span class="line"><span class="cl">minimal: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>SYSV<span class="o">)</span>, statically linked, not stripped
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="bare-metal-与程序员的约定">Bare-metal 与程序员的约定</h3>
-<ul>
-<li>
-<p>计算机硬件运行的时候也是状态机</p>
-</li>
-<li>
-<p>为了让计算机能<font color="red">运行任何我们的程序</font>，一定存在软件/硬件的约定</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><b>CPU reset</b> 后，处理器处于某个<b>确定的状态</b></p>
-<ul>
-<li><b>PC 指针</b>一般指向一段 <font color="blue">memory-mapped ROM</font>
-<ul>
-<li>ROM 存储了厂商提供的 firmware (固件)</li>
-</ul>
-</li>
-<li>处理器的大部分特性处于关闭状态
-<ul>
-<li>缓存、虚拟存储、……</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Firmware (固件，厂商提供的代码)</p>
-<ul>
-<li>将用户数据加载到内存
-<ul>
-<li>例如存储介质上的第二级 loader (加载器)</li>
-<li>或者直接加载操作系统 (嵌入式系统)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="x86-family-cpu-reset-行为">x86 Family: CPU Reset 行为</h3>
-<ul>
-<li>
-<p>CPU Reset (<a href="https://software.intel.com/en-us/articles/intel-sdm" target="_blank" rel="noopener noreffer">Intel® 64 and IA-32 Architectures Software Developer’s Manual</a>, Volume 3A/3B)</p>
-</li>
-<li>
-<p>寄存器会有初始状态</p>
-<ul>
-<li>
-<p><code>EIP = 0x0000fff0</code></p>
-</li>
-<li>
-<p><code>CR0 = 0x60000010</code></p>
-<ul>
-<li>16-bit 模式 $\Longrightarrow$ 2010年前的老电脑会兼容老接口和老的操作系统</li>
-</ul>
-</li>
-<li>
-<p><code>EFLAGS = 0x00000002</code></p>
-</li>
-<li>
-<p>interrupt disabled（中断关闭）</p>
-</li>
-</ul>
-</li>
-<li>
-<p>TFM (5,000 页 by 2019)</p>
-<ul>
-<li>最需要的 Volume 3A 只有 468 页</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-1.png" title="/img/Operating System/chapter9-1.png" data-thumbnail="/img/Operating System/chapter9-1.png" data-sub-html="<h2>friendly manual</h2>">
-        
-    </a><figcaption class="image-caption"><code>friendly manual</code></figcaption>
-    </figure>
-<ul>
-<li>让<code>qemu</code>模拟器停在第一条指令上，和上面的手册对照，会发现和手册一致</li>
-</ul>
-<h3 id="cpu-reset-之后发生了什么">CPU Reset 之后：发生了什么？</h3>
-<ul>
-<li>
-<p>《计算机系统基础》：<font color="red">不仅是程序，整个计算机系统也是一个状态机</font></p>
-<ul>
-<li>
-<p>从 PC (<code>CS:IP</code>) 指针处取指令、译码、执行……</p>
-</li>
-<li>
-<p>从 firmware 开始执行</p>
-<ul>
-<li><code>ffff0</code>(PC初始化的值) 通常是一条向 firmware 跳转的 jmp 指令</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>厂商会在<code>ROW</code>里面放好写死的代码（Only-read）</p>
-</li>
-<li>
-<p>Firmware: <a href="https://www.zhihu.com/question/21672895" target="_blank" rel="noopener noreffer">BIOS vs. UEFI</a></p>
-<ul>
-<li>
-<p>都是主板/主板上外插设备的软件抽象</p>
-<ul>
-<li>支持系统管理程序运行</li>
-</ul>
-</li>
-<li>
-<p>Legacy BIOS (Basic I/O System)</p>
-</li>
-<li>
-<p>UEFI (Unified Extensible Firmware Interface)</p>
-</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-2.png" title="/img/Operating System/chapter9-2.png" data-thumbnail="/img/Operating System/chapter9-2.png" data-sub-html="<h2>BIOS</h2>">
-        
-    </a><figcaption class="image-caption"><code>BIOS</code></figcaption>
-    </figure>
-<h3 id="legacy-bios-约定">Legacy BIOS: 约定</h3>
-<p><b>Firmware 必须提供机制，将用户数据载入内存</b></p>
-<div class="mermaid" id="id-1"></div>
-<ul>
-<li>
-<p>Legacy BIOS 把<b>第一个可引导设备的第一个扇区加载到物理内存的 <code>7c00</code> 位置</b>，这也是我们Fireware和OS之间的第一次，也是唯一一次握手</p>
-<ul>
-<li>
-<p>此时处理器处于 16-bit 模式</p>
-</li>
-<li>
-<p>规定 <code>CS:IP = 0x7c00</code>, <code>(R[CS] &lt;&lt; 4) | R[IP] == 0x7c00</code></p>
-<ul>
-<li>
-<p>可能性1：<code>CS = 0x07c0, IP = 0</code></p>
-</li>
-<li>
-<p>可能性2：<code>CS = 0, IP = 0x7c00</code></p>
-</li>
-</ul>
-</li>
-<li>
-<p>其他没有任何约束</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Windows启动模式：老的Windows的A，B盘都是软盘，BIOS先去软盘里面读前512个<code>bytes</code>，看最后两个byte是否为<code>55aa</code>（大端），如果是就加载这块磁盘，否则读下一块，如果都不是就启动失败。读完A/B盘之后引导到C盘，这也是为什么今天的Windows操作系统C盘是系统盘的原因</p>
-</li>
-<li>
-<p>Firmware做的事情（以BIOS为例）</p>
-</li>
-</ul>
-<div class="mermaid" id="id-2"></div>
-<h3 id="能不能看一下代码">能不能看一下代码？</h3>
-<blockquote>
-<p>Talk is cheap. Show me the code. ——Linus Torvalds</p>
-</blockquote>
-<ul>
-<li>
-<p>有没有可能我们真的去看从 CPU Reset 以后每一条指令的执行？</p>
-</li>
-<li>
-<p><font color="red">计算机系统公理：你想到的就一定有人做到</font></p>
-</li>
-<li>
-<p>模拟方案：QEMU</p>
-<ul>
-<li>传奇黑客、天才程序员 <a href="https://www.zhihu.com/question/28388113" target="_blank" rel="noopener noreffer">Fabrice Bellard</a> 的杰作（其他:ffmpeg)
-<ul>
-<li><a href="https://www.usenix.org/legacy/publications/library/proceedings/usenix05/tech/freenix/full_papers/bellard/bellard.pdf" target="_blank" rel="noopener noreffer">QEMU, A fast and portable dynamic translator</a> (USENIX ATC'05)</li>
-<li>Android Virtual Device, VirtualBox, &hellip; 背后都是 QEMU</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>真机方案：JTAG (Joint Test Action Group) debugger</p>
-<ul>
-<li>一系列 (物理) 调试寄存器，可以实现 gdb 接口 (!!!)</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-3.png" title="/img/Operating System/chapter9-3.png" data-thumbnail="/img/Operating System/chapter9-3.png" data-sub-html="<h2>ffmpeg</h2>">
-        
-    </a><figcaption class="image-caption"><code>ffmpeg</code></figcaption>
-    </figure>
-<h3 id="调试-qemu-确认-firmware-的行为">调试 QEMU: 确认 Firmware 的行为</h3>
-<blockquote>
-<p>亲眼确认 Firmware 到底是不是会加载启动盘第一个扇区到 <code>0x7c00</code> 内存位置！</p>
-</blockquote>
-<p>调试 QEMU 模拟器</p>
-<ul>
-<li>
-<p>查看 CPU Reset 后的寄存器</p>
-<ul>
-<li><code>info registers</code></li>
-</ul>
-</li>
-<li>
-<p>查看<code>0x7c00</code>内存的加载</p>
-<ul>
-<li><code>watch *0x7c00</code> - 《计算机系统基础》的良苦用心</li>
-<li>查看当前指令 <code>x/i ($cs * 16 + $rip)</code></li>
-<li>打印内存 <code>x/16xb 0x7c00</code></li>
-</ul>
-</li>
-<li>
-<p>进入<code>0x7c00</code>代码的执行</p>
-<ul>
-<li><code>b *0x7c00</code>, <code>c</code> (撒花！我们一会再回来)</li>
-</ul>
-</li>
-</ul>
-<h3 id="鸡和蛋的问题解决">鸡和蛋的问题解决</h3>
-<ul>
-<li>
-<p>有个原始的鸡：Firmware</p>
-<ul>
-<li>
-<p>代码直接存在于硬件里</p>
-</li>
-<li>
-<p>CPU Reset 后 Firmware 会执行</p>
-<ul>
-<li>加载 512 字节到内存 (Legacy Boot)
-<ul>
-<li>然后功成身退</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Firmware 的另一用处</p>
-<ul>
-<li>放置一些 “绝对安全的代码”
-<ul>
-<li><a href="https://jyywiki.cn/pages/OS/manuals/BIOS-interrupts.pdf" target="_blank" rel="noopener noreffer">BIOS 中断</a> (Hello World 是如何被打印的)</li>
-<li>如果加载失败将错误信息打印出来</li>
-<li>ARM Trusted Firmware
-<ul>
-<li>Boot-Level 1, 2, 3.1, 3.2, 3.3</li>
-<li><a href="https://www.denx.de/wiki/U-Boot" target="_blank" rel="noopener noreffer">U-Boot</a>: the universal boot loader</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="小插曲firmware-的病毒-1998">小插曲：Firmware 的病毒 (1998)</h3>
-<ul>
-<li>
-<p>Firmware 通常是只读的 (当然……)</p>
-</li>
-<li>
-<p>Intel 430TX (Pentium) 芯片组允许<font color="red">写入 Flash ROM</font></p>
-<ul>
-<li>
-<p>只要向 Flash BIOS 写入特定序列，Flash ROM 就变为可写</p>
-<ul>
-<li>留给 firmware 更新的通道</li>
-</ul>
-</li>
-<li>
-<p>要得到这个序列其实并不困难</p>
-<ul>
-<li>似乎文档里就有 🤔 Boom……</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p><a href="https://zh.wikipedia.org/zh-tw/CIH%E7%97%85%E6%AF%92" target="_blank" rel="noopener noreffer">CIH</a> 的作者陈盈豪被逮捕，但并未被定罪</p>
-</blockquote>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-4.gif" title="/img/Operating System/chapter9-4.gif" data-thumbnail="/img/Operating System/chapter9-4.gif" data-sub-html="<h2>病毒代码结尾的CIH</h2>">
-        
-    </a><figcaption class="image-caption">病毒代码结尾的<code>CIH</code></figcaption>
-    </figure>
-<h3 id="今天的-firmware-uefi">今天的 Firmware: UEFI</h3>
-<ul>
-<li>
-<p>IBM PC 所有设备/BIOS 中断是有 specification 的 (成就了 “兼容机”)</p>
-</li>
-<li>
-<p>今天的 boot loader 面临麻烦得多的硬件：</p>
-<ul>
-<li>指纹锁、不知名厂商生产网卡上的网络启动、USB 上的蓝牙转接器连接的蓝牙键盘、……</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter9-5.png" title="/img/Operating System/chapter9-5.png" data-thumbnail="/img/Operating System/chapter9-5.png" data-sub-html="<h2>UEFI</h2>">
-        
-    </a><figcaption class="image-caption"><code>UEFI</code></figcaption>
-    </figure>
-<h3 id="uefi-上的操作系统加载">UEFI 上的操作系统加载</h3>
-<ul>
-<li>
-<p>标准化的加载流程</p>
-<ul>
-<li>
-<p>盘必须按 GPT (GUID Partition Table) 方式格式化</p>
-</li>
-<li>
-<p>预留一个 FAT32 分区 (lsblk/fdisk 可以看到)</p>
-</li>
-<li>
-<p>Firmware 加载任意大小的 PE 可执行文件<code>.efi</code></p>
-<ul>
-<li>
-<p>没有 legacy boot 512 字节限制</p>
-</li>
-<li>
-<p>EFI 应用可以返回 firmware</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>更好的程序支持</p>
-<ul>
-<li>
-<p>设备驱动框架</p>
-</li>
-<li>
-<p>更多的功能，例如 Secure Boot，只能启动 “信任” 的操作系统</p>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="操作系统的状态机模型">操作系统的状态机模型</h2>
-<h3 id="操作系统-的状态机已经启动">“操作系统” 的状态机已经启动</h3>
-<ul>
-<li>Firmware 和 boot loader 共同完成 “操作系统的加载”
-<ul>
-<li>初始化全局变量和栈；分配堆区 (<code>heap</code>)</li>
-<li>为 <code>main</code> 函数传递参数
-<ul>
-<li>谁给操作系统传递了参数？</li>
-<li>如何实现参数传递？</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>进入 C 代码之后</p>
-<ul>
-<li>
-<p>完全遵循 C 语言的形式语义</p>
-</li>
-<li>
-<p>但有一些行为 “补充” —— AbstractMachine API</p>
-</li>
-</ul>
-</li>
-</ul>
-<div class="mermaid" id="id-3"></div>
-<h3 id="操作系统是个-c-程序">操作系统：是个 C 程序</h3>
-<ul>
-<li>一个迷你 “操作系统” <a href="https://jyywiki.cn/pages/OS/2022/demos/thread-os.c" target="_blank" rel="noopener noreffer">thread-os.c</a>
-<ul>
-<li>make 会得到一个 “磁盘镜像”，好像魔法一样
-<ul>
-<li>就跟你们第一次用 IDE 的时候按一个键就可以编译运行一样</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">cte_init</span><span class="p">(</span><span class="n">on_interrupt</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Task</span> <span class="o">*</span><span class="n">task</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Area</span> <span class="n">stack</span>    <span class="o">=</span> <span class="p">(</span><span class="n">Area</span><span class="p">)</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">task</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">};</span>
-</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">kcontext</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">task</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">next</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">)];</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="n">mpe_init</span><span class="p">(</span><span class="n">mp_entry</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>thread-os.c</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span><span class="lnt">61
-</span><span class="lnt">62
-</span><span class="lnt">63
-</span><span class="lnt">64
-</span><span class="lnt">65
-</span><span class="lnt">66
-</span><span class="lnt">67
-</span><span class="lnt">68
-</span><span class="lnt">69
-</span><span class="lnt">70
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;am.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;klib.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;klib-macros.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define MAX_CPU 8
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">union</span> <span class="n">task</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">union</span> <span class="n">task</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">void</span>      <span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Context</span>    <span class="o">*</span><span class="n">context</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">};</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">stack</span><span class="p">[</span><span class="mi">8192</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Task</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">Task</span> <span class="o">*</span><span class="n">currents</span><span class="p">[</span><span class="n">MAX_CPU</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define current currents[cpu_current()]
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="c1">// user-defined tasks
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">locked</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">lock</span><span class="p">()</span>   <span class="p">{</span> <span class="k">while</span> <span class="p">(</span><span class="n">atomic_xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">1</span><span class="p">));</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">unlock</span><span class="p">()</span> <span class="p">{</span> <span class="n">atomic_xchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">locked</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">lock</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Thread-%s on CPU #%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">cpu_current</span><span class="p">());</span>
-</span></span><span class="line"><span class="cl">    <span class="n">unlock</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="k">volatile</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">Task</span> <span class="n">tasks</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;A&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;B&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;C&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;D&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span> <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;E&#34;</span><span class="p">,</span> <span class="p">.</span><span class="n">entry</span> <span class="o">=</span> <span class="n">func</span> <span class="p">},</span>
-</span></span><span class="line"><span class="cl"><span class="p">};</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// ------------------
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="n">Context</span> <span class="o">*</span><span class="nf">on_interrupt</span><span class="p">(</span><span class="n">Event</span> <span class="n">ev</span><span class="p">,</span> <span class="n">Context</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">extern</span> <span class="n">Task</span> <span class="n">tasks</span><span class="p">[];</span>
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">current</span><span class="p">)</span> <span class="n">current</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">  <span class="k">else</span>          <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="k">do</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">while</span> <span class="p">((</span><span class="n">current</span> <span class="o">-</span> <span class="n">tasks</span><span class="p">)</span> <span class="o">%</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cpu_current</span><span class="p">());</span>
-</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mp_entry</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">iset</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">yield</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">cte_init</span><span class="p">(</span><span class="n">on_interrupt</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Task</span> <span class="o">*</span><span class="n">task</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Area</span> <span class="n">stack</span>    <span class="o">=</span> <span class="p">(</span><span class="n">Area</span><span class="p">)</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">task</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">};</span>
-</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">kcontext</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">task</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">task</span><span class="o">-&gt;</span><span class="n">next</span>    <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">tasks</span><span class="p">)];</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="n">mpe_init</span><span class="p">(</span><span class="n">mp_entry</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="abstractmachine-对-c-程序语义-做出的扩充">AbstractMachine 对 “C 程序语义” 做出的扩充</h3>
-<ul>
-<li>
-<p>TRM + MPE</p>
-<ul>
-<li>
-<p>完全等同于多线程 (处理器相当于线程) - L1/native</p>
-</li>
-<li>
-<p>IOE API: 完全是普通的库函数</p>
-<ul>
-<li>同一设备的数据竞争 = undefined behavior</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>CTE</p>
-<ul>
-<li>
-<p>允许创建多个执行流 (类比协程) - M2</p>
-</li>
-<li>
-<p>yield 主动切换；会被中断被动打断</p>
-</li>
-<li>
-<p><code>on_interrupt</code> 会拦截到中断事件</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>VME</p>
-<ul>
-<li>
-<p>允许创建一个 “经过地址翻译的执行模式”</p>
-</li>
-<li>
-<p>通过 CTE API 管理</p>
-</li>
-</ul>
-</li>
-<li>
-<p>有关中断代码</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">Context</span> <span class="o">*</span><span class="nf">on_interrupt</span><span class="p">(</span><span class="n">Event</span> <span class="n">ev</span><span class="p">,</span> <span class="n">Context</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">extern</span> <span class="n">Task</span> <span class="n">tasks</span><span class="p">[];</span>
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">current</span><span class="p">)</span> <span class="n">current</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">  <span class="k">else</span>          <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="k">do</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">while</span> <span class="p">((</span><span class="n">current</span> <span class="o">-</span> <span class="n">tasks</span><span class="p">)</span> <span class="o">%</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cpu_current</span><span class="p">());</span>
-</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">context</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mp_entry</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">iset</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">yield</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">iset</span><span class="p">(</span><span class="kt">bool</span> <span class="n">enable</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">extern</span> <span class="n">sigset_t</span> <span class="n">__am_intr_sigmask</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="c1">// NOTE: sigprocmask does not supported in multithreading
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">sigprocmask</span><span class="p">(</span><span class="n">enable</span> <span class="o">?</span> <span class="nl">SIG_UNBLOCK</span> <span class="p">:</span> <span class="n">SIG_BLOCK</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">__am_intr_sigmask</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">assert</span><span class="p">(</span><span class="n">ret</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="rtfsc-时间">RTFSC 时间</h2>
-<h3 id="0-生成镜像和启动虚拟机">(0) 生成镜像和启动虚拟机</h3>
-<blockquote>
-<p>如果使用 “土办法”，你很可能被淹没在 Makefile 中</p>
-<ul>
-<li>读懂 Makefile 需要 STFW, RTFM，大量的精力</li>
-<li>虽然花点时间读是值得的，但很可能读了很久都没读到重要的地方</li>
-</ul>
-</blockquote>
-<ul>
-<li>
-<p>花一点时间想 “应该怎么做”</p>
-<ul>
-<li>
-<p>花几分钟创建一个小工具：“AbstractMachine 构建理解工具”</p>
-<ul>
-<li>UNIX Philosophy: keep it simple, stupid</li>
-<li>everything is a file; write things to work together using text interface</li>
-</ul>
-</li>
-<li>
-<p><em>Get out of your comfort zone</em></p>
-</li>
-</ul>
-</li>
-</ul>
-<p>Abstract-Machine 通过脚本+重定向可以转化为<a href="https://github.com/Jungle430/check-for-NJU-OS/blob/main/abstract-machine-Makefile.html" target="_blank" rel="noopener noreffer">HTML代码</a>进行阅读</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿jungle-virtual-machine<span class="o">)</span>-<span class="o">[</span>~/deom1/abstract-machine<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ sudo apt install python3-markdown
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿jungle-virtual-machine<span class="o">)</span>-<span class="o">[</span>~/deom1/abstract-machine<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ cat Makefile <span class="p">|</span> sed <span class="s1">&#39;s/^\([^#]\)/    \1/g&#39;</span> <span class="p">|</span> markdown_py &gt; Makefile.html
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>注：使用了自动化工具<a href="https://python-markdown.github.io" target="_blank" rel="noopener noreffer">python3-markdown</a></p>
-<h3 id="0-生成镜像和启动虚拟机-contd">(0) 生成镜像和启动虚拟机 (cont&rsquo;d)</h3>
-<ul>
-<li>观察 AbstractMachine 程序编译过程的正确方法：</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">make -nB <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> grep -ve <span class="s1">&#39;^\(\#\|echo\|mkdir\|make\)&#39;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> sed <span class="s2">&#34;s#</span><span class="nv">$AM_HOME</span><span class="s2">#\$AM_HOME#g&#34;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> sed <span class="s2">&#34;s#</span><span class="nv">$PWD</span><span class="s2">#.#g&#34;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="p">|</span> vim -
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>Command line tricks</p>
-<ul>
-<li><code>make -nB</code> (RTFM)</li>
-<li>grep: 文本过滤，省略了一些干扰项
-<ul>
-<li>echo (提示信息), mkdir (目录建立), make (sub-goals)</li>
-</ul>
-</li>
-<li>sed: 让输出更易读
-<ul>
-<li>将绝对路径替换成相对路径</li>
-</ul>
-</li>
-<li>vim: 更舒适的编辑/查看体验</li>
-</ul>
-</li>
-<li>
-<p>部分<code>make -nB</code>的输出信息</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl"><span class="gh"># Building hello-image [x86_64-qemu]
-</span></span></span><span class="line"><span class="cl"><span class="gh"></span>mkdir -p /home/jungle/deom1/deom/build/x86_64-qemu/ <span class="err">&amp;&amp;</span> echo + CC main.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/deom/build/x86_64-qemu/main.o /home/jungle/deom1/deom/main.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/deom/build/x86_64-qemu/ <span class="err">&amp;&amp;</span> echo + CC say.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/deom/build/x86_64-qemu/say.o /home/jungle/deom1/deom/say.c
-</span></span><span class="line"><span class="cl">make -s -C /home/jungle/deom1/deom/../abstract-machine/am archive
-</span></span><span class="line"><span class="cl"><span class="gh"># Building am-archive [x86_64-qemu]
-</span></span></span><span class="line"><span class="cl"><span class="gh"></span>mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + AS src/x86/qemu/start64.S
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -MMD -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -m64 -fPIC -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/start64.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/start64.S
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + AS src/x86/qemu/trap64.S
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -MMD -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -m64 -fPIC -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trap64.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/trap64.S
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/trm.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trm.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/trm.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/cte.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/cte.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/cte.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/ioe.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ioe.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/ioe.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/vme.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/vme.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/vme.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ <span class="err">&amp;&amp;</span> echo + CC src/x86/qemu/mpe.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/deom/../abstract-machine/am/src -I/home/jungle/deom1/abstract-machine/am/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/mpe.o /home/jungle/deom1/abstract-machine/am/src/x86/qemu/mpe.c
-</span></span><span class="line"><span class="cl">echo + AR &#34;-&gt;&#34; build/am-x86_64-qemu.a
-</span></span><span class="line"><span class="cl">ar rcs /home/jungle/deom1/abstract-machine/am/build/am-x86_64-qemu.a /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/start64.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trap64.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/trm.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/cte.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/ioe.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/vme.o /home/jungle/deom1/abstract-machine/am/build/x86_64-qemu/src/x86/qemu/mpe.o
-</span></span><span class="line"><span class="cl">make -s -C /home/jungle/deom1/deom/../abstract-machine/klib archive
-</span></span><span class="line"><span class="cl"><span class="gh"># Building klib-archive [x86_64-qemu]
-</span></span></span><span class="line"><span class="cl"><span class="gh"></span>mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/stdio.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdio.o /home/jungle/deom1/abstract-machine/klib/src/stdio.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/int64.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/int64.o /home/jungle/deom1/abstract-machine/klib/src/int64.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/string.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/string.o /home/jungle/deom1/abstract-machine/klib/src/string.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/cpp.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/cpp.o /home/jungle/deom1/abstract-machine/klib/src/cpp.c
-</span></span><span class="line"><span class="cl">mkdir -p /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/ <span class="err">&amp;&amp;</span> echo + CC src/stdlib.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -std=gnu11 -O2 -MMD -Wall -Werror -I/home/jungle/deom1/abstract-machine/klib/include -I/home/jungle/deom1/deom/../abstract-machine/am/include/ -I/home/jungle/deom1/deom/../abstract-machine/klib/include/ -D__ISA__=\&#34;x86_64\&#34; -D__ISA_X86_64__ -D__ARCH__=x86_64-qemu -D__ARCH_X86_64_QEMU -D__PLATFORM__=qemu -D__PLATFORM_QEMU -DARCH_H=\&#34;arch/x86_64-qemu.h\&#34; -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -m64 -fPIC -mno-sse -c -o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdlib.o /home/jungle/deom1/abstract-machine/klib/src/stdlib.c
-</span></span><span class="line"><span class="cl">echo + AR &#34;-&gt;&#34; build/klib-x86_64-qemu.a
-</span></span><span class="line"><span class="cl">ar rcs /home/jungle/deom1/abstract-machine/klib/build/klib-x86_64-qemu.a /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdio.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/int64.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/string.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/cpp.o /home/jungle/deom1/abstract-machine/klib/build/x86_64-qemu/src/stdlib.o
-</span></span><span class="line"><span class="cl">echo + LD &#34;-&gt;&#34; build/hello-x86_64-qemu.elf
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-ld -melf_x86_64 -N -Ttext-segment=0x00100000 -o /home/jungle/deom1/deom/build/hello-x86_64-qemu.elf --start-group /home/jungle/deom1/deom/build/x86_64-qemu/main.o /home/jungle/deom1/deom/build/x86_64-qemu/say.o /home/jungle/deom1/deom/../abstract-machine/am/build/am-x86_64-qemu.a /home/jungle/deom1/deom/../abstract-machine/klib/build/klib-x86_64-qemu.a --end-group
-</span></span><span class="line"><span class="cl">echo \# Creating image [x86_64-qemu]
-</span></span><span class="line"><span class="cl">make -s -C /home/jungle/deom1/deom/../abstract-machine/am/src/x86/qemu/boot
-</span></span><span class="line"><span class="cl">echo + CC start.S main.c
-</span></span><span class="line"><span class="cl">x86_64-linux-gnu-gcc -static -m32 -fno-pic -Os -nostdlib -Ttext 0x7c00 -I/home/jungle/deom1/deom/../abstract-machine/am/src -o bootblock.o start.S main.c
-</span></span><span class="line"><span class="cl">python3 genboot.py bootblock.o
-</span></span><span class="line"><span class="cl">echo + CREATE &#34;-&gt;&#34; build/hello-x86_64-qemu
-</span></span><span class="line"><span class="cl">( cat /home/jungle/deom1/deom/../abstract-machine/am/src/x86/qemu/boot/bootblock.o; head -c 1024 /dev/zero; cat /home/jungle/deom1/deom/build/hello-x86_64-qemu.elf ) &gt; /home/jungle/deom1/deom/build/hello-x86_64-qemu
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="0-生成镜像和启动虚拟机-contd-1">(0) 生成镜像和启动虚拟机 (cont&rsquo;d)</h3>
-<p>想要看得更清楚一些？</p>
-<ul>
-<li><code>:%s/ /\r /g</code>
-<ul>
-<li>每一个命令就像 “一句话”</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p>编译</p>
-<ul>
-<li><code>-std=gnu11</code>, <code>m64</code>, <code>-mno-sse</code>, <code>-I</code>, <code>-D</code>, &hellip; (这对你配置 vscode 很重要)</li>
-</ul>
-<p>链接</p>
-<ul>
-<li><code>-melf_x86_64</code>, <code>-N</code>, <code>-Ttext-segment=0x00100000</code></li>
-<li>链接了需要的库 (<code>am-x86_64-qemu.a</code>, <code>klib-x86_64-qemu.a</code>)</li>
-</ul>
-<p>彩蛋</p>
-<ul>
-<li><code>make html</code></li>
-</ul>
-<h3 id="1-启动加载器-boot-loader">(1) 启动加载器 (Boot Loader)</h3>
-<p>512 字节中的代码，假设了镜像格式 (真正的的加载器有很多 stages)</p>
-<ul>
-<li>16-bit → 32-bit</li>
-<li>ELF32/64 的加载器
-<ul>
-<li>按照约定的磁盘镜像格式加载</li>
-</ul>
-</li>
-</ul>
-<p>代码讲解：</p>
-<ul>
-<li><code>am/src/x86/qemu/boot/start.S</code>和<code>main.c</code>
-<ul>
-<li>它们都可以调试！</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">elf32</span><span class="o">-&gt;</span><span class="n">e_machine</span> <span class="o">==</span> <span class="n">EM_X86_64</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="p">((</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)())(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">elf64</span><span class="o">-&gt;</span><span class="n">e_entry</span><span class="p">)();</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="p">((</span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)())(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">elf32</span><span class="o">-&gt;</span><span class="n">e_entry</span><span class="p">)();</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="总结">总结</h2>
-<p>本次课回答的问题</p>
-<ul>
-<li><strong>Q</strong>: 操作系统也是程序，它如何用状态机如何定义？</li>
-</ul>
-<hr>
-<p>Take-away message</p>
-<ul>
-<li>一切皆可调试 (包括 firmware)
-<ul>
-<li>理解操作系统是如何被启动的</li>
-<li>学会使用 gdb (必备生存技能)</li>
-</ul>
-</li>
-<li>操作系统也是程序
-<ul>
-<li>AbstractMachine 扩展了程序的语义，仅此而已</li>
 </ul>
 </li>
 </ul>
