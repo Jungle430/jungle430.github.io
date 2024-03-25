@@ -4,9 +4,231 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 24 Mar 2024 22:00:23 &#43;0800</lastBuildDate>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 25 Mar 2024 15:48:05 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>CMU 15-445 Lecture #03: Database Storage (Part I)</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/</link>
+    <pubDate>Mon, 25 Mar 2024 15:48:05 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-03-database-storage-part-i">Lecture #03: Database Storage (Part I)</h2>
+<h3 id="storage">Storage</h3>
+<ul>
+<li>
+<p>本课程讨论的都是存储在磁盘上的数据库，不考虑后期出现的内存数据库</p>
+</li>
+<li>
+<p>补充计组的知识：设备离CPU越近，存储速度越快，内存越小，价格越贵</p>
+</li>
+<li>
+<p><strong>Volatile Devices</strong></p>
+<ul>
+<li>断了电就没有数据了</li>
+<li>可以通过字节寻址快速随机访问，程序可以随机获取数据</li>
+<li>这个地方基本就叫内存</li>
+</ul>
+</li>
+<li>
+<p><strong>Non-Volatile Devices</strong></p>
+<ul>
+<li>断了电也不怕</li>
+<li>也是块/页可寻址的，但是如果程序要读取需要先load到内存</li>
+<li>更适合顺序访问（加载到内存+局部性原理）</li>
+<li>一般叫磁盘，这个课不区分机械盘和SSD</li>
+</ul>
+</li>
+<li>
+<p>部分公司后面为了获取两个设备的长处推出了“持久内存”，但是本课程不会讨论，而且从Intel 2022开始逐步停产该系列产品来看，它没有想象中那么好</p>
+</li>
+<li>
+<p>本课程主要是磁盘存储的数据库，我们必须明白一点，磁盘上面的数据必须要先load到内存中才能操作</p>
+</li>
+</ul>
+<h3 id="disk-oriented-dbms-overview">Disk-Oriented DBMS Overview</h3>
+<ul>
+<li>
+<p>数据库全部存储在磁盘上，数据库文件被数据组织成页，<strong>第一页是目录页</strong></p>
+</li>
+<li>
+<p>为了对数据库进行操作，DBMS需要将数据放入内存，<strong>这个时候会使用一个缓冲池来管理在磁盘和内存之间移动的数据</strong></p>
+</li>
+<li>
+<p>例子：以DBMS中的查询为例，执行引擎会让缓冲池请求特定的页面，缓冲池将该页加载到内存，然后返回给执行引擎目前内存中该页的指针，使得执行引擎可以进行下一步的工作</p>
+</li>
+</ul>
+<h3 id="dbms-vs-os">DBMS vs. OS</h3>
+<ul>
+<li>
+<p>DBMS和OS的虚拟内存都涉及到了cache和disk调用的问题，那么是否可以在DBMS中使用mmap呢</p>
+<ul>
+<li>不可以</li>
+<li>mmap一旦出现地址错误会block，这对于DBMS的性能来说是不能接收的</li>
+<li>mmap是为OS设计的，对于cache和disk的调用，DBMS其实更应该根据自己的情况来定制化其他方案</li>
+</ul>
+</li>
+<li>
+<p>但是我们和disk交互的时候仍然可以使用下面的OS调用，这些是符合我们期望的</p>
+</li>
+</ul>
+<blockquote>
+<p>• <strong>madvise</strong>: Tells the OS know when you are planning on reading certain pages.</p>
+<p>• <strong>mlock</strong>: Tells the OS to not swap memory ranges out to disk.</p>
+<p>• <strong>msync</strong>: Tells the OS to flush memory ranges out to disk.</p>
+</blockquote>
+<ul>
+<li>对于DBMS这种如此吃性能的设施，很多解决方案还是需要手搓定制化，而不是依赖OS的调用</li>
+</ul>
+<h3 id="file-storage">File Storage</h3>
+<ul>
+<li>
+<p>DBMS将数据库作为文件存储在磁盘上，有些使用文件层次结构，有些使用单个文件（比如SQLite）</p>
+</li>
+<li>
+<p>OS是不知道这些文件存储的是什么，只有DBMS才能读懂和操作它们（有特定的编码）</p>
+</li>
+<li>
+<p>DBMS的存储管理器负责管理数据库的文件。<strong>它将文件表示为页面的集合</strong>，它还跟踪哪些数据被读取和写入到页面，以及这些页面中有多少空闲空间</p>
+</li>
+</ul>
+<h3 id="database-pages">Database Pages</h3>
+<ul>
+<li>
+<p>DBMS会将多个文件组织成固定大小的数据块，这个东西就叫页</p>
+</li>
+<li>
+<p>页面可以包含不同的数据类型，但是大多数系统是不会在页面中混合使用这些类型的</p>
+</li>
+<li>
+<p>有些系统要求页面是自包含的，这意味着读取每个页面所需的所有信息都在页面本身上</p>
+</li>
+<li>
+<p>每个页面都有一个唯一的标识符</p>
+</li>
+<li>
+<p>如果数据库是单个文件，那么页id可以只是文件偏移量。大多数DBMS都有一个间接层，它将页id映射到文件路径和偏移量。系统的上层将要求提供特定的页码。然后，存储管理器必须将该页码转换为文件和偏移量以查找该页</p>
+</li>
+<li>
+<p>大多数的页大小都是固定的，不然难以管理内存（内存碎片）</p>
+</li>
+<li>
+<p>DBMS中的三种页面</p>
+<ul>
+<li>Hardware page (usually 4 KB).</li>
+</ul>
+<ol start="2">
+<li>
+<p>OS page (4 KB).</p>
+</li>
+<li>
+<p>Database page (1-16 KB).</p>
+</li>
+</ol>
+</li>
+<li>
+<p>硬件页设计的小是为了能够利用硬件的条件原子性写入，但是到了数据库的页就无法保证了，所以需要使用额外的措施保证原子性</p>
+</li>
+</ul>
+<h3 id="database-heap">Database Heap</h3>
+<ul>
+<li>数据库的页“堆”成一个文件的方式</li>
+<li>也要能够有创建页，遍历页，删除页的操作，那么页之间怎么组织？
+<ul>
+<li>Linked List</li>
+<li>Page Directory</li>
+</ul>
+</li>
+</ul>
+<h3 id="page-layout">Page Layout</h3>
+<ul>
+<li>
+<p>Every page includes a header that records meta-data about the page’s contents:</p>
+<ul>
+<li>
+<p>Page size.</p>
+</li>
+<li>
+<p>Checksum.</p>
+</li>
+<li>
+<p>DBMS version.</p>
+</li>
+<li>
+<p>Transaction visibility.</p>
+</li>
+<li>
+<p>Self-containment. (Some systems like Oracle require this.)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>数据的存储方案</p>
+<ul>
+<li>
+<p>Tuple-oriented:按照真实数据一行一行存</p>
+<ul>
+<li>
+<p>如何避免内存碎片化问题：Slotted Page结构，索引在一个区，剩下的空间存储数据</p>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter3-1.png" title="/img/CMU 15-445 Database Systems/chapter3-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter3-1.png" data-sub-html="<h2>Slotted Page</h2>">
+              
+          </a><figcaption class="image-caption">Slotted Page</figcaption>
+          </figure>
+</li>
+<li>
+<p>定位：page_id + offset/slot</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Log-Structured:存操作日志</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="tuple-layout">Tuple Layout</h3>
+<ul>
+<li>一组数据存储在磁盘上面就是bytes，需要我们附加其他的信息进行解析</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter3-2.png" title="/img/CMU 15-445 Database Systems/chapter3-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter3-2.png" data-sub-html="<h2>Tuple布局</h2>">
+        
+    </a><figcaption class="image-caption">Tuple布局</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>Tuple Header</strong>: Contains meta-data about the tuple.</p>
+<ul>
+<li>并发控制信息（为了事务安全）</li>
+<li>NULL值的Bit映射（解析Tuple需要的信息）</li>
+<li>注：不需要存结构信息（每一个Header都存一下内存浪费太多了）</li>
+</ul>
+</li>
+<li>
+<p><strong>Tuple Header</strong>: Contains meta-data about the tuple.</p>
+<ul>
+<li>属性通常按照创建表的时候指定的数据存储</li>
+<li>大多数DBMS不允许一个元组超过一个页面的大小</li>
+</ul>
+</li>
+<li>
+<p><strong>Unique Identifier</strong></p>
+<ul>
+<li>最常见的是page_id+offset</li>
+<li>应用程序不能直接用这些，只能用主键这类的属性（因为这个东西会因为内存整理而更改，程序员只能和DBMS这部分的管理系统用主键交流，由这个系统进行映射）</li>
+</ul>
+</li>
+<li>
+<p><strong>Denormalized Tuple Data</strong>: If two tables are related, the DBMS can “pre-join” them, so the tables end up
+on the same page. This makes reads faster since the DBMS only has to load in one page rather than two
+separate pages. However, it makes updates more expensive since the DBMS needs more space for each
+tuple.</p>
+<ul>
+<li>两个表如果总是需要JOIN，那我提前给你在内存中连好</li>
+<li>理论上可行，现实中会让插入等的复杂度变的很高，目前这种方案已经被废止</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #02: Modern SQL</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter2/</link>
     <pubDate>Sun, 24 Mar 2024 22:00:23 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter2/</guid>
@@ -371,7 +593,81 @@ syntax for date and time operations varies wildly across systems.</li>
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="window-functions">Window Functions</h3>
-]]></description>
+<ul>
+<li>解决了分组后非聚合函数数值undefined的问题，保留了原来的列结构</li>
+</ul>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter2-1.png" title="/img/CMU 15-445 Database Systems/chapter2-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter2-1.png">
+        
+    </a>
+<ol>
+<li>
+<p>ROW NUMBER: The number of the current row.</p>
+</li>
+<li>
+<p>RANK: The order position of the current row.</p>
+</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">cid</span><span class="p">,</span><span class="w"> </span><span class="n">sid</span><span class="p">,</span><span class="w"> </span><span class="n">ROW_NUMBER</span><span class="p">()</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cid</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cid</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">ROW_NUMBER</span><span class="p">()</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cid</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">enrolled</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cid</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>本质上面来说是一种分析函数，将order by之后的组进行二次分析，而不是只能使用聚合函数来获取那些值</li>
+</ul>
+<h3 id="common-table-expressions">Common Table Expressions</h3>
+<ul>
+<li>主要是WITH，和Python中的WITH做对比，表示临时变量，这样可以简单的生成临时表用于复杂的操作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">WITH</span><span class="w"> </span><span class="n">cteName</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">cteName</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>递归操作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">WITH</span><span class="w"> </span><span class="k">RECURSIVE</span><span class="w"> </span><span class="n">cteSource</span><span class="w"> </span><span class="p">(</span><span class="n">counter</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">(</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">UNION</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">(</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="n">counter</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">cteSource</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    	</span><span class="k">WHERE</span><span class="w"> </span><span class="n">counter</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">cteSource</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div>]]></description>
 </item>
 <item>
     <title>LRU and LRU-K</title>
@@ -8436,1097 +8732,6 @@ $$</p>
 <p>反置页表是在页寄存器的基础上引入<code>PID</code>（进程标识）一同哈希，随后与反置页表中指定哈希值处对应验证，如果不一样就说明有冲突，继续遍历冲突项。如果<code>PID</code>和虚拟基址都相同，则找到了对应的页表。多余的开销来自于<code>hash</code>冲突。总体仍然是一个很好的思路</p>
 </li>
 </ul>
-]]></description>
-</item>
-<item>
-    <title>Operating System Chapter10 状态机模型的应用</title>
-    <link>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</link>
-    <pubDate>Tue, 28 Mar 2023 13:10:52 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/operating-system/operating-system-chapter10/</guid>
-    <description><![CDATA[<h1 id="operating-system">Operating System</h1>
-<p>$Nanjing\ University\rightarrow Yanyan\ Jiang\newline$</p>
-<h2 id="overview">Overview</h2>
-<p>复习</p>
-<ul>
-<li>状态机：理论
-<ul>
-<li>数字电路：<a href="https://jyywiki.cn/pages/OS/2022/demos/logisim.c" target="_blank" rel="noopener noreffer">logisim.c</a> 和 <a href="https://jyywiki.cn/pages/OS/2022/demos/seven-seg.py" target="_blank" rel="noopener noreffer">seven-seg.py</a></li>
-<li>Model checker: 理解并发程序执行的新方法</li>
-</ul>
-</li>
-<li>状态机：实践
-<ul>
-<li><a href="https://jyywiki.cn/pages/OS/2022/demos/thread-os.c" target="_blank" rel="noopener noreffer">thread-os.c</a></li>
-</ul>
-</li>
-</ul>
-<hr>
-<p>本次课回答的问题</p>
-<ul>
-<li><strong>Q</strong>: 状态机模型如此有用，还能更有用一点吗？</li>
-</ul>
-<hr>
-<p>本次课主要内容</p>
-<ul>
-<li>终于做完了铺垫，是时候让你感受到 “真正的力量” 了
-<ul>
-<li>都是没用的内容，当我口胡就行了</li>
-</ul>
-</li>
-</ul>
-<h2 id="状态机理解我们的世界">状态机：理解我们的世界</h2>
-<h3 id="哲--学探讨">哲 ♂ 学探讨</h3>
-<ul>
-<li>
-<p>我们的物理世界是 “确定规则” 的状态机吗？</p>
-<ul>
-<li>
-<p>宏观物理世界近似于 deterministic 的状态机 (经典力学)</p>
-</li>
-<li>
-<p>微观世界可能是 non-deterministic 的 (量子力学)</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>把物理世界建模成基本粒子的运动</p>
-<ul>
-<li><a href="https://playgameoflife.com/" target="_blank" rel="noopener noreffer">Conway&rsquo;s game of life</a> $\Longrightarrow$ <b>Turing Complete</b></li>
-</ul>
-<h3 id="哲--学探讨-contd">哲 ♂ 学探讨 (cont&rsquo;d)</h3>
-<p>可以在这个模型上严肃地定义很多概念：预测未来、时间旅行……</p>
-<ul>
-<li>成为你理解物理 (和计算机) 世界的参考</li>
-</ul>
-<hr>
-<ul>
-<li>例子
-<ul>
-<li>Cellular automata 不支持 “时间旅行”
-<ul>
-<li>怎么添加一个公理使它可以支持？
-<ul>
-<li>平行宇宙</li>
-<li>如果世界线需要合并？可以<a href="https://www.scientificamerican.com/article/time-travel-simulation-resolves-grandfather-paradox/" target="_blank" rel="noopener noreffer">收敛于某个分布</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Cellular automata 不支持 “预测外来”
-<ul>
-<li>能否添加一个 syscall 使它支持？
-<ul>
-<li><a href="https://www.scottaaronson.com/papers/philos.pdf" target="_blank" rel="noopener noreffer">Why philosophers should care about computational complexity, Ch. 10</a> (<b>jyy 强烈推荐，解释部分在10th-section</b>)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="状态机模型理解编译器和现代-cpu">状态机模型：理解编译器和现代 CPU</h3>
-<ul>
-<li>编译器：源代码$S$(状态机) → 二进制代码$C$(状态机)</li>
-</ul>
-<p>$$
-C=compile(S)
-$$</p>
-<ul>
-<li>
-<p>编译 (优化) 的正确性 (Soundness):</p>
-<ul>
-<li><font color="red"><em>S</em> 与 <em>C</em> 的可观测行为严格一致</font> （二进制落实到硬件也是如此，严格一致不是句句对应，而是状态机一致，比如一个时钟周期内执行两条指令 $\Longrightarrow$ <font color="red">instruction-level parallelism</font>）
-<ul>
-<li>system calls; volatile variable loads/stores; termination</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>超标量 (superscalar)/乱序执行处理器</p>
-<ul>
-<li>
-<p>允许在状态机上 “跳跃”</p>
-</li>
-<li>
-<p><a href="https://jyywiki.cn/pages/OS/2022/demos/ilp-demo.c" target="_blank" rel="noopener noreffer">ilp-demo.c</a></p>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define LOOP 1000000000ul
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">void</span> <span class="n">loop</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LOOP</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rax;&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rdi;&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rsi;&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rdx;&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%rcx;&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r10;&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r8;&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="s">&#34;mov $1, %%r9;&#34;</span>
-</span></span><span class="line"><span class="cl">    <span class="o">:::</span><span class="s">&#34;rax&#34;</span><span class="p">,</span> <span class="s">&#34;rdi&#34;</span><span class="p">,</span> <span class="s">&#34;rsi&#34;</span><span class="p">,</span> <span class="s">&#34;rdx&#34;</span><span class="p">,</span> <span class="s">&#34;rcx&#34;</span><span class="p">,</span> <span class="s">&#34;r10&#34;</span><span class="p">,</span> <span class="s">&#34;r8&#34;</span><span class="p">,</span> <span class="s">&#34;r9&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">st</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="n">loop</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">ed</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">LOOP</span> <span class="o">*</span> <span class="p">(</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000000000</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">ips</span> <span class="o">=</span> <span class="n">inst</span> <span class="o">/</span> <span class="p">((</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">CLOCKS_PER_SEC</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%.2lfG instructions/s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ips</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>在优化下执行的效果</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ screenfetch            
-</span></span><span class="line"><span class="cl">..............                                  
-</span></span><span class="line"><span class="cl">            ..,<span class="p">;</span>:ccc,.                           kali@kali
-</span></span><span class="line"><span class="cl">          ......<span class="s1">&#39;&#39;&#39;;lxO.                         OS: Kali Linux 
-</span></span></span><span class="line"><span class="cl"><span class="s1">.....&#39;&#39;&#39;&#39;..........,:ld;                         Kernel: x86_64 Linux 6.0.0-kali3-amd64
-</span></span></span><span class="line"><span class="cl"><span class="s1">           .&#39;</span><span class="p">;;;</span>:::<span class="p">;</span>,,.x,                        Uptime: 49m
-</span></span><span class="line"><span class="cl">      ..<span class="s1">&#39;&#39;&#39;.            0Xxoc:,.  ...            Packages: 2707
-</span></span></span><span class="line"><span class="cl"><span class="s1">  ....                ,ONkc;,;cokOdc&#39;</span>,.          Shell: zsh 5.9
-</span></span><span class="line"><span class="cl"> .                   OMo           <span class="s1">&#39;:ddo.        Resolution: 1714x874
-</span></span></span><span class="line"><span class="cl"><span class="s1">                    dMc               :OO;       DE: Xfce
-</span></span></span><span class="line"><span class="cl"><span class="s1">                    0M.                 .:o.     WM: Xfwm4
-</span></span></span><span class="line"><span class="cl"><span class="s1">                    ;Wd                          WM Theme: Kali-Dark
-</span></span></span><span class="line"><span class="cl"><span class="s1">                     ;XO,                        GTK Theme: Kali-Dark [GTK2]
-</span></span></span><span class="line"><span class="cl"><span class="s1">                       ,d0Odlc;,..               Icon Theme: Flat-Remix-Blue-Dark
-</span></span></span><span class="line"><span class="cl"><span class="s1">                           ..&#39;</span>,<span class="p">;</span>:cdOOd::,.       Font: Cantarell <span class="m">11</span>
-</span></span><span class="line"><span class="cl">                                    .:d<span class="p">;</span>.<span class="s1">&#39;:;.    Disk: 19G / 80G (26%)
-</span></span></span><span class="line"><span class="cl"><span class="s1">                                       &#39;</span>d,  .<span class="s1">&#39;   CPU: AMD Ryzen 9 5900HX with Radeon Graphics @ 4x 3.294GHz
-</span></span></span><span class="line"><span class="cl"><span class="s1">                                         ;l   .. GPU: VMware SVGA II Adapter
-</span></span></span><span class="line"><span class="cl"><span class="s1">                                          .o     RAM: 1501MiB / 1972MiB
-</span></span></span><span class="line"><span class="cl"><span class="s1">                                            c   
-</span></span></span><span class="line"><span class="cl"><span class="s1">                                            .&#39;</span>  
-</span></span><span class="line"><span class="cl">                                             .  
-</span></span><span class="line"><span class="cl">                                                                                                                                            
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ gcc -O2 ilp-demo.c -o ilp-demo   
-</span></span><span class="line"><span class="cl">                                                                                                                                            
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ ./ilp-demo                      
-</span></span><span class="line"><span class="cl">19.06G instructions/s
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ ./ilp-demo
-</span></span><span class="line"><span class="cl">19.38G instructions/s
-</span></span><span class="line"><span class="cl">                                                                                                                                            
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ ./ilp-demo
-</span></span><span class="line"><span class="cl">19.19G instructions/s
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>优化过后，<b>每一个时钟周期可以执行远远超过一条指令</b></li>
-</ul>
-<h2 id="查看状态机执行">查看状态机执行</h2>
-<h3 id="trace-和调试器">Trace 和调试器</h3>
-<ul>
-<li>
-<p>程序执行 = 状态机执行</p>
-<ul>
-<li>我们能不能 “hack” 进这个状态机
-<ul>
-<li>观察状态机的执行
-<ul>
-<li>strace/gdb</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>甚至记录和<font color="red">改变</font>状态机的执行</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ strace ./ilp-demo 
-</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./ilp-demo&#34;</span>, <span class="o">[</span><span class="s2">&#34;./ilp-demo&#34;</span><span class="o">]</span>, 0x7ffe10420e10 /* <span class="m">55</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55de2e4e2000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 8192, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b2c000
-</span></span><span class="line"><span class="cl">access<span class="o">(</span><span class="s2">&#34;/etc/ld.so.preload&#34;</span>, R_OK<span class="o">)</span>      <span class="o">=</span> -1 ENOENT <span class="o">(</span>No such file or directory<span class="o">)</span>
-</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/etc/ld.so.cache&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span>
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0644, <span class="nv">st_size</span><span class="o">=</span>89062, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 89062, PROT_READ, MAP_PRIVATE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b16000
-</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/lib/x86_64-linux-gnu/libc.so.6&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span>
-</span></span><span class="line"><span class="cl">read<span class="o">(</span>3, <span class="s2">&#34;\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0&gt;\0\1\0\0\0Ps\2\0\0\0\0\0&#34;</span>..., 832<span class="o">)</span> <span class="o">=</span> <span class="m">832</span>
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span>
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0755, <span class="nv">st_size</span><span class="o">=</span>1922136, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 1970000, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_DENYWRITE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4935000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb495b000, 1396736, PROT_READ<span class="p">|</span>PROT_EXEC, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x26000<span class="o">)</span> <span class="o">=</span> 0x7f9eb495b000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb4ab0000, 339968, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x17b000<span class="o">)</span> <span class="o">=</span> 0x7f9eb4ab0000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb4b03000, 24576, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x1ce000<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b03000
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7f9eb4b09000, 53072, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4b09000
-</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 12288, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7f9eb4932000
-</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x7f9eb4932740<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x7f9eb4932a10<span class="o">)</span>         <span class="o">=</span> <span class="m">5644</span>
-</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x7f9eb4932a20, 24<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x7f9eb4933060, 0x20, 0, 0x53053053<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7f9eb4b03000, 16384, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x55de2e4dc000, 4096, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7f9eb4b5e000, 8192, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">munmap<span class="o">(</span>0x7f9eb4b16000, 89062<span class="o">)</span>           <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>1796473<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>514062681<span class="o">})</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>1, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFCHR<span class="p">|</span>0600, <span class="nv">st_rdev</span><span class="o">=</span>makedev<span class="o">(</span>0x88, 0<span class="o">)</span>, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\x2a\x03\xa3\xe2\x7d\xa4\x84\x07&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span>
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55de2e4e2000
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x55de2e503000<span class="o">)</span>                     <span class="o">=</span> 0x55de2e503000
-</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;19.52G instructions/s\n&#34;</span>, 2219.52G instructions/s
-</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">22</span>
-</span></span><span class="line"><span class="cl">exit_group<span class="o">(</span>0<span class="o">)</span>                           <span class="o">=</span> ?
-</span></span><span class="line"><span class="cl">+++ exited with <span class="m">0</span> +++
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><code>strace</code>调试最小的Hello OS，可以清楚地看到系统调用</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ strace ./minimal
-</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./minimal&#34;</span>, <span class="o">[</span><span class="s2">&#34;./minimal&#34;</span><span class="o">]</span>, 0x7ffefc958480 /* <span class="m">55</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span>
-</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;\33[01;31mHello, OS World\33[0m\n&#34;</span>, 28Hello, OS World
-</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">28</span>
-</span></span><span class="line"><span class="cl">exit<span class="o">(</span>1<span class="o">)</span>                                 <span class="o">=</span> ?
-</span></span><span class="line"><span class="cl">+++ exited with <span class="m">1</span> +++
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>-T看每一个系统调用花费的时间</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ strace -T ./ilp-demo
-</span></span><span class="line"><span class="cl">execve<span class="o">(</span><span class="s2">&#34;./ilp-demo&#34;</span>, <span class="o">[</span><span class="s2">&#34;./ilp-demo&#34;</span><span class="o">]</span>, 0x7ffdfd498e18 /* <span class="m">55</span> vars */<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000258&gt;
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55a0fd277000 &lt;0.000005&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 8192, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c980a000 &lt;0.000113&gt;
-</span></span><span class="line"><span class="cl">access<span class="o">(</span><span class="s2">&#34;/etc/ld.so.preload&#34;</span>, R_OK<span class="o">)</span>      <span class="o">=</span> -1 ENOENT <span class="o">(</span>No such file or directory<span class="o">)</span> &lt;0.000076&gt;
-</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/etc/ld.so.cache&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span> &lt;0.000077&gt;
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0644, <span class="nv">st_size</span><span class="o">=</span>89062, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000077&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 89062, PROT_READ, MAP_PRIVATE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c97f4000 &lt;0.000074&gt;
-</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span> &lt;0.000072&gt;
-</span></span><span class="line"><span class="cl">openat<span class="o">(</span>AT_FDCWD, <span class="s2">&#34;/lib/x86_64-linux-gnu/libc.so.6&#34;</span>, O_RDONLY<span class="p">|</span>O_CLOEXEC<span class="o">)</span> <span class="o">=</span> <span class="m">3</span> &lt;0.000076&gt;
-</span></span><span class="line"><span class="cl">read<span class="o">(</span>3, <span class="s2">&#34;\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0&gt;\0\1\0\0\0Ps\2\0\0\0\0\0&#34;</span>..., 832<span class="o">)</span> <span class="o">=</span> <span class="m">832</span> &lt;0.000072&gt;
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span> &lt;0.000071&gt;
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>3, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFREG<span class="p">|</span>0755, <span class="nv">st_size</span><span class="o">=</span>1922136, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000076&gt;
-</span></span><span class="line"><span class="cl">pread64<span class="o">(</span>3, <span class="s2">&#34;\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0&#34;</span>..., 784, 64<span class="o">)</span> <span class="o">=</span> <span class="m">784</span> &lt;0.000071&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 1970000, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_DENYWRITE, 3, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c9613000 &lt;0.000084&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c9639000, 1396736, PROT_READ<span class="p">|</span>PROT_EXEC, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x26000<span class="o">)</span> <span class="o">=</span> 0x7fb9c9639000 &lt;0.000073&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c978e000, 339968, PROT_READ, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x17b000<span class="o">)</span> <span class="o">=</span> 0x7fb9c978e000 &lt;0.000073&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c97e1000, 24576, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_DENYWRITE, 3, 0x1ce000<span class="o">)</span> <span class="o">=</span> 0x7fb9c97e1000 &lt;0.000060&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>0x7fb9c97e7000, 53072, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_FIXED<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c97e7000 &lt;0.000074&gt;
-</span></span><span class="line"><span class="cl">close<span class="o">(</span>3<span class="o">)</span>                                <span class="o">=</span> <span class="m">0</span> &lt;0.000072&gt;
-</span></span><span class="line"><span class="cl">mmap<span class="o">(</span>NULL, 12288, PROT_READ<span class="p">|</span>PROT_WRITE, MAP_PRIVATE<span class="p">|</span>MAP_ANONYMOUS, -1, 0<span class="o">)</span> <span class="o">=</span> 0x7fb9c9610000 &lt;0.000074&gt;
-</span></span><span class="line"><span class="cl">arch_prctl<span class="o">(</span>ARCH_SET_FS, 0x7fb9c9610740<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000073&gt;
-</span></span><span class="line"><span class="cl">set_tid_address<span class="o">(</span>0x7fb9c9610a10<span class="o">)</span>         <span class="o">=</span> <span class="m">8876</span> &lt;0.000071&gt;
-</span></span><span class="line"><span class="cl">set_robust_list<span class="o">(</span>0x7fb9c9610a20, 24<span class="o">)</span>     <span class="o">=</span> <span class="m">0</span> &lt;0.000097&gt;
-</span></span><span class="line"><span class="cl">rseq<span class="o">(</span>0x7fb9c9611060, 0x20, 0, 0x53053053<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000109&gt;
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7fb9c97e1000, 16384, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000079&gt;
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x55a0fcb07000, 4096, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000072&gt;
-</span></span><span class="line"><span class="cl">mprotect<span class="o">(</span>0x7fb9c983c000, 8192, PROT_READ<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000073&gt;
-</span></span><span class="line"><span class="cl">prlimit64<span class="o">(</span>0, RLIMIT_STACK, NULL, <span class="o">{</span><span class="nv">rlim_cur</span><span class="o">=</span>8192*1024, <span class="nv">rlim_max</span><span class="o">=</span>RLIM64_INFINITY<span class="o">})</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000074&gt;
-</span></span><span class="line"><span class="cl">munmap<span class="o">(</span>0x7fb9c97f4000, 89062<span class="o">)</span>           <span class="o">=</span> <span class="m">0</span> &lt;0.000094&gt;
-</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>876239<span class="o">})</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000075&gt;
-</span></span><span class="line"><span class="cl">clock_gettime<span class="o">(</span>CLOCK_PROCESS_CPUTIME_ID, <span class="o">{</span><span class="nv">tv_sec</span><span class="o">=</span>0, <span class="nv">tv_nsec</span><span class="o">=</span>511881481<span class="o">})</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000199&gt;
-</span></span><span class="line"><span class="cl">newfstatat<span class="o">(</span>1, <span class="s2">&#34;&#34;</span>, <span class="o">{</span><span class="nv">st_mode</span><span class="o">=</span>S_IFCHR<span class="p">|</span>0600, <span class="nv">st_rdev</span><span class="o">=</span>makedev<span class="o">(</span>0x88, 0<span class="o">)</span>, ...<span class="o">}</span>, AT_EMPTY_PATH<span class="o">)</span> <span class="o">=</span> <span class="m">0</span> &lt;0.000090&gt;
-</span></span><span class="line"><span class="cl">getrandom<span class="o">(</span><span class="s2">&#34;\x6e\x63\x59\xe8\xb3\xfe\x8a\x8d&#34;</span>, 8, GRND_NONBLOCK<span class="o">)</span> <span class="o">=</span> <span class="m">8</span> &lt;0.000143&gt;
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>NULL<span class="o">)</span>                               <span class="o">=</span> 0x55a0fd277000 &lt;0.000106&gt;
-</span></span><span class="line"><span class="cl">brk<span class="o">(</span>0x55a0fd298000<span class="o">)</span>                     <span class="o">=</span> 0x55a0fd298000 &lt;0.000052&gt;
-</span></span><span class="line"><span class="cl">write<span class="o">(</span>1, <span class="s2">&#34;19.57G instructions/s\n&#34;</span>, 2219.57G instructions/s
-</span></span><span class="line"><span class="cl"><span class="o">)</span> <span class="o">=</span> <span class="m">22</span> &lt;0.000085&gt;
-</span></span><span class="line"><span class="cl">exit_group<span class="o">(</span>0<span class="o">)</span>                           <span class="o">=</span> ?
-</span></span><span class="line"><span class="cl">+++ exited with <span class="m">0</span> +++
-</span></span></code></pre></td></tr></table>
-</div>
-</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter10-1.png" title="/img/Operating System/chapter10-1.png" data-thumbnail="/img/Operating System/chapter10-1.png" data-sub-html="<h2>gdb layout src</h2>">
-        
-    </a><figcaption class="image-caption"><code>gdb layout src</code></figcaption>
-    </figure>
-<ul>
-<li>注意为了让<code>layout src</code>能够成功显示，编译时需要使用<code>gcc</code>的<code>-g</code>编译选项</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ gcc -O2 ilp-demo.c -o ilp-demo -g  
-</span></span><span class="line"><span class="cl">                                                                                                                                            
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/chapter9<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ gdb ilp-demo                     
-</span></span><span class="line"><span class="cl">GNU gdb <span class="o">(</span>Debian 13.1-2<span class="o">)</span> 13.1
-</span></span><span class="line"><span class="cl">Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2023</span> Free Software Foundation, Inc.
-</span></span><span class="line"><span class="cl">License GPLv3+: GNU GPL version <span class="m">3</span> or later &lt;http://gnu.org/licenses/gpl.html&gt;
-</span></span><span class="line"><span class="cl">This is free software: you are free to change and redistribute it.
-</span></span><span class="line"><span class="cl">There is NO WARRANTY, to the extent permitted by law.
-</span></span><span class="line"><span class="cl">Type <span class="s2">&#34;show copying&#34;</span> and <span class="s2">&#34;show warranty&#34;</span> <span class="k">for</span> details.
-</span></span><span class="line"><span class="cl">This GDB was configured as <span class="s2">&#34;x86_64-linux-gnu&#34;</span>.
-</span></span><span class="line"><span class="cl">Type <span class="s2">&#34;show configuration&#34;</span> <span class="k">for</span> configuration details.
-</span></span><span class="line"><span class="cl">For bug reporting instructions, please see:
-</span></span><span class="line"><span class="cl">&lt;https://www.gnu.org/software/gdb/bugs/&gt;.
-</span></span><span class="line"><span class="cl">Find the GDB manual and other documentation resources online at:
-</span></span><span class="line"><span class="cl">    &lt;http://www.gnu.org/software/gdb/documentation/&gt;.
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">For help, <span class="nb">type</span> <span class="s2">&#34;help&#34;</span>.
-</span></span><span class="line"><span class="cl">Type <span class="s2">&#34;apropos word&#34;</span> to search <span class="k">for</span> commands related to <span class="s2">&#34;word&#34;</span>...
-</span></span><span class="line"><span class="cl">Reading symbols from ilp-demo...
-</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> start
-</span></span><span class="line"><span class="cl">Temporary breakpoint <span class="m">1</span> at 0x1060: file ilp-demo.c, line 22.
-</span></span><span class="line"><span class="cl">Starting program: /home/kali/chapter9/ilp-demo 
-</span></span><span class="line"><span class="cl"><span class="o">[</span>Thread debugging using libthread_db enabled<span class="o">]</span>
-</span></span><span class="line"><span class="cl">Using host libthread_db library <span class="s2">&#34;/lib/x86_64-linux-gnu/libthread_db.so.1&#34;</span>.
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">Temporary breakpoint 1, main <span class="o">()</span> at ilp-demo.c:22
-</span></span><span class="line"><span class="cl"><span class="m">22</span>        clock_t <span class="nv">st</span> <span class="o">=</span> clock<span class="o">()</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> layout src
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="应用-1-time-travel-debugging">应用 (1): Time-Travel Debugging</h3>
-<ul>
-<li>
-<p>程序执行是随时间 “前进” 的$s_0 \rightarrow s_1 \rightarrow s_2 \rightarrow \dots$</p>
-</li>
-<li>
-<p>能否在时间上 “后退”？ (time-travel)</p>
-<ul>
-<li>经常 gdb 不小心 step 过了，从头再来……</li>
-<li>记录所有的$s_i$，就能实现任意的 time-traveling</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>凉性循环，看一会<code>rust</code></p>
-</blockquote>
-<ul>
-<li>记录所有$s_i$的开销太大（$s_i$由内存+寄存器组成）
-<ul>
-<li>但<font color="red">一条指令的side-effect通常有限</font></li>
-</ul>
-</li>
-</ul>
-<h3 id="应用-1-time-travel-debugging-contd">应用 (1): Time-Travel Debugging (cont&rsquo;d)</h3>
-<ul>
-<li>
-<p>gdb 的隐藏功能 (大家读过 gdb 的手册了吗？)</p>
-<ul>
-<li>
-<p><code>record full</code> - 开始记录</p>
-</li>
-<li>
-<p><code>record stop</code> - 结束记录</p>
-</li>
-<li>
-<p><code>reverse-step</code>/<code>reverse-stepi</code> - “时间旅行调试”</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>例子：调试 <a href="https://jyywiki.cn/pages/OS/2022/demos/rdrand.c" target="_blank" rel="noopener noreffer">rdrand.c</a>
-<ul>
-<li>Reverse execution 不是万能的
-<ul>
-<li><b><font color="red">有些复杂的指令 (<code>syscall</code>) 无法保证</font></b> $\Longrightarrow$ <code>record and replay</code></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">uint64_t</span> <span class="n">val</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span> <span class="p">(</span><span class="s">&#34;rdrand %0&#34;</span><span class="o">:</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">val</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;rdrand returns %016lx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">val</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p><code>asm volatile (&quot;rdrand %0&quot;: &quot;=r&quot;(val));</code>使用了 <code>GCC</code> 内联汇编（<code>Inline Assembly</code>）的语法，使用 Intel 的 RDRAND 指令生成一个随机数，并将该随机数保存到变量 <code>val</code> 中。</p>
-<p>具体来说，<code>%0</code> 表示占位符，用来代表第一个输入或输出操作数，这里是 <code>val</code>。而 <code>=r</code> 则表示将 <code>val</code> 寄存器中的值作为输出值，同时通知编译器该变量会被修改。</p>
-<p>因此，该代码使用 RDRAND 生成一个随机数，并将其保存到 <code>val</code> 变量中。最后通过 <code>printf</code> 打印出该随机数。</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter10<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ gcc -O1 rdrand.c -g -o rdrand   
-</span></span><span class="line"><span class="cl">                                                                                         
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter10<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ ./rdrand
-</span></span><span class="line"><span class="cl">rdrand returns d8112baa2a77dd3e
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter10<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ ./rdrand
-</span></span><span class="line"><span class="cl">rdrand returns 106671f827a8f49e                                                           
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter10<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ ./rdrand
-</span></span><span class="line"><span class="cl">rdrand returns 04adc0b810ec0565
-</span></span></code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p><code>volatile</code>提醒编译器它后面所定义的变量随时都有可能改变，因此编译后的程序每次需要存储或读取这个变量的时候，告诉编译器对该变量不做优化，都会直接从变量内存地址中读取数据，从而可以提供对特殊地址的稳定访问。</p>
-<p>如果没有<code>volatile</code>关键字，则编译器可能优化读取和存储，可能暂时使用寄存器中的值，如果这个变量由别的程序更新了的话，将出现不一致的现象。（简洁的说就是：<code>volatile</code>关键词影响编译器编译的结果，用<code>volatile</code>声明的变量表示该变量随时可能发生变化，与该变量有关的运算，不要进行编译优化，以免出错）</p>
-</blockquote>
-<ul>
-<li>更改之后进行<code>gdb</code></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">uint64_t</span> <span class="k">volatile</span> <span class="n">val</span> <span class="o">=</span> <span class="mi">114514</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="k">asm</span> <span class="k">volatile</span> <span class="p">(</span><span class="s">&#34;rdrand %0&#34;</span><span class="o">:</span> <span class="s">&#34;=r&#34;</span><span class="p">(</span><span class="n">val</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;rdrand returns %016lx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">val</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>每一次的调试结果都不一样，那我们应该如何复现<code>BUG</code>？
-<ul>
-<li>打开记录模式</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> record full
-</span></span></code></pre></td></tr></table>
-</div>
-</div><figure><a class="lightgallery" href="/img/Operating%20System/chapter10-2.png" title="/img/Operating System/chapter10-2.png" data-thumbnail="/img/Operating System/chapter10-2.png" data-sub-html="<h2>on wsl</h2>">
-        
-    </a><figcaption class="image-caption"><code>on wsl</code></figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter10-3.png" title="/img/Operating System/chapter10-3.png" data-thumbnail="/img/Operating System/chapter10-3.png" data-sub-html="<h2>layout asm</h2>">
-        
-    </a><figcaption class="image-caption"><code>layout asm</code></figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter10-4.png" title="/img/Operating System/chapter10-4.png" data-thumbnail="/img/Operating System/chapter10-4.png" data-sub-html="<h2>rax值相同</h2>">
-        
-    </a><figcaption class="image-caption"><code>rax值相同</code></figcaption>
-    </figure>
-<ul>
-<li><code>val</code>的值已经改变，如何向上回溯？
-<ul>
-<li>使用<code>rsi</code>往回执行</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter10-5.png" title="/img/Operating System/chapter10-5.png" data-thumbnail="/img/Operating System/chapter10-5.png" data-sub-html="<h2>rsi</h2>">
-        
-    </a><figcaption class="image-caption"><code>rsi</code></figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/Operating%20System/chapter10-6.png" title="/img/Operating System/chapter10-6.png" data-thumbnail="/img/Operating System/chapter10-6.png" data-sub-html="<h2>返回旧值</h2>">
-        
-    </a><figcaption class="image-caption"><code>返回旧值</code></figcaption>
-    </figure>
-<h3 id="应用-2-record--replay">应用 (2): Record &amp; Replay</h3>
-<ul>
-<li>在程序执行时记录信息，结束后重现程序的行为
-<ul>
-<li>确定的程序不需要任何记录
-<ul>
-<li>假设$s_0$执行 1,000,000 条确定的指令后得到$s^{`}$
-<ul>
-<li>那么只要记录$s_0$和1,000,000</li>
-<li>就能通过“再执行一次” 推导出$s^{`}$</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>记录：[指令数（确定指令） + 结果（非确定指令）] $\times n$</li>
-</ul>
-<h3 id="应用-2-record--replay-contd">应用 (2): Record &amp; Replay (cont&rsquo;d)</h3>
-<ul>
-<li>
-<p><code>Record &amp; Replay</code>: 只需记录 <code>non-deterministic</code> 的指令的<font color="red">效果</font></p>
-</li>
-<li>
-<p>(单线程) 应用程序</p>
-<ul>
-<li>syscall, rdrand, rdtsc, &hellip;</li>
-<li>rr (Mozilla)
-<ul>
-<li><a href="https://jyywiki.cn/OS/2022/slides/10.slides" target="_blank" rel="noopener noreffer">To catch a failure: The record-and-replay approach to debugging</a> (CACM'20)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>(单处理器) 操作系统</p>
-<ul>
-<li>
-<p>mmio, in, out, rdrand, rdtsc, 中断, &hellip;</p>
-</li>
-<li>
-<p>QEMU (<code>-icount shift=auto,rr=record,rrfile=replay.bin</code>)</p>
-<ul>
-<li><a href="https://jyywiki.cn/OS/2022/slides/10.slides" target="_blank" rel="noopener noreffer">ReVirt: Enabling intrusion analysis through virtual-machine logging and replay</a> (OSDI'02, Best Paper 🏅)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="采样状态机执行">采样状态机执行</h2>
-<h3 id="关于性能优化">关于性能优化</h3>
-<blockquote>
-<p>Premature optimization is the root of all evil. (D. E. Knuth)</p>
-</blockquote>
-<ul>
-<li>
-<p>那到底怎么样才算 <code>mature</code> 呢？</p>
-<ul>
-<li>
-<p>状态机的执行需要时间；对象需要占用空间</p>
-</li>
-<li>
-<p>需要理解好 “时间花在哪里”、“什么对象占用了空间”</p>
-</li>
-</ul>
-</li>
-<li>
-<p>我们需要真实执行的<font color="red">性能摘要</font>！</p>
-<ul>
-<li>
-<p>本质的回答：“为了做某件事到底花去了多少资源”</p>
-</li>
-<li>
-<p>简化的回答：“一段时间内资源的消耗情况”</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="profiler-和性能摘要">Profiler 和性能摘要</h3>
-<blockquote>
-<p><b>性能摘要需要对程序执行性能影响最小（不能因为这个进程过多影响你检测的程序）</b>，往往不需要 full trace。</p>
-</blockquote>
-<ul>
-<li><b><font color="red">隔一段时间 （比如一毫秒）“暂停” 程序、观察状态机的执行</font></b>
-<ul>
-<li><b>中断</b>就可以做到</li>
-<li>将状态 [<em>s</em>→<em>s</em>′] “记账”
-<ul>
-<li>执行的语句</li>
-<li>函数调用栈</li>
-<li>服务的请求</li>
-</ul>
-</li>
-<li>得到统计意义的性能摘要</li>
-</ul>
-</li>
-</ul>
-<hr>
-<p>例子：Linux Kernel perf (支持硬件 PMU) - <a href="https://jyywiki.cn/pages/OS/2022/demos/ilp-demo.c" target="_blank" rel="noopener noreffer">ilp-demo.c</a></p>
-<ul>
-<li>perf list, perf stat (-e), perf record, perf report</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="cp">#define LOOP 1000000000ul
-</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="cl"><span class="n">__attribute__</span><span class="p">((</span><span class="n">noinline</span><span class="p">))</span> <span class="kt">void</span> <span class="n">loop</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">LOOP</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">asm</span> <span class="k">volatile</span><span class="p">(</span><span class="s">&#34;mov $1, %%rax;&#34;</span>
-</span></span><span class="line"><span class="cl">                 <span class="s">&#34;mov $1, %%rdi;&#34;</span>
-</span></span><span class="line"><span class="cl">                 <span class="s">&#34;mov $1, %%rsi;&#34;</span>
-</span></span><span class="line"><span class="cl">                 <span class="s">&#34;mov $1, %%rdx;&#34;</span>
-</span></span><span class="line"><span class="cl">                 <span class="s">&#34;mov $1, %%rcx;&#34;</span>
-</span></span><span class="line"><span class="cl">                 <span class="s">&#34;mov $1, %%r10;&#34;</span>
-</span></span><span class="line"><span class="cl">                 <span class="s">&#34;mov $1, %%r8;&#34;</span>
-</span></span><span class="line"><span class="cl">                 <span class="s">&#34;mov $1, %%r9;&#34;</span> <span class="o">::</span>
-</span></span><span class="line"><span class="cl">                     <span class="o">:</span> <span class="s">&#34;rax&#34;</span><span class="p">,</span> <span class="s">&#34;rdi&#34;</span><span class="p">,</span> <span class="s">&#34;rsi&#34;</span><span class="p">,</span> <span class="s">&#34;rdx&#34;</span><span class="p">,</span> <span class="s">&#34;rcx&#34;</span><span class="p">,</span> <span class="s">&#34;r10&#34;</span><span class="p">,</span> <span class="s">&#34;r8&#34;</span><span class="p">,</span> <span class="s">&#34;r9&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">st</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="n">loop</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="n">clock_t</span> <span class="n">ed</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">inst</span> <span class="o">=</span> <span class="n">LOOP</span> <span class="o">*</span> <span class="p">(</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000000000</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">ips</span> <span class="o">=</span> <span class="n">inst</span> <span class="o">/</span> <span class="p">((</span><span class="n">ed</span> <span class="o">-</span> <span class="n">st</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">CLOCKS_PER_SEC</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%.2lfG instructions/s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ips</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>安装<code>perf</code></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">┌──<span class="o">(</span>jungle㉿LAPTOP-A7S3TAA4<span class="o">)</span>-<span class="o">[</span>/mnt/d/work <span class="k">for</span> vscode/chapter10<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ sudo apt install linux-tools-common
-</span></span><span class="line"><span class="cl"><span class="o">[</span>sudo<span class="o">]</span> password <span class="k">for</span> jungle: 
-</span></span><span class="line"><span class="cl">Reading package lists... Done
-</span></span><span class="line"><span class="cl">Building dependency tree... Done
-</span></span><span class="line"><span class="cl">Reading state information... Done
-</span></span><span class="line"><span class="cl">The following NEW packages will be installed:
-</span></span><span class="line"><span class="cl">  linux-tools-common
-</span></span><span class="line"><span class="cl"><span class="m">0</span> upgraded, <span class="m">1</span> newly installed, <span class="m">0</span> to remove and <span class="m">48</span> not upgraded.
-</span></span><span class="line"><span class="cl">Need to get <span class="m">295</span> kB of archives.
-</span></span><span class="line"><span class="cl">After this operation, <span class="m">812</span> kB of additional disk space will be used.
-</span></span><span class="line"><span class="cl">Get:1 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 linux-tools-common all 5.15.0-69.76 <span class="o">[</span><span class="m">295</span> kB<span class="o">]</span>
-</span></span><span class="line"><span class="cl">Fetched <span class="m">295</span> kB in 0s <span class="o">(</span><span class="m">4448</span> kB/s<span class="o">)</span>           
-</span></span><span class="line"><span class="cl">debconf: unable to initialize frontend: Dialog
-</span></span><span class="line"><span class="cl">debconf: <span class="o">(</span>Dialog frontend requires a screen at least <span class="m">13</span> lines tall and <span class="m">31</span> columns wide.<span class="o">)</span>
-</span></span><span class="line"><span class="cl">debconf: falling back to frontend: Readline
-</span></span><span class="line"><span class="cl">Selecting previously unselected package linux-tools-common.
-</span></span><span class="line"><span class="cl"><span class="o">(</span>Reading database ... <span class="m">81634</span> files and directories currently installed.<span class="o">)</span>
-</span></span><span class="line"><span class="cl">Preparing to unpack .../linux-tools-common_5.15.0-69.76_all.deb ...
-</span></span><span class="line"><span class="cl">Unpacking linux-tools-common <span class="o">(</span>5.15.0-69.76<span class="o">)</span> ...
-</span></span><span class="line"><span class="cl">Setting up linux-tools-common <span class="o">(</span>5.15.0-69.76<span class="o">)</span> ...
-</span></span><span class="line"><span class="cl">Processing triggers <span class="k">for</span> man-db <span class="o">(</span>2.10.2-1<span class="o">)</span> ...
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="实际中的性能优化">实际中的性能优化</h3>
-<ul>
-<li>
-<p>你们遇到的大部分情况</p>
-<ul>
-<li>
-<p>二八定律：80% 的时间消耗在非常集中的几处代码</p>
-</li>
-<li>
-<p><code>L1 (pmm)</code>: 小内存分配时的 <code>lock contention</code></p>
-<ul>
-<li><code>profiler</code> 直接帮你解决问题</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>工业界遇到的大部分情况
-<ul>
-<li>木桶效应：每个部分都已经 tune 到局部最优了
-<ul>
-<li>剩下的部分要么 profiler 信息不完整，要么就不好解决</li>
-<li>(工程师整天都对着 profiler 看得头都大了)</li>
-<li><a href="https://cacm.acm.org/magazines/2016/6/202665-the-flame-graph/fulltext" target="_blank" rel="noopener noreffer">The flame graph（火焰图）</a> (CACM'16)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="model-checkerverifier">Model Checker/Verifier</h2>
-<h3 id="model-checker-的威力大家已经知道了">Model Checker 的威力大家已经知道了</h3>
-<ul>
-<li>
-<p>150 行代码的 <a href="https://jyywiki.cn/pages/OS/2022/demos/model-checker.py" target="_blank" rel="noopener noreffer">model-checker.py</a></p>
-<ul>
-<li>
-<p>证完所有《操作系统》课上涉及的并发程序</p>
-</li>
-<li>
-<p>复现 OSTEP 教科书上的并发 bug (条件变量错误唤醒)</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>一些真正的 model checkers</p>
-<ul>
-<li>
-<p><a href="https://lamport.azurewebsites.net/tla/tla.html" target="_blank" rel="noopener noreffer">TLA+</a> by Leslie Lamport;</p>
-</li>
-<li>
-<p><a href="https://ti.arc.nasa.gov/tech/rse/vandv/jpf/" target="_blank" rel="noopener noreffer">Java PathFinder (JFP)</a> 和<a href="http://spinroot.com/" target="_blank" rel="noopener noreffer">SPIN</a></p>
-<ul>
-<li>它们都喜欢用 Peterson 算法做 tutorial 😁</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="model-checker-不仅是并发">Model Checker: 不仅是并发</h3>
-<ul>
-<li>任何 “<code>non-deterministic</code>” 的状态机都可以检查</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">u32</span> <span class="n">x</span> <span class="o">=</span> <span class="n">rdrand</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="n">u32</span> <span class="n">y</span> <span class="o">=</span> <span class="n">rdrand</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">65</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bug</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="p">...</span>
-</span></span><span class="line"><span class="cl"><span class="n">assert</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span> <span class="c1">// 可能空指针吗？
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>更高效的 <code>Model Checker</code>: “将相似状态合并”
-<ul>
-<li><a href="https://dl.acm.org/doi/10.5555/1855741.1855756" target="_blank" rel="noopener noreffer">KLEE: Unassisted and automatic generation of high-coverage tests for complex systems programs</a> (OSDI'08, Best Paper 🏅)</li>
-<li>基于 <code>LLVM bitcode</code> 解释器实现</li>
-</ul>
-</li>
-</ul>
-<h2 id="总结">总结</h2>
-<ul>
-<li>本次课回答的问题
-<ul>
-<li><strong>Q</strong>: 状态机的视角给了我们什么？</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Take-away messages</p>
-<ul>
-<li>
-<p>编程 (状态机) 就是全世界</p>
-</li>
-<li>
-<p>状态机可以帮我们</p>
-<ul>
-<li>建立物理世界的公理体系
-<ul>
-<li>理解调试器、<code>Trace, profiler</code></li>
-<li>自动分析程序的执行 (<code>model checker</code>)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p><b>声明：本文章引用资料与图像均已做标注，如有侵权本人会马上删除</b></p>
 ]]></description>
 </item>
 </channel>

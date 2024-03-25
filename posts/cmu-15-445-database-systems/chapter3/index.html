@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #03: Database Storage (Part I) - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #03: Database Storage (Part I)" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #03: Database Storage (Part I) Storage 本课程讨论的都是存储在磁盘上的数据库，不考虑后期出现的内存数据库 补充计组的知识：设备离CPU越近，存储速度越快，内存越" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-03-25T15:48:05+08:00" />
+<meta property="article:modified_time" content="2024-03-25T15:48:05+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #03: Database Storage (Part I)"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #03: Database Storage (Part I) Storage 本课程讨论的都是存储在磁盘上的数据库，不考虑后期出现的内存数据库 补充计组的知识：设备离CPU越近，存储速度越快，内存越"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter2/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #03: Database Storage (Part I)",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter3\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1821 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter3\/","datePublished": "2024-03-25T15:48:05+08:00","dateModified": "2024-03-25T15:48:05+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #03: Database Storage (Part I)</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-25">2024-03-25</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1821 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-03-database-storage-part-i">Lecture #03: Database Storage (Part I)</a>
+      <ul>
+        <li><a href="#storage">Storage</a></li>
+        <li><a href="#disk-oriented-dbms-overview">Disk-Oriented DBMS Overview</a></li>
+        <li><a href="#dbms-vs-os">DBMS vs. OS</a></li>
+        <li><a href="#file-storage">File Storage</a></li>
+        <li><a href="#database-pages">Database Pages</a></li>
+        <li><a href="#database-heap">Database Heap</a></li>
+        <li><a href="#page-layout">Page Layout</a></li>
+        <li><a href="#tuple-layout">Tuple Layout</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-03-database-storage-part-i">Lecture #03: Database Storage (Part I)</h2>
+<h3 id="storage">Storage</h3>
+<ul>
+<li>
+<p>本课程讨论的都是存储在磁盘上的数据库，不考虑后期出现的内存数据库</p>
+</li>
+<li>
+<p>补充计组的知识：设备离CPU越近，存储速度越快，内存越小，价格越贵</p>
+</li>
+<li>
+<p><strong>Volatile Devices</strong></p>
+<ul>
+<li>断了电就没有数据了</li>
+<li>可以通过字节寻址快速随机访问，程序可以随机获取数据</li>
+<li>这个地方基本就叫内存</li>
+</ul>
+</li>
+<li>
+<p><strong>Non-Volatile Devices</strong></p>
+<ul>
+<li>断了电也不怕</li>
+<li>也是块/页可寻址的，但是如果程序要读取需要先load到内存</li>
+<li>更适合顺序访问（加载到内存+局部性原理）</li>
+<li>一般叫磁盘，这个课不区分机械盘和SSD</li>
+</ul>
+</li>
+<li>
+<p>部分公司后面为了获取两个设备的长处推出了“持久内存”，但是本课程不会讨论，而且从Intel 2022开始逐步停产该系列产品来看，它没有想象中那么好</p>
+</li>
+<li>
+<p>本课程主要是磁盘存储的数据库，我们必须明白一点，磁盘上面的数据必须要先load到内存中才能操作</p>
+</li>
+</ul>
+<h3 id="disk-oriented-dbms-overview">Disk-Oriented DBMS Overview</h3>
+<ul>
+<li>
+<p>数据库全部存储在磁盘上，数据库文件被数据组织成页，<strong>第一页是目录页</strong></p>
+</li>
+<li>
+<p>为了对数据库进行操作，DBMS需要将数据放入内存，<strong>这个时候会使用一个缓冲池来管理在磁盘和内存之间移动的数据</strong></p>
+</li>
+<li>
+<p>例子：以DBMS中的查询为例，执行引擎会让缓冲池请求特定的页面，缓冲池将该页加载到内存，然后返回给执行引擎目前内存中该页的指针，使得执行引擎可以进行下一步的工作</p>
+</li>
+</ul>
+<h3 id="dbms-vs-os">DBMS vs. OS</h3>
+<ul>
+<li>
+<p>DBMS和OS的虚拟内存都涉及到了cache和disk调用的问题，那么是否可以在DBMS中使用mmap呢</p>
+<ul>
+<li>不可以</li>
+<li>mmap一旦出现地址错误会block，这对于DBMS的性能来说是不能接收的</li>
+<li>mmap是为OS设计的，对于cache和disk的调用，DBMS其实更应该根据自己的情况来定制化其他方案</li>
+</ul>
+</li>
+<li>
+<p>但是我们和disk交互的时候仍然可以使用下面的OS调用，这些是符合我们期望的</p>
+</li>
+</ul>
+<blockquote>
+<p>• <strong>madvise</strong>: Tells the OS know when you are planning on reading certain pages.</p>
+<p>• <strong>mlock</strong>: Tells the OS to not swap memory ranges out to disk.</p>
+<p>• <strong>msync</strong>: Tells the OS to flush memory ranges out to disk.</p>
+</blockquote>
+<ul>
+<li>对于DBMS这种如此吃性能的设施，很多解决方案还是需要手搓定制化，而不是依赖OS的调用</li>
+</ul>
+<h3 id="file-storage">File Storage</h3>
+<ul>
+<li>
+<p>DBMS将数据库作为文件存储在磁盘上，有些使用文件层次结构，有些使用单个文件（比如SQLite）</p>
+</li>
+<li>
+<p>OS是不知道这些文件存储的是什么，只有DBMS才能读懂和操作它们（有特定的编码）</p>
+</li>
+<li>
+<p>DBMS的存储管理器负责管理数据库的文件。<strong>它将文件表示为页面的集合</strong>，它还跟踪哪些数据被读取和写入到页面，以及这些页面中有多少空闲空间</p>
+</li>
+</ul>
+<h3 id="database-pages">Database Pages</h3>
+<ul>
+<li>
+<p>DBMS会将多个文件组织成固定大小的数据块，这个东西就叫页</p>
+</li>
+<li>
+<p>页面可以包含不同的数据类型，但是大多数系统是不会在页面中混合使用这些类型的</p>
+</li>
+<li>
+<p>有些系统要求页面是自包含的，这意味着读取每个页面所需的所有信息都在页面本身上</p>
+</li>
+<li>
+<p>每个页面都有一个唯一的标识符</p>
+</li>
+<li>
+<p>如果数据库是单个文件，那么页id可以只是文件偏移量。大多数DBMS都有一个间接层，它将页id映射到文件路径和偏移量。系统的上层将要求提供特定的页码。然后，存储管理器必须将该页码转换为文件和偏移量以查找该页</p>
+</li>
+<li>
+<p>大多数的页大小都是固定的，不然难以管理内存（内存碎片）</p>
+</li>
+<li>
+<p>DBMS中的三种页面</p>
+<ul>
+<li>Hardware page (usually 4 KB).</li>
+</ul>
+<ol start="2">
+<li>
+<p>OS page (4 KB).</p>
+</li>
+<li>
+<p>Database page (1-16 KB).</p>
+</li>
+</ol>
+</li>
+<li>
+<p>硬件页设计的小是为了能够利用硬件的条件原子性写入，但是到了数据库的页就无法保证了，所以需要使用额外的措施保证原子性</p>
+</li>
+</ul>
+<h3 id="database-heap">Database Heap</h3>
+<ul>
+<li>数据库的页“堆”成一个文件的方式</li>
+<li>也要能够有创建页，遍历页，删除页的操作，那么页之间怎么组织？
+<ul>
+<li>Linked List</li>
+<li>Page Directory</li>
+</ul>
+</li>
+</ul>
+<h3 id="page-layout">Page Layout</h3>
+<ul>
+<li>
+<p>Every page includes a header that records meta-data about the page’s contents:</p>
+<ul>
+<li>
+<p>Page size.</p>
+</li>
+<li>
+<p>Checksum.</p>
+</li>
+<li>
+<p>DBMS version.</p>
+</li>
+<li>
+<p>Transaction visibility.</p>
+</li>
+<li>
+<p>Self-containment. (Some systems like Oracle require this.)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>数据的存储方案</p>
+<ul>
+<li>
+<p>Tuple-oriented:按照真实数据一行一行存</p>
+<ul>
+<li>
+<p>如何避免内存碎片化问题：Slotted Page结构，索引在一个区，剩下的空间存储数据</p>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter3-1.png" title="/img/CMU 15-445 Database Systems/chapter3-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter3-1.png" data-sub-html="<h2>Slotted Page</h2>">
+              <img
+                  class="lazyload"
+                  src="/svg/loading.min.svg"
+                  data-src="/img/CMU%2015-445%20Database%20Systems/chapter3-1.png"
+                  data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter3-1.png, /img/CMU%2015-445%20Database%20Systems/chapter3-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter3-1.png 2x"
+                  data-sizes="auto"
+                  alt="/img/CMU 15-445 Database Systems/chapter3-1.png" />
+          </a><figcaption class="image-caption">Slotted Page</figcaption>
+          </figure>
+</li>
+<li>
+<p>定位：page_id + offset/slot</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Log-Structured:存操作日志</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="tuple-layout">Tuple Layout</h3>
+<ul>
+<li>一组数据存储在磁盘上面就是bytes，需要我们附加其他的信息进行解析</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter3-2.png" title="/img/CMU 15-445 Database Systems/chapter3-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter3-2.png" data-sub-html="<h2>Tuple布局</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter3-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter3-2.png, /img/CMU%2015-445%20Database%20Systems/chapter3-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter3-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter3-2.png" />
+    </a><figcaption class="image-caption">Tuple布局</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>Tuple Header</strong>: Contains meta-data about the tuple.</p>
+<ul>
+<li>并发控制信息（为了事务安全）</li>
+<li>NULL值的Bit映射（解析Tuple需要的信息）</li>
+<li>注：不需要存结构信息（每一个Header都存一下内存浪费太多了）</li>
+</ul>
+</li>
+<li>
+<p><strong>Tuple Header</strong>: Contains meta-data about the tuple.</p>
+<ul>
+<li>属性通常按照创建表的时候指定的数据存储</li>
+<li>大多数DBMS不允许一个元组超过一个页面的大小</li>
+</ul>
+</li>
+<li>
+<p><strong>Unique Identifier</strong></p>
+<ul>
+<li>最常见的是page_id+offset</li>
+<li>应用程序不能直接用这些，只能用主键这类的属性（因为这个东西会因为内存整理而更改，程序员只能和DBMS这部分的管理系统用主键交流，由这个系统进行映射）</li>
+</ul>
+</li>
+<li>
+<p><strong>Denormalized Tuple Data</strong>: If two tables are related, the DBMS can “pre-join” them, so the tables end up
+on the same page. This makes reads faster since the DBMS only has to load in one page rather than two
+separate pages. However, it makes updates more expensive since the DBMS needs more space for each
+tuple.</p>
+<ul>
+<li>两个表如果总是需要JOIN，那我提前给你在内存中连好</li>
+<li>理论上可行，现实中会让插入等的复杂度变的很高，目前这种方案已经被废止</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-03-25</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" data-title="CMU 15-445 Lecture #03: Database Storage (Part I)"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter2/" class="prev" rel="prev" title="CMU 15-445 Lecture #02: Modern SQL"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
