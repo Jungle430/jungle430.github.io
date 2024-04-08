@@ -4,7 +4,91 @@
         <link>https://Jungle430.github.io/categories/cmu-15-445-database-systems/</link>
         <description>CMU 15-445 Database Systems - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 08 Apr 2024 10:31:51 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/cmu-15-445-database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 08 Apr 2024 20:02:45 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/cmu-15-445-database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #06: Buffer Pools</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter6/</link>
+    <pubDate>Mon, 08 Apr 2024 20:02:45 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter6/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-06-buffer-pools">Lecture #06: Buffer Pools</h2>
+<h3 id="introduction">Introduction</h3>
+<ul>
+<li>DBMS需要负责管理数据在内存和磁盘之间移动，大多数情况下数据不能在磁盘中被处理，而是需要加载到内存中，处理完成后再写回磁盘，这个过程就需要Buffer Pools来进行管理，使得DBMS的其他部分可以像在内存中处理所有数据那样进行操作</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter6-1.png" title="/img/CMU 15-445 Database Systems/chapter6-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter6-1.png" data-sub-html="<h2>Buffer Pool模型</h2>">
+        
+    </a><figcaption class="image-caption">Buffer Pool模型</figcaption>
+    </figure>
+<ul>
+<li>一个DBMS需要考虑下面的两个方面
+<ul>
+<li><strong>Spatial Control</strong>: refers to where pages are physically written on disk. The goal of spatial control is to keep pages
+that are used together often as physically close together as possible on disk to possibly help with prefetching and
+other optimizations.(写磁盘的时候把需要经常一起用的页尽量写到磁盘的一块地方，这样下次用也能够一把加载到Buffer Pool里面)</li>
+<li><strong>Temporal Control</strong>: is deciding when to read pages into memory and when to write them to disk. Temporal control
+aims to minimize the number of stalls from having to read data from disk.(何时写回磁盘，对于一些热点写数据没有必要写一次刷一次盘，完全可以写好多次刷一次磁盘，因为刷盘的代价太大了)</li>
+</ul>
+</li>
+</ul>
+<h3 id="locks-vs-latches">Locks vs. Latches</h3>
+<ul>
+<li>
+<p>英语和概念性的问题</p>
+</li>
+<li>
+<p><strong>Locks</strong>: A lock is a higher-level, logical primitive that protects the contents of a database (e.g., tuples, tables, databases)
+from other transactions. Database systems can expose to the user which locks are being held as queries are run. Locks
+need to be able to roll back changes.(逻辑上面的锁，比如行锁/表锁/库锁，不关心底层实现，用于理论上面的讨论，为了防止死锁，一般这种锁都可以回滚)</p>
+</li>
+<li>
+<p><strong>Latches</strong>: A latch is a low-level protection primitive that the DBMS uses for the critical sections in its internal data
+structures (e.g., hash tables, regions of memory). Latches are held for only the duration of the operation being made.
+Latches do not need to be able to roll back changes. This is often implemented by simple language primitives like
+mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争的区域是哪，用互斥锁还是信号量，悲观锁还是乐观锁)</p>
+</li>
+</ul>
+<h3 id="buffer-pool">Buffer Pool</h3>
+<ul>
+<li>
+<p>It is organized as an array of fixed-size pages. Each array entry is called a frame. 缓存池的本质就是内存里面的一块固定的数组，这个里面的一个元素就叫frame了，但是其实和page是一个东西</p>
+</li>
+<li>
+<p><strong>page directory</strong>:在数据库的磁盘上还维护了一个page directory，这个东西存的就是页id到页在磁盘物理位置的映射，所以说这个如果修改了必须写回到磁盘上，这样DBMS重新启动的时候才能找到，他也通常回一直在内存里面，因为你找页必须要先通过page directory去找页的物理位置</p>
+</li>
+<li>
+<p><strong>Buffer Pool Meta-data</strong>:缓存池必须要存储一些meta-data，从而保证正确性和提高缓存池的效率，常见的一些meta-data</p>
+<ul>
+<li>
+<p><strong>page table</strong>:这个是内存中的一个hash表，它的映射是页面id $\rightarrow$ 这个页在缓存池中的帧位置，因为页在缓存池里面的顺序和磁盘中的顺序往往不一致，所以需要page table来做这个额外的间接层，除了页在缓存池中的位置，page table还维护了其他meta-data，比如一个脏标志（说明这个页是不是脏页），引用计数器（有哪几个事务在用它），这个和page directory的一个大的区别就是他不用记在磁盘上</p>
+</li>
+<li>
+<p><strong>dirty-flag</strong>:这个就是上面page table维护的一个页的meta-data之一，当有线程对buffer pool中的某个页面进行修改的时候这个标志会被设置，这提醒这个页在被踢出buffer pool的时候必须要刷盘</p>
+</li>
+<li>
+<p><strong>Pin/reference counter</strong>:这个也是上面page table维护的一个页的meta-data之一，主要是记录有几个线程正在访问该页，线程必须在访问该页之前增加counter，如果counter &gt; 0，那么该页就无法被驱逐，counter不会管理并发事务那些东西，如果当前缓冲池的所有页都无法被踢，而且已经满，就会抛出OOM(out-of-memory)的错误</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Memory Allocation Policies</strong></p>
+<ul>
+<li>
+<p>Memory in the database is allocated for the buffer pool according to two policies</p>
+</li>
+<li>
+<p><strong>Global policies</strong>: 考虑所有事务，来找到分配内存的最佳决策</p>
+</li>
+<li>
+<p><strong>local policies</strong>:做出决策的时候只考虑单个事务，即使他不适合整个工作负载，本地策略将帧分配给特定的事务，而不考虑并发事务的行为。但是，它仍然支持事务之间共享帧</p>
+</li>
+<li>
+<p>Most systems use a combination of both global and local policies.</p>
+</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #05: Storage Models &amp; Compression</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter5/</link>
     <pubDate>Mon, 08 Apr 2024 10:31:51 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter5/</guid>
