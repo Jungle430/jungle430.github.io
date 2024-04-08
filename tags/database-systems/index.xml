@@ -4,7 +4,131 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 25 Mar 2024 21:32:28 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 08 Apr 2024 10:31:51 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #05: Storage Models &amp; Compression</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter5/</link>
+    <pubDate>Mon, 08 Apr 2024 10:31:51 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter5/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-05-storage-models--compression">Lecture #05: Storage Models &amp; Compression</h2>
+<h3 id="database-workloads">DataBase WorkLoads</h3>
+<ul>
+<li>
+<p><strong>On-Line Transaction Processing(OLTP)</strong>:Fast operations that only read/update a small amount of data each time.</p>
+<ul>
+<li>快速操作，事务简单，读/写数据量很小</li>
+<li>通常处理的写操作多于读操作</li>
+<li>例子：银行转一次钱</li>
+<li>往往意味着高并发，比如支付宝，微信支付</li>
+</ul>
+</li>
+<li>
+<p><strong>On-Line Analytical Processing(OLAP):</strong> Complex queries that read of a lot of data to computer aggregates</p>
+<ul>
+<li>一般是公司要对某一段时间的所有数据进行统计分析的时候使用</li>
+<li>事务复杂，且要读大量的数据，从现有的大量数据中分析派生出新的数据</li>
+<li>典型代表：数仓，深度学习的数据收集（比如常见的搜广推模型的训练）</li>
+</ul>
+</li>
+<li>
+<p><strong>Hybrid(混合) Transaction + Analytical Processing(HTAP):</strong> OLTP+OLAP together on the same database instance</p>
+<ul>
+<li>希望这个数据库两种事务都能应对（兼顾）</li>
+<li>很像之前讲的disk和memory的结合体（</li>
+</ul>
+</li>
+<li>
+<p>公司方案:<strong>BIFURCATED ENVIRONMENT</strong>：OLTP和OLAP分别布置</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-1.png" title="/img/CMU 15-445 Database Systems/chapter5-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-1.png" data-sub-html="<h2>OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</h2>">
+        
+    </a><figcaption class="image-caption">OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</figcaption>
+    </figure>
+<ul>
+<li>
+<p>HTAP或许能避免上面<strong>BIFURCATED ENVIRONMENT</strong>的问题，但是也有可能是两头都跑不好</p>
+</li>
+<li>
+<p>行存的模型适合OLTP，列存(DSM)的模型适合OLAP</p>
+</li>
+<li>
+<p>现在很多数据库也会加入列存引擎来处理OLAP的事务</p>
+</li>
+</ul>
+<h3 id="storage-models">Storage Models</h3>
+<ul>
+<li>这部分主要讲数据库的数据在磁盘上面不同的物理布局，对于不同的场景，不同的布局会有不一样的效果</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>N-Ary Storage Model (NSM)</strong></p>
+<ul>
+<li>
+<p><u>The DBMS stores (almost) all attributes for a single tuple contiguously in a single page</u>(一个元组里面是所有属性，连续地存储在一个页中)</p>
+</li>
+<li>
+<p>Also known as a “<strong>row store</strong>”（国内叫“行存”）</p>
+</li>
+<li>
+<p>非常适合OLTP的工作负载，读的东西少，但是一直在频繁的写数据，行存的模型对写数据很友好</p>
+</li>
+<li>
+<p>NSM数据库页面大小通常是硬件页面的常数倍(m $\times$ 4KB)：Oracle(4KB),Postgres(8KB),MySQL(16KB)</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>NSM: PHYSICAL ORGANIZATION</strong></p>
+<ul>
+<li>
+<p>无论是定长还是不定长度，这个NSM都是用的之前的slotted page的存储模型，元组就连续的存储在页里面，再加上一个slot array来做标定，header来存储头部必要的一些信息</p>
+</li>
+<li>
+<p>DBMS区分物理元组的唯一标识：<strong>record id</strong>(page#,slot#)，注意这个<strong>record id</strong>是页标识+槽标识构造的，不是数据库主键/唯一键，一定要区分!</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-2.png" title="/img/CMU 15-445 Database Systems/chapter5-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-2.png" data-sub-html="<h2>slotted page的物理存储模型</h2>">
+        
+    </a><figcaption class="image-caption">slotted page的物理存储模型</figcaption>
+    </figure>
+<ul>
+<li><strong>NSM</strong>性能上的缺点
+<ul>
+<li>进行OLAP的操作的时候会有很多无用的数据，浪费效率</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-3.png" title="/img/CMU 15-445 Database Systems/chapter5-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-3.png" data-sub-html="<h2>OLAP往往是所有行的扫描，但是只要其中的几列数据，其他列的数据是无用的，但是DBMS就要为此扫描所有页，大量的I/O造成了效率低下</h2>">
+        
+    </a><figcaption class="image-caption">OLAP往往是所有行的扫描，但是只要其中的几列数据，其他列的数据是无用的，但是DBMS就要为此扫描所有页，大量的I/O造成了效率低下</figcaption>
+    </figure>
+<ul>
+<li><strong>NSM:SUMMARY</strong>
+<ul>
+<li><strong>Advantages</strong>
+<ul>
+<li>Fast inserts, updates, and deletes</li>
+<li>Good for queries that need the entire tuple(OLTP)</li>
+<li>Can use index-oriented physical storage for clustering</li>
+</ul>
+</li>
+<li><strong>Disadvantages</strong>
+<ul>
+<li>Not good for scanning large portions of the table and/or a subset of the attributes</li>
+<li>Terrible memory locality for OLAP access patterns.(数据分散到了多个页，属性列不是连续的)</li>
+<li>Not ideal for compression because of multiple value domains within a single page.(压缩数据靠的是数据的相似性，同一列的数据相似性才高，但是NSM是按行存不同列的数据，每一页数据的相似性很低，很难压缩)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #04: Database Storage (Part II)</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/</link>
     <pubDate>Mon, 25 Mar 2024 21:32:28 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/</guid>
@@ -175,7 +299,7 @@
 <ul>
 <li><strong>Null Column Bitmap Header</strong>：在数据的头部集中存储一个bitmap，这个bitmap就表示本条数据里面那些属性是null，这是最常见的方法</li>
 <li><strong>Special Values</strong>：用特殊值来标记null，比如给整数标定一个int32min来表示null</li>
-<li><strong>Per Attribute Null Flag</strong>：给每个属性前面都加一位来表示这个属性是不是为null，不推荐，因为不节约内存，多这一位的数据可能会造成内存需要填充好几位才能维持字节对其</li>
+<li><strong>Per Attribute Null Flag</strong>：给每个属性前面都加一位来表示这个属性是不是为null，不推荐，因为不节约内存，多这一位的数据可能会造成内存需要填充好几位才能维持字节对齐</li>
 </ul>
 </li>
 </ul>
@@ -194,49 +318,6 @@
         
     </a><figcaption class="image-caption">MySQL的information schema里面的TABLES表，存了这个数据库里面所有表的信息</figcaption>
     </figure>
-<h3 id="database-workloads">DataBase WorkLoads</h3>
-<ul>
-<li>
-<p><strong>On-Line Transaction Processing(OLTP)</strong>:Fast operations that only read/update a small amount of data each time.</p>
-<ul>
-<li>快速操作，事务简单，读/写数据量很小</li>
-<li>例子：银行转一次钱</li>
-<li>往往意味着高并发，比如支付宝，微信支付</li>
-</ul>
-</li>
-<li>
-<p><strong>On-Line Analytical Processing(OLAP):</strong> Complex queries that read of a lot of data to computer aggregates</p>
-<ul>
-<li>一般是公司要对某一段时间的所有数据进行统计分析的时候使用</li>
-<li>事务复杂，且要读大量的数据</li>
-<li>典型代表：数仓</li>
-</ul>
-</li>
-<li>
-<p><strong>Hybrid(混合) Transaction + Analytical Processing(HTAP):</strong> OLTP+OLAP together on the same database instance</p>
-<ul>
-<li>希望这个数据库两种事务都能应对（兼顾）</li>
-</ul>
-</li>
-<li>
-<p>公司方案:<strong>BIFURCATED ENVIRONMENT</strong>：OLTP和OLAP分别布置</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-14.png" title="/img/CMU 15-445 Database Systems/chapter4-14.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-14.png" data-sub-html="<h2>OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</h2>">
-        
-    </a><figcaption class="image-caption">OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</figcaption>
-    </figure>
-<ul>
-<li>
-<p>HTAP或许能避免上面<strong>BIFURCATED ENVIRONMENT</strong>的问题，但是也有可能是两头都跑不好</p>
-</li>
-<li>
-<p>行存的模型适合OLTP，列存(DSM)的模型适合OLAP</p>
-</li>
-<li>
-<p>现在很多数据库也会加入列存引擎来处理OLAP的事务</p>
-</li>
-</ul>
 ]]></description>
 </item>
 <item>

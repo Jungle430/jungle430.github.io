@@ -17,7 +17,7 @@
 <meta name="application-name" content="Jungle&#39;s blog">
 <meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter3/" /><link rel="next" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter5/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter4\/"
-        },"genre": "posts","keywords": "Database Systems","wordcount":  2162 ,
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1806 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter4\/","datePublished": "2024-03-25T21:32:28+08:00","dateModified": "2024-03-25T21:32:28+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -69,8 +69,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #04: Database Storage (Part II)</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-25">2024-03-25</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2162 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-25">2024-03-25</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1806 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -86,7 +86,6 @@
         <li><a href="#index-organized-storage">Index-Organized Storage</a></li>
         <li><a href="#data-representation">Data Representation</a></li>
         <li><a href="#system-catalogs">System Catalogs</a></li>
-        <li><a href="#database-workloads">DataBase WorkLoads</a></li>
       </ul>
     </li>
   </ul>
@@ -324,7 +323,7 @@
 <ul>
 <li><strong>Null Column Bitmap Header</strong>：在数据的头部集中存储一个bitmap，这个bitmap就表示本条数据里面那些属性是null，这是最常见的方法</li>
 <li><strong>Special Values</strong>：用特殊值来标记null，比如给整数标定一个int32min来表示null</li>
-<li><strong>Per Attribute Null Flag</strong>：给每个属性前面都加一位来表示这个属性是不是为null，不推荐，因为不节约内存，多这一位的数据可能会造成内存需要填充好几位才能维持字节对其</li>
+<li><strong>Per Attribute Null Flag</strong>：给每个属性前面都加一位来表示这个属性是不是为null，不推荐，因为不节约内存，多这一位的数据可能会造成内存需要填充好几位才能维持字节对齐</li>
 </ul>
 </li>
 </ul>
@@ -355,55 +354,6 @@
             alt="/img/CMU 15-445 Database Systems/chapter4-13.png" />
     </a><figcaption class="image-caption">MySQL的information schema里面的TABLES表，存了这个数据库里面所有表的信息</figcaption>
     </figure>
-<h3 id="database-workloads">DataBase WorkLoads</h3>
-<ul>
-<li>
-<p><strong>On-Line Transaction Processing(OLTP)</strong>:Fast operations that only read/update a small amount of data each time.</p>
-<ul>
-<li>快速操作，事务简单，读/写数据量很小</li>
-<li>例子：银行转一次钱</li>
-<li>往往意味着高并发，比如支付宝，微信支付</li>
-</ul>
-</li>
-<li>
-<p><strong>On-Line Analytical Processing(OLAP):</strong> Complex queries that read of a lot of data to computer aggregates</p>
-<ul>
-<li>一般是公司要对某一段时间的所有数据进行统计分析的时候使用</li>
-<li>事务复杂，且要读大量的数据</li>
-<li>典型代表：数仓</li>
-</ul>
-</li>
-<li>
-<p><strong>Hybrid(混合) Transaction + Analytical Processing(HTAP):</strong> OLTP+OLAP together on the same database instance</p>
-<ul>
-<li>希望这个数据库两种事务都能应对（兼顾）</li>
-</ul>
-</li>
-<li>
-<p>公司方案:<strong>BIFURCATED ENVIRONMENT</strong>：OLTP和OLAP分别布置</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-14.png" title="/img/CMU 15-445 Database Systems/chapter4-14.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-14.png" data-sub-html="<h2>OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="/img/CMU%2015-445%20Database%20Systems/chapter4-14.png"
-            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter4-14.png, /img/CMU%2015-445%20Database%20Systems/chapter4-14.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter4-14.png 2x"
-            data-sizes="auto"
-            alt="/img/CMU 15-445 Database Systems/chapter4-14.png" />
-    </a><figcaption class="image-caption">OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</figcaption>
-    </figure>
-<ul>
-<li>
-<p>HTAP或许能避免上面<strong>BIFURCATED ENVIRONMENT</strong>的问题，但是也有可能是两头都跑不好</p>
-</li>
-<li>
-<p>行存的模型适合OLTP，列存(DSM)的模型适合OLAP</p>
-</li>
-<li>
-<p>现在很多数据库也会加入列存引擎来处理OLAP的事务</p>
-</li>
-</ul>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
                 </span></div><div class="post-info-line"><div class="post-info-mod">
@@ -411,7 +361,8 @@
             </div><div class="post-info-mod"></div>
         </div><div class="post-info-share">
             <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/" data-title="CMU 15-445 Lecture #04: Database Storage (Part II)"><i class="fab fa-evernote fa-fw"></i></a></span>
-        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter3/" class="prev" rel="prev" title="CMU 15-445 Lecture #03: Database Storage (Part I)"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter3/" class="prev" rel="prev" title="CMU 15-445 Lecture #03: Database Storage (Part I)"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a>
+            <a href="/posts/cmu-15-445-database-systems/chapter5/" class="next" rel="next" title="CMU 15-445 Lecture #05: Storage Models &amp; Compression">Next Post<i class="fas fa-angle-right fa-fw"></i></a></div></div>
 </div></article></div>
             </main>
             <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
