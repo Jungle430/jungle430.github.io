@@ -90,7 +90,8 @@ mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争�
 </ul>
 <h3 id="buffer-pool-optimizations">Buffer Pool Optimizations</h3>
 <ul>
-<li><strong>Multiple Buffer Pools</strong>
+<li>
+<p><strong>Multiple Buffer Pools</strong></p>
 <ul>
 <li>DBMS可以开好多个缓冲池，比如按照类型分（索引缓冲池，数据缓冲池），同一类似使用hash再分到不同的区域，这样每个缓冲池都可以选择适合自己的存储策略，同时分成多个缓存池也避免了一个缓冲池频繁的锁竞争问题</li>
 <li>Object IDs and hashing are two approaches to mapping desired pages to a buffer pool.
@@ -101,8 +102,75 @@ mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争�
 </li>
 </ul>
 </li>
-<li><strong>Pre-fetching</strong>: 根据查询计划来对预取页面进行优化，比如处理第一组页面的时候把第二组页面给预提取到缓冲池中（这个在顺序扫描的时候常用），在索引扫描的时候处理某个叶子页的时候可以把这个叶子页的下一页也预提取到缓冲池中，这都提高了效率（这个下一页都是逻辑上的，不是物理上的）</li>
-<li></li>
+<li>
+<p><strong>Pre-fetching</strong>: 根据查询计划来对预取页面进行优化，比如处理第一组页面的时候把第二组页面给预提取到缓冲池中（这个在顺序扫描的时候常用），在索引扫描的时候处理某个叶子页的时候可以把这个叶子页的下一页也预提取到缓冲池中，这都提高了效率（这个下一页都是逻辑上的，不是物理上的）</p>
+</li>
+<li>
+<p><strong>Scan Sharing (Synchronized Scans)</strong>:尽量复用缓冲池里面的数据，比如第一个事务是SELECT ALL FROM A，第二个事务也是SELECT ALL FROM A，这个时候第一个事务把页3~6加载到缓冲池里面了，那第二个事务可以从这个地方跟着第一个事务开始扫，等把后面那些跟着第一个事务扫完之后再去扫前面的表，或者说这个时候有SELECT ALL FROM A LIMIT 100这种事务，可以直接到缓冲池里面找一张表拿100条数据就走（这也是为什么每次查询结果不一样的原因）</p>
+</li>
+<li>
+<p><strong>Buffer Pool Bypass</strong>:全表扫描（可能加SORT），大型JOIN这种东西大概率这次查询完了之后近期不会再差，这种数据除了查询时加载到内存中查询完了就扔出去，来节约缓冲池的资源</p>
+</li>
+</ul>
+<h3 id="buffer-replacement-policies">Buffer Replacement Policies</h3>
+<ul>
+<li>
+<p>要求是准确+快+开销小</p>
+</li>
+<li>
+<p><strong>COLCK</strong>:时钟轮询，如果有frame被访问过给打上标记，时钟循环看每一帧，有标记的清空标记，没有标记证明最近没人访问你，给踢出</p>
+</li>
+<li>
+<p><strong>LRU/LRU-K</strong>:看这两篇就够了</p>
+<ul>
+<li>
+<p><a href="https://jungle430.github.io/posts/cmu-15-445-database-systems/lru_and_lru-k/" target="_blank" rel="noopener noreffer">《LRU and LRU-K》</a></p>
+</li>
+<li>
+<p><a href="https://zhuanlan.zhihu.com/p/622224538" target="_blank" rel="noopener noreffer">《CMU 15-445 P1 LRU-K Replacement Policy》</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>localization per query</strong>:驱逐页只驱逐自己事务相关的，防止把其他事务的页给驱逐</p>
+</li>
+<li>
+<p><strong>priority hints</strong>:给一些页上标记，告诉缓存池这页不要随便清理，比如索引的根节点，这种东西轻易不会清理</p>
+</li>
+<li>
+<p><strong>Dirty Pages</strong>:踢出页的时候页是否是脏页对于踢出页时候的处理不一样</p>
+<ul>
+<li>非脏页：直接删除就行</li>
+<li>脏页：要刷回磁盘，当然能写不回去就尽量先不写回去（后面会讲WAL，redo-log），一定要先写回再踢出</li>
+</ul>
+</li>
+</ul>
+<h3 id="disk-io-and-os-cache">Disk I/O and OS Cache</h3>
+<ul>
+<li>操作系统本身也有cache的管理，但是和DBMS要求的差的很多，所以DBMS的缓存管理都是定制化的，不依赖操作系统的调用</li>
+</ul>
+<h3 id="other-memory-pools">Other Memory Pools</h3>
+<ul>
+<li>
+<p>除了缓存页还会缓存别的数据（比如热点查询数据，这里有点像NoSQL的一些功能了）</p>
+<ul>
+<li>
+<p>Sorting + Join Buffers</p>
+</li>
+<li>
+<p>Query Caches</p>
+</li>
+<li>
+<p>Maintenance Buffers</p>
+</li>
+<li>
+<p>Log Buffers</p>
+</li>
+<li>
+<p>Dictionary Caches</p>
+</li>
+</ul>
+</li>
 </ul>
 ]]></description>
 </item>
