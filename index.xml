@@ -66,7 +66,7 @@ mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争�
 <p><strong>dirty-flag</strong>:这个就是上面page table维护的一个页的meta-data之一，当有线程对buffer pool中的某个页面进行修改的时候这个标志会被设置，这提醒这个页在被踢出buffer pool的时候必须要刷盘</p>
 </li>
 <li>
-<p><strong>Pin/reference counter</strong>:这个也是上面page table维护的一个页的meta-data之一，主要是记录有几个线程正在访问该页，线程必须在访问该页之前增加counter，如果counter &gt; 0，那么该页就无法被驱逐，counter不会管理并发事务那些东西，如果当前缓冲池的所有页都无法被踢，而且已经满，就会抛出OOM(out-of-memory)的错误</p>
+<p><strong>Pin/reference counter</strong>:这个也是上面page table维护的一个页的meta-data之一，主要是记录有几个线程正在访问该页，线程必须在访问该页之前增加counter，如果counter &gt; 0，那么该页就无法被驱逐，counter不会管理并发事务那些东西，如果当前缓冲池的所有页都无法被踢，而且已经满了，就会抛出OOM(out-of-memory)的错误</p>
 </li>
 </ul>
 </li>
@@ -87,6 +87,22 @@ mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争�
 </li>
 </ul>
 </li>
+</ul>
+<h3 id="buffer-pool-optimizations">Buffer Pool Optimizations</h3>
+<ul>
+<li><strong>Multiple Buffer Pools</strong>
+<ul>
+<li>DBMS可以开好多个缓冲池，比如按照类型分（索引缓冲池，数据缓冲池），同一类似使用hash再分到不同的区域，这样每个缓冲池都可以选择适合自己的存储策略，同时分成多个缓存池也避免了一个缓冲池频繁的锁竞争问题</li>
+<li>Object IDs and hashing are two approaches to mapping desired pages to a buffer pool.
+<ul>
+<li><strong>Object IDs</strong>:维护一个id到缓存池区域的映射，这样根据页的id就能分配到对应的缓存池中，而且这个映射自己维护，你可以把分配的策略做的更细更智能，代价就是这个映射也是额外的内存开销</li>
+<li><strong>hashing</strong>:对页的id做hash来确定到那块缓存池</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Pre-fetching</strong>: 根据查询计划来对预取页面进行优化，比如处理第一组页面的时候把第二组页面给预提取到缓冲池中（这个在顺序扫描的时候常用），在索引扫描的时候处理某个叶子页的时候可以把这个叶子页的下一页也预提取到缓冲池中，这都提高了效率（这个下一页都是逻辑上的，不是物理上的）</li>
+<li></li>
 </ul>
 ]]></description>
 </item>
