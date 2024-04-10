@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #07: Hash Tables - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #07: Hash Tables" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #07: Hash Tables Data Structures DBMS很多部分使用不同的数据结构 Internal Meta-Data Core Data Storage Temporary Data Structures Table Indices DBMS设计数据结构需要考虑两个方面 Data organization:数" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-09T21:11:32+08:00" />
+<meta property="article:modified_time" content="2024-04-09T21:11:32+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #07: Hash Tables"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #07: Hash Tables Data Structures DBMS很多部分使用不同的数据结构 Internal Meta-Data Core Data Storage Temporary Data Structures Table Indices DBMS设计数据结构需要考虑两个方面 Data organization:数"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter6/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #07: Hash Tables",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter7\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1728 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter7\/","datePublished": "2024-04-09T21:11:32+08:00","dateModified": "2024-04-09T21:11:32+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #07: Hash Tables</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-09">2024-04-09</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1728 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-07-hash-tables">Lecture #07: Hash Tables</a>
+      <ul>
+        <li><a href="#data-structures">Data Structures</a></li>
+        <li><a href="#hash-table">Hash Table</a></li>
+        <li><a href="#hash-functions">Hash Functions</a></li>
+        <li><a href="#static-hashing-schemes">Static Hashing Schemes</a></li>
+        <li><a href="#dynamic-hashing-schemes">Dynamic Hashing Schemes</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-07-hash-tables">Lecture #07: Hash Tables</h2>
+<h3 id="data-structures">Data Structures</h3>
+<ul>
+<li>
+<p>DBMS很多部分使用不同的数据结构</p>
+<ul>
+<li>Internal Meta-Data</li>
+<li>Core Data Storage</li>
+<li>Temporary Data Structures</li>
+<li>Table Indices</li>
+</ul>
+</li>
+<li>
+<p>DBMS设计数据结构需要考虑两个方面</p>
+<ul>
+<li><strong>Data organization</strong>:数据结构应该怎么设计，什么数据应该存到那，从而保证有效的访问</li>
+<li><strong>Concurrency</strong>:老话题，只要是DBMS上面的东西基本都要考虑并发安全</li>
+</ul>
+</li>
+</ul>
+<h3 id="hash-table">Hash Table</h3>
+<ul>
+<li>
+<p>哈希表实现了一个Key $\rightarrow$ Value的关联数组，它提供了平均$O(1)$的操作复杂度（当然最差会是$O(n)$）和$O(n)$的存储复杂度，这理要注意的是$O(1)$是理论上面的，在现实中实现这个数据结构的时候要考虑常数因子的优化</p>
+</li>
+<li>
+<p>哈希表的实现由两部分组成</p>
+<ul>
+<li>
+<p><strong>Hash Function</strong>:如何将较大的值映射到一个较小的空间内，这里要注意碰撞率和计算耗时的关系</p>
+<ul>
+<li>计算越复杂，耗时越高，碰撞率越低</li>
+<li>计算越简单，耗时越低，碰撞率越高</li>
+<li>Hash Function理想的情况就是在计算耗时和碰撞率之间取得平衡</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing Scheme</strong>:考虑哈希冲突的时候的处理办法，在扩大哈希表减少冲突和发生冲突时处理方案的复杂性中取得平衡</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="hash-functions">Hash Functions</h3>
+<ul>
+<li>
+<p><strong>Hash Function</strong>接收的参数应该可以是任意类型的，然后返回一个整数，该函数的输出要是确定性的（相同的参数输出的值要一样）</p>
+</li>
+<li>
+<p><strong>Hash Function</strong>一般不用网安那套加密安全哈希函数，因为不需要保护密钥的内容（这个东西只在DBMS内部使用，没有泄露的风险），我们只关心计算速度和碰撞率</p>
+</li>
+</ul>
+<blockquote>
+<p>The current state-of-the-art hash function is <a href="https://xxhash.com" target="_blank" rel="noopener noreffer">Facebook XXHash3</a>.</p>
+</blockquote>
+<h3 id="static-hashing-schemes">Static Hashing Schemes</h3>
+<ul>
+<li>
+<p>对于一个固定容量的Hash table来说，如果容量满了再次扩容代价很大</p>
+</li>
+<li>
+<p>一般扩容都是给扩容成原来的2倍</p>
+</li>
+<li>
+<p>避免hash冲突是很重要的，一般我们期望元素数=槽数$\times$2</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Linear Probe Hashing</strong></p>
+<ul>
+<li>
+<p>碰到Hash冲突就把K-V存到下一个槽里面</p>
+</li>
+<li>
+<p>如果下一个槽还碰撞就下下个槽，直到找到空位置</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-1.png" title="/img/CMU 15-445 Database Systems/chapter7-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-1.png" data-sub-html="<h2>碰撞的处理方法</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter7-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter7-1.png, /img/CMU%2015-445%20Database%20Systems/chapter7-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter7-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter7-1.png" />
+    </a><figcaption class="image-caption">碰撞的处理方法</figcaption>
+    </figure>
+</li>
+<li>
+<p>删除比较恶心</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-2.png" title="/img/CMU 15-445 Database Systems/chapter7-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-2.png" data-sub-html="<h2>D因为和C碰撞往下走，现在C被删了，结果查D发现D没有了，出现了错误</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter7-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter7-2.png, /img/CMU%2015-445%20Database%20Systems/chapter7-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter7-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter7-2.png" />
+    </a><figcaption class="image-caption">D因为和C碰撞往下走，现在C被删了，结果查D发现D没有了，出现了错误</figcaption>
+    </figure>
+</li>
+<li>
+<p>解决方案</p>
+<ul>
+<li>加上一个Tombstone标志，说明这个地方原来有数据，然后被删除了</li>
+<li>Movement：把下边的数据往上挪，但是不能傻瓜式的向上推，hash值是对的就不能动</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Non-unique Keys</strong>:同一个键可能与多个不同的值或元组关联的情况，两种解决方案
+<ul>
+<li><strong>Separate Linked List</strong>:存储Value的不再是一个值，而是List&lt;V&gt;，这样就可以存储多个值了</li>
+<li><strong>Redundant Keys</strong>:将Key和Value结合起来再做hash</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Optimizations</strong>
+<ul>
+<li><strong>Specialized hash table implementations based on the data type or size of keys</strong>:根据数据结构不同/键大小采取不同的措施，比如字符串，小的字符串我拷贝存一份，大的字符串我存指针或者哈希</li>
+<li><strong>Storing metadata in a separate array</strong>:将空槽/墓碑数据集中存在一个bitmap里面，作为哈希表的头文件或者作为一个单独的哈希表，这样避免查找已经删除的键</li>
+<li><strong>Maintaining versions for the hash table and its slots</strong>:在哈希表上面删除/分配内存代价很高，所以给哈希表的Value添加一个version字段，只要version不匹配就认为没有这个Value，删数据就不用释放内存了</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Google’s absl::flat hash map is a state-of-the-art implementation of Linear Probe Hashing.</p>
+</blockquote>
+<hr>
+<ul>
+<li><strong>Cuckoo Hashing</strong>
+<ul>
+<li>使用多个哈希表，每个哈希表使用的哈希函数整体一样，但是参数不同（就是设定的种子）</li>
+<li>一旦发生哈希碰撞，就把原有的值使用别的哈希函数驱赶到别的哈希表中，如果被驱逐的值也发生哈希碰撞就重复上面的过程，直到没有哈希碰撞</li>
+<li>使用的很少，现实中这种实现问题很大</li>
+</ul>
+</li>
+</ul>
+<h3 id="dynamic-hashing-schemes">Dynamic Hashing Schemes</h3>
+<ul>
+<li>
+<p>如果不知道需要存储数据的量，那么就需要一个能够动态扩容的哈希表</p>
+</li>
+<li>
+<p><strong>Chained Hashing</strong></p>
+<ul>
+<li>
+<p>槽不再是单独的一个槽，而是变成了一个指针，指向一个“桶”，桶能存好多Value，一般也具备扩容的功能，有名的实现是Java的HashMap</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-3.png" title="/img/CMU 15-445 Database Systems/chapter7-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-3.png" data-sub-html="<h2>Chained Hashing模型</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter7-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter7-3.png, /img/CMU%2015-445%20Database%20Systems/chapter7-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter7-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter7-3.png" />
+    </a><figcaption class="image-caption"><strong>Chained Hashing</strong>模型</figcaption>
+    </figure>
+</li>
+<li>
+<p><strong>Bloom Filters</strong>:布隆过滤器，Redis有讲，用来先过滤一遍不存在的数据</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Extendible Hashing</strong>:这个也和Java的HashMap思想很像，2的幂次方扩容，每次扩容重排桶中的数据，计算hash的时候因为是2的幂次所以可以用位运算，每次扩容就是参与运算的二进制位变多了一位</p>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-4.png" title="/img/CMU 15-445 Database Systems/chapter7-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-4.png" data-sub-html="<h2>扩容前</h2>">
+          <img
+              class="lazyload"
+              src="/svg/loading.min.svg"
+              data-src="/img/CMU%2015-445%20Database%20Systems/chapter7-4.png"
+              data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter7-4.png, /img/CMU%2015-445%20Database%20Systems/chapter7-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter7-4.png 2x"
+              data-sizes="auto"
+              alt="/img/CMU 15-445 Database Systems/chapter7-4.png" />
+      </a><figcaption class="image-caption">扩容前</figcaption>
+      </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-5.png" title="/img/CMU 15-445 Database Systems/chapter7-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-5.png" data-sub-html="<h2>扩容后</h2>">
+          <img
+              class="lazyload"
+              src="/svg/loading.min.svg"
+              data-src="/img/CMU%2015-445%20Database%20Systems/chapter7-5.png"
+              data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter7-5.png, /img/CMU%2015-445%20Database%20Systems/chapter7-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter7-5.png 2x"
+              data-sizes="auto"
+              alt="/img/CMU 15-445 Database Systems/chapter7-5.png" />
+      </a><figcaption class="image-caption">扩容后</figcaption>
+      </figure>
+</li>
+<li>
+<p><strong>Linear Hashing</strong></p>
+<ul>
+<li>
+<p>之前的扩容是按照2的幂次扩容，扩容一次需要的代价很大，需要用户等待很多时间</p>
+</li>
+<li>
+<p><strong>Linear Hashing</strong>希望扩容不要那么猛，一点一点慢慢扩容</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-6.png" title="/img/CMU 15-445 Database Systems/chapter7-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-6.png" data-sub-html="<h2>由size = 4扩容到size = 5，分家指针向下移动一位，分家指针上面的槽用旧哈希函数x%n，分家指针下面的槽用新哈希函数x%2n</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter7-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter7-6.png, /img/CMU%2015-445%20Database%20Systems/chapter7-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter7-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter7-6.png" />
+    </a><figcaption class="image-caption">由size = 4扩容到size = 5，分家指针向下移动一位，分家指针上面的槽用旧哈希函数x%n，分家指针下面的槽用新哈希函数x%2n</figcaption>
+    </figure>
+</li>
+<li>
+<p>分家指针指向原来的槽末尾再扩容就会回到0，此时一轮的扩容已经完成</p>
+</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-09</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/" data-title="CMU 15-445 Lecture #07: Hash Tables"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter6/" class="prev" rel="prev" title="CMU 15-445 Lecture #06: Buffer Pools"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>

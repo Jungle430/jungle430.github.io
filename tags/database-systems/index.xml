@@ -4,7 +4,202 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 08 Apr 2024 20:02:45 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Tue, 09 Apr 2024 21:11:32 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #07: Hash Tables</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/</link>
+    <pubDate>Tue, 09 Apr 2024 21:11:32 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-07-hash-tables">Lecture #07: Hash Tables</h2>
+<h3 id="data-structures">Data Structures</h3>
+<ul>
+<li>
+<p>DBMS很多部分使用不同的数据结构</p>
+<ul>
+<li>Internal Meta-Data</li>
+<li>Core Data Storage</li>
+<li>Temporary Data Structures</li>
+<li>Table Indices</li>
+</ul>
+</li>
+<li>
+<p>DBMS设计数据结构需要考虑两个方面</p>
+<ul>
+<li><strong>Data organization</strong>:数据结构应该怎么设计，什么数据应该存到那，从而保证有效的访问</li>
+<li><strong>Concurrency</strong>:老话题，只要是DBMS上面的东西基本都要考虑并发安全</li>
+</ul>
+</li>
+</ul>
+<h3 id="hash-table">Hash Table</h3>
+<ul>
+<li>
+<p>哈希表实现了一个Key $\rightarrow$ Value的关联数组，它提供了平均$O(1)$的操作复杂度（当然最差会是$O(n)$）和$O(n)$的存储复杂度，这理要注意的是$O(1)$是理论上面的，在现实中实现这个数据结构的时候要考虑常数因子的优化</p>
+</li>
+<li>
+<p>哈希表的实现由两部分组成</p>
+<ul>
+<li>
+<p><strong>Hash Function</strong>:如何将较大的值映射到一个较小的空间内，这里要注意碰撞率和计算耗时的关系</p>
+<ul>
+<li>计算越复杂，耗时越高，碰撞率越低</li>
+<li>计算越简单，耗时越低，碰撞率越高</li>
+<li>Hash Function理想的情况就是在计算耗时和碰撞率之间取得平衡</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing Scheme</strong>:考虑哈希冲突的时候的处理办法，在扩大哈希表减少冲突和发生冲突时处理方案的复杂性中取得平衡</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="hash-functions">Hash Functions</h3>
+<ul>
+<li>
+<p><strong>Hash Function</strong>接收的参数应该可以是任意类型的，然后返回一个整数，该函数的输出要是确定性的（相同的参数输出的值要一样）</p>
+</li>
+<li>
+<p><strong>Hash Function</strong>一般不用网安那套加密安全哈希函数，因为不需要保护密钥的内容（这个东西只在DBMS内部使用，没有泄露的风险），我们只关心计算速度和碰撞率</p>
+</li>
+</ul>
+<blockquote>
+<p>The current state-of-the-art hash function is <a href="https://xxhash.com" target="_blank" rel="noopener noreffer">Facebook XXHash3</a>.</p>
+</blockquote>
+<h3 id="static-hashing-schemes">Static Hashing Schemes</h3>
+<ul>
+<li>
+<p>对于一个固定容量的Hash table来说，如果容量满了再次扩容代价很大</p>
+</li>
+<li>
+<p>一般扩容都是给扩容成原来的2倍</p>
+</li>
+<li>
+<p>避免hash冲突是很重要的，一般我们期望元素数=槽数$\times$2</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Linear Probe Hashing</strong></p>
+<ul>
+<li>
+<p>碰到Hash冲突就把K-V存到下一个槽里面</p>
+</li>
+<li>
+<p>如果下一个槽还碰撞就下下个槽，直到找到空位置</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-1.png" title="/img/CMU 15-445 Database Systems/chapter7-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-1.png" data-sub-html="<h2>碰撞的处理方法</h2>">
+        
+    </a><figcaption class="image-caption">碰撞的处理方法</figcaption>
+    </figure>
+</li>
+<li>
+<p>删除比较恶心</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-2.png" title="/img/CMU 15-445 Database Systems/chapter7-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-2.png" data-sub-html="<h2>D因为和C碰撞往下走，现在C被删了，结果查D发现D没有了，出现了错误</h2>">
+        
+    </a><figcaption class="image-caption">D因为和C碰撞往下走，现在C被删了，结果查D发现D没有了，出现了错误</figcaption>
+    </figure>
+</li>
+<li>
+<p>解决方案</p>
+<ul>
+<li>加上一个Tombstone标志，说明这个地方原来有数据，然后被删除了</li>
+<li>Movement：把下边的数据往上挪，但是不能傻瓜式的向上推，hash值是对的就不能动</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Non-unique Keys</strong>:同一个键可能与多个不同的值或元组关联的情况，两种解决方案
+<ul>
+<li><strong>Separate Linked List</strong>:存储Value的不再是一个值，而是List&lt;V&gt;，这样就可以存储多个值了</li>
+<li><strong>Redundant Keys</strong>:将Key和Value结合起来再做hash</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Optimizations</strong>
+<ul>
+<li><strong>Specialized hash table implementations based on the data type or size of keys</strong>:根据数据结构不同/键大小采取不同的措施，比如字符串，小的字符串我拷贝存一份，大的字符串我存指针或者哈希</li>
+<li><strong>Storing metadata in a separate array</strong>:将空槽/墓碑数据集中存在一个bitmap里面，作为哈希表的头文件或者作为一个单独的哈希表，这样避免查找已经删除的键</li>
+<li><strong>Maintaining versions for the hash table and its slots</strong>:在哈希表上面删除/分配内存代价很高，所以给哈希表的Value添加一个version字段，只要version不匹配就认为没有这个Value，删数据就不用释放内存了</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Google’s absl::flat hash map is a state-of-the-art implementation of Linear Probe Hashing.</p>
+</blockquote>
+<hr>
+<ul>
+<li><strong>Cuckoo Hashing</strong>
+<ul>
+<li>使用多个哈希表，每个哈希表使用的哈希函数整体一样，但是参数不同（就是设定的种子）</li>
+<li>一旦发生哈希碰撞，就把原有的值使用别的哈希函数驱赶到别的哈希表中，如果被驱逐的值也发生哈希碰撞就重复上面的过程，直到没有哈希碰撞</li>
+<li>使用的很少，现实中这种实现问题很大</li>
+</ul>
+</li>
+</ul>
+<h3 id="dynamic-hashing-schemes">Dynamic Hashing Schemes</h3>
+<ul>
+<li>
+<p>如果不知道需要存储数据的量，那么就需要一个能够动态扩容的哈希表</p>
+</li>
+<li>
+<p><strong>Chained Hashing</strong></p>
+<ul>
+<li>
+<p>槽不再是单独的一个槽，而是变成了一个指针，指向一个“桶”，桶能存好多Value，一般也具备扩容的功能，有名的实现是Java的HashMap</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-3.png" title="/img/CMU 15-445 Database Systems/chapter7-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-3.png" data-sub-html="<h2>Chained Hashing模型</h2>">
+        
+    </a><figcaption class="image-caption"><strong>Chained Hashing</strong>模型</figcaption>
+    </figure>
+</li>
+<li>
+<p><strong>Bloom Filters</strong>:布隆过滤器，Redis有讲，用来先过滤一遍不存在的数据</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Extendible Hashing</strong>:这个也和Java的HashMap思想很像，2的幂次方扩容，每次扩容重排桶中的数据，计算hash的时候因为是2的幂次所以可以用位运算，每次扩容就是参与运算的二进制位变多了一位</p>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-4.png" title="/img/CMU 15-445 Database Systems/chapter7-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-4.png" data-sub-html="<h2>扩容前</h2>">
+          
+      </a><figcaption class="image-caption">扩容前</figcaption>
+      </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-5.png" title="/img/CMU 15-445 Database Systems/chapter7-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-5.png" data-sub-html="<h2>扩容后</h2>">
+          
+      </a><figcaption class="image-caption">扩容后</figcaption>
+      </figure>
+</li>
+<li>
+<p><strong>Linear Hashing</strong></p>
+<ul>
+<li>
+<p>之前的扩容是按照2的幂次扩容，扩容一次需要的代价很大，需要用户等待很多时间</p>
+</li>
+<li>
+<p><strong>Linear Hashing</strong>希望扩容不要那么猛，一点一点慢慢扩容</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-6.png" title="/img/CMU 15-445 Database Systems/chapter7-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-6.png" data-sub-html="<h2>由size = 4扩容到size = 5，分家指针向下移动一位，分家指针上面的槽用旧哈希函数x%n，分家指针下面的槽用新哈希函数x%2n</h2>">
+        
+    </a><figcaption class="image-caption">由size = 4扩容到size = 5，分家指针向下移动一位，分家指针上面的槽用旧哈希函数x%n，分家指针下面的槽用新哈希函数x%2n</figcaption>
+    </figure>
+</li>
+<li>
+<p>分家指针指向原来的槽末尾再扩容就会回到0，此时一轮的扩容已经完成</p>
+</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #06: Buffer Pools</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter6/</link>
     <pubDate>Mon, 08 Apr 2024 20:02:45 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter6/</guid>
