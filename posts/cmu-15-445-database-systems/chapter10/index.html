@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #10: Sorting &amp; Aggregation Algorithms Query Plan 从本节课开始将讨论DBMS的Operator Execution 优化器会把SQL变成一棵执行树，递归式的向上执行 执行树 本课DBMS的特" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-11T19:21:30+08:00" />
+<meta property="article:modified_time" content="2024-04-11T19:21:30+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #10: Sorting &amp; Aggregation Algorithms Query Plan 从本节课开始将讨论DBMS的Operator Execution 优化器会把SQL变成一棵执行树，递归式的向上执行 执行树 本课DBMS的特"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #10: Sorting \u0026 Aggregation Algorithms",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter10\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1006 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter10\/","datePublished": "2024-04-11T19:21:30+08:00","dateModified": "2024-04-11T19:21:30+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-11">2024-04-11</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1006 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-10-sorting--aggregation-algorithms">Lecture #10: Sorting &amp; Aggregation Algorithms</a>
+      <ul>
+        <li><a href="#query-plan">Query Plan</a></li>
+        <li><a href="#sorting">Sorting</a></li>
+        <li><a href="#aggregations">Aggregations</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-10-sorting--aggregation-algorithms">Lecture #10: Sorting &amp; Aggregation Algorithms</h2>
+<h3 id="query-plan">Query Plan</h3>
+<ul>
+<li>
+<p>从本节课开始将讨论DBMS的Operator Execution</p>
+</li>
+<li>
+<p>优化器会把SQL变成一棵执行树，递归式的向上执行</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-1.png" title="/img/CMU 15-445 Database Systems/chapter10-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-1.png" data-sub-html="<h2>执行树</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter10-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter10-1.png, /img/CMU%2015-445%20Database%20Systems/chapter10-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter10-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter10-1.png" />
+    </a><figcaption class="image-caption">执行树</figcaption>
+    </figure>
+<ul>
+<li>本课DBMS的特点：内存没法一次处理全部数据，会OOM，往往需要把中间结果也给写回到磁盘，磁盘和内存要相互配合，要最大化利用连续I/O，减少随机I/O的压力</li>
+</ul>
+<h3 id="sorting">Sorting</h3>
+<ul>
+<li>
+<p><strong>External merge sort</strong></p>
+<ul>
+<li>排的是硬盘里面的数据，而不是像往常那样排内存里面的数据</li>
+<li>代表：MySQL</li>
+<li>Phase #1 – Sorting: First, the algorithm sorts small chunks of data that fit in main memory, and then writes the sorted pages back to disk.</li>
+<li>Phase #2 – Merge: Then, the algorithm combines the sorted runs into larger sorted runs.</li>
+</ul>
+</li>
+<li>
+<p>两种&lt;Key,Value&gt;的模式</p>
+<ul>
+<li>Early Materialization:&lt;Key,Tuple&gt;，直接存储的就是数据</li>
+<li>Late Materialization:&lt;Key,Record id&gt;，需要回表</li>
+</ul>
+</li>
+<li>
+<p><strong>Two-way Merge Sort</strong></p>
+<ul>
+<li>N个页的大表，缓存池最多能承受B个页的容量</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-2.png" title="/img/CMU 15-445 Database Systems/chapter10-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-2.png" data-sub-html="<h2>把每页加载到内存后排序，然后把排序好的数据写回磁盘，最后再归并刚才写回磁盘的那些有序页</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter10-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter10-2.png, /img/CMU%2015-445%20Database%20Systems/chapter10-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter10-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter10-2.png" />
+    </a><figcaption class="image-caption">把每页加载到内存后排序，然后把排序好的数据写回磁盘，最后再归并刚才写回磁盘的那些有序页</figcaption>
+    </figure></li>
+<li>排序好的数据不是全部一把进到内存（那又该爆内存了，可以轮询着进，因为合并有序数组本来就是轮询比较的（参考力扣里面的题目））</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-3.png" title="/img/CMU 15-445 Database Systems/chapter10-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-3.png" data-sub-html="<h2>多个页的情况</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter10-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter10-3.png, /img/CMU%2015-445%20Database%20Systems/chapter10-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter10-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter10-3.png" />
+    </a><figcaption class="image-caption">多个页的情况</figcaption>
+    </figure></li>
+<li>优化：一次I/O不要只读一页，尽最大可能多读几页</li>
+</ul>
+</li>
+<li>
+<p><strong>General (K-way) Merge Sort</strong></p>
+<ul>
+<li>二路归并变成K路归并，一次比如读N/B个页，然后进行排序，Merge的轮数会少很多，这样效率会提高很多</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Using B+Trees</strong>
+<ul>
+<li>直接利用B+ Tree的有序性</li>
+<li>要考虑聚簇还是非聚簇，因为聚簇的话关系到Early Materialization的问题，可以省去回表的过程，提高效率</li>
+</ul>
+</li>
+</ul>
+<h3 id="aggregations">Aggregations</h3>
+<ul>
+<li>
+<p><strong>Sorting</strong></p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-4.png" title="/img/CMU 15-445 Database Systems/chapter10-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-4.png" data-sub-html="<h2>过滤，排序，去重</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter10-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter10-4.png, /img/CMU%2015-445%20Database%20Systems/chapter10-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter10-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter10-4.png" />
+    </a><figcaption class="image-caption">过滤，排序，去重</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing</strong></p>
+<ul>
+<li>
+<p>如果不要求有序可以用Hashing来提高效率</p>
+</li>
+<li>
+<p><strong>External Hashing aggregations</strong></p>
+</li>
+<li>
+<p><strong>Phase #1 – Partition</strong></p>
+<ul>
+<li>先给要Agg的字段做一个哈希表，然后把这个哈希表写回到磁盘里面</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-5.png" title="/img/CMU 15-445 Database Systems/chapter10-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-5.png" data-sub-html="<h2>把需要Agg的字段做第一次哈希，相同的值&#43;碰撞的都放在一个桶</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter10-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter10-5.png, /img/CMU%2015-445%20Database%20Systems/chapter10-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter10-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter10-5.png" />
+    </a><figcaption class="image-caption">把需要Agg的字段做第一次哈希，相同的值+碰撞的都放在一个桶</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Phase #2 – ReHash</strong>:把磁盘里面的哈希表再加载到内存中，读进去之后再做第二次哈希，这样就把碰撞的值也分开了，这样就生成了第二次的哈希表，也就是最终结果</p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-6.png" title="/img/CMU 15-445 Database Systems/chapter10-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-6.png" data-sub-html="<h2>二次哈希解决了哈希碰撞，也就拿到了最终结果</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter10-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter10-6.png, /img/CMU%2015-445%20Database%20Systems/chapter10-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter10-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter10-6.png" />
+    </a><figcaption class="image-caption">二次哈希解决了哈希碰撞，也就拿到了最终结果</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing summarization</strong></p>
+<ul>
+<li>During the rehash phase, store pairs of the form (GroupKey→RunningVal) 如果说需要对值进行计算(count,sum等)，那么在hash的过程中也要带上其他需要的数值，这部分叫RunningVal</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-7.png" title="/img/CMU 15-445 Database Systems/chapter10-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-7.png" data-sub-html="<h2>带上需要的数据进行聚合类函数的计算</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter10-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter10-7.png, /img/CMU%2015-445%20Database%20Systems/chapter10-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter10-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter10-7.png" />
+    </a><figcaption class="image-caption">带上需要的数据进行聚合类函数的计算</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Sorting和Hashing没有绝对的好，要看条件，比如前置的数据有没有做了排序或者哈希，需要的结果到底要不要进行排序</p>
+</li>
+<li>
+<p>优化的思路</p>
+<ul>
+<li>随机I/O尽量变成连续I/O:一次写入页的数量尽量多</li>
+<li>预加载:能先加载到内存中的数据都先加载到内存中</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-11</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" data-title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter9/" class="prev" rel="prev" title="CMU 15-445 Lecture #09: Index Concurrency Control"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>

@@ -4,7 +4,143 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Thu, 11 Apr 2024 13:34:01 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Thu, 11 Apr 2024 19:21:30 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/</link>
+    <pubDate>Thu, 11 Apr 2024 19:21:30 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-10-sorting--aggregation-algorithms">Lecture #10: Sorting &amp; Aggregation Algorithms</h2>
+<h3 id="query-plan">Query Plan</h3>
+<ul>
+<li>
+<p>从本节课开始将讨论DBMS的Operator Execution</p>
+</li>
+<li>
+<p>优化器会把SQL变成一棵执行树，递归式的向上执行</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-1.png" title="/img/CMU 15-445 Database Systems/chapter10-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-1.png" data-sub-html="<h2>执行树</h2>">
+        
+    </a><figcaption class="image-caption">执行树</figcaption>
+    </figure>
+<ul>
+<li>本课DBMS的特点：内存没法一次处理全部数据，会OOM，往往需要把中间结果也给写回到磁盘，磁盘和内存要相互配合，要最大化利用连续I/O，减少随机I/O的压力</li>
+</ul>
+<h3 id="sorting">Sorting</h3>
+<ul>
+<li>
+<p><strong>External merge sort</strong></p>
+<ul>
+<li>排的是硬盘里面的数据，而不是像往常那样排内存里面的数据</li>
+<li>代表：MySQL</li>
+<li>Phase #1 – Sorting: First, the algorithm sorts small chunks of data that fit in main memory, and then writes the sorted pages back to disk.</li>
+<li>Phase #2 – Merge: Then, the algorithm combines the sorted runs into larger sorted runs.</li>
+</ul>
+</li>
+<li>
+<p>两种&lt;Key,Value&gt;的模式</p>
+<ul>
+<li>Early Materialization:&lt;Key,Tuple&gt;，直接存储的就是数据</li>
+<li>Late Materialization:&lt;Key,Record id&gt;，需要回表</li>
+</ul>
+</li>
+<li>
+<p><strong>Two-way Merge Sort</strong></p>
+<ul>
+<li>N个页的大表，缓存池最多能承受B个页的容量</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-2.png" title="/img/CMU 15-445 Database Systems/chapter10-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-2.png" data-sub-html="<h2>把每页加载到内存后排序，然后把排序好的数据写回磁盘，最后再归并刚才写回磁盘的那些有序页</h2>">
+        
+    </a><figcaption class="image-caption">把每页加载到内存后排序，然后把排序好的数据写回磁盘，最后再归并刚才写回磁盘的那些有序页</figcaption>
+    </figure></li>
+<li>排序好的数据不是全部一把进到内存（那又该爆内存了，可以轮询着进，因为合并有序数组本来就是轮询比较的（参考力扣里面的题目））</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-3.png" title="/img/CMU 15-445 Database Systems/chapter10-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-3.png" data-sub-html="<h2>多个页的情况</h2>">
+        
+    </a><figcaption class="image-caption">多个页的情况</figcaption>
+    </figure></li>
+<li>优化：一次I/O不要只读一页，尽最大可能多读几页</li>
+</ul>
+</li>
+<li>
+<p><strong>General (K-way) Merge Sort</strong></p>
+<ul>
+<li>二路归并变成K路归并，一次比如读N/B个页，然后进行排序，Merge的轮数会少很多，这样效率会提高很多</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Using B+Trees</strong>
+<ul>
+<li>直接利用B+ Tree的有序性</li>
+<li>要考虑聚簇还是非聚簇，因为聚簇的话关系到Early Materialization的问题，可以省去回表的过程，提高效率</li>
+</ul>
+</li>
+</ul>
+<h3 id="aggregations">Aggregations</h3>
+<ul>
+<li>
+<p><strong>Sorting</strong></p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-4.png" title="/img/CMU 15-445 Database Systems/chapter10-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-4.png" data-sub-html="<h2>过滤，排序，去重</h2>">
+        
+    </a><figcaption class="image-caption">过滤，排序，去重</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing</strong></p>
+<ul>
+<li>
+<p>如果不要求有序可以用Hashing来提高效率</p>
+</li>
+<li>
+<p><strong>External Hashing aggregations</strong></p>
+</li>
+<li>
+<p><strong>Phase #1 – Partition</strong></p>
+<ul>
+<li>先给要Agg的字段做一个哈希表，然后把这个哈希表写回到磁盘里面</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-5.png" title="/img/CMU 15-445 Database Systems/chapter10-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-5.png" data-sub-html="<h2>把需要Agg的字段做第一次哈希，相同的值&#43;碰撞的都放在一个桶</h2>">
+        
+    </a><figcaption class="image-caption">把需要Agg的字段做第一次哈希，相同的值+碰撞的都放在一个桶</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Phase #2 – ReHash</strong>:把磁盘里面的哈希表再加载到内存中，读进去之后再做第二次哈希，这样就把碰撞的值也分开了，这样就生成了第二次的哈希表，也就是最终结果</p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-6.png" title="/img/CMU 15-445 Database Systems/chapter10-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-6.png" data-sub-html="<h2>二次哈希解决了哈希碰撞，也就拿到了最终结果</h2>">
+        
+    </a><figcaption class="image-caption">二次哈希解决了哈希碰撞，也就拿到了最终结果</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing summarization</strong></p>
+<ul>
+<li>During the rehash phase, store pairs of the form (GroupKey→RunningVal) 如果说需要对值进行计算(count,sum等)，那么在hash的过程中也要带上其他需要的数值，这部分叫RunningVal</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-7.png" title="/img/CMU 15-445 Database Systems/chapter10-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-7.png" data-sub-html="<h2>带上需要的数据进行聚合类函数的计算</h2>">
+        
+    </a><figcaption class="image-caption">带上需要的数据进行聚合类函数的计算</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Sorting和Hashing没有绝对的好，要看条件，比如前置的数据有没有做了排序或者哈希，需要的结果到底要不要进行排序</p>
+</li>
+<li>
+<p>优化的思路</p>
+<ul>
+<li>随机I/O尽量变成连续I/O:一次写入页的数量尽量多</li>
+<li>预加载:能先加载到内存中的数据都先加载到内存中</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #09: Index Concurrency Control</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</link>
     <pubDate>Thu, 11 Apr 2024 13:34:01 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</guid>
@@ -2480,763 +2616,6 @@ syntax for date and time operations varies wildly across systems.</li>
 <ul>
 <li>由于该版的实验<strong>page中有是否可以移除的标志位</strong>，如果为false表明该页无法被移除，所以说移除page的算法需要在原有的LRU-K算法的基础上面改进，按照优先级别先从History List的头向后扫描，如果有可以移除的page就直接移除，如果说History List中的页都无法移除，那么就需要从Buffer List的尾部向前扫描，发现可以移除的page就直接移除</li>
 <li>这种情况的改变将删除操作的时间复杂度从$O(1)$上升到了$O(n)$，但是因为理想的模型和实际并不相符，实际中有一些page就是规定不应该被移除，所以为了和实际相符只能损失一小部分效率（毕竟主存和磁盘的容量比很小）</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #01: Course Overview &amp; Relational Model</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/</link>
-    <pubDate>Wed, 22 Feb 2023 15:23:14 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-01-course-overview--relational-model">Lecture #01: Course Overview &amp; Relational Model</h2>
-<h3 id="outline">Outline</h3>
-<ul>
-<li>Course Logistics</li>
-<li>Relational Model</li>
-<li>Relational Algebra</li>
-</ul>
-<h3 id="course-overiew">Course overiew</h3>
-<ul>
-<li>This course is about the design/implementation of database management systems (<code>DBMSs</code>)</li>
-<li>This is <strong>not</strong> a course ($\rightarrow Key\ point\ is\ the\ theory\ and\ the\ concept$) about how to use a DBMS to build applications or how to administer a DBMS.→ See <a href="http://www.heinz.cmu.edu/academic-resources/course-results/course-details/index.aspx?cid=273" target="_blank" rel="noopener noreffer">CMU 95-703</a> (Heinz College)</li>
-</ul>
-<h3 id="projects">PROJECTS</h3>
-<ul>
-<li>
-<p>All projects will use the CMU DB Group <a href="https://github.com/cmu-db/bustub" target="_blank" rel="noopener noreffer">BusTub</a> academic DBMS.</p>
-<ul>
-<li>→ Each project builds on the previous one.</li>
-<li>→ We will not teach you how to write/debug C++17</li>
-</ul>
-</li>
-<li>
-<p><strong>complete <a href="https://15445.courses.cs.cmu.edu/fall2022/project0/" target="_blank" rel="noopener noreffer">Project #0</a> ! ! !</strong></p>
-</li>
-</ul>
-<h3 id="database">Database</h3>
-<ul>
-<li>
-<p><strong>Organized collection of inter-related data that models some aspect of the real-world</strong></p>
-</li>
-<li>
-<p><strong>Databases are the core component of most computer applications</strong></p>
-</li>
-</ul>
-<h4 id="example">Example</h4>
-<p>Create a database that models a digital music store to keep track of artists and albums</p>
-<ul>
-<li>Things we need for our store
-<ul>
-<li>Information about <code>Artists</code></li>
-<li>What <code>Albums</code> those Artists released</li>
-</ul>
-</li>
-</ul>
-<h5 id="flat-file-strawman">FLAT FILE STRAWMAN</h5>
-<ul>
-<li>
-<p>Store our database as <strong>comma-separated value (CSV)</strong> files that we manage ourselves in our application code</p>
-<ul>
-<li>
-<p>Use a separate file per entity</p>
-</li>
-<li>
-<p>The application must parse the files each time they want to read/update records</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Create a database that models a digital music store</p>
-</li>
-</ul>
-<p>Artist(name, year, country)</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;Wu-Tang Clan&#34;</span><span class="err">,</span><span class="mi">1992</span><span class="err">,</span><span class="s2">&#34;USA&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;Notorious BIG&#34;</span><span class="err">,</span><span class="mi">1992</span><span class="err">,</span><span class="s2">&#34;USA&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;GZA&#34;</span><span class="err">,</span><span class="mi">1990</span><span class="err">,</span><span class="s2">&#34;USA&#34;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Album(name, artist, year)</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;Enter the Wu-Tang&#34;</span><span class="err">,</span><span class="s2">&#34;Wu-Tang Clan&#34;</span><span class="err">,</span><span class="mi">1993</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;St.Ides Mix Tape&#34;</span><span class="err">,</span><span class="s2">&#34;Wu-Tang Clan&#34;</span><span class="err">,</span><span class="mi">1994</span>
-</span></span><span class="line"><span class="cl"><span class="s2">&#34;Liquid Swords&#34;</span><span class="err">,</span><span class="s2">&#34;GZA&#34;</span><span class="err">,</span><span class="mi">1990</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h5 id="our-code">Our Code</h5>
-<ul>
-<li>Example: Get the year that GZA went solo $\rightarrow$ Artist</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-</span></span><span class="line"><span class="cl">	<span class="n">record</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&#34;GZA&#34;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">		<span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="problem-about-flat-files-rightarrow-data-integrity">Problem about FLAT FILES $\rightarrow$ DATA-INTEGRITY</h4>
-<ul>
-<li>
-<p>How do we ensure that the artist is the same for each album entry?</p>
-</li>
-<li>
-<p>What if somebody overwrites the album year with an invalid string?</p>
-</li>
-<li>
-<p>What if there are multiple artists on an album?</p>
-</li>
-<li>
-<p>What happens if we delete an artist that has albums?</p>
-</li>
-</ul>
-<h4 id="problem-about-flat-files-rightarrow-implementation">Problem about FLAT FILES $\rightarrow$ IMPLEMENTATION</h4>
-<ul>
-<li>
-<p>How do you find a particular record?</p>
-</li>
-<li>
-<p>What if we now want to create a new application that uses the same database?</p>
-</li>
-<li>
-<p>What if two threads try to write to the same file at the same time?</p>
-</li>
-</ul>
-<h4 id="problem-about-flat-files-rightarrow-durability">Problem about FLAT FILES $\rightarrow$ DURABILITY</h4>
-<ul>
-<li>
-<p>What if the machine crashes while our program is updating a record?</p>
-</li>
-<li>
-<p>What if we want to replicate the database on multiple machines for high availability?</p>
-</li>
-</ul>
-<h3 id="database-management-system">DATABASE MANAGEMENT SYSTEM</h3>
-<ul>
-<li>
-<p>A <u>database management system</u> (<strong>DBMS</strong>) is software that allows applications to <strong>store and analyze information in a database</strong></p>
-</li>
-<li>
-<p>A general-purpose DBMS supports the <u>definition, creation, querying, update, and administration of databases</u> in accordance with some <u>data model</u></p>
-</li>
-</ul>
-<h4 id="early-dbmss">EARLY DBMSs</h4>
-<blockquote>
-<p>Early database applications were difficult to build and maintain on available DBMSs in the 1960s</p>
-<blockquote>
-<p>Examples: IDS, IMS, CODASYL</p>
-<p>Computers were expensive, humans were cheap😂</p>
-</blockquote>
-</blockquote>
-<ul>
-<li><u>Tight coupling</u> between <strong>logical</strong> and <strong>physical</strong> layers</li>
-<li>Programmers had to (roughly) know what queries the application would execute before they could deploy the database😟</li>
-</ul>
-<blockquote>
-<p><strong>Ted Codd</strong> was a <u>mathematician</u> working at IBM Research in the late 1960s</p>
-<p>He saw IBM&rsquo;s developers spending their time <strong>rewriting database programs</strong> every time <u>the database’s schema or layout changed</u>😨</p>
-<p>Devised the <strong>relational model</strong> in 1969</p>
-</blockquote>
-<h3 id="relational-model">RELATIONAL MODEL</h3>
-<ul>
-<li>
-<p>The relational model defines a database abstraction based on relations to avoid maintenance overhead</p>
-</li>
-<li>
-<p>Key tenets</p>
-<ul>
-<li>Store database in simple data structures (relations)</li>
-<li>Physical storage left up to the DBMS implementation</li>
-<li>Access data through high-level language, DBMS figures out best execution strategy</li>
-</ul>
-</li>
-<li>
-<p><strong>Structure:</strong> The definition of the database&rsquo;s relations and their contents</p>
-</li>
-<li>
-<p><strong>Integrity:</strong> Ensure the database&rsquo;s contents satisfy constraints</p>
-</li>
-<li>
-<p><strong>Manipulation:</strong> Programming interface for accessing and modifying a database&rsquo;s contents</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>A <u>relation</u> is an unordered set that contain the relationship of attributes that represent entities</li>
-<li>A <u>tuple</u> is a set of attribute values (also known as its <u>domain</u>) in the relation
-<ul>
-<li>Values are (normally) atomic/scalar</li>
-<li>The special value <strong>NULL</strong> is a member of every domain (if allowed)</li>
-</ul>
-</li>
-</ul>
-<p>Artist(name, year, country)</p>
-<table>
-<thead>
-<tr>
-<th>name</th>
-<th>year</th>
-<th>country</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Wu-Tang Clan</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>Notorious BIG</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>GZA</td>
-<td>1990</td>
-<td>USA</td>
-</tr>
-</tbody>
-</table>
-<p>$$
-n-ary\ Relation=Table\ with\ n\ columns\newline
-$$</p>
-<h4 id="relational-model-primary-keys">RELATIONAL MODEL: PRIMARY KEYS</h4>
-<ul>
-<li>A relation&rsquo;s <u>primary key</u> <strong>uniquely</strong> identifies a single tuple</li>
-<li>Some <code>DBMSs</code> automatically create an internal primary key if a table does not define one</li>
-<li>Auto-generation of unique integer primary keys
-<ul>
-<li>→ <strong>SEQUENCE</strong> (SQL:2003)</li>
-<li>→ <strong>AUTO_INCREMENT</strong> (MySQL)</li>
-</ul>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>id</th>
-<th>name</th>
-<th>year</th>
-<th>country</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>123</td>
-<td>Wu-Tang Clan</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>456</td>
-<td>Notorious BIG</td>
-<td>1992</td>
-<td>USA</td>
-</tr>
-<tr>
-<td>789</td>
-<td>GZA</td>
-<td>1990</td>
-<td>USA</td>
-</tr>
-</tbody>
-</table>
-<h4 id="relational-model-foreign-keys">RELATIONAL MODEL: FOREIGN KEYS</h4>
-<ul>
-<li>A <u>foreign key</u> specifies that an attribute <strong>from one relation</strong> has to <strong>map to a tuple in another relation</strong></li>
-</ul>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-1.png" title="/img/CMU 15-445 Database Systems/chapter1-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-1.png">
-        
-    </a>
-<h3 id="data-models">DATA MODELS</h3>
-<ul>
-<li>
-<p>A <u>data model</u> is a collection of concepts for describing the data in a database</p>
-</li>
-<li>
-<p>A <u>schema</u> is a description of a particular collection of data, <u>using a given data model</u></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>Example</p>
-<ul>
-<li>
-<p><strong>Relational</strong> $\leftarrow This\ Course\newline$</p>
-</li>
-<li>
-<p>Key/Value</p>
-</li>
-<li>
-<p>Graph</p>
-</li>
-<li>
-<p>Document / Object</p>
-</li>
-<li>
-<p>Wide-Column / Column-family</p>
-</li>
-<li>
-<p>Array / Matrix / Vectors</p>
-</li>
-<li>
-<p>Hierarchical</p>
-</li>
-<li>
-<p>Network</p>
-</li>
-<li>
-<p>Multi-Value</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="data-manipulation-languages-dml">DATA MANIPULATION LANGUAGES (DML)</h3>
-<ul>
-<li>
-<p>Methods to store and retrieve information from a database</p>
-</li>
-<li>
-<p><strong>Procedural:</strong></p>
-<ul>
-<li>→ The query specifies the (high-level) strategy to find the desired result based on sets / bags $\leftarrow Relational\ Algebra\newline$</li>
-</ul>
-</li>
-<li>
-<p><strong>Non-Procedural (Declarative):</strong></p>
-<ul>
-<li>→ The query specifies only what data is wanted and not how to find it. $\leftarrow Relational\ Calculus\newline$</li>
-</ul>
-</li>
-</ul>
-<h3 id="relational-algebra">RELATIONAL ALGEBRA</h3>
-<ul>
-<li>
-<p>Fundamental operations to retrieve and manipulate tuples in a relation</p>
-<ul>
-<li>→ Based on set algebra</li>
-</ul>
-</li>
-<li>
-<p>Each operator takes one or more relations as its inputs and outputs a new relation</p>
-<ul>
-<li>→ We can &ldquo;chain&rdquo; operators together to create more complex operations</li>
-</ul>
-</li>
-</ul>
-<p>$$
-\begin{align}
-&amp;\sigma\Longrightarrow Select\newline
-&amp;\prod\Longrightarrow Projection\newline
-&amp;\cup\Longrightarrow Union\newline
-&amp;\cap\Longrightarrow Intersection\newline
-&amp;-\Longrightarrow Difference\newline
-&amp;\times\Longrightarrow Product\newline
-&amp;\bowtie\Longrightarrow Join\newline
-\end{align}
-$$</p>
-<h4 id="select">SELECT</h4>
-<ul>
-<li>
-<p>Choose a subset of the tuples from a relation that satisfies a selection predicate</p>
-<ul>
-<li>
-<p>Predicate acts as a filter to retain only tuples that fulfill its qualifying requirement</p>
-</li>
-<li>
-<p>Can combine multiple predicates using conjunctions / disjunctions</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>$$
-Syntax:\sigma_{predicate}(R)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-2.png" title="/img/CMU 15-445 Database Systems/chapter1-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-2.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">WHERE</span><span class="w"> </span><span class="n">a_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;a2&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">b_id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">102</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="projection">PROJECTION</h4>
-<ul>
-<li>
-<p>Generate a relation with tuples that contains only the specified attributes</p>
-<ul>
-<li>
-<p>Can rearrange attributes’ ordering</p>
-</li>
-<li>
-<p>Can manipulate the values</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>$$
-Syntax:\prod_{A_1, A_2, &hellip;A_n}(R)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-3.png" title="/img/CMU 15-445 Database Systems/chapter1-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-3.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">b_id</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">a_id</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">a_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;a2&#39;</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="union">UNION</h4>
-<ul>
-<li>Generate a relation that contains all tuples that <strong>appear in either only one or both input relations</strong></li>
-</ul>
-<p>$$
-Syntax:(R\cup S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-4.png" title="/img/CMU 15-445 Database Systems/chapter1-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-4.png">
-        
-    </a>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-5.png" title="/img/CMU 15-445 Database Systems/chapter1-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-5.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="k">UNION</span><span class="w"> </span><span class="k">ALL</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">S</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="intersection">INTERSECTION</h4>
-<ul>
-<li>Generate a relation that contains only the tuples that <strong>appear in both of the input relations</strong></li>
-</ul>
-<p>$$
-Syntax:(R\cap S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-6.png" title="/img/CMU 15-445 Database Systems/chapter1-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-6.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="k">INTERSECT</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">S</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="difference">DIFFERENCE</h4>
-<ul>
-<li>Generate a relation that contains only the tuples that appear in the first and not the second of the input relations</li>
-</ul>
-<p>$$
-Syntax:(R-S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-7.png" title="/img/CMU 15-445 Database Systems/chapter1-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-7.png">
-        
-    </a>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-8.png" title="/img/CMU 15-445 Database Systems/chapter1-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-8.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">)</span><span class="w"> </span><span class="k">EXCEPT</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">S</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="product">PRODUCT</h4>
-<ul>
-<li>Generate a relation that contains all possible combinations of tuples from the input relations(<code>combination</code>)</li>
-</ul>
-<p>$$
-Syntax:(R\times S)
-$$</p>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-9.png" title="/img/CMU 15-445 Database Systems/chapter1-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-9.png">
-        
-    </a>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">CROSS</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="p">;</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="p">,</span><span class="w"> </span><span class="n">S</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="join-">JOIN !</h4>
-<ul>
-<li>Generate a relation that contains all tuples that are a combination of two tuples (one from each input relation) with a common value(s) for one or more attributes</li>
-</ul>
-<p>$$
-Syntax:(R\bowtie S)
-$$</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">NATURAL</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>R</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>A</th>
-<th>B</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>a</td>
-<td>1</td>
-</tr>
-<tr>
-<td>b</td>
-<td>2</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>S</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>B</th>
-<th>C</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>x</td>
-</tr>
-<tr>
-<td>1</td>
-<td>y</td>
-</tr>
-<tr>
-<td>3</td>
-<td>z</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>$R\bowtie S$</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>a</td>
-<td>1</td>
-<td>x</td>
-</tr>
-<tr>
-<td>a</td>
-<td>1</td>
-<td>y</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span><span class="n">a_id</span><span class="p">,</span><span class="w"> </span><span class="n">b_id</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-10.png" title="/img/CMU 15-445 Database Systems/chapter1-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-10.png">
-        
-    </a>
-<h4 id="extra-operators">EXTRA OPERATORS</h4>
-<ul>
-<li>
-<p>Rename($\rho$)</p>
-</li>
-<li>
-<p>Assignment($R \leftarrow S$)</p>
-</li>
-<li>
-<p>Duplicate Elimination($\delta$)</p>
-</li>
-<li>
-<p>Aggregation($\gamma$)</p>
-</li>
-<li>
-<p>Sorting($\tau$)</p>
-</li>
-<li>
-<p>Division($R\div S$)</p>
-</li>
-</ul>
-<h4 id="observation">OBSERVATION</h4>
-<blockquote>
-<p>Relational algebra is a procedural language because it defines the high level-steps of how to compute a query. For example, $\sigma_{b_id=102}(R\bowtie S)$ is saying to first do the join of R and S and then do the select,whereas $(R \bowtie (\sigma_{b_id=102}(S)))$ will do the select on S first, and then do the join. These two statements will actually produce the same answer, but if there is only 1 tuple in S with b_id=102 out of a billion tuples, then$(R \bowtie (\sigma_{b_id=102}(S)))$ will be significantly faster than $\sigma_{b_id=102}(R\bowtie S)$😂</p>
-</blockquote>
-<blockquote>
-<p>A better approach is to say the result you want (state $\rightarrow$<u>retrieve the joined tuples from R and S where b_id equals 102</u>), and let the DBMS decide the steps it wants to take to compute the query. SQL will do exactly this,and it is the de facto standard for writing queries on relational model databases🐮</p>
-</blockquote>
-<h4 id="queries">QUERIES</h4>
-<ul>
-<li>
-<p>The relational model is independent of any query language implementation.</p>
-</li>
-<li>
-<p><strong>SQL</strong> is the <em>de facto</em> standard (many dialects)</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-</span></span><span class="line"><span class="cl">	<span class="n">record</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&#34;GZA&#34;</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">		<span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">artists</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;GZA&#39;</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="document-data-model">DOCUMENT DATA MODEL</h3>
-<ul>
-<li>Embed data hierarchy into a single object❌</li>
-</ul>
-<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter1-11.png" title="/img/CMU 15-445 Database Systems/chapter1-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter1-11.png">
-        
-    </a>
-<div class="mermaid" id="id-1"></div>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Artist</span> <span class="o">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">year</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Album</span> <span class="n">albums</span><span class="o">[];</span>
-</span></span><span class="line"><span class="cl"><span class="o">};</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Album</span> <span class="o">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">year</span><span class="o">;</span>
-</span></span><span class="line"><span class="cl"><span class="o">};</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>$$
-\Downarrow
-$$</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;GZA&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="nt">&#34;year&#34;</span><span class="p">:</span> <span class="mi">1990</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="nt">&#34;albums&#34;</span><span class="p">:</span> <span class="p">[</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Liquid Swords&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;year&#34;</span><span class="p">:</span> <span class="mi">1995</span>
-</span></span><span class="line"><span class="cl">        <span class="p">},</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Beneath the Surface&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;year&#34;</span><span class="p">:</span> <span class="mi">1999</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">]</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="conclusion">CONCLUSION</h3>
-<ul>
-<li>
-<p>Databases are ubiquitous</p>
-</li>
-<li>
-<p>Relational algebra defines the primitives for processing queries on a relational database.</p>
-</li>
-<li>
-<p>We will see relational algebra again when we talk about query optimization + execution</p>
-</li>
 </ul>
 ]]></description>
 </item>

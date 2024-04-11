@@ -4,7 +4,143 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Thu, 11 Apr 2024 13:34:01 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Thu, 11 Apr 2024 19:21:30 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/</link>
+    <pubDate>Thu, 11 Apr 2024 19:21:30 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-10-sorting--aggregation-algorithms">Lecture #10: Sorting &amp; Aggregation Algorithms</h2>
+<h3 id="query-plan">Query Plan</h3>
+<ul>
+<li>
+<p>从本节课开始将讨论DBMS的Operator Execution</p>
+</li>
+<li>
+<p>优化器会把SQL变成一棵执行树，递归式的向上执行</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-1.png" title="/img/CMU 15-445 Database Systems/chapter10-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-1.png" data-sub-html="<h2>执行树</h2>">
+        
+    </a><figcaption class="image-caption">执行树</figcaption>
+    </figure>
+<ul>
+<li>本课DBMS的特点：内存没法一次处理全部数据，会OOM，往往需要把中间结果也给写回到磁盘，磁盘和内存要相互配合，要最大化利用连续I/O，减少随机I/O的压力</li>
+</ul>
+<h3 id="sorting">Sorting</h3>
+<ul>
+<li>
+<p><strong>External merge sort</strong></p>
+<ul>
+<li>排的是硬盘里面的数据，而不是像往常那样排内存里面的数据</li>
+<li>代表：MySQL</li>
+<li>Phase #1 – Sorting: First, the algorithm sorts small chunks of data that fit in main memory, and then writes the sorted pages back to disk.</li>
+<li>Phase #2 – Merge: Then, the algorithm combines the sorted runs into larger sorted runs.</li>
+</ul>
+</li>
+<li>
+<p>两种&lt;Key,Value&gt;的模式</p>
+<ul>
+<li>Early Materialization:&lt;Key,Tuple&gt;，直接存储的就是数据</li>
+<li>Late Materialization:&lt;Key,Record id&gt;，需要回表</li>
+</ul>
+</li>
+<li>
+<p><strong>Two-way Merge Sort</strong></p>
+<ul>
+<li>N个页的大表，缓存池最多能承受B个页的容量</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-2.png" title="/img/CMU 15-445 Database Systems/chapter10-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-2.png" data-sub-html="<h2>把每页加载到内存后排序，然后把排序好的数据写回磁盘，最后再归并刚才写回磁盘的那些有序页</h2>">
+        
+    </a><figcaption class="image-caption">把每页加载到内存后排序，然后把排序好的数据写回磁盘，最后再归并刚才写回磁盘的那些有序页</figcaption>
+    </figure></li>
+<li>排序好的数据不是全部一把进到内存（那又该爆内存了，可以轮询着进，因为合并有序数组本来就是轮询比较的（参考力扣里面的题目））</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-3.png" title="/img/CMU 15-445 Database Systems/chapter10-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-3.png" data-sub-html="<h2>多个页的情况</h2>">
+        
+    </a><figcaption class="image-caption">多个页的情况</figcaption>
+    </figure></li>
+<li>优化：一次I/O不要只读一页，尽最大可能多读几页</li>
+</ul>
+</li>
+<li>
+<p><strong>General (K-way) Merge Sort</strong></p>
+<ul>
+<li>二路归并变成K路归并，一次比如读N/B个页，然后进行排序，Merge的轮数会少很多，这样效率会提高很多</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Using B+Trees</strong>
+<ul>
+<li>直接利用B+ Tree的有序性</li>
+<li>要考虑聚簇还是非聚簇，因为聚簇的话关系到Early Materialization的问题，可以省去回表的过程，提高效率</li>
+</ul>
+</li>
+</ul>
+<h3 id="aggregations">Aggregations</h3>
+<ul>
+<li>
+<p><strong>Sorting</strong></p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-4.png" title="/img/CMU 15-445 Database Systems/chapter10-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-4.png" data-sub-html="<h2>过滤，排序，去重</h2>">
+        
+    </a><figcaption class="image-caption">过滤，排序，去重</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing</strong></p>
+<ul>
+<li>
+<p>如果不要求有序可以用Hashing来提高效率</p>
+</li>
+<li>
+<p><strong>External Hashing aggregations</strong></p>
+</li>
+<li>
+<p><strong>Phase #1 – Partition</strong></p>
+<ul>
+<li>先给要Agg的字段做一个哈希表，然后把这个哈希表写回到磁盘里面</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-5.png" title="/img/CMU 15-445 Database Systems/chapter10-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-5.png" data-sub-html="<h2>把需要Agg的字段做第一次哈希，相同的值&#43;碰撞的都放在一个桶</h2>">
+        
+    </a><figcaption class="image-caption">把需要Agg的字段做第一次哈希，相同的值+碰撞的都放在一个桶</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Phase #2 – ReHash</strong>:把磁盘里面的哈希表再加载到内存中，读进去之后再做第二次哈希，这样就把碰撞的值也分开了，这样就生成了第二次的哈希表，也就是最终结果</p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-6.png" title="/img/CMU 15-445 Database Systems/chapter10-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-6.png" data-sub-html="<h2>二次哈希解决了哈希碰撞，也就拿到了最终结果</h2>">
+        
+    </a><figcaption class="image-caption">二次哈希解决了哈希碰撞，也就拿到了最终结果</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Hashing summarization</strong></p>
+<ul>
+<li>During the rehash phase, store pairs of the form (GroupKey→RunningVal) 如果说需要对值进行计算(count,sum等)，那么在hash的过程中也要带上其他需要的数值，这部分叫RunningVal</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter10-7.png" title="/img/CMU 15-445 Database Systems/chapter10-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter10-7.png" data-sub-html="<h2>带上需要的数据进行聚合类函数的计算</h2>">
+        
+    </a><figcaption class="image-caption">带上需要的数据进行聚合类函数的计算</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Sorting和Hashing没有绝对的好，要看条件，比如前置的数据有没有做了排序或者哈希，需要的结果到底要不要进行排序</p>
+</li>
+<li>
+<p>优化的思路</p>
+<ul>
+<li>随机I/O尽量变成连续I/O:一次写入页的数量尽量多</li>
+<li>预加载:能先加载到内存中的数据都先加载到内存中</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #09: Index Concurrency Control</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</link>
     <pubDate>Thu, 11 Apr 2024 13:34:01 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</guid>
@@ -2480,1306 +2616,6 @@ syntax for date and time operations varies wildly across systems.</li>
 <ul>
 <li>由于该版的实验<strong>page中有是否可以移除的标志位</strong>，如果为false表明该页无法被移除，所以说移除page的算法需要在原有的LRU-K算法的基础上面改进，按照优先级别先从History List的头向后扫描，如果有可以移除的page就直接移除，如果说History List中的页都无法移除，那么就需要从Buffer List的尾部向前扫描，发现可以移除的page就直接移除</li>
 <li>这种情况的改变将删除操作的时间复杂度从$O(1)$上升到了$O(n)$，但是因为理想的模型和实际并不相符，实际中有一些page就是规定不应该被移除，所以为了和实际相符只能损失一小部分效率（毕竟主存和磁盘的容量比很小）</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>Learning docker</title>
-    <link>https://Jungle430.github.io/posts/docker/learning_docker/</link>
-    <pubDate>Thu, 14 Sep 2023 17:54:38 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/docker/learning_docker/</guid>
-    <description><![CDATA[<h1 id="learning-docker">Learning Docker</h1>
-<h2 id="背景概要">背景概要</h2>
-<ul>
-<li>$2005 \Rightarrow 2015$：<code>Cloud</code>（云技术）时代，为<code>Container</code>打下基础，带来土壤</li>
-<li>$2015 \Rightarrow\ Now$：<code>Container</code>（容器）时代，最出名的代表就是<code>Docker</code></li>
-</ul>
-<h2 id="container的概念"><code>Container</code>的概念</h2>
-<ul>
-<li>简述：复制了一遍你的运行环境，别人拿过来能直接跑对应的程序，不用再折腾配环境这种司马事情了</li>
-</ul>
-<h2 id="安装">安装</h2>
-<h3 id="windows"><code>Windows</code></h3>
-<ul>
-<li>
-<p><a href="https://www.docker.com" target="_blank" rel="noopener noreffer">Docker官网</a>，下载桌面版</p>
-</li>
-<li>
-<p>注意安装前开启<code>BIOS</code>虚拟化</p>
-</li>
-<li>
-<p>如果开启<code>wsl2</code>能省去很多事情（</p>
-</li>
-<li>
-<p>最终验证：命令行运行</p>
-</li>
-</ul>
-<h3 id="linux"><code>Linux</code></h3>
-<ul>
-<li><a href="get.docker.com" rel="">get.docker.com</a>
-<ul>
-<li>下载后跑脚本即可</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">curl -fsSL get.docker.com -o get-docker.sh
-</span></span><span class="line"><span class="cl">sudo ./get-docker.sh
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>最终验证：命令行运行</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo systemctl start docker
-</span></span><span class="line"><span class="cl">docker version
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="创建与操作容器">创建与操作容器</h2>
-<ul>
-<li>镜像(<code>image</code>)：包含<code>OS</code>和应用的对象，类似虚拟机的模板（装系统用的那种，比如系统盘！），只能读</li>
-<li>容器(<code>container</code>)：和镜像几乎一样，但是比镜像多了一层<code>Read-Write Layer</code>，这样就可以写了</li>
-</ul>
-<hr>
-<h3 id="创建容器">创建容器</h3>
-<ul>
-<li>
-<p>先检测<code>Client</code>和<code>Server</code>是否都启动<code>docker version</code>（<code>docker</code>桌面版要挂着）</p>
-</li>
-<li>
-<p>创建命令<code>docker container run &lt;image name&gt;</code>(容器里面是对应的<code>image name</code>)</p>
-</li>
-<li>
-<p>例子</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 建nginx的镜像，并运行</span>
-</span></span><span class="line"><span class="cl">docker container run nginx
-</span></span><span class="line"><span class="cl"><span class="c1"># 建ubuntu的镜像，并运行</span>
-</span></span><span class="line"><span class="cl">docker container run ubuntu
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><code>Docker Hub</code>：官方镜像社区，里面有大量制作好的镜像（创建容器就是上上面先拉取镜像，然后制作成镜像装在<code>Docker</code>里面）</li>
-</ul>
-<hr>
-<h3 id="查看正在运行的容器">查看正在运行的容器</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ls
-</span></span></span><span class="line"><span class="cl"><span class="nb"></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                 <span class="n">COMMAND</span>       <span class="n">CREATED</span>        <span class="n">STATUS</span>              <span class="n">PORTS</span>     <span class="n">NAMES</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>   <span class="n">8</span> <span class="n">hours</span> <span class="n">ago</span>    <span class="n">Up</span> <span class="n">About</span> <span class="n">a</span> <span class="n">minute</span>             <span class="n">rros_lab1</span>
-</span></span><span class="line"><span class="cl"><span class="n">a99fc6e9cfe3</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>   <span class="n">11</span> <span class="n">hours</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="n">5</span> <span class="n">seconds</span>                  <span class="n">rros_lab</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="查看所有容器">查看所有容器</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ps </span><span class="n">-a</span>
-</span></span><span class="line"><span class="cl"><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                 <span class="n">COMMAND</span>             <span class="n">CREATED</span>        <span class="n">STATUS</span>                         <span class="n">PORTS</span>     <span class="n">NAMES</span>
-</span></span><span class="line"><span class="cl"><span class="n">e64ddbdaadc8</span>   <span class="nb">rust-oslab</span><span class="err">:</span><span class="n">latest</span>     <span class="s2">&#34;/bin/sh -c bash&#34;</span>   <span class="n">9</span> <span class="n">hours</span> <span class="n">ago</span>    <span class="n">Exited</span> <span class="p">(</span><span class="n">0</span><span class="p">)</span> <span class="n">About</span> <span class="n">an</span> <span class="n">hour</span> <span class="n">ago</span>             <span class="nb">rust-oslab</span><span class="p">-</span><span class="n">1</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>         <span class="n">9</span> <span class="n">hours</span> <span class="n">ago</span>    <span class="n">Exited</span> <span class="p">(</span><span class="n">137</span><span class="p">)</span> <span class="n">43</span> <span class="n">seconds</span> <span class="n">ago</span>              <span class="n">rros_lab1</span>
-</span></span><span class="line"><span class="cl"><span class="n">a99fc6e9cfe3</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>         <span class="n">12</span> <span class="n">hours</span> <span class="n">ago</span>   <span class="n">Exited</span> <span class="p">(</span><span class="n">137</span><span class="p">)</span> <span class="n">42</span> <span class="n">seconds</span> <span class="n">ago</span>              <span class="n">rros_lab</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c"># 等价命令</span>
-</span></span><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ls </span><span class="n">-a</span>
-</span></span><span class="line"><span class="cl"><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                 <span class="n">COMMAND</span>             <span class="n">CREATED</span>        <span class="n">STATUS</span>                       <span class="n">PORTS</span>     <span class="n">NAMES</span>
-</span></span><span class="line"><span class="cl"><span class="n">e64ddbdaadc8</span>   <span class="nb">rust-oslab</span><span class="err">:</span><span class="n">latest</span>     <span class="s2">&#34;/bin/sh -c bash&#34;</span>   <span class="n">9</span> <span class="n">hours</span> <span class="n">ago</span>    <span class="n">Exited</span> <span class="p">(</span><span class="n">0</span><span class="p">)</span> <span class="n">30</span> <span class="n">seconds</span> <span class="n">ago</span>              <span class="nb">rust-oslab</span><span class="p">-</span><span class="n">1</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>         <span class="n">10</span> <span class="n">hours</span> <span class="n">ago</span>   <span class="n">Exited</span> <span class="p">(</span><span class="n">137</span><span class="p">)</span> <span class="n">7</span> <span class="n">minutes</span> <span class="n">ago</span>             <span class="n">rros_lab1</span>
-</span></span><span class="line"><span class="cl"><span class="n">a99fc6e9cfe3</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>         <span class="n">12</span> <span class="n">hours</span> <span class="n">ago</span>   <span class="n">Exited</span> <span class="p">(</span><span class="n">137</span><span class="p">)</span> <span class="n">7</span> <span class="n">minutes</span> <span class="n">ago</span>             <span class="n">rros_lab</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="启动容器">启动容器</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">run</span> <span class="p">&lt;</span><span class="n">image</span> <span class="n">name</span><span class="p">&gt;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="停止正在运行的容器">停止正在运行的容器</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">stop</span> <span class="p">&lt;</span><span class="n">id</span><span class="p">&gt;</span> <span class="c"># id写前缀就行，一般前缀不会冲突</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="删除容器">删除容器</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="nb">rm </span><span class="p">&lt;</span><span class="n">id</span><span class="p">&gt;</span> <span class="c"># id写前缀就行，一般前缀不会冲突</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<ul>
-<li>上面的命令可以省略<code>container</code>不过为了强调<code>container</code>平时不做删除（与<code>image</code>区分）</li>
-</ul>
-<hr>
-<h3 id="多容器操作">多容器操作</h3>
-<ul>
-<li>一次停掉多个容器的思路
-<ul>
-<li>查看所有容器的<code>id</code></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ps </span><span class="n">-a</span> <span class="n">-q</span>
-</span></span><span class="line"><span class="cl"><span class="n">660040021c4d</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>
-</span></span><span class="line"><span class="cl"><span class="n">a99fc6e9cfe3</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>然后利用指令组合</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="n">stop</span> <span class="p">$(</span><span class="n">docker</span> <span class="n">container</span> <span class="nb">ps </span><span class="n">-a</span> <span class="n">-q</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">660040021c4d</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>
-</span></span><span class="line"><span class="cl"><span class="n">a99fc6e9cfe3</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><b>命令组合的思路可以用到很多<code>docker</code>需要批量处理的情况下</b></p>
-</li>
-<li>
-<p><b>删除正在运行的容器会报错！</b></p>
-<ul>
-<li>强制删除：<code>docker container rm &lt;id&gt; -f</code></li>
-</ul>
-</li>
-</ul>
-<h2 id="端口映射与主被动模式">端口映射与主/被动模式</h2>
-<h3 id="端口映射">端口映射</h3>
-<ul>
-<li>目的：让容器能过在外网访问到</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">run</span> <span class="n">-p</span> <span class="p">&lt;</span><span class="s2">&#34;服务器的端口&#34;</span><span class="p">&gt;</span><span class="err">:</span><span class="p">&lt;</span><span class="s2">&#34;容器的端口&#34;</span><span class="p">&gt;</span> <span class="n">nginx</span>
-</span></span><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">run</span> <span class="n">-p</span> <span class="n">80</span><span class="err">:</span><span class="n">80</span> <span class="n">nginx</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>检测是否启动
-<ul>
-<li>浏览器中访问<code>127.0.0.1:80</code></li>
-</ul>
-</li>
-</ul>
-<hr>
-<h3 id="主动模式默认">主动模式（默认）</h3>
-<ul>
-<li>
-<p>相当于命令行里面的子进程，会打印日志信息</p>
-</li>
-<li>
-<p>容易被误操作停掉（关掉命令行或者不小心<code>Ctrl + c</code>）</p>
-</li>
-<li>
-<p>调试时使用</p>
-</li>
-</ul>
-<h3 id="被动模式后台运行">被动模式（后台运行）</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">run</span> <span class="n">-d</span> <span class="n">-p</span> <span class="n">80</span><span class="err">:</span><span class="n">80</span> <span class="n">nginx</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>不再打印日志</p>
-</li>
-<li>
-<p>不会因为关掉命令行而终止</p>
-</li>
-<li>
-<p>使用<code>docker container ls</code>就能查看到</p>
-</li>
-</ul>
-<h3 id="转换成主动模式">转换成主动模式</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">attach</span> <span class="p">&lt;</span><span class="n">id</span><span class="p">&gt;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<h3 id="detached模式下查看日志的方法"><code>detached</code>模式下查看日志的方法</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">run</span> <span class="n">-d</span> <span class="n">-p</span> <span class="n">80</span><span class="err">:</span><span class="n">80</span> <span class="n">nginx</span>
-</span></span><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">logs</span> <span class="p">&lt;</span><span class="n">id</span><span class="p">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="c"># id写镜像名字也行</span>
-</span></span><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">logs</span> <span class="p">&lt;</span><span class="n">image</span> <span class="n">name</span><span class="p">&gt;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>跟踪日志（变成终端的子进程，不会自动停止，<code>Ctrl + C</code>终止）</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">container</span> <span class="n">logs</span> <span class="o">-f</span> <span class="p">&lt;</span><span class="n">id</span><span class="p">&gt;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="交互模式">交互模式</h2>
-<ul>
-<li>先启动容器</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ls
-</span></span></span><span class="line"><span class="cl"><span class="nb"></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>     <span class="n">COMMAND</span>   <span class="n">CREATED</span>   <span class="n">STATUS</span>    <span class="n">PORTS</span>     <span class="n">NAMES</span>
-</span></span><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">start </span><span class="n">rros_lab1</span>
-</span></span><span class="line"><span class="cl"><span class="n">rros_lab1</span>
-</span></span><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ls
-</span></span></span><span class="line"><span class="cl"><span class="nb"></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                 <span class="n">COMMAND</span>       <span class="n">CREATED</span>        <span class="n">STATUS</span>         <span class="n">PORTS</span>     <span class="n">NAMES</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>   <span class="n">21</span> <span class="n">hours</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="n">3</span> <span class="n">seconds</span>             <span class="n">rros_lab1</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>进入容器终端</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker attach &lt;container name&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><figure><a class="lightgallery" href="/img/Learning%20Docker/docker%20attach.png" title="/img/Learning Docker/docker attach.png" data-thumbnail="/img/Learning Docker/docker attach.png" data-sub-html="<h2>``</h2>">
-        
-    </a><figcaption class="image-caption">``</figcaption>
-    </figure>
-<ul>
-<li><code>exit</code>退出后容器也会关闭</li>
-</ul>
-<hr>
-<h3 id="如何exit后不关闭容器">如何<code>exit</code>后不关闭容器</h3>
-<ul>
-<li>使用<code>detached</code>模式</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it &lt;container name&gt; &lt;shell&gt;（通常用sh或者bash）
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ls
-</span></span></span><span class="line"><span class="cl"><span class="nb"></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                 <span class="n">COMMAND</span>       <span class="n">CREATED</span>        <span class="n">STATUS</span>          <span class="n">PORTS</span>     <span class="n">NAMES</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>   <span class="n">22</span> <span class="n">hours</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="n">52</span> <span class="n">seconds</span>             <span class="n">rros_lab1</span>
-</span></span><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">exec</span> <span class="n">-it</span> <span class="n">rros_lab1</span> <span class="n">bash</span>
-</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="nv">@9ed70676585e</span><span class="err">:</span><span class="p">/</span><span class="n">data</span><span class="p">/</span><span class="nb">bupt-rtos</span><span class="c"># ls</span>
-</span></span><span class="line"><span class="cl"><span class="n">20210704_ojeda_rust_support</span><span class="p">.</span><span class="n">mbx</span>  <span class="n">arm64_ramdisk</span>  <span class="n">rros</span>
-</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="nv">@9ed70676585e</span><span class="err">:</span><span class="p">/</span><span class="n">data</span><span class="p">/</span><span class="nb">bupt-rtos</span><span class="c"># exit</span>
-</span></span><span class="line"><span class="cl"><span class="n">exit</span>
-</span></span><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">ROG</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">container</span> <span class="nb">ls
-</span></span></span><span class="line"><span class="cl"><span class="nb"></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                 <span class="n">COMMAND</span>       <span class="n">CREATED</span>        <span class="n">STATUS</span>              <span class="n">PORTS</span>     <span class="n">NAMES</span>
-</span></span><span class="line"><span class="cl"><span class="n">9ed70676585e</span>   <span class="n">l543306408</span><span class="p">/</span><span class="n">rros_lab</span>   <span class="s2">&#34;/bin/bash&#34;</span>   <span class="n">22</span> <span class="n">hours</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="n">About</span> <span class="n">a</span> <span class="n">minute</span>             <span class="n">rros_lab1</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="镜像获取image-registry">镜像获取/<code>Image Registry</code></h2>
-<h3 id="获取镜像的三个途径">获取镜像的三个途径</h3>
-<ul>
-<li>
-<p><code>pull from registry</code></p>
-<ul>
-<li>常见<code>registry</code>：<a href="https://hub.docker.com" target="_blank" rel="noopener noreffer">Docker Hub</a>，<a href="https://quay.io" target="_blank" rel="noopener noreffer">quay.io</a></li>
-</ul>
-</li>
-<li>
-<p><code>Dockerfile (online)</code></p>
-</li>
-<li>
-<p>自有文件导入<code>(offline)</code></p>
-</li>
-<li>
-<p>使用官方认证的镜像：安全</p>
-</li>
-</ul>
-<hr>
-<h3 id="镜像的拉取和删除">镜像的拉取和删除</h3>
-<ul>
-<li>拉取：官网找命令</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Learning%20Docker/docker%20pull.png" title="/img/Learning Docker/docker pull.png" data-thumbnail="/img/Learning Docker/docker pull.png" data-sub-html="<h2>``</h2>">
-        
-    </a><figcaption class="image-caption">``</figcaption>
-    </figure>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker pull wordpress
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>新版本可以加上<code>image</code>前缀（强调，和<code>container</code>作区分）</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image pull wordpress
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>实际效果（默认最新版，如果要其他版本去<code>tag</code>里面找对应版本的命令）</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Learning%20Docker/docker%20pull%20busybox.png" title="/img/Learning Docker/docker pull busybox.png" data-thumbnail="/img/Learning Docker/docker pull busybox.png" data-sub-html="<h2>``</h2>">
-        
-    </a><figcaption class="image-caption">``</figcaption>
-    </figure>
-<h3 id="查看现有镜像">查看现有镜像</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image ls
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="查看镜像详细信息">查看镜像详细信息</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image inspect &lt;image id&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>关注对应的<code>OS</code>和架构</li>
-</ul>
-<hr>
-<h3 id="删除镜像">删除镜像</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image rm &lt;id&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<h3 id="image的导入导出"><code>image</code>的导入/导出</h3>
-<ul>
-<li>
-<p><code>image</code>导出</p>
-</li>
-<li>
-<p>在要保存的位置执行</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">image</span> <span class="n">save</span> <span class="p">&lt;</span><span class="n">image</span> <span class="n">name</span><span class="p">&gt;</span><span class="err">:</span><span class="p">&lt;</span><span class="n">tag</span><span class="p">&gt;</span> <span class="n">-o</span> <span class="p">&lt;</span><span class="n">new</span> <span class="n">image</span> <span class="n">name</span><span class="p">&gt;.</span><span class="n">image</span>
-</span></span><span class="line"><span class="cl"><span class="c"># example</span>
-</span></span><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">image</span> <span class="n">save</span> <span class="n">busybox</span><span class="err">:</span><span class="n">latest</span> <span class="n">-o</span> <span class="n">mybusybox</span><span class="p">.</span><span class="n">image</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p><code>image</code>导入</p>
-</li>
-<li>
-<p>也是在对应镜像的位置</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">image</span> <span class="n">load</span> <span class="n">-i</span> <span class="p">&lt;</span><span class="n">load</span> <span class="n">image</span> <span class="n">name</span><span class="p">&gt;.</span><span class="n">image</span>
-</span></span><span class="line"><span class="cl"><span class="c"># 例子</span>
-</span></span><span class="line"><span class="cl"><span class="n">docker</span> <span class="n">image</span> <span class="n">load</span> <span class="n">-i</span> <span class="p">.\</span><span class="n">mybusybox</span><span class="p">.</span><span class="n">image</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<h2 id="dockerfile"><code>Dockerfile</code></h2>
-<ul>
-<li><code>Dockerfile</code>：使用组合映像命令的文本文档，用于<code>DIY</code>自己的<code>image</code></li>
-</ul>
-<hr>
-<ul>
-<li>例子<code>ubuntu</code>执行<code>python</code>程序</li>
-<li><code>hello.py</code></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Hello, my first docker!&#34;</span><span class="p">)</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><code>Dockerfile</code></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:latest</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span>  apt-get update <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="nv">DEBIAN_FRONTEND</span><span class="o">=</span>noninteractive apt-get install --no-install-recommends -y python3.9 python3-pip python3.9-dev<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">ADD</span> hello.py /<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">CMD</span> <span class="p">[</span><span class="s2">&#34;python3&#34;</span><span class="p">,</span><span class="s2">&#34;hello.py&#34;</span><span class="p">]</span><span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><code>FROM</code>：引入系统</p>
-</li>
-<li>
-<p><code>RUN</code>：安装环境（<code>build</code>的时候执行）</p>
-</li>
-<li>
-<p><code>ADD</code>：将本机文件加入到<code>image</code>中，默认加入到<code>image</code>的根目录</p>
-</li>
-<li>
-<p><code>CMD</code>：相当于使用<code>shell</code>命令(<code>build</code>后执行)</p>
-</li>
-</ul>
-<hr>
-<h3 id="构建dockerfile">构建<code>Dockerfile</code></h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image build -t &lt;image name&gt;:&lt;tag<span class="o">(</span>若忽略则默认latest<span class="o">)</span>&gt; &lt;image path<span class="o">(</span>通常用<span class="s2">&#34;.&#34;</span>，本地目录<span class="o">)</span>&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<ul>
-<li>
-<p>将镜像上传到<code>Docker Hub</code>上面</p>
-<ul>
-<li>规则：<code>&lt;Hub name&gt;/&lt;image name&gt;</code></li>
-</ul>
-</li>
-<li>
-<p>更改名字使其能够上传</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image tag &lt;old name&gt; &lt;new name&gt;
-</span></span><span class="line"><span class="cl"><span class="c1"># example</span>
-</span></span><span class="line"><span class="cl">docker image tag myimage username/myimage
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>通过<code>id/name</code>上传</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker login <span class="c1"># 输入用户名和密码登录</span>
-</span></span><span class="line"><span class="cl">docker image push username/myimage
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<h4 id="from语法"><code>FROM</code>语法</h4>
-<ul>
-<li>
-<p>引入基础镜像</p>
-</li>
-<li>
-<p>三个基本原则</p>
-<ul>
-<li>
-<p>官方镜像优于非官方镜像（安全性）</p>
-</li>
-<li>
-<p>固定版本的<code>Tag</code>，而不是每次都使用<code>latest</code>（稳定）</p>
-</li>
-<li>
-<p>功能满足的情况下使用体积小的镜像（让自己的镜像变得简洁）</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h4 id="run命令"><code>RUN</code>命令</h4>
-<ul>
-<li>
-<p>接<code>shell</code>命令</p>
-</li>
-<li>
-<p>坑</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:latest</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> apt-get update<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> apt-get install -y wget<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> wget https://github.com/ipinfo/cli/releases/download/ipinfo-2.0.1/ipinfo_2.0.1_linux_amd64.tar.gz<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> tar zxf ipinfo_2.0.1_linux_amd64.tar.gz<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> mv ipinfo_2.0.1_linux_amd64 /usr/bin/ipinfo<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> rm -rf ipinfo_2.0.1_linux_amd64.tar.gz<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>不建议这么写：每个<code>RUN</code>都会生成一个新的“层”，打包的体积会变大</p>
-<ul>
-<li><code>rm -rf</code>的命令也会无效：上面的文件已经嵌入到上一层里面了</li>
-</ul>
-</li>
-<li>
-<p>正确写法：改成<code>&amp;&amp; \</code>的组合</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:latest</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    apt-get install -y wget <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    wget https://github.com/ipinfo/cli/releases/download/ipinfo-2.0.1/ipinfo_2.0.1_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    tar zxf ipinfo_2.0.1_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    mv ipinfo_2.0.1_linux_amd64 /usr/bin/ipinfo <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    rm -rf ipinfo_2.0.1_linux_amd64.tar.gz<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>变成了只有一层，体积会变小</li>
-</ul>
-<hr>
-<h4 id="文件操作">文件操作</h4>
-<ul>
-<li>
-<p><code>COPY</code></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">COPY</span> index.js /app/index.js<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>将当前目录下的<code>index.js</code>文件拷贝到镜像中的<code>/app/index.js</code>（镜像中没有对应文件会自动创建）</li>
-</ul>
-</li>
-<li>
-<p><code>ADD</code></p>
-<ul>
-<li>基本效果和<code>COPY</code>相同，但是会自动解压缩</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">ADD</span> index.tar /app/<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>运行后会发现容器<code>/app/</code>文件夹里面就是<code>index.tar</code>里面被压缩文件的内容</li>
-</ul>
-</li>
-<li>
-<p><code>WORKDIR</code></p>
-<ul>
-<li>切换目录</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:20.04</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /app</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">COPY</span> hello.py hello.py<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>和上面效果相同，最后文件都在<code>/app</code>这个目录下</li>
-<li>相当于<code>cd</code></li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p>变量声明（类似宏定义，使得代码更简介）</p>
-</li>
-<li>
-<p>例子</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:latest</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    apt-get install -y wget <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    wget https://github.com/ipinfo/cli/releases/download/ipinfo-2.0.1/ipinfo_2.0.1_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    tar zxf ipinfo_2.0.1_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    mv ipinfo_2.0.1_linux_amd64 /usr/bin/ipinfo <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    rm -rf ipinfo_2.0.1_linux_amd64.tar.gz<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="env"><code>ENV</code></h4>
-<ul>
-<li><code>ENV key=value</code>（中间不要加空格，有坑）</li>
-<li>使用<code>value</code>：<code>${key}$</code></li>
-<li>效果</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:latest</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">ENV</span> <span class="nv">VERSION</span><span class="o">=</span><span class="m">2</span>.0.1<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    apt-get install -y wget <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    wget https://github.com/ipinfo/cli/releases/download/ipinfo-<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>/ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    tar zxf ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    mv ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64 /usr/bin/ipinfo <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    rm -rf ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64.tar.gz<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="arg"><code>ARG</code></h4>
-<ul>
-<li>语法和<code>ENV</code>一样
-<ul>
-<li>和<code>ENV</code>不同的地方
-<ul>
-<li><b><code>ENV</code>声明的变量会带入镜像内部</b>（比如<code>Linux</code>的<code>env</code>命令，或者直接<code>echo $key</code>也能打出来），而<code>ARG</code>不会</li>
-<li><code>ARG</code>可以动态添加</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image build -f Dockfile -t &lt;image&gt;:&lt;tag&gt; --build-arg <span class="nv">VERSION</span><span class="o">=</span>2.0.0 .
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<h4 id="cmd"><code>CMD</code></h4>
-<ul>
-<li>
-<p>三个基本原则</p>
-<ul>
-<li>容器启动时默认执行的命令
-<ul>
-<li>如果没有，对应拉取的官方镜像会有默认的<code>CMD</code>，比如<code>ubuntu</code>会自带<code>CMD[&quot;bash&quot;]</code></li>
-</ul>
-</li>
-<li>如果启动容器所用的命令是<code>docker container run {commandline}</code>
-<ul>
-<li>比如<code>docker container run -it &lt;image name&gt; &lt;command&gt; =&gt; docker container run -it ipinfo-base ipinfo version</code>：对于容器<code>ipinfo-base</code>容器的默认<code>CMD</code>就是<code>ipinfo version</code></li>
-</ul>
-</li>
-<li>一个<code>Dockerfile</code>定义了多个<code>CMD</code>命令，只会执行最后一个</li>
-</ul>
-</li>
-<li>
-<p>两种写法</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">CMD</span> <span class="p">[</span> <span class="s2">&#34;python3&#34;</span><span class="p">,</span><span class="s2">&#34;hello.py&#34;</span> <span class="p">]</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">CMD</span> python3 hello.py<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>清除<b>不再使用</b>的容器</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker system prune -f
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>清除<b>不再使用</b>的镜像</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker image prune -a
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="entrypoint"><code>ENTRYPOINT</code></h4>
-<ul>
-<li>
-<p>和<code>CMD</code>功能相似</p>
-</li>
-<li>
-<p>区别</p>
-<ul>
-<li><code>CMD</code>会被命令行启动模式后面接的命令覆盖掉，而<code>ENTRYPOINT</code>不会，<b>一定会被执行</b></li>
-<li><code>CMD</code>和<code>ENTRYPOINT</code>可以联合使用</li>
-</ul>
-</li>
-<li>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:21.04</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&#34;echo&#34;</span><span class="p">]</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">CMD</span> <span class="p">[]</span><span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>命令行<code>docker container run -rm -it demo-both &quot;hello world&quot;</code>执行效果<code>=&gt; hello world</code></li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>数据持久化：<code>VOLUME</code>
-<ul>
-<li>数据库，日志等如何存到本地？</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu:latest</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">ARG</span> <span class="nv">VERSION</span><span class="o">=</span><span class="m">2</span>.0.1<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    apt-get install -y wget <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    wget https://github.com/ipinfo/cli/releases/download/ipinfo-<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>/ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    tar zxf ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64.tar.gz <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    mv ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64 /usr/bin/ipinfo <span class="o">&amp;&amp;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>    rm -rf ipinfo_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>_linux_amd64.tar.gz<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">VOLUME</span> <span class="p">[</span> <span class="s2">&#34;/data&#34;</span> <span class="p">]</span><span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>保留镜像下面的<code>/data</code>目录，没有会自动创建</p>
-</li>
-<li>
-<p>保存在本地的持久化数据使用<code>docker volume</code>系列的命令查看</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker volume ls
-</span></span><span class="line"><span class="cl"><span class="c1"># -----</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># -----</span>
-</span></span><span class="line"><span class="cl">docker volume inspect &lt;VOLUME NAME&gt;<span class="o">(</span>注意不能简写<span class="o">)</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><code>Mountpoint</code>就是本地存储的位置</li>
-</ul>
-<hr>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker container run -d -v &lt;VOLUME NAME&gt;/&lt;VOLUME PATH IN DOCKERFILE&gt; &lt;container name&gt;
-</span></span><span class="line"><span class="cl">docker volume inspect &lt;container name&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>这个时候<code>VOLUME NAME</code>和<code>Mountpoint</code>就是你自己刚才指定的名字了，不会是一串大段的加密码了</li>
-<li>这个既可以让容器的数据保存的主机，反过来，如果主机对应的目录下面有文件，再次运行新的容器的时候，该容器可以复用主机对应部分的数据</li>
-</ul>
-<hr>
-<ul>
-<li><code>Bind Mount</code>自定义
-<ul>
-<li><code>Windows</code>实现数据持久化</li>
-<li>用容器运行本机的程序，本机无需再需要安装环境</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker container run -it -v <span class="si">${</span><span class="nv">pwd</span><span class="si">}</span>:/app node sh
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>本机修改数据的时候会同步到容器中，相当于完全绑定</li>
-</ul>
-<hr>
-<ul>
-<li>网络端口映射</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker container run -d -p 80:80 &lt;container name&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><code>-p &lt;主机端口&gt;:&lt;容器端口&gt;</code>：映射</p>
-</li>
-<li>
-<p>查看容器的端口</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker container inspect --format <span class="s1">&#39;{{.Config.ExposedPorts}}&#39;</span> &lt;container id&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>主要关注<code>Config.ExposedPorts</code>下面的内容</li>
-</ul>
-<h2 id="docker-compose"><code>Docker-compose</code></h2>
-<ul>
-<li>
-<p>相当于<code>shell</code>脚本，集成了命令</p>
-</li>
-<li>
-<p>两个部分</p>
-<ul>
-<li>配置<code>yml</code>文件</li>
-<li>运行文件的命令</li>
-</ul>
-</li>
-<li>
-<p>检测环境</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker-compose --version
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<h3 id="yml文件的基本语法"><code>yml</code>文件的基本语法</h3>
-<ul>
-<li><code>docker-compose.yml</code></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;3.8&#34;</span><span class="w"> </span><span class="c"># docker-compose的版本号</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">services</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 容器</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">servicename</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># 服务名字，这个名字也是内部 bridge网络可以使用的 DNS name</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="c"># 镜像的名字</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="c"># 可选，如果设置，则会覆盖默认镜像里的 CMD命令</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"> </span><span class="c"># 可选，相当于 docker run里的 --env</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"> </span><span class="c"># 可选，相当于docker run里的 -v</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="c"># 可选，相当于 docker run里的 --network</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"> </span><span class="c"># 可选，相当于 docker run里的 -p</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">servicename2</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">volumes</span><span class="p">:</span><span class="w"> </span><span class="c"># 可选，相当于 docker volume create</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="c"># 可选，相当于 docker network create</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>实践</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># docker container run -d -p 80:80 wordpress</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">services</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">my-wordpress</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l">Jungle</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">wordpress:latest</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="m">80</span><span class="p">:</span><span class="m">80</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><code>version</code>：有关信息</p>
-<ul>
-<li><a href="https://docs.docker.com/compose/features-uses" target="_blank" rel="noopener noreffer">https://docs.docker.com/compose/features-uses</a></li>
-<li><a href="https://docs.docker.com/compose/migrate" target="_blank" rel="noopener noreffer">https://docs.docker.com/compose/migrate</a></li>
-</ul>
-</li>
-<li>
-<p>执行<code>compose</code>命令（在同级目录）</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker compose up <span class="c1"># 主动，占用命令行</span>
-</span></span><span class="line"><span class="cl">docker compose up -d <span class="c1"># 被动，后台开启</span>
-</span></span><span class="line"><span class="cl">docker compose stop <span class="c1"># 停止对应的容器</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><code>compose</code>镜像的构建和拉取</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># docker container run -d -p 80:80 wordpress</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">services</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">my-wordpress</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l">Jungle</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">rust-oslab:latest</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="m">80</span><span class="p">:</span><span class="m">80</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>只拉取镜像，不启动容器，下次<code>docker compose up</code>的时候会很快</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker compose pull
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<h2 id="网络配置">网络配置</h2>
-<ul>
-<li>
-<p>主要信息在配置文件里面的<code>Networks</code>部分</p>
-</li>
-<li>
-<p>内网地址：<code>IPAddress</code></p>
-</li>
-<li>
-<p>网关：<code>Gateway</code>：通常是主机地址</p>
-</li>
-<li>
-<p>使用容器集群的时候要进行网络配置</p>
-<ul>
-<li>
-<p>查看</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker network ls
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>三种模式</p>
-<ul>
-<li><code>bridge</code>：桥接模式（网桥），为每一个容器分配和设置一个<code>ip</code>地址，并将容器连接到<code>docker0</code>上面（<code>linux</code>下使用<code>ip addr</code>查看）</li>
-<li><code>host</code>：使用主机的网络地址，容器自己没有<code>ip</code>和网关，全部依赖宿主</li>
-<li><code>container</code>：使用其他网络配置好了的容器的网络</li>
-<li><code>null</code>：不对网络进行任何配置，也可以自定义</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker run -it --name bbox01 busybox
-</span></span></code></pre></td></tr></table>
-</div>
-</div><hr>
-<ul>
-<li>创建<code>host</code>类型的容器</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker run -it --name nginx1 --network host nginx
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>创建<code>null</code>类型的容器</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker run -it --name bbox2 --network none busybox
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li><code>container</code></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 启动一个新的容器</span>
-</span></span><span class="line"><span class="cl">docker run -it --name bbox01 busybox
-</span></span><span class="line"><span class="cl"><span class="c1"># container 模式</span>
-</span></span><span class="line"><span class="cl">docker run -it --name bbox02 --network container:bbox1 busybox
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>如果<code>container</code>对应的容器关闭，<b>或者关闭之后开启</b>，<code>container</code>的容器的网都会断开</li>
 </ul>
 ]]></description>
 </item>
