@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #09: Index Concurrency Control - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #09: Index Concurrency Control" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #09: Index Concurrency Control Index Concurrency Control 前面讨论都默认是单线程条件下，但是对于DBMS这种主要问题在I/O上面的系统来说，肯定要上多线程，异步这些来提高效率" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-11T13:34:01+08:00" />
+<meta property="article:modified_time" content="2024-04-11T13:34:01+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #09: Index Concurrency Control"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #09: Index Concurrency Control Index Concurrency Control 前面讨论都默认是单线程条件下，但是对于DBMS这种主要问题在I/O上面的系统来说，肯定要上多线程，异步这些来提高效率"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter8/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #09: Index Concurrency Control",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter9\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1599 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter9\/","datePublished": "2024-04-11T13:34:01+08:00","dateModified": "2024-04-11T13:34:01+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #09: Index Concurrency Control</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-11">2024-04-11</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1599 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-09-index-concurrency-control">Lecture #09: Index Concurrency Control</a>
+      <ul>
+        <li><a href="#index-concurrency-control">Index Concurrency Control</a></li>
+        <li><a href="#locks-vs-latches">Locks vs. Latches</a></li>
+        <li><a href="#latch-implementations">Latch Implementations</a></li>
+        <li><a href="#hash-table-latching">Hash Table Latching</a></li>
+        <li><a href="#btree-latching">B+Tree Latching</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-09-index-concurrency-control">Lecture #09: Index Concurrency Control</h2>
+<h3 id="index-concurrency-control">Index Concurrency Control</h3>
+<ul>
+<li>
+<p>前面讨论都默认是单线程条件下，但是对于DBMS这种主要问题在I/O上面的系统来说，肯定要上多线程，异步这些来提高效率，那么如何在这种条件下保证索引的线程安全很重要了</p>
+</li>
+<li>
+<p>其他数据库的一些处理方法</p>
+<ul>
+<li>内存型NoSQL:直接单线程模式运行，比如Redis</li>
+</ul>
+</li>
+<li>
+<p>本节课主要研究<strong>Physical Correctness</strong>，关注底层设计</p>
+</li>
+</ul>
+<h3 id="locks-vs-latches">Locks vs. Latches</h3>
+<ul>
+<li>和前面的课讨论的一样，一个逻辑锁，一个底层锁</li>
+<li>死锁和回滚都是建立在Locks上面的</li>
+<li>Latches这个锁要划分为读锁和写锁
+<ul>
+<li>多个线程可以同时去读一个变量，相应的读锁可以重入其他线程的读锁，但是其他线程不能写(也叫共享锁)</li>
+<li>一个线程写数据的时候，其他线程不能读和写这个数据，所以写锁一般不可重入其他线程的锁(也叫独占锁)</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png" title="/img/CMU 15-445 Database Systems/chapter9-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-1.png" data-sub-html="<h2>Locks和Latches的区别</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png, /img/CMU%2015-445%20Database%20Systems/chapter9-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter9-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter9-1.png" />
+    </a><figcaption class="image-caption">Locks和Latches的区别</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png" title="/img/CMU 15-445 Database Systems/chapter9-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-1.png" data-sub-html="<h2>兼容矩阵</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png, /img/CMU%2015-445%20Database%20Systems/chapter9-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter9-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter9-1.png" />
+    </a><figcaption class="image-caption">兼容矩阵</figcaption>
+    </figure>
+<h3 id="latch-implementations">Latch Implementations</h3>
+<ul>
+<li><strong>Blocking OS Mutex</strong>
+<ul>
+<li>simple to use(操作系统自己支持)</li>
+<li>Non-scalable (about 25ns per lock/unlock invocation)，大规模使用不行，这东西效率太低</li>
+<li>Example: std::mutex$\rightarrow$pthread_mutex$\rightarrow$futex</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">m</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">m</span><span class="p">.</span><span class="n">lock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// Do something special...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">m</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>底层实现:内存中分配出来一个变量来获取锁，要锁的程序就把这个变量设置值，如果发现锁被夺取，这个线程就直接进入内核态自己sleep，如果锁被释放操作系统会试着唤醒sleep的线程
+<ul>
+<li>好处：竞争的线程拿不到锁直接sleep，不会额外消耗系统的资源</li>
+<li>坏处：sleep和notify在操作系统层面上面很浪费资源（线程链表的调整）</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Test-and-Set Spin Latch (TAS)</strong></li>
+<li>也叫自旋锁</li>
+<li>Very efficient (single instruction to latch/unlatch)</li>
+<li>Non-scalable, not cache friendly, not OS friendly.大规模用效率上也不行，自旋也很笨</li>
+<li>Example: std::atomic&lt;T&gt;</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">atomic_flag</span> <span class="n">latch</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">while</span> <span class="p">(</span><span class="n">latch</span><span class="p">.</span><span class="n">test_and_set</span><span class="p">(</span><span class="err">…</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// Retry? Yield? Abort?
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>检测和设置这一组操作必须要是原子的</p>
+</li>
+<li>
+<p>自旋锁对于CPU的开销很大（一直空转）</p>
+</li>
+<li>
+<p>很多语言会把TAS和Blocking结合，自旋一阵子不行就去睡一会</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Atomic Instruction Example: compare-and-swap (CAS)</strong>
+<ul>
+<li>
+<p>Atomic instruction that compares contents of a memory location M to a given value V</p>
+<ul>
+<li>If values are equal, installs new given value V’ in M</li>
+<li>Otherwise, operation fails</li>
+</ul>
+</li>
+<li>
+<p>这个东西是CPU的一条指令，由CPU来保证原子性</p>
+</li>
+<li>
+<p>经常作为自旋锁或者JUC的包里面的一些锁底层的实现</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Reader-Writer Latches</strong>
+<ul>
+<li>Allows for concurrent readers. Must manage read/write queues to avoid starvation.</li>
+<li>Can be implemented on top of spinlocks</li>
+<li>Example: std::shared_mutex $\rightarrow$ pthread_rwlock</li>
+</ul>
+</li>
+</ul>
+<h3 id="hash-table-latching">Hash Table Latching</h3>
+<ul>
+<li>
+<p>好加锁，无论是桶还是开放地址哈希，大家查找的方向是一致的，并且一次只能访问一个页/槽，这点上出不了死锁(当然HashMap的头插法可能会出，不过这个和链表的结构有关)，向其他搜索方向不一致的B+ Tree可能就会出死锁</p>
+</li>
+<li>
+<p>如果要调整容量，一般把整个哈希表都给加上全局的写锁</p>
+</li>
+<li>
+<p>其他情况下一般锁部分就可以了</p>
+<ul>
+<li>
+<p><strong>Page/Block-level Latches</strong></p>
+<ul>
+<li>Each page/block has its own reader-writer latch that protects its entire contents.</li>
+<li>Threads acquire either a read or write latch before they access a page/block</li>
+<li>按块划分，加锁</li>
+<li>Java的ConcurrentHashMap是这种处理方案，几个槽一个锁</li>
+<li>好处：不用维护太多锁，还保证了并发性</li>
+</ul>
+</li>
+<li>
+<p><strong>Slot Latches</strong></p>
+<ul>
+<li>一个槽加一个锁</li>
+<li>锁更细了，更能避免死锁和提高并发</li>
+<li>但是维护这么多锁开销太高了</li>
+</ul>
+</li>
+<li>
+<p>还有其他方法，比如读写分离（比如go的sync.Map）</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="btree-latching">B+Tree Latching</h3>
+<ul>
+<li>两方面的并发问题
+<ul>
+<li>节点内部的数据要做并发保护</li>
+<li>节点的分裂/合并过程中要做并发保护</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Latch Crabbing/Coupling</strong></p>
+<ul>
+<li>
+<p>Get latch for parent，给根节点上锁</p>
+</li>
+<li>
+<p>Get latch for child，给子节点上锁</p>
+</li>
+<li>
+<p>Release latch for parent if “safe”，判断子节点是否“安全”，安全的话放根节点的锁</p>
+</li>
+<li>
+<p>“safe”:A <strong>safe node</strong> is one that will not split or merge when updated.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Find: Start at root and traverse down the tree</p>
+<ul>
+<li>Acquire R latch on child</li>
+<li>Then unlatch parent</li>
+<li>Repeat until we reach the leaf node</li>
+</ul>
+</li>
+<li>
+<p>Insert/Delete: Start at root and go down, obtaining W latches as needed. Once child is latched, check if it is safe:</p>
+<ul>
+<li>If child is safe, release all latches on ancestors</li>
+</ul>
+</li>
+<li>
+<p>问题：所有的操作都要先锁根节点，这是一个性能上面的瓶颈</p>
+<ul>
+<li>原因：上面的想法是悲观的，认为每次写操作都有可能会造成根节点的分裂/合并，但是实际上来说根节点变动的次数很少</li>
+<li>使用乐观的想法：我认为大部分操作不会改变根节点的结构，所以我给根节点加读锁，如果说发现根节点要变动结构，这个时候从根节点重新给加写锁</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Leaf Node Scans</strong>
+<ul>
+<li>一般来说是顺序扫描</li>
+<li>但是这样会带来一个风险:Find key &gt; 4和Find key &lt; 1扫描叶子节点的时候方向是相反的，会有死锁的风险</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-3.png" title="/img/CMU 15-445 Database Systems/chapter9-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-3.png" data-sub-html="<h2>方向相反造成死锁</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter9-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter9-3.png, /img/CMU%2015-445%20Database%20Systems/chapter9-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter9-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter9-3.png" />
+    </a><figcaption class="image-caption">方向相反造成死锁</figcaption>
+    </figure></li>
+<li>解决方法：<strong>制定规则</strong>，比如数据只能从大往小走，比如MySQL，之前不支持倒序遍历就和这个有关，后面又加上了倒叙索引才解决了这个问题</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-11</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/" data-title="CMU 15-445 Lecture #09: Index Concurrency Control"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter8/" class="prev" rel="prev" title="CMU 15-445 Lecture #08: Tree Indexes"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>

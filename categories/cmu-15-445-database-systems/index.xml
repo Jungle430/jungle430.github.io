@@ -4,7 +4,247 @@
         <link>https://Jungle430.github.io/categories/cmu-15-445-database-systems/</link>
         <description>CMU 15-445 Database Systems - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Wed, 10 Apr 2024 15:53:39 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/cmu-15-445-database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Thu, 11 Apr 2024 13:34:01 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/cmu-15-445-database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #09: Index Concurrency Control</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</link>
+    <pubDate>Thu, 11 Apr 2024 13:34:01 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-09-index-concurrency-control">Lecture #09: Index Concurrency Control</h2>
+<h3 id="index-concurrency-control">Index Concurrency Control</h3>
+<ul>
+<li>
+<p>前面讨论都默认是单线程条件下，但是对于DBMS这种主要问题在I/O上面的系统来说，肯定要上多线程，异步这些来提高效率，那么如何在这种条件下保证索引的线程安全很重要了</p>
+</li>
+<li>
+<p>其他数据库的一些处理方法</p>
+<ul>
+<li>内存型NoSQL:直接单线程模式运行，比如Redis</li>
+</ul>
+</li>
+<li>
+<p>本节课主要研究<strong>Physical Correctness</strong>，关注底层设计</p>
+</li>
+</ul>
+<h3 id="locks-vs-latches">Locks vs. Latches</h3>
+<ul>
+<li>和前面的课讨论的一样，一个逻辑锁，一个底层锁</li>
+<li>死锁和回滚都是建立在Locks上面的</li>
+<li>Latches这个锁要划分为读锁和写锁
+<ul>
+<li>多个线程可以同时去读一个变量，相应的读锁可以重入其他线程的读锁，但是其他线程不能写(也叫共享锁)</li>
+<li>一个线程写数据的时候，其他线程不能读和写这个数据，所以写锁一般不可重入其他线程的锁(也叫独占锁)</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png" title="/img/CMU 15-445 Database Systems/chapter9-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-1.png" data-sub-html="<h2>Locks和Latches的区别</h2>">
+        
+    </a><figcaption class="image-caption">Locks和Latches的区别</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png" title="/img/CMU 15-445 Database Systems/chapter9-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-1.png" data-sub-html="<h2>兼容矩阵</h2>">
+        
+    </a><figcaption class="image-caption">兼容矩阵</figcaption>
+    </figure>
+<h3 id="latch-implementations">Latch Implementations</h3>
+<ul>
+<li><strong>Blocking OS Mutex</strong>
+<ul>
+<li>simple to use(操作系统自己支持)</li>
+<li>Non-scalable (about 25ns per lock/unlock invocation)，大规模使用不行，这东西效率太低</li>
+<li>Example: std::mutex$\rightarrow$pthread_mutex$\rightarrow$futex</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">m</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">m</span><span class="p">.</span><span class="n">lock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// Do something special...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">m</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>底层实现:内存中分配出来一个变量来获取锁，要锁的程序就把这个变量设置值，如果发现锁被夺取，这个线程就直接进入内核态自己sleep，如果锁被释放操作系统会试着唤醒sleep的线程
+<ul>
+<li>好处：竞争的线程拿不到锁直接sleep，不会额外消耗系统的资源</li>
+<li>坏处：sleep和notify在操作系统层面上面很浪费资源（线程链表的调整）</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Test-and-Set Spin Latch (TAS)</strong></li>
+<li>也叫自旋锁</li>
+<li>Very efficient (single instruction to latch/unlatch)</li>
+<li>Non-scalable, not cache friendly, not OS friendly.大规模用效率上也不行，自旋也很笨</li>
+<li>Example: std::atomic&lt;T&gt;</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">atomic_flag</span> <span class="n">latch</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">while</span> <span class="p">(</span><span class="n">latch</span><span class="p">.</span><span class="n">test_and_set</span><span class="p">(</span><span class="err">…</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// Retry? Yield? Abort?
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>检测和设置这一组操作必须要是原子的</p>
+</li>
+<li>
+<p>自旋锁对于CPU的开销很大（一直空转）</p>
+</li>
+<li>
+<p>很多语言会把TAS和Blocking结合，自旋一阵子不行就去睡一会</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Atomic Instruction Example: compare-and-swap (CAS)</strong>
+<ul>
+<li>
+<p>Atomic instruction that compares contents of a memory location M to a given value V</p>
+<ul>
+<li>If values are equal, installs new given value V’ in M</li>
+<li>Otherwise, operation fails</li>
+</ul>
+</li>
+<li>
+<p>这个东西是CPU的一条指令，由CPU来保证原子性</p>
+</li>
+<li>
+<p>经常作为自旋锁或者JUC的包里面的一些锁底层的实现</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Reader-Writer Latches</strong>
+<ul>
+<li>Allows for concurrent readers. Must manage read/write queues to avoid starvation.</li>
+<li>Can be implemented on top of spinlocks</li>
+<li>Example: std::shared_mutex $\rightarrow$ pthread_rwlock</li>
+</ul>
+</li>
+</ul>
+<h3 id="hash-table-latching">Hash Table Latching</h3>
+<ul>
+<li>
+<p>好加锁，无论是桶还是开放地址哈希，大家查找的方向是一致的，并且一次只能访问一个页/槽，这点上出不了死锁(当然HashMap的头插法可能会出，不过这个和链表的结构有关)，向其他搜索方向不一致的B+ Tree可能就会出死锁</p>
+</li>
+<li>
+<p>如果要调整容量，一般把整个哈希表都给加上全局的写锁</p>
+</li>
+<li>
+<p>其他情况下一般锁部分就可以了</p>
+<ul>
+<li>
+<p><strong>Page/Block-level Latches</strong></p>
+<ul>
+<li>Each page/block has its own reader-writer latch that protects its entire contents.</li>
+<li>Threads acquire either a read or write latch before they access a page/block</li>
+<li>按块划分，加锁</li>
+<li>Java的ConcurrentHashMap是这种处理方案，几个槽一个锁</li>
+<li>好处：不用维护太多锁，还保证了并发性</li>
+</ul>
+</li>
+<li>
+<p><strong>Slot Latches</strong></p>
+<ul>
+<li>一个槽加一个锁</li>
+<li>锁更细了，更能避免死锁和提高并发</li>
+<li>但是维护这么多锁开销太高了</li>
+</ul>
+</li>
+<li>
+<p>还有其他方法，比如读写分离（比如go的sync.Map）</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="btree-latching">B+Tree Latching</h3>
+<ul>
+<li>两方面的并发问题
+<ul>
+<li>节点内部的数据要做并发保护</li>
+<li>节点的分裂/合并过程中要做并发保护</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Latch Crabbing/Coupling</strong></p>
+<ul>
+<li>
+<p>Get latch for parent，给根节点上锁</p>
+</li>
+<li>
+<p>Get latch for child，给子节点上锁</p>
+</li>
+<li>
+<p>Release latch for parent if “safe”，判断子节点是否“安全”，安全的话放根节点的锁</p>
+</li>
+<li>
+<p>“safe”:A <strong>safe node</strong> is one that will not split or merge when updated.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Find: Start at root and traverse down the tree</p>
+<ul>
+<li>Acquire R latch on child</li>
+<li>Then unlatch parent</li>
+<li>Repeat until we reach the leaf node</li>
+</ul>
+</li>
+<li>
+<p>Insert/Delete: Start at root and go down, obtaining W latches as needed. Once child is latched, check if it is safe:</p>
+<ul>
+<li>If child is safe, release all latches on ancestors</li>
+</ul>
+</li>
+<li>
+<p>问题：所有的操作都要先锁根节点，这是一个性能上面的瓶颈</p>
+<ul>
+<li>原因：上面的想法是悲观的，认为每次写操作都有可能会造成根节点的分裂/合并，但是实际上来说根节点变动的次数很少</li>
+<li>使用乐观的想法：我认为大部分操作不会改变根节点的结构，所以我给根节点加读锁，如果说发现根节点要变动结构，这个时候从根节点重新给加写锁</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Leaf Node Scans</strong>
+<ul>
+<li>一般来说是顺序扫描</li>
+<li>但是这样会带来一个风险:Find key &gt; 4和Find key &lt; 1扫描叶子节点的时候方向是相反的，会有死锁的风险</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-3.png" title="/img/CMU 15-445 Database Systems/chapter9-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-3.png" data-sub-html="<h2>方向相反造成死锁</h2>">
+        
+    </a><figcaption class="image-caption">方向相反造成死锁</figcaption>
+    </figure></li>
+<li>解决方法：<strong>制定规则</strong>，比如数据只能从大往小走，比如MySQL，之前不支持倒序遍历就和这个有关，后面又加上了倒叙索引才解决了这个问题</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #08: Tree Indexes</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter8/</link>
     <pubDate>Wed, 10 Apr 2024 15:53:39 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter8/</guid>
