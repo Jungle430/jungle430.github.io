@@ -4,9 +4,229 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Tue, 09 Apr 2024 21:11:32 &#43;0800</lastBuildDate>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Wed, 10 Apr 2024 15:53:39 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>CMU 15-445 Lecture #08: Tree Indexes</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter8/</link>
+    <pubDate>Wed, 10 Apr 2024 15:53:39 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter8/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-08-tree-indexes">Lecture #08: Tree Indexes</h2>
+<h3 id="table-indexes">Table Indexes</h3>
+<ul>
+<li>数据库中常常需要数据库的部分有序(这也是为什么哈希表做不成索引，因为无序)副本来提高查找的效率，这个副本一般称为索引</li>
+<li>DBMS要自己维护索引和数据的一致性，还有执行SQL的时候使用什么索引</li>
+</ul>
+<h3 id="b-tree">B+ Tree</h3>
+<ul>
+<li>B+ Tree是一种自平衡搜索树，它可以将查找的复杂度控制在$O(logn)$，同时它的设计也减小了查找时磁盘的$I/O$，这对于DBMS的效率来说是十分重要的</li>
+<li>几乎所有支持索引的现代DBMS都用了B+ Tree，B+ Tree和B Tree最大的区别在于B+ Tree之有叶子节点才存储了值，非叶子节点存储的是部分索引的值，而B Tree的每个节点都存储了值</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter8-1.png" title="/img/CMU 15-445 Database Systems/chapter8-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter8-1.png" data-sub-html="<h2>B&#43; Tree还借鉴了其他B Tree类数据结构的特性，比如从B-Link-Tree中学到的sibling pointers</h2>">
+        
+    </a><figcaption class="image-caption">B+ Tree还借鉴了其他B Tree类数据结构的特性，比如从B-Link-Tree中学到的sibling pointers</figcaption>
+    </figure>
+<ul>
+<li>
+<p>B+ Tree有以下特点</p>
+<ul>
+<li>它是完全平衡的（所有的叶子节点高度一致）</li>
+<li>除了根节点外，每个内部节点至少为半满($\frac{M}{2}-1 \le num\ of\ keys \le M -1$)</li>
+<li>每个有K个键的节点有K+1个非空子节点（指针是从两个key中间的“缝”出来的）</li>
+</ul>
+</li>
+<li>
+<p>B+ Tree的每个节点都包含一个Key-Value的数组&lt;索引值，下层的节点&gt;</p>
+</li>
+<li>
+<p>B+ Tree的叶子节点有两种存储模式</p>
+<ul>
+<li>一种是存储Tuple的指针，通过这个指针去拿Tuple的数据</li>
+<li>另一种是存储Tuple的数据，这样就可以直接获取，不用再去找一次Tuple的数据</li>
+</ul>
+</li>
+<li>
+<p>根据NULL在不同类型中的意义，NULL节点一般会在第一个或最后一个叶子节点里面（要看对NULL认为是无穷大的还是无穷小的）</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Insertion</strong>
+<ul>
+<li>向下遍历树，找到插入的位置</li>
+<li>如果索引有足够的空间，则直接插入</li>
+<li>否则最下面的索引分裂，然后重新整合B+ Tree的结构后再插入</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Deletion</strong>
+<ul>
+<li>如果删除后的节点少于半满，需要合并树</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Composite Index</strong>
+<ul>
+<li>多个属性组成的联合索引</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">abc_index</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>我们可以使用联合索引来加快查询速度</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">table</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><strong>Selection Conditions</strong></p>
+<ul>
+<li>要看联合索引的结构，是前面的字段先有序之后再排下一个字段，要想高效利用联合索引就要会最左匹配</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Duplicate Keys</strong>:重复索引的处理方法
+<ul>
+<li><strong>append record IDs</strong>:后面加上唯一标识符。比如主键或者(page,slot)的元组，这样就保证绝对唯一</li>
+<li><strong>overflow nodes</strong>:给叶子节点再挂一个溢出节点，专门放碰撞的Key，但是增加了维护树结构的成本</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Clustered Indexes</strong>
+<ul>
+<li>主键B+ Tree的叶子节点对应的数据就是实际数据，这样遍历到主键的话直接就拿到数据</li>
+<li>但是如果不是主键的B+ Tree的话，只能先拿到主键再去主键的B+ Tree上面找</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Index Scan Page Sorting</strong>
+<ul>
+<li>先扫描统计要那些主键对应的数据，再把数据做一次排序 ,然后进主键的B+ Tree一把搜出来</li>
+</ul>
+</li>
+</ul>
+<h3 id="btree-design-choices">B+Tree Design Choices</h3>
+<ul>
+<li><strong>Node size</strong>
+<ul>
+<li>磁盘越慢，B+ Tree的节点越大，这样减少I/O的压力，如果是内存，节点应该变小，因为这个时候筛选无用数据的成本已经高过磁盘中的I/O了
+<ul>
+<li>HDD: ~1MB</li>
+<li>SSD: ~10KB</li>
+<li>In-Memory: ~512B</li>
+</ul>
+</li>
+<li>还有就是业务类型，OTAP喜欢点查询，节点小一点好，OLAP喜欢动不动扫描全表，节点大一点好</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Merge Threshold</strong>
+<ul>
+<li>一般来说合并拆分这种操作DBMS都是尽量拖一拖，因为这个过程开销太大了，所以不是到了阈值就马上合并</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Variable Length Keys</strong>
+<ul>
+<li>pointers:节点存指针</li>
+<li>Variable Length Nodes:节点本身就是变长的，维护更加困难</li>
+<li>Padding:数据不到规定大小，填充字节补偿(像字节对齐)</li>
+<li>Key Map/Indirection:和slot很像，里面的结构加上slot-array来适应不同长度的数据</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Intra-Node Search</strong>
+<ul>
+<li>节点内部的数据怎么搜索
+<ul>
+<li><strong>Linear</strong>:线性遍历，看似低效，但是和I/O的时间比起来不算什么</li>
+<li><strong>Binary</strong>:二分，复杂度降为$O(log(n))$</li>
+<li><strong>Interpolation</strong>:利用数学规律/机器学习等其他方式进行推断查找</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="optimizations">Optimizations</h3>
+<ul>
+<li>
+<p><strong>Prefix Compression</strong></p>
+<ul>
+<li>
+<p>找前缀一样的统一存一下前缀，剩下的空间存后缀</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter8-2.png" title="/img/CMU 15-445 Database Systems/chapter8-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter8-2.png" data-sub-html="<h2>前缀压缩的例子</h2>">
+        
+    </a><figcaption class="image-caption">前缀压缩的例子</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Deduplication</strong>
+<ul>
+<li>一个K，后面根据所有的V，防止K冗余</li>
+<li>$(K_1,V_1),(K_1,V_2),(K_1,V_3),(K_2,V_4),(K_2,V_5) \rightarrow\ (K_1,V_1,V_2,V_3),(K_2,V_4,V_5)$</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Suffix Truncation</strong>
+<ul>
+<li>如果搜索的时候不要要全部数据往下走，只需要部分数据，那我存个前缀也行
+<ul>
+<li>比如string的like”x%”这种操作，存前缀就够了</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Bulk Insert</strong>
+<ul>
+<li>一次插入一批，减少树的分裂合并次数</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #07: Hash Tables</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/</link>
     <pubDate>Tue, 09 Apr 2024 21:11:32 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/</guid>
@@ -3695,272 +3915,6 @@ $$</p>
 <ul>
 <li><code>Go</code>的源码还是不错的，起码不至于像<code>C++</code>那样群魔乱舞，考完试抽时间看看</li>
 </ul>
-]]></description>
-</item>
-<item>
-    <title>消息队列</title>
-    <link>https://Jungle430.github.io/posts/go/message-queue/</link>
-    <pubDate>Sat, 03 Jun 2023 16:04:20 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/go/message-queue/</guid>
-    <description><![CDATA[<h1 id="消息队列">消息队列</h1>
-<h2 id="走进消息队列">走进消息队列</h2>
-<h3 id="场景">场景</h3>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image1.png" title="/img/Go/message-queue/image1.png" data-thumbnail="/img/Go/message-queue/image1.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>案例一：有一天晚上我们上完课，回到宿舍，想着新出的游戏机，但又摸了摸钱包，太贵了买不起，这个时候你突然想到，今天抖音直播搞活动，瞬间你掏出了手机打开抖音搜索，找到直播间以后，你打开了心心念念的游戏机详情页，看到价格只要500。
-<ul>
-<li>这个时候我们分析一下，就我们上面这几步操作，在我们的程序背后，做了什么事情。</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image2.png" title="/img/Go/message-queue/image2.png" data-thumbnail="/img/Go/message-queue/image2.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>案例二：服务能力有限（到点上车，无数用户在对面狂点手机+黄牛的脚本）</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image3.png" title="/img/Go/message-queue/image3.png" data-thumbnail="/img/Go/message-queue/image3.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>案例三：链路耗时长尾（下单之后一直在转圈圈）</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image4.png" title="/img/Go/message-queue/image4.png" data-thumbnail="/img/Go/message-queue/image4.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>案例四：日志存储</p>
-<ul>
-<li>如果完事之后发现本地日志丢掉了怎么办？</li>
-</ul>
-</li>
-<li>
-<p>面对上面的四个场景，我们有什么解决办法吗？</p>
-</li>
-</ul>
-<h3 id="解决问题">解决问题</h3>
-<ul>
-<li>案例一
-<ul>
-<li>解决方案：解耦</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image5.png" title="/img/Go/message-queue/image5.png" data-thumbnail="/img/Go/message-queue/image5.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>类似生产者消费者模型（或者是<code>go</code>的<code>channel</code>），即使数据库方面宕机但是消息仍然被保存下来，部分请求还是可以被处理掉</p>
-</li>
-<li>
-<p>案例二</p>
-<ul>
-<li>解决方案：削峰</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image6.png" title="/img/Go/message-queue/image6.png" data-thumbnail="/img/Go/message-queue/image6.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>加了一层缓冲机制</p>
-</li>
-<li>
-<p>案例三</p>
-<ul>
-<li>解决方案：异步</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image7.png" title="/img/Go/message-queue/image7.png" data-thumbnail="/img/Go/message-queue/image7.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>前两个请求处理完成之后用户会马上得到响应，不再干等着，耗时的通知商家响应方是商家，所以慢一点问题不太大</p>
-</li>
-<li>
-<p>三个过程从原来的<strong>单线程顺序处理</strong>变成<strong>多线程异步处理</strong></p>
-</li>
-<li>
-<p>案例四</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image8.png" title="/img/Go/message-queue/image8.png" data-thumbnail="/img/Go/message-queue/image8.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<h2 id="什么是消息队列">什么是消息队列？</h2>
-<blockquote>
-<p>消息队列(MQ)，指保存<strong>消息</strong>的一个<strong>容器</strong>，本质是个<strong>队列</strong>。但是这个队列需要满足<strong>高吞吐，高并发，并且高可用</strong></p>
-</blockquote>
-<div class="mermaid" id="id-1"></div>
-<h3 id="业界消息队列对比">业界消息队列对比</h3>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image9.png" title="/img/Go/message-queue/image9.png" data-thumbnail="/img/Go/message-queue/image9.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<h3 id="消息队列kafka">消息队列<code>Kafka</code></h3>
-<ul>
-<li>使用场景：离线的消息处理当中（日志信息，<code>Metrics</code>数据，用户行为 $\Longrightarrow$ 搜索，点赞，评论，收藏）</li>
-</ul>
-<h4 id="如何使用kafka">如何使用<code>Kafka</code></h4>
-<div class="mermaid" id="id-2"></div>
-<ul>
-<li>基本概念
-<ul>
-<li><code>Topic</code>：逻辑队列，不同的<code>Topic</code>可以建立不同的<code>Topic</code></li>
-<li><code>Cluster</code>：物理集群，每个集群中可以建立多个不同的<code>Topic</code></li>
-<li><code>Producer</code>：生产者，负责将业务消息发送到<code>Topic</code>中</li>
-<li><code>Consumer</code>：消费者，负责消费<code>Topic</code>中的消息</li>
-<li><code>ConsumerGroup</code>：消费者组，不同组<code>Consumer</code>互不干涉</li>
-<li>同一个<code>Topic</code>中的<code>Partion</code>可以并发处理，提高吞吐量</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image10.png" title="/img/Go/message-queue/image10.png" data-thumbnail="/img/Go/message-queue/image10.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<hr>
-<ul>
-<li>Offset</li>
-</ul>
-<blockquote>
-<p><strong>Offset</strong>:消息在Partion内的相对位置信息，可以理解为唯一ID，<strong>在partion内部是严格递增的</strong></p>
-</blockquote>
-<hr>
-<ul>
-<li>Replica</li>
-</ul>
-<blockquote>
-<p>每个分片有多个<strong>Replica</strong>，<strong>Leader Replica</strong>将会从$LSR$中选出</p>
-</blockquote>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image11.png" title="/img/Go/message-queue/image11.png" data-thumbnail="/img/Go/message-queue/image11.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>
-<p>Leader:对外进行读写</p>
-</li>
-<li>
-<p>Foller:不断将数据从Leader上面拉取下来，努力和Leader保持一个一致的状态，如果和Leader差距过大会被踢出ISR（参考Replica3）</p>
-</li>
-<li>
-<p>ISR的作用：如果ISR里面的leader对应的机器发生了宕机等故障，<strong>ISR会从里面的Foller中选择一个让其重新成为Leader</strong>，保证服务器继续运行，保证了<strong>高可用性</strong></p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>数据复制</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image12.png" title="/img/Go/message-queue/image12.png" data-thumbnail="/img/Go/message-queue/image12.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>其中有一个Broker同时也扮演了Controller的角色。Controller是整个集群的大脑，负责对副本和Broker的分配</li>
-</ul>
-<hr>
-<ul>
-<li><code>Kafka</code>架构</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image13.png" title="/img/Go/message-queue/image13.png" data-thumbnail="/img/Go/message-queue/image13.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<h4 id="消息的处理流程">消息的处理流程</h4>
-<div class="mermaid" id="id-3"></div>
-<h5 id="发送消息">发送消息</h5>
-<ul>
-<li>如果发送一条消息，等待其成功后再发送下一条消息会有什么问题？</li>
-</ul>
-<div class="mermaid" id="id-4"></div>
-<hr>
-<ul>
-<li>批量发送消息可以增加吞吐量，<strong>但是如果网络带宽不够怎么办</strong>？</li>
-</ul>
-<div class="mermaid" id="id-5"></div>
-<ul>
-<li>解决方法：进行压缩，减少消息大小，目前支持的有:Snappy,Gzip,LZ4,ZSTD压缩算法</li>
-</ul>
-<div class="mermaid" id="id-6"></div>
-<h5 id="存储消息">存储消息</h5>
-<div class="mermaid" id="id-7"></div>
-<ul>
-<li>
-<p>如何存储到磁盘？</p>
-</li>
-<li>
-<p><code>Borker</code>的文件结构</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image14.png" title="/img/Go/message-queue/image14.png" data-thumbnail="/img/Go/message-queue/image14.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<ul>
-<li>磁盘结构：由于寻道成本比较高，所以<u>顺序写入可以减少寻道带来的时间成本</u></li>
-</ul>
-<hr>
-<ul>
-<li><code>Broker</code>-顺序写</li>
-</ul>
-<div class="mermaid" id="id-8"></div>
-<ul>
-<li>采用顺序写的方式进行写入（磁盘末尾追加，减少动磁头的次数），以提高写入效率</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><code>Broker</code>-如何找到消息</p>
-</li>
-<li>
-<p><code>Consumer </code>通过发送<code>FetchRequest</code>请求消息数据，<code>Broker </code>会将指定<code>Offset</code>处的消息，按照时间窗口和消息大小窗口发送给<code> Consumer</code>，<u>寻找数据这个细节是如何做到的呢?</u></p>
-</li>
-</ul>
-<div class="mermaid" id="id-9"></div>
-<ul>
-<li>
-<p>例子：寻找<code>offer=28</code></p>
-<ul>
-<li>
-<p><b>二分法</b>查找小于目标<code>offer</code>的最大文件</p>
-</li>
-<li>
-<p>接着通过偏移量去对应的地址里面继续查找</p>
-</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image15.png" title="/img/Go/message-queue/image15.png" data-thumbnail="/img/Go/message-queue/image15.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
-<hr>
-<ul>
-<li><code>Broker</code>-时间戳索引文件
-<ul>
-<li>二分法找到<strong>小于目标时间戳的最大索引位置</strong>，再通过<code>offset</code>的方式找到最终数据</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/Go/message-queue/image16.png" title="/img/Go/message-queue/image16.png" data-thumbnail="/img/Go/message-queue/image16.png" data-sub-html="<h2> </h2>">
-        
-    </a><figcaption class="image-caption"><code> </code></figcaption>
-    </figure>
 ]]></description>
 </item>
 </channel>
