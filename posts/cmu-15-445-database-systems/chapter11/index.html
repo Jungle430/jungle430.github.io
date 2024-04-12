@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #11: Joins Algorithms - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #11: Joins Algorithms" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #11: Joins Algorithms Introduction 根据数据库的范式理论，设计数据库表的一个原则是不让数据冗余，所以在查找的时候JOIN的操作是少不了的 For binary joins, we often prefer the left table (the ”" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-12T00:56:12+08:00" />
+<meta property="article:modified_time" content="2024-04-12T00:56:12+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #11: Joins Algorithms"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #11: Joins Algorithms Introduction 根据数据库的范式理论，设计数据库表的一个原则是不让数据冗余，所以在查找的时候JOIN的操作是少不了的 For binary joins, we often prefer the left table (the ”"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter10/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #11: Joins Algorithms",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter11\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1492 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter11\/","datePublished": "2024-04-12T00:56:12+08:00","dateModified": "2024-04-12T00:56:12+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #11: Joins Algorithms</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-12">2024-04-12</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1492 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-11-joins-algorithms">Lecture #11: Joins Algorithms</a>
+      <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#join-operators">Join Operators</a></li>
+        <li><a href="#nested-loop-join">Nested Loop Join</a></li>
+        <li><a href="#sort-merge-join">Sort-Merge Join</a></li>
+        <li><a href="#hash-join">Hash Join</a></li>
+        <li><a href="#conclusion">Conclusion</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-11-joins-algorithms">Lecture #11: Joins Algorithms</h2>
+<h3 id="introduction">Introduction</h3>
+<ul>
+<li>
+<p>根据数据库的范式理论，设计数据库表的一个原则是不让数据冗余，所以在查找的时候JOIN的操作是少不了的</p>
+</li>
+<li>
+<p>For binary joins, we often prefer the left table (the ”outer table” ) to be the smaller one of the two.优化SQL的一个方法，左表尽量小(<strong>这个小指的是文件页数少</strong>)，后面会说明原因</p>
+</li>
+</ul>
+<h3 id="join-operators">Join Operators</h3>
+<ul>
+<li><strong>Operator Output</strong>
+<ul>
+<li>两个表满足JOIN条件的attributes可以组合成一个新的tuple</li>
+<li>输出取决于以下几个方面
+<ul>
+<li>processing model</li>
+<li>storage model</li>
+<li>data requirements in query</li>
+</ul>
+</li>
+<li><strong>Data</strong>
+<ul>
+<li><strong>Early materialization</strong>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-1.png" title="/img/CMU 15-445 Database Systems/chapter11-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-1.png" data-sub-html="<h2>JOIN的时候需要什么属性都加上，最后直接输出</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-1.png, /img/CMU%2015-445%20Database%20Systems/chapter11-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-1.png" />
+    </a><figcaption class="image-caption">JOIN的时候需要什么属性都加上，最后直接输出</figcaption>
+    </figure></li>
+<li>可以避免子操作回表</li>
+</ul>
+</li>
+<li><strong>Record Id</strong>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-2.png" title="/img/CMU 15-445 Database Systems/chapter11-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-2.png" data-sub-html="<h2>属性里面放的是行id或者地址，后面需要回表拿数据</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-2.png, /img/CMU%2015-445%20Database%20Systems/chapter11-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-2.png" />
+    </a><figcaption class="image-caption">属性里面放的是行id或者地址，后面需要回表拿数据</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Cost Analysis</strong></p>
+<ul>
+<li>
+<p>不同JOIN算法的开销</p>
+</li>
+<li>
+<p>Assume</p>
+<ul>
+<li>
+<p>M pages in table R, m tuples in R</p>
+</li>
+<li>
+<p>N pages in table S, n tuples in S</p>
+</li>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">R</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">S</span><span class="p">.</span><span class="n">cdate</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ON</span><span class="w"> </span><span class="n">R</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">S</span><span class="p">.</span><span class="n">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">S</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p>Cost Metric: <strong>number of IOs</strong> to compute join</p>
+</li>
+<li>
+<p><strong>JOIN Algorithms</strong></p>
+<ul>
+<li>Next Loop Join</li>
+<li>Sort-Merge Join</li>
+<li>Hash Join</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="nested-loop-join">Nested Loop Join</h3>
+<ul>
+<li><strong>Native Nested Loop Join</strong></li>
+<li>伪代码</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">s</span> <span class="k">in</span> <span class="n">S</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">emit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>“stupid nested loop join”</p>
+<ul>
+<li><strong>一个R中的tuple需要扫S表的所有数据，对于缓存池的利用率过低，这种方法开销太大</strong></li>
+<li>S每次都是先灌满缓存池，然后前面的页淘汰，如此反复</li>
+</ul>
+</li>
+<li>
+<p>Assume</p>
+<ul>
+<li>
+<p>M pages in table R, m tuples in R</p>
+</li>
+<li>
+<p>N pages in table S, n tuples in S</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Cost: $M+(m \times N)$</p>
+</li>
+<li>
+<p>优化：高效利用缓存池，一次多加载一些页，不要一页一页加载</p>
+</li>
+<li>
+<p><strong>Block Nested Loop Join</strong></p>
+</li>
+<li>
+<p>伪代码</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">block</span> <span class="n">B_R</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">block</span> <span class="n">B_S</span> <span class="k">in</span> <span class="n">S</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">B_R</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">s</span> <span class="k">in</span> <span class="n">B_S</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">emit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>每次不只读一页，每次R和S都读好多页进行匹配</p>
+</li>
+<li>
+<p>Cost: $M+(\frac{M}{M\ Block\ Size} \times N)$</p>
+</li>
+<li>
+<p>讨论block size</p>
+</li>
+<li>
+<p>B个页的内存，一个页做输出缓存，一个页给右表，多缓存左表(给B-2个)</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">B</span><span class="p">-</span><span class="m">2</span> <span class="n">blocks</span> <span class="n">B_R</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">block</span> <span class="n">B_S</span> <span class="k">in</span> <span class="n">S</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">B</span><span class="p">-</span><span class="m">2</span> <span class="n">blocks</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">s</span> <span class="k">in</span> <span class="n">B_S</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">emit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>Cost: $M+(\frac{M}{B-2}\times N)$</p>
+</li>
+<li>
+<p>if $B-2&gt;M$, then cost: $M+N$</p>
+</li>
+<li>
+<p>为啥nested loop join性能不行</p>
+<ul>
+<li>总要去遍历S表</li>
+<li>为啥要遍历：<strong>没有索引等其他方案来提高查找S中属性的效率，所以只能傻瓜式的遍历</strong></li>
+</ul>
+</li>
+<li>
+<p>优化思路：提高S中查找/范围查找的速度</p>
+</li>
+<li>
+<p><strong>Index Nested Loop Join</strong></p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">S</span> <span class="k">in</span> <span class="n">Index</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">==</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">emit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>认为每次索引查询需要C次I/O</p>
+</li>
+<li>
+<p>Cost: $M+(m\times C)$</p>
+</li>
+</ul>
+<h3 id="sort-merge-join">Sort-Merge Join</h3>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-3.png" title="/img/CMU 15-445 Database Systems/chapter11-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-3.png" data-sub-html="<h2>先对Join的列进行排序，后面就是合并多个有序数组的思路</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-3.png, /img/CMU%2015-445%20Database%20Systems/chapter11-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-3.png" />
+    </a><figcaption class="image-caption">先对Join的列进行排序，后面就是合并多个有序数组的思路</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-4.png" title="/img/CMU 15-445 Database Systems/chapter11-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-4.png" data-sub-html="<h2>匹配中可能会漏掉匹配项，必须要加上回退的功能</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-4.png, /img/CMU%2015-445%20Database%20Systems/chapter11-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-4.png" />
+    </a><figcaption class="image-caption">匹配中可能会漏掉匹配项，必须要加上回退的功能</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Cost</p>
+<ul>
+<li>
+<p>Sort R: $2M \times (1+\log_{B-1}\frac{M}{B})$</p>
+</li>
+<li>
+<p>Sort S: $2N\times (1+\log_{B-1}\frac{N}{B})$</p>
+</li>
+<li>
+<p>Merge Cost: $M+N$</p>
+</li>
+<li>
+<p>Total Cost: $Sort + Merge$</p>
+</li>
+</ul>
+</li>
+<li>
+<p>退化情况：两个连接列所有值一样，那么Merge Cost会因为回退增加到$M\times N$</p>
+</li>
+<li>
+<p>适合的场景</p>
+<ul>
+<li>数据本身就有序</li>
+<li>输出的结果需要排序</li>
+</ul>
+</li>
+</ul>
+<h3 id="hash-join">Hash Join</h3>
+<ul>
+<li>Hash table点查询比B+ Tree快
+<ul>
+<li>左表做hash，右表去匹配</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">build</span> <span class="nb">hash</span> <span class="n">table</span> <span class="n">HT_R</span> <span class="k">for</span> <span class="n">R</span>
+</span></span><span class="line"><span class="cl"><span class="n">foreach</span> <span class="nb">tuple</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">h1</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">in</span> <span class="n">HT_R</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">output</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-5.png" title="/img/CMU 15-445 Database Systems/chapter11-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-5.png" data-sub-html="<h2>给左表做哈希表，右表的数据hash完成后去哈希表里面找匹配数据</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-5.png, /img/CMU%2015-445%20Database%20Systems/chapter11-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-5.png" />
+    </a><figcaption class="image-caption">给左表做哈希表，右表的数据hash完成后去哈希表里面找匹配数据</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Hash</p>
+<ul>
+<li>Key:需要连接的列</li>
+<li>Value
+<ul>
+<li>Full Tuple:放上需要的数据，不需要回表</li>
+<li>Tuple Identifier:放索引，最后需要去回表拿数据</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>OPTIMIZATION</strong></p>
+<ul>
+<li>Create a probe filter (such as a Bloom Filter) during the build phase if the key is likely to not exist in the inner relation 加上一层过滤器先过滤掉部分没有匹配项的数据，防止在哈希表里面找半天发现没有，比如加一个布隆过滤器</li>
+</ul>
+</li>
+<li>
+<p>如果哈希表太大可能会面临内存池驱逐的问题，但是我们不想让内存池随机驱逐</p>
+</li>
+<li>
+<p><strong>Grace Hash Join</strong></p>
+<ul>
+<li>
+<p>1980’s东京大学搞数据库一体机的时候发明的（现在也有一体机，比如Oracle还在卖），银行和金融机构爱买</p>
+</li>
+<li>
+<p>左表和右表都做hash，把哈希表存在硬盘里面，把硬盘里面相对应的哈希桶拿出来做nested loop join</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-6.png" title="/img/CMU 15-445 Database Systems/chapter11-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-6.png" data-sub-html="<h2>能连接上的行都在一个桶号里面，所以每次都加载两个哈希表里面相同桶号的桶</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-6.png, /img/CMU%2015-445%20Database%20Systems/chapter11-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-6.png" />
+    </a><figcaption class="image-caption">能连接上的行都在一个桶号里面，所以每次都加载两个哈希表里面相同桶号的桶</figcaption>
+    </figure>
+</li>
+<li>
+<p>如果哈希桶还是太大怎么办，再换别的哈希函数继续哈希，直到哈希出来的块够小（这个叫<strong>RECURSIVE PARTITIONING</strong>）</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-7.png" title="/img/CMU 15-445 Database Systems/chapter11-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-7.png" data-sub-html="<h2>RECURSIVE PARTITIONING</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-7.png, /img/CMU%2015-445%20Database%20Systems/chapter11-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-7.png" />
+    </a><figcaption class="image-caption">RECURSIVE PARTITIONING</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+<li>
+<p>Cost</p>
+<ul>
+<li>Partition Phash:$2(M+N)$(读到内存hash后还要写回去)</li>
+<li>Probing Phash:$M+N$</li>
+<li>Total:$3(M+N)$</li>
+</ul>
+</li>
+</ul>
+<h3 id="conclusion">Conclusion</h3>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-8.png" title="/img/CMU 15-445 Database Systems/chapter11-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-8.png" data-sub-html="<h2>各方法开销</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter11-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter11-8.png, /img/CMU%2015-445%20Database%20Systems/chapter11-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter11-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter11-8.png" />
+    </a><figcaption class="image-caption">各方法开销</figcaption>
+    </figure>
+<ul>
+<li>Sorting和Hash没有最好，要看条件选择
+<ul>
+<li>哈希碰撞，输出是否有序都会影响开销</li>
+<li>优秀的数据库会有优化器来进行分析和选择</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-12</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" data-title="CMU 15-445 Lecture #11: Joins Algorithms"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter10/" class="prev" rel="prev" title="CMU 15-445 Lecture #10: Sorting &amp; Aggregation Algorithms"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
