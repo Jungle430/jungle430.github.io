@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #14: Query Execution II - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #14: Query Execution II" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #14: Query Execution II Background 上节课讨论了DBMS的执行过程 这节课讨论DBMS在多线程下的执行过程 Parallel vs Distributed Databases 并行和分布式数据库 Parallel DBMSs 资源都在一块，离得很近" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-12T21:01:51+08:00" />
+<meta property="article:modified_time" content="2024-04-12T21:01:51+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #14: Query Execution II"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #14: Query Execution II Background 上节课讨论了DBMS的执行过程 这节课讨论DBMS在多线程下的执行过程 Parallel vs Distributed Databases 并行和分布式数据库 Parallel DBMSs 资源都在一块，离得很近"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter13/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #14: Query Execution II",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter14\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  722 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter14\/","datePublished": "2024-04-12T21:01:51+08:00","dateModified": "2024-04-12T21:01:51+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #14: Query Execution II</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-12">2024-04-12</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 722 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-14-query-execution-ii">Lecture #14: Query Execution II</a>
+      <ul>
+        <li><a href="#background">Background</a></li>
+        <li><a href="#parallel-vs-distributed-databases">Parallel vs Distributed Databases</a></li>
+        <li><a href="#process-models">Process Models</a></li>
+        <li><a href="#inter-query-parallelism">Inter-Query Parallelism</a></li>
+        <li><a href="#intra-query-parallelism">Intra-Query parallelism</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-14-query-execution-ii">Lecture #14: Query Execution II</h2>
+<h3 id="background">Background</h3>
+<ul>
+<li>上节课讨论了DBMS的执行过程</li>
+<li>这节课讨论DBMS在多线程下的执行过程</li>
+</ul>
+<h3 id="parallel-vs-distributed-databases">Parallel vs Distributed Databases</h3>
+<ul>
+<li>
+<p>并行和分布式数据库</p>
+</li>
+<li>
+<p><strong>Parallel DBMSs</strong></p>
+<ul>
+<li>资源都在一块，离得很近</li>
+<li>资源通信很高速，OS内通信</li>
+<li>线程间的通信高速又可靠</li>
+</ul>
+</li>
+<li>
+<p><strong>Distributed Databases</strong></p>
+<ul>
+<li>资源相互之间离得很远</li>
+<li>资源之间的通信很慢</li>
+<li>节点之间通信的代价很高且不可靠</li>
+</ul>
+</li>
+</ul>
+<h3 id="process-models">Process Models</h3>
+<ul>
+<li>模型：认为每个DBMS下面有多个worker，多个worker并行处理</li>
+<li>这个模型针对的是多个SQL并发执行的问题，不能做个单个SQL并发处理的问题</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Process per Worker</strong>
+<ul>
+<li>每一个worker给分配一个进程(OS级别的)</li>
+<li>依赖OS对进程的调度</li>
+<li>用共享内存来进行通信</li>
+<li>优点：一个进程崩了不至于让整个系统宕机</li>
+<li>例子：Oracle，Postgres(因为开发年代太古早)</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-1.png" title="/img/CMU 15-445 Database Systems/chapter14-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-1.png" data-sub-html="<h2>工作模型，因为进程太吃资源，后面基本都做了池化的技术</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-1.png, /img/CMU%2015-445%20Database%20Systems/chapter14-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-1.png" />
+    </a><figcaption class="image-caption">工作模型，因为进程太吃资源，后面基本都做了池化的技术</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Thread per Worker</strong>
+<ul>
+<li>pthread统一出现后各大数据库也把模型换成了给worker分配线程</li>
+<li>优点：线程切换代价小，内存天然共享</li>
+<li>缺点：一个线程崩了整个进程跟着崩</li>
+<li>例子：MySQL，IBM DB2</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-2.png" title="/img/CMU 15-445 Database Systems/chapter14-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-2.png" data-sub-html="<h2>工作模型</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-2.png, /img/CMU%2015-445%20Database%20Systems/chapter14-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-2.png" />
+    </a><figcaption class="image-caption">工作模型</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Scheduling</strong></p>
+<ul>
+<li>In conclusion, for each query plan, the DBMS has to decide where, when, and how to execute. Relevant
+questions include:
+<ul>
+<li>How many tasks should it use?</li>
+<li>How many CPU cores should it use?</li>
+<li>What CPU cores should the tasks execute on?</li>
+<li>Where should a task store its output?</li>
+</ul>
+</li>
+<li>When making decisions regarding query plans, <strong>the DBMS always knows more than the OS</strong> and should be
+prioritized as such.</li>
+</ul>
+</li>
+<li>
+<p>说白了就是让DBMS安排一个执行计划怎么执行，这个东西和缓存一样，不能依赖OS的系统调用，要定制化</p>
+</li>
+</ul>
+<h3 id="inter-query-parallelism">Inter-Query Parallelism</h3>
+<ul>
+<li>多个SQL之间怎么并发执行</li>
+<li>如果并发的查询都是只读的，那冲突很小</li>
+<li>如果并发的查询涉及更新数据，那冲突就很多且不可避免</li>
+</ul>
+<h3 id="intra-query-parallelism">Intra-Query parallelism</h3>
+<ul>
+<li>
+<p><strong>Intra-Operator Parallelism (Horizontal)</strong></p>
+<ul>
+<li>水平切，把要处理的数据给切开，然后分给多个线程，这个切是靠Exchange算子的</li>
+<li>多个线程干的事情是一一样的</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-3.png" title="/img/CMU 15-445 Database Systems/chapter14-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-3.png" data-sub-html="<h2>Exchange算子工作模型，并发调用</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-3.png, /img/CMU%2015-445%20Database%20Systems/chapter14-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-3.png" />
+    </a><figcaption class="image-caption">Exchange算子工作模型，并发调用</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p>Exchange Type #1 – <strong>Gather</strong></p>
+<ul>
+<li>→ Combine the results from multiple workers into a single output stream.</li>
+</ul>
+</li>
+<li>
+<p>Exchange Type #2 – <strong>Distribute</strong></p>
+<ul>
+<li>→ Split a single input stream into multiple output streams.</li>
+</ul>
+</li>
+<li>
+<p>Exchange Type #3 – <strong>Repartition</strong></p>
+<ul>
+<li>→ Shuffle multiple input streams across multiple output streams.</li>
+</ul>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-4.png" title="/img/CMU 15-445 Database Systems/chapter14-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-4.png" data-sub-html="<h2>三个类型的工作模型</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-4.png, /img/CMU%2015-445%20Database%20Systems/chapter14-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-4.png" />
+    </a><figcaption class="image-caption">三个类型的工作模型</figcaption>
+    </figure>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-5.png" title="/img/CMU 15-445 Database Systems/chapter14-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-5.png" data-sub-html="<h2>Para Hash</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-5.png, /img/CMU%2015-445%20Database%20Systems/chapter14-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-5.png" />
+    </a><figcaption class="image-caption">Para Hash</figcaption>
+    </figure>
+<hr>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-12</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/" data-title="CMU 15-445 Lecture #14: Query Execution II"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter13/" class="prev" rel="prev" title="CMU 15-445 Lecture #13: Query Processing I"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
