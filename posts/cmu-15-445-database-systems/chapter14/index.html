@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter14\/"
-        },"genre": "posts","keywords": "Database Systems","wordcount":  722 ,
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1283 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter14\/","datePublished": "2024-04-12T21:01:51+08:00","dateModified": "2024-04-12T21:01:51+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -69,8 +69,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #14: Query Execution II</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-12">2024-04-12</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 722 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-12">2024-04-12</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1283 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -86,7 +86,11 @@
         <li><a href="#parallel-vs-distributed-databases">Parallel vs Distributed Databases</a></li>
         <li><a href="#process-models">Process Models</a></li>
         <li><a href="#inter-query-parallelism">Inter-Query Parallelism</a></li>
-        <li><a href="#intra-query-parallelism">Intra-Query parallelism</a></li>
+        <li><a href="#intra-query-parallelism-horizontal">Intra-Query parallelism (Horizontal)</a></li>
+        <li><a href="#inter-operator-parallelism--vertical">Inter-Operator parallelism  (Vertical)</a></li>
+        <li><a href="#bushy-parallelism">Bushy Parallelism</a></li>
+        <li><a href="#io-parallelism">I/O Parallelism</a></li>
+        <li><a href="#conclusion">CONCLUSION</a></li>
       </ul>
     </li>
   </ul>
@@ -187,7 +191,7 @@ prioritized as such.</li>
 </ul>
 </li>
 <li>
-<p>说白了就是让DBMS安排一个执行计划怎么执行，这个东西和缓存一样，不能依赖OS的系统调用，要定制化</p>
+<p>说白了就是让DBMS安排一个执行计划怎么执行，这个东西和缓存一样，不能完全依赖OS线程方面的系统调用，要定制化</p>
 </li>
 </ul>
 <h3 id="inter-query-parallelism">Inter-Query Parallelism</h3>
@@ -196,14 +200,16 @@ prioritized as such.</li>
 <li>如果并发的查询都是只读的，那冲突很小</li>
 <li>如果并发的查询涉及更新数据，那冲突就很多且不可避免</li>
 </ul>
-<h3 id="intra-query-parallelism">Intra-Query parallelism</h3>
+<h3 id="intra-query-parallelism-horizontal">Intra-Query parallelism (Horizontal)</h3>
 <ul>
 <li>
-<p><strong>Intra-Operator Parallelism (Horizontal)</strong></p>
-<ul>
-<li>水平切，把要处理的数据给切开，然后分给多个线程，这个切是靠Exchange算子的</li>
-<li>多个线程干的事情是一一样的</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-3.png" title="/img/CMU 15-445 Database Systems/chapter14-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-3.png" data-sub-html="<h2>Exchange算子工作模型，并发调用</h2>">
+<p>水平切，把要处理的数据给切开，然后分给多个线程，这个切是靠Exchange算子的</p>
+</li>
+<li>
+<p>多个线程干的事情是一一样的</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-3.png" title="/img/CMU 15-445 Database Systems/chapter14-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-3.png" data-sub-html="<h2>Exchange算子工作模型，并发调用</h2>">
         <img
             class="lazyload"
             src="/svg/loading.min.svg"
@@ -212,8 +218,7 @@ prioritized as such.</li>
             data-sizes="auto"
             alt="/img/CMU 15-445 Database Systems/chapter14-3.png" />
     </a><figcaption class="image-caption">Exchange算子工作模型，并发调用</figcaption>
-    </figure></li>
-</ul>
+    </figure>
 </li>
 <li>
 <p>Exchange Type #1 – <strong>Gather</strong></p>
@@ -256,7 +261,116 @@ prioritized as such.</li>
             alt="/img/CMU 15-445 Database Systems/chapter14-5.png" />
     </a><figcaption class="image-caption">Para Hash</figcaption>
     </figure>
+<h3 id="inter-operator-parallelism--vertical">Inter-Operator parallelism  (Vertical)</h3>
+<ul>
+<li>垂直切，让多个算子并发执行，数据在每个算子之间流动</li>
+<li>Also called pipeline parallelism.</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-6.png" title="/img/CMU 15-445 Database Systems/chapter14-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-6.png" data-sub-html="<h2>多个算子并发</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-6.png, /img/CMU%2015-445%20Database%20Systems/chapter14-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-6.png" />
+    </a><figcaption class="image-caption">多个算子并发</figcaption>
+    </figure>
+<ul>
+<li>缺点：中间一个线程处理的速度慢，其他部分线程就要等，会浪费</li>
+</ul>
+<h3 id="bushy-parallelism">Bushy Parallelism</h3>
+<ul>
+<li>上面两种并发方式的结合</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-7.png" title="/img/CMU 15-445 Database Systems/chapter14-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-7.png" data-sub-html="<h2>水平并发&#43;垂直并发</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-7.png, /img/CMU%2015-445%20Database%20Systems/chapter14-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-7.png" />
+    </a><figcaption class="image-caption">水平并发+垂直并发</figcaption>
+    </figure>
+<h3 id="io-parallelism">I/O Parallelism</h3>
+<ul>
+<li>
+<p>上面的模型说的都是数据已经在内存中的并行，但是对于本课程的数据库，I/O带来的性能问题如何通过并行优化甚至比前面的并行优化还重要</p>
+</li>
+<li>
+<p>还有上面的内存并行带来的问题可能是两个算子并发读写磁盘的不同部分，那对于机械盘来说这种随机读写也会大大降低性能，这部分也要进行优化</p>
+</li>
+</ul>
 <hr>
+<ul>
+<li><strong>Split the DBMS across multiple storage devices to improve disk bandwidth latency.Many different options that have trade-offs</strong>:
+<ul>
+<li>→ Multiple Disks per Database</li>
+<li>→ One Database per Disk</li>
+<li>→ One Relation per Disk</li>
+<li>→ Split Relation across Multiple Disks</li>
+</ul>
+</li>
+<li>Some DBMSs support this natively. Others require admin to configure outside of DBMS.</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Multi-Disk Parallelism</strong>
+<ul>
+<li>在操作系统/硬件层面让不同的DBMS文件去不同的磁盘(e.g. RAID)，这个层面对DBMS是透明的（对于他来说就像操作一个盘一样）</li>
+<li>多盘并发</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-8.png" title="/img/CMU 15-445 Database Systems/chapter14-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-8.png" data-sub-html="<h2>RAID0(Striping)下面的多盘并发</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-8.png, /img/CMU%2015-445%20Database%20Systems/chapter14-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-8.png" />
+    </a><figcaption class="image-caption">RAID0(Striping)下面的多盘并发</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Database Partitioning</strong>
+<ul>
+<li>把数据库也进行切分</li>
+<li>不同的库存在不同的盘，如果有统一恢复用的log文件要记得做好共享问题</li>
+<li>把单个的表进行分区，物理存储上分成多个部分，注意，这个分区对应用程序来说要是透明的，不需要关心数据如何存储的</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-9.png" title="/img/CMU 15-445 Database Systems/chapter14-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-9.png" data-sub-html="<h2>某一个属性特别的大且不常用就可以垂直切开分两部分存</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter14-9.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter14-9.png, /img/CMU%2015-445%20Database%20Systems/chapter14-9.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter14-9.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter14-9.png" />
+    </a><figcaption class="image-caption">某一个属性特别的大且不常用就可以垂直切开分两部分存</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<h3 id="conclusion">CONCLUSION</h3>
+<ul>
+<li>
+<p>Parallel execution is important, which is why (almost) every major DBMS supports it.</p>
+</li>
+<li>
+<p>However, it is hard to get right.</p>
+<ul>
+<li>→ Coordination Overhead</li>
+<li>→ Scheduling</li>
+<li>→ Concurrency Issues</li>
+<li>→ Resource Contention</li>
+</ul>
+</li>
+<li>
+<p>总结：并发能提示DBMS效率，但是理论简单实现难得多，要面对一大堆的问题</p>
+</li>
+</ul>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
                 </span></div><div class="post-info-line"><div class="post-info-mod">
