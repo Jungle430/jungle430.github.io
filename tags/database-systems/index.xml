@@ -4,7 +4,103 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Fri, 12 Apr 2024 21:01:51 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 15 Apr 2024 12:47:46 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #15: Query Planning &amp; Optimization</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter15/</link>
+    <pubDate>Mon, 15 Apr 2024 12:47:46 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter15/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-15-query-planning--optimization">Lecture #15: Query Planning &amp; Optimization</h2>
+<ul>
+<li>数据库最复杂的模块之一，论文都在这个上面做功夫</li>
+</ul>
+<h3 id="overview">Overview</h3>
+<ul>
+<li>
+<p>SQL都是声明式的，没有告诉DBMS执行的过程</p>
+</li>
+<li>
+<p>需要优化器来根据SQL告诉DBMS具体怎么执行</p>
+</li>
+<li>
+<p>两种流派</p>
+<ul>
+<li>SQL+优化器</li>
+<li>大数据处理框架(flink,spark)+程序员</li>
+</ul>
+</li>
+<li>
+<p>优化的两种流派</p>
+<ul>
+<li>Heuristics/Rules
+<ul>
+<li>启发式，通过查看catalog来看表的结构/有无索引，从而进行优化</li>
+</ul>
+</li>
+<li>Cost-base Search
+<ul>
+<li>基于代价的：要估计每一个查询plan的变化，然后进行决策，要知道数据的情况</li>
+</ul>
+</li>
+<li>大部分的数据库会结合这两个流派</li>
+</ul>
+</li>
+<li>
+<p><strong>Logical vs. Physical Plans</strong></p>
+<ul>
+<li>逻辑计划都是关系代数级别的</li>
+<li>物理计划具体到怎么执行，比如算子怎么执行，是sort join还是hash join</li>
+</ul>
+</li>
+<li>
+<p>计划的优化是NP难度级别的问题，这门课就是讲的普及</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter15-1.png" title="/img/CMU 15-445 Database Systems/chapter15-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter15-1.png" data-sub-html="<h2>例子：逻辑等价优化</h2>">
+        
+    </a><figcaption class="image-caption">例子：逻辑等价优化</figcaption>
+    </figure>
+<h3 id="logical-query-optimization">Logical Query Optimization</h3>
+<ul>
+<li>
+<p>自己要写一些模式上面的规则，让优化器拿着规则去优化，比如JOIN怎么消除，怎么做索引下推</p>
+</li>
+<li>
+<p>缺点：只能根据规则进行逻辑计划的转换，但是不能根据代价开销去进行优化，很死板</p>
+</li>
+<li>
+<p>Some pattern</p>
+<ul>
+<li>Perform filters as early as possible (predicate pushdown).</li>
+<li>Reorder predicates so that the DBMS applies the most selective one first.</li>
+<li>Breakup a complex predicate and pushing it down (split conjunctive predicates)</li>
+</ul>
+</li>
+</ul>
+<h3 id="cost-estimations">Cost Estimations</h3>
+<ul>
+<li>
+<p>最大的代价还是磁盘的I/O，这里的优化就是减少I/O</p>
+</li>
+<li>
+<p>postgres:用的”magic”，黑魔法</p>
+</li>
+<li>
+<p>老牌的商用数据库在优化的时候比开源的要保守和细得多，DB2就会结合事务，锁，用户数整体考虑，pg就比较激进和简单了</p>
+</li>
+<li>
+<p><strong>Selection Statistics</strong></p>
+<ul>
+<li>这个就是参数，关系型数据库会对每张表做统计信息，这样你分析才有参数</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter15-2.png" title="/img/CMU 15-445 Database Systems/chapter15-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter15-2.png" data-sub-html="<h2>强制立即更新统计信息的命令</h2>">
+        
+    </a><figcaption class="image-caption">强制立即更新统计信息的命令</figcaption>
+    </figure>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #14: Query Execution II</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/</link>
     <pubDate>Fri, 12 Apr 2024 21:01:51 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/</guid>
@@ -2197,198 +2293,6 @@ mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争�
 </ul>
 </li>
 </ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #04: Database Storage (Part II)</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/</link>
-    <pubDate>Mon, 25 Mar 2024 21:32:28 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter4/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-04-database-storage-part-ii">Lecture #04: Database Storage (Part II)</h2>
-<h3 id="log-structured-storage">Log-Structured Storage</h3>
-<ul>
-<li>
-<p>Slotted-Page(页+槽)的存储结构遇到的一些问题</p>
-<ul>
-<li><strong>Fragmentation</strong>:删除元组可能会在页中留下空白</li>
-<li><strong>Useless Disk I/O</strong>:更新一组数据，但是你要把这个数据所在的页从磁盘load到内存里面</li>
-<li><strong>Random Disk I/O</strong>:如果说你随机更新了很多数据，那么可能需要从磁盘load好多页到内存，时间会变得非常慢</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>另一种解决思路:<strong>Log-Structured Storage</strong></li>
-</ul>
-<blockquote>
-<p>Log-structured Storage is based on the Log-Structured File System (LSFS) by Rosenblum and Ousterhout’92 and Log-structured Merge Trees (LSM Tree) by O’Neil, Cheng</p>
-<p>LSM-tree也是数据库里面一个重要的知识点</p>
-</blockquote>
-<ul>
-<li>DBMS不存储元组，而是只存储元组更改的记录，DBMS将新的日志添加到内存缓冲区中，不检查之前记录，然后按照更改数据写回到磁盘里面(这个顺序写盘就能解决上面的<strong>Random Disk I/O</strong>问题)，</li>
-<li>这种模式对于写数据库的操作来说速度很快（直接写一个log刷回到盘里面就行了），这个在K-V数据库里面很流行</li>
-<li>读记录的时候则需要从最旧的顺序扫描日志文件，从而获取元组的最新内容，为了提高效率，log也会使用索引来加快查找速度</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-1.png" title="/img/CMU 15-445 Database Systems/chapter4-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-1.png" data-sub-html="<h2>log&#43;索引</h2>">
-        
-    </a><figcaption class="image-caption">log+索引</figcaption>
-    </figure>
-<ul>
-<li>
-<p><strong>Compaction</strong></p>
-</li>
-<li>
-<p>如果就一直记录日志，那么磁盘肯定有一天会不够写，所以DBMS需要定期压缩日志，压缩后的日志甚至不用按照时间戳排序，而是按照id排序（找的更快）</p>
-</li>
-<li>
-<p>按层压缩（<strong>Level Compaction</strong>）</p>
-<ul>
-<li>代表:RocksDB(RocksDB第一/二/三层文件)</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-2.png" title="/img/CMU 15-445 Database Systems/chapter4-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-2.png" data-sub-html="<h2>Level0的两个文件内部可以压缩，但是如果update A在文件一，delete A在文件二，那这两条数据就没法合并压缩了</h2>">
-          
-      </a><figcaption class="image-caption">Level0的两个文件内部可以压缩，但是如果update A在文件一，delete A在文件二，那这两条数据就没法合并压缩了</figcaption>
-      </figure>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-3.png" title="/img/CMU 15-445 Database Systems/chapter4-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-3.png" data-sub-html="<h2>解决方案：直接读取这两个文件中的日志，一起压缩到Level1的一个新文件里面</h2>">
-          
-      </a><figcaption class="image-caption">解决方案：直接读取这两个文件中的日志，一起压缩到Level1的一个新文件里面</figcaption>
-      </figure>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-4.png" title="/img/CMU 15-445 Database Systems/chapter4-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-4.png" data-sub-html="<h2>这种情况可以一直递归压缩</h2>">
-          
-      </a><figcaption class="image-caption">这种情况可以一直递归压缩</figcaption>
-      </figure>
-<ul>
-<li>RocksDB最多能压缩到第七层</li>
-<li>读取的时候就从0层开始读，读不到就再读下一层</li>
-</ul>
-</li>
-<li>
-<p>通用压缩（<strong>Universal Compaction</strong>）</p>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-5.png" title="/img/CMU 15-445 Database Systems/chapter4-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-5.png" data-sub-html="<h2>不用分层，能合并就合并</h2>">
-          
-      </a><figcaption class="image-caption">不用分层，能合并就合并</figcaption>
-      </figure>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Log-Structured Storage</strong>的利弊
-<ul>
-<li>快速的顺序写入，对于需要频繁更改的数据库来说效率提示很多</li>
-<li>读取可能很慢（要读很多日志）</li>
-<li>压缩日志的代价很大</li>
-<li>受制于写入放大（一个逻辑写入可能有多个物理写入，比如UPDATE ALL STUDENT age TO age + 1，对于这种语句到它的日志里面要写一堆）</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-6.png" title="/img/CMU 15-445 Database Systems/chapter4-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-6.png" data-sub-html="<h2>Log-Structured Storage代表数据库</h2>">
-        
-    </a><figcaption class="image-caption">Log-Structured Storage代表数据库</figcaption>
-    </figure>
-<h3 id="index-organized-storage">Index-Organized Storage</h3>
-<ul>
-<li>加入额外的索引存储，从而提高查找的速度</li>
-</ul>
-<h3 id="data-representation">Data Representation</h3>
-<blockquote>
-<p>There are five high level datatypes that can be stored in tuples: <strong>integers, variable-precision numbers, fixedpoint precision numbers, variable length values, and dates/times.</strong></p>
-</blockquote>
-<ul>
-<li>
-<p>元组中的数据本质就是字节数组，你要规定如何存储和解释这些字节，从而存储你的信息</p>
-<ul>
-<li>
-<p>字节对齐的问题</p>
-<ul>
-<li><strong>Padding</strong>:在属性后添加空位，确保元组对其</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-7.png" title="/img/CMU 15-445 Database Systems/chapter4-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-7.png" data-sub-html="<h2>属性长度不够，后面填充字节码</h2>">
-            
-        </a><figcaption class="image-caption">属性长度不够，后面填充字节码</figcaption>
-        </figure>
-<ul>
-<li>
-<p><strong>Reordering</strong>:重新排列属性+填充</p>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-8.png" title="/img/CMU 15-445 Database Systems/chapter4-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-8.png" data-sub-html="<h2>能凑到一块的先凑起来，然后再填充</h2>">
-              
-          </a><figcaption class="image-caption">能凑到一块的先凑起来，然后再填充</figcaption>
-          </figure>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>其他数据表示：整数，字符串这俩都很好记录，字符串可能头部需要存储一个长度，但是也不难，这里重点讨论浮点数/高精度和时间的表示</p>
-</li>
-<li>
-<p>浮点数:IEEE-754下面的标准转到十进制是有误差的，这个在金融等需要绝对准确的领域里面是无法忍受的</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-9.png" title="/img/CMU 15-445 Database Systems/chapter4-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-9.png" data-sub-html="<h2>0.1 &#43; 0.2 != 0.3</h2>">
-        
-    </a><figcaption class="image-caption">0.1 + 0.2 != 0.3</figcaption>
-    </figure>
-<ul>
-<li>解决方案：高精度</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-10.png" title="/img/CMU 15-445 Database Systems/chapter4-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-10.png" data-sub-html="<h2>pg的高精度</h2>">
-        
-    </a><figcaption class="image-caption">pg的高精度</figcaption>
-    </figure>
-<hr>
-<ul>
-<li>
-<p><strong>LARGE VALUES</strong></p>
-</li>
-<li>
-<p>某一段数据很长造成的，比如在存储字符串的地方存了一本电子小说的内容，数据长到比最小的页还长，整个页都没法完整地把这个数据给存储下来</p>
-</li>
-<li>
-<p>解决方案:<strong>Overflow Page</strong>，新开一个“溢出页”，把大的数据存到这个新开的页里面，然后原始页里面存放这个数据的地方去存放这个新开的页的地址</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-11.png" title="/img/CMU 15-445 Database Systems/chapter4-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-11.png" data-sub-html="<h2>溢出页和原有页的关系</h2>">
-        
-    </a><figcaption class="image-caption">溢出页和原有页的关系</figcaption>
-    </figure>
-<ul>
-<li>
-<p>如果溢出页还不够：后面再加溢出页（当成拉链法去理解就好）</p>
-</li>
-<li>
-<p><strong>使用数据库尽量避免这样的情况，很损害数据库的性能</strong></p>
-<ul>
-<li>一种方案是存成文件，然后数据库里面存文件路径，缺点就是这个文件里面数据没有持久性和事务保护</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Null Data Types</strong></li>
-<li>在DBMS里面表示null的方法
-<ul>
-<li><strong>Null Column Bitmap Header</strong>：在数据的头部集中存储一个bitmap，这个bitmap就表示本条数据里面那些属性是null，这是最常见的方法</li>
-<li><strong>Special Values</strong>：用特殊值来标记null，比如给整数标定一个int32min来表示null</li>
-<li><strong>Per Attribute Null Flag</strong>：给每个属性前面都加一位来表示这个属性是不是为null，不推荐，因为不节约内存，多这一位的数据可能会造成内存需要填充好几位才能维持字节对齐</li>
-</ul>
-</li>
-</ul>
-<h3 id="system-catalogs">System Catalogs</h3>
-<ul>
-<li>每个数据库都有一个System Catalogs，里面的表存自己的元数据（有什么表，表结构，用户，用户权限，统计信息，日志信息。。。）</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-12.png" title="/img/CMU 15-445 Database Systems/chapter4-12.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-12.png" data-sub-html="<h2>MySQL的information schema</h2>">
-        
-    </a><figcaption class="image-caption">MySQL的information schema</figcaption>
-    </figure>
-<ul>
-<li>每个数据库里面都有information schema，但是存的东西不一样</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter4-13.png" title="/img/CMU 15-445 Database Systems/chapter4-13.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter4-13.png" data-sub-html="<h2>MySQL的information schema里面的TABLES表，存了这个数据库里面所有表的信息</h2>">
-        
-    </a><figcaption class="image-caption">MySQL的information schema里面的TABLES表，存了这个数据库里面所有表的信息</figcaption>
-    </figure>
 ]]></description>
 </item>
 </channel>
