@@ -4,7 +4,82 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 15 Apr 2024 12:47:46 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 15 Apr 2024 16:04:09 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #16: Concurrency Control Theory</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter16/</link>
+    <pubDate>Mon, 15 Apr 2024 16:04:09 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter16/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-16-concurrency-control-theory">Lecture #16: Concurrency Control Theory</h2>
+<h3 id="motivation">Motivation</h3>
+<ul>
+<li>Lost Update Problem (Concurrency Control):数据竞争</li>
+<li>Durability Problem (Recovery):故障恢复</li>
+</ul>
+<h3 id="transactions">Transactions</h3>
+<ul>
+<li>
+<p>特点：ACID</p>
+</li>
+<li>
+<p>Atomicity: Atomicity ensures that either all actions in the transaction happen, or none happen.</p>
+</li>
+<li>
+<p>Consistency: If each transaction is consistent and the database is consistent at the beginning of the transaction, then the database is guaranteed to be consistent when the transaction completes. Data is consistent if it satisfies all validation rules such as constraints, cascades and triggers.</p>
+</li>
+<li>
+<p>Isolation: Isolation means that when a transaction executes, it should have the illusion that it is isolated from other transactions. Isolation ensures that concurrent execution of transactions should have the same resulting database state as a sequential execution of the transactions.</p>
+</li>
+<li>
+<p>Durability: If a transaction commits, then its effects on the database should persist.</p>
+</li>
+</ul>
+<h3 id="acid-atomicity">ACID: Atomicity</h3>
+<ul>
+<li>
+<p>Approach #1: Logging:常用的方法就是记日至，典型的就是undo log，日志也能提交性能（异步刷磁盘）</p>
+</li>
+<li>
+<p>Approach #2: Shadow Paging:备份自己改的那些页</p>
+</li>
+</ul>
+<h3 id="acid-consistency">ACID: Consistency</h3>
+<ul>
+<li>后面的事务能看见前面事务的变动</li>
+<li>业务的一致性是后端程序员保证的</li>
+</ul>
+<h3 id="acid-isolation">ACID: Isolation</h3>
+<ul>
+<li>好像就我一个人在用数据库</li>
+<li>但是实际上是好多txn在一起跑</li>
+<li>这边也是两大流派
+<ul>
+<li>悲观控制</li>
+<li>乐观控制+回滚</li>
+</ul>
+</li>
+<li>三种冲突
+<ul>
+<li>R-W</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter16-1.png" title="/img/CMU 15-445 Database Systems/chapter16-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter16-1.png" data-sub-html="<h2>R-W也叫不可重复读</h2>">
+        
+    </a><figcaption class="image-caption">R-W也叫不可重复读</figcaption>
+    </figure></li>
+<li>W-R</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter16-2.png" title="/img/CMU 15-445 Database Systems/chapter16-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter16-2.png" data-sub-html="<h2>W-R也叫脏读</h2>">
+        
+    </a><figcaption class="image-caption">W-R也叫脏读</figcaption>
+    </figure></li>
+<li>W-W</li>
+</ul>
+</li>
+</ul>
+<h3 id="acid-durability">ACID: Durability</h3>
+<ul>
+<li>一旦commit，必须保证持久化到磁盘上面</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #15: Query Planning &amp; Optimization</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter15/</link>
     <pubDate>Mon, 15 Apr 2024 12:47:46 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter15/</guid>
@@ -1873,422 +1948,6 @@ mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争�
 </li>
 <li>
 <p>Dictionary Caches</p>
-</li>
-</ul>
-</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #05: Storage Models &amp; Compression</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter5/</link>
-    <pubDate>Mon, 08 Apr 2024 10:31:51 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter5/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-05-storage-models--compression">Lecture #05: Storage Models &amp; Compression</h2>
-<h3 id="database-workloads">DataBase WorkLoads</h3>
-<ul>
-<li>
-<p><strong>On-Line Transaction Processing(OLTP)</strong>:Fast operations that only read/update a small amount of data each time.</p>
-<ul>
-<li>快速操作，事务简单，读/写数据量很小</li>
-<li>通常处理的写操作多于读操作</li>
-<li>例子：银行转一次钱</li>
-<li>往往意味着高并发，比如支付宝，微信支付</li>
-</ul>
-</li>
-<li>
-<p><strong>On-Line Analytical Processing(OLAP):</strong> Complex queries that read of a lot of data to computer aggregates</p>
-<ul>
-<li>一般是公司要对某一段时间的所有数据进行统计分析的时候使用</li>
-<li>事务复杂，且要读大量的数据，从现有的大量数据中分析派生出新的数据</li>
-<li>典型代表：数仓，深度学习的数据收集（比如常见的深度学习模型的训练）</li>
-</ul>
-</li>
-<li>
-<p><strong>Hybrid(混合) Transaction + Analytical Processing(HTAP):</strong> OLTP+OLAP together on the same database instance</p>
-<ul>
-<li>希望这个数据库两种事务都能应对（兼顾）</li>
-<li>很像之前讲的disk和memory的结合体（</li>
-</ul>
-</li>
-<li>
-<p>公司方案:<strong>BIFURCATED ENVIRONMENT</strong>：OLTP和OLAP分别布置</p>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-1.png" title="/img/CMU 15-445 Database Systems/chapter5-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-1.png" data-sub-html="<h2>OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</h2>">
-        
-    </a><figcaption class="image-caption">OLTP负责对用户的事务处理，在流量低的时候将数据整合到数仓里面，分析师再过来操作数仓进行数据分析</figcaption>
-    </figure>
-<ul>
-<li>
-<p>HTAP或许能避免上面<strong>BIFURCATED ENVIRONMENT</strong>(要准备两套数据库，而且数据还要从这两套系统中来回迁移)的问题，但是也有可能是两头都跑不好</p>
-</li>
-<li>
-<p>行存的模型适合OLTP，列存(DSM)的模型适合OLAP</p>
-</li>
-<li>
-<p>现在很多主流数据库也会加入列存引擎来处理OLAP的事务</p>
-</li>
-</ul>
-<h3 id="storage-models">Storage Models</h3>
-<ul>
-<li>这部分主要讲数据库的数据在磁盘上面不同的物理布局，对于不同的场景，不同的布局会有不一样的效果</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>N-Ary Storage Model (NSM)</strong></p>
-<ul>
-<li>
-<p><u>The DBMS stores (almost) all attributes for a single tuple contiguously in a single page</u>(一个元组里面是所有属性，连续地存储在一个页中)</p>
-</li>
-<li>
-<p>Also known as a “<strong>row store</strong>”（国内叫“行存”）</p>
-</li>
-<li>
-<p>非常适合OLTP的工作负载，读的东西少，但是一直在频繁的写数据，行存的模型对写数据很友好</p>
-</li>
-<li>
-<p>NSM数据库页面大小通常是硬件页面的常数倍(m $\times$ 4KB)：Oracle(4KB),Postgres(8KB),MySQL(16KB)</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>NSM: PHYSICAL ORGANIZATION</strong></p>
-<ul>
-<li>
-<p>无论是定长还是不定长度，这个NSM都是用的之前的slotted page的存储模型，元组就连续的存储在页里面，再加上一个slot array来做标定，header来存储头部必要的一些信息</p>
-</li>
-<li>
-<p>DBMS区分物理元组的唯一标识：<strong>record id</strong>(page#,slot#)，注意这个<strong>record id</strong>是页标识+槽标识构造的，不是数据库主键/唯一键，一定要区分!</p>
-</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-2.png" title="/img/CMU 15-445 Database Systems/chapter5-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-2.png" data-sub-html="<h2>slotted page的物理存储模型</h2>">
-        
-    </a><figcaption class="image-caption">slotted page的物理存储模型</figcaption>
-    </figure>
-<ul>
-<li><strong>NSM</strong>性能上的缺点
-<ul>
-<li>进行OLAP的操作的时候会有很多无用的数据，浪费效率</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-3.png" title="/img/CMU 15-445 Database Systems/chapter5-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-3.png" data-sub-html="<h2>OLAP往往是所有行的扫描，但是只要其中的几列数据，其他列的数据是无用的，但是DBMS就要为此扫描所有页，大量的I/O造成了效率低下</h2>">
-        
-    </a><figcaption class="image-caption">OLAP往往是所有行的扫描，但是只要其中的几列数据，其他列的数据是无用的，但是DBMS就要为此扫描所有页，大量的I/O造成了效率低下</figcaption>
-    </figure>
-<ul>
-<li><strong>NSM:SUMMARY</strong>
-<ul>
-<li><strong>Advantages</strong>
-<ul>
-<li>Fast inserts, updates, and deletes</li>
-<li>Good for queries that need the entire tuple(OLTP)</li>
-<li>Can use index-oriented physical storage for clustering</li>
-</ul>
-</li>
-<li><strong>Disadvantages</strong>
-<ul>
-<li>Not good for scanning large portions of the table and/or a subset of the attributes</li>
-<li>Terrible memory locality for OLAP access patterns.(数据分散到了多个页，属性列不是连续的)</li>
-<li>Not ideal for compression because of multiple value domains within a single page.(压缩数据靠的是数据的相似性，同一列的数据相似性才高，但是NSM是按行存不同列的数据，每一页数据的相似性很低，很难压缩)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Decomposition Storage Model (DSM)</strong></p>
-<ul>
-<li>The DBMS stores a single attribute for all tuples contiguously in a block of data.</li>
-<li>Also known as a “<strong>column store</strong>”(国内叫“列存”)</li>
-<li>非常适合OLAP的工作负载，大量的读取数据，而且往往都要的是某一列属性</li>
-<li>DBMS这个时候主要就负责读写的时候拆分和组合属性</li>
-</ul>
-</li>
-<li>
-<p><strong>DSM: PHYSICAL ORGANIZATION</strong></p>
-<ul>
-<li>
-<p>Store attributes and metadata (e.g.nulls) in separate arrays of fixedlength values.(固定长度的属性最好存储，数组完美匹配)</p>
-</li>
-<li>
-<p>唯一标识：偏移量</p>
-</li>
-<li>
-<p>难的是处理变长属性，需要在前面在加上一个id数据来做为标识，这样其实造成了数据冗余（id存了好几次）</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-6.png" title="/img/CMU 15-445 Database Systems/chapter5-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-6.png" data-sub-html="<h2>属性定长和不定长的两种存储方式</h2>">
-        
-    </a><figcaption class="image-caption">属性定长和不定长的两种存储方式</figcaption>
-    </figure>
-</li>
-<li>
-<p>Maintain a separate file per attribute with a dedicated header area for metadata about the entire column.(一个属性一个文件，加上Header来处理元数据)</p>
-</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-4.png" title="/img/CMU 15-445 Database Systems/chapter5-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-4.png" data-sub-html="<h2>DSM的文件结构</h2>">
-        
-    </a><figcaption class="image-caption">DSM的文件结构</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-5.png" title="/img/CMU 15-445 Database Systems/chapter5-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-5.png" data-sub-html="<h2>OLAP下只需要找对应属性的页，不需要像NSM那样全页扫描</h2>">
-        
-    </a><figcaption class="image-caption">OLAP下只需要找对应属性的页，不需要像NSM那样全页扫描</figcaption>
-    </figure>
-<ul>
-<li>
-<p><strong>DSM:SUMMARY</strong></p>
-<ul>
-<li><strong>Advantages</strong>
-<ul>
-<li>Reduces the amount wasted I/O per query because the DBMS only reads the data that it needs.</li>
-<li>Faster query processing because of increased locality and cached data reuse.（属性上面的局部性 &gt; 行的局部性）</li>
-<li>Better data compression (more on this in a few slides).</li>
-</ul>
-</li>
-<li><strong>Disadvantages</strong>
-<ul>
-<li>Slow for point queries, inserts, updates, and deletes because of tuple splitting/stitching/reorganization.</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>OBSERVATION</strong></p>
-<ul>
-<li>OLAP往往也要面临JOIN这样的操作，但是DSM的存储模型在JOIN上面的操作不是很优秀</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>PAX STORAGE MODEL</strong></p>
-<ul>
-<li>
-<p>Partition Attributes Across (PAX) is a <strong>hybrid storage model</strong> that vertically partitions attributes within a database page.</p>
-</li>
-<li>
-<p>The goal is to get the benefit of <strong>faster processing on columnar storage while retaining</strong> the spatial locality benefits of <strong>row storage</strong>.（保留行存优势地前提下，在列处理上面提速来匹配OLAP操作）</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>PAX: PHYSICAL ORGANIZATION</strong></p>
-<ul>
-<li>水平地将行划分为组，然后将这组的属性进行列存</li>
-<li>每个页的Header里面会标明这个页里面每一组的偏移量
-<ul>
-<li>如果这个文件不可变，Header就存到页脚</li>
-</ul>
-</li>
-<li>每一组都会有自己的<strong>metadata header</strong>(比如标明那一行那个属性是null，其他有关这个组的信息)</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-7.png" title="/img/CMU 15-445 Database Systems/chapter5-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-7.png" data-sub-html="<h2>PAX的物理结构</h2>">
-        
-    </a><figcaption class="image-caption">PAX的物理结构</figcaption>
-    </figure>
-<h3 id="database-compression">Database Compression</h3>
-<ul>
-<li>
-<p>When a DBMS uses compression, it is always lossless because people don’t like losing data. Any kind of lossy compression must be performed at the application level.（数据库只能做无损压缩，有损压缩只能在应用程序里面做，数据库是绝对不给做的）</p>
-</li>
-<li>
-<p><strong>COMPRESSION GRANULARITY</strong>（压缩的力度）</p>
-</li>
-</ul>
-<h3 id="naïve-compression">NAÏVE COMPRESSION</h3>
-<ul>
-<li>
-<p><strong>Block-Level</strong>：压缩同一个表里面的元组块</p>
-</li>
-<li>
-<p>使用通用的算法来压缩数据</p>
-</li>
-<li>
-<p>压缩的范围仅限于提供的数据</p>
-</li>
-<li>
-<p>LZO (1996), LZ4 (2011), Snappy (2011),Oracle OZIP (2014), Zstd (2015)</p>
-</li>
-</ul>
-<p>需要考虑的因素</p>
-<ul>
-<li>计算的开销</li>
-<li>压缩和解压的速度</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-8.png" title="/img/CMU 15-445 Database Systems/chapter5-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-8.png" data-sub-html="<h2>MySQL INNODB的解压过程，把压缩好的数据读到缓存池再解压</h2>">
-        
-    </a><figcaption class="image-caption">MySQL INNODB的解压过程，把压缩好的数据读到缓存池再解压</figcaption>
-    </figure>
-<ul>
-<li>这个模式的一个弊端就是每次读写数据的时候都先要做解码，效率很低</li>
-<li>另一个思路：能不能不解码，而是对查询的数据使用算法变换，然后操作压缩后的数据</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-9.png" title="/img/CMU 15-445 Database Systems/chapter5-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-9.png" data-sub-html="<h2>这个就是上面的想法，把SQL中的数据进行变换，然后直接操作压缩的数据</h2>">
-        
-    </a><figcaption class="image-caption">这个就是上面的想法，把SQL中的数据进行变换，然后直接操作压缩的数据</figcaption>
-    </figure>
-<h3 id="columnar-compression">COLUMNAR COMPRESSION</h3>
-<ul>
-<li>
-<p><strong>Column-Level</strong>：压缩属性值的列(DSM-only)，也叫<strong>COLUMNAR COMPRESSION</strong>（柱状压缩）</p>
-</li>
-<li>
-<p><strong>Run-length Encoding</strong></p>
-<ul>
-<li>将单个列中的相同值改为三元组
-<ul>
-<li>属性的值</li>
-<li>该值在这一列的起始位置</li>
-<li>该值的元素个数</li>
-</ul>
-</li>
-<li>适合的情景是该列对属性进行智能排序，这样可以获取最大化压缩的机会</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-10.png" title="/img/CMU 15-445 Database Systems/chapter5-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-10.png" data-sub-html="<h2>Run-length Encoding算法演示</h2>">
-        
-    </a><figcaption class="image-caption">Run-length Encoding算法演示</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-11.png" title="/img/CMU 15-445 Database Systems/chapter5-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-11.png" data-sub-html="<h2>如果只有GROUP BY的操作，那么压缩的会更好</h2>">
-        
-    </a><figcaption class="image-caption">如果只有GROUP BY的操作，那么压缩的会更好</figcaption>
-    </figure>
-<ul>
-<li><strong>Bit-Packing Encoding</strong>
-<ul>
-<li>如果整数属性的值很小，那么二进制前面的几位就可以不要</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-12.png" title="/img/CMU 15-445 Database Systems/chapter5-12.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-12.png" data-sub-html="<h2>bit packing压缩方案</h2>">
-        
-    </a><figcaption class="image-caption">bit packing压缩方案</figcaption>
-    </figure>
-<ul>
-<li><strong>PATCHING/MOSTLY ENCODING</strong>
-<ul>
-<li>当属性中的大多数值小于对应类型的最大值时，使用更小的数据类型来对其进行存储，对于少数数值很大的值仍然使用原来的数据类型来进行存储</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-13.png" title="/img/CMU 15-445 Database Systems/chapter5-13.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-13.png" data-sub-html="<h2>int32-&gt;int8，Header会标定一下那个数据还是用的int32</h2>">
-        
-    </a><figcaption class="image-caption">int32-&gt;int8，Header会标定一下那个数据还是用的int32</figcaption>
-    </figure>
-<ul>
-<li>
-<p><strong>Bit-map Encoding</strong></p>
-<ul>
-<li>
-<p>对于一些属性，它的值就那些（比如枚举）</p>
-</li>
-<li>
-<p>那直接用位运算存几个bit里面就完全够了</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-14.png" title="/img/CMU 15-445 Database Systems/chapter5-14.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-14.png" data-sub-html="<h2>一共只有Y和N，那直接用两位bit就够了</h2>">
-        
-    </a><figcaption class="image-caption">一共只有Y和N，那直接用两位bit就够了</figcaption>
-    </figure>
-</li>
-<li>
-<p>但是从上面的图上面来看这个模式没有完全压榨二进制位运算的空间（比如只能用01和10，00和11都浪费了），所以在一些情况下压缩不如不压缩</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Delta Encoding</strong></p>
-<ul>
-<li>
-<p>记录和上一列的差别，不记录实际数据</p>
-</li>
-<li>
-<p>基础值内联到表里面或者单独查询，有这个基础值下面的值都能推断出来了</p>
-</li>
-<li>
-<p>配合<strong>Run-Length-Encoding</strong>压缩效果会更好</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-15.png" title="/img/CMU 15-445 Database Systems/chapter5-15.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-15.png" data-sub-html="<h2>先Delta Encoding再Run-Length-Encoding</h2>">
-        
-    </a><figcaption class="image-caption">先Delta Encoding再Run-Length-Encoding</figcaption>
-    </figure>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>DICTIONARY COMPRESSION</strong></p>
-<ul>
-<li>
-<p>Replace frequent values with smaller fixed-length codes and then maintain a mapping (dictionary) from the codes to the original values(搞一个K-V的映射，然后把原来数据的V换成长度更小的K)</p>
-</li>
-<li>
-<p>Most widely used native compression scheme in DBMSs.</p>
-</li>
-<li>
-<p>理想的字典查询是希望在单点查询和范围查询上面都有良好的性能</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-16.png" title="/img/CMU 15-445 Database Systems/chapter5-16.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-16.png" data-sub-html="<h2>建一个Hash表，然后压缩原表</h2>">
-        
-    </a><figcaption class="image-caption">建一个Hash表，然后压缩原表</figcaption>
-    </figure>
-</li>
-<li>
-<p>字典需要有两个功能</p>
-<ul>
-<li>Eecode/Locate：给了Key要能编码</li>
-<li>Decode/Extract：给了Value能解压成Key</li>
-<li><strong>所以即使上面会用Hash这个词，但是这个结构不能靠Hash函数来实现（Hash只能正着算，不能反向算）</strong></li>
-</ul>
-</li>
-<li>
-<p>字典还要保序，不能说编完码之后你原表的数据顺序就变了，因为你要考虑范围查找这种东西</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter5-17.png" title="/img/CMU 15-445 Database Systems/chapter5-17.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter5-17.png" data-sub-html="<h2>如果保序，范围查找对SQL里面的key做一次Hash就可以操作压缩后的数据了</h2>">
-        
-    </a><figcaption class="image-caption">如果保序，范围查找对SQL里面的key做一次Hash就可以操作压缩后的数据了</figcaption>
-    </figure>
-</li>
-<li>
-<p>字典压缩还有一个好处就是如果查询中有DISTINCT这种关键字，那么不需要进行全表扫描，直接去字典里面扫描一遍Value就够了</p>
-</li>
-<li>
-<p>数据结构的选择</p>
-<ul>
-<li>Array
-<ul>
-<li>一个数组包含可变长度的字符串，一个数组包含指向映射到前面数组字符串的指针</li>
-<li>更新成本很高，只能用在不可变文件中</li>
-</ul>
-</li>
-<li>Hash Table
-<ul>
-<li>快速，紧凑</li>
-<li>无法进行范围查询和前缀查询</li>
-</ul>
-</li>
-<li>B+ Tree
-<ul>
-<li>比Hash Table要慢，而且占用更多的内存</li>
-<li>支持范围查询和前缀查询</li>
-</ul>
-</li>
-</ul>
 </li>
 </ul>
 </li>
