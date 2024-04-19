@@ -4,7 +4,194 @@
         <link>https://Jungle430.github.io/categories/cmu-15-445-database-systems/</link>
         <description>CMU 15-445 Database Systems - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 15 Apr 2024 16:04:09 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/cmu-15-445-database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Fri, 19 Apr 2024 17:58:06 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/cmu-15-445-database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #17: Two-Phase Locking</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/</link>
+    <pubDate>Fri, 19 Apr 2024 17:58:06 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-17-two-phase-locking">Lecture #17: Two-Phase Locking</h2>
+<h3 id="transaction-locks">Transaction Locks</h3>
+<ul>
+<li>
+<p>在操作数据的时候通过DBMS的锁管理器给数据上一把锁，这样就可以避免并发的数据竞争问题</p>
+</li>
+<li>
+<p>但是这个锁怎么加怎么解的方案需要设计</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-1.png" title="/img/CMU 15-445 Database Systems/chapter17-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-1.png" data-sub-html="<h2>利用锁保证数据安全</h2>">
+        
+    </a><figcaption class="image-caption">利用锁保证数据安全</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>Lock Types</strong></p>
+<ul>
+<li><strong>S-LOCK</strong>: Shared locks for reading(Reading Lock)</li>
+<li><strong>X-LOCK</strong>: Exclusive locks for writing(Writing Lock)</li>
+</ul>
+</li>
+<li>
+<p>仅仅W(R)的时候上锁，修改完了解锁是无法修复串行化带来的问题，因为这个操作在一个事务里面只是一段，没有锁这个事务</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-2.png" title="/img/CMU 15-445 Database Systems/chapter17-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-2.png" data-sub-html="<h2>lock -&gt; W(R) -&gt; unlock下的串行问题</h2>">
+        
+    </a><figcaption class="image-caption">lock -&gt; W(R) -&gt; unlock下的串行问题</figcaption>
+    </figure>
+<h3 id="two-phase-locking2pl">Two-Phase Locking(2PL)</h3>
+<ul>
+<li>这个就是后面的研究人员为了避免上面加锁还是没有解决并发问题提出来的一个理论，这个加锁的理论和上面最大的不同就是不用预先知道整个事务的全貌（前面的加锁方案好多都是事后诸葛亮，但是放在真实场景下你又不可能回滚去干这玩意）</li>
+<li>2PL分为两个阶段
+<ul>
+<li><strong>Phase #1– Growing</strong>: In the growing phase, each transaction requests the locks that it needs from the DBMS’s lock manager. The lock manager grants/denies these lock requests.</li>
+<li><strong>Phase #2– Shrinking</strong>: Transactions enter the shrinking phase immediately after they release their first
+lock. In the shrinking phase, transactions are only allowed to release locks. They are not allowed to acquire
+new ones.</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-3.png" title="/img/CMU 15-445 Database Systems/chapter17-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-3.png" data-sub-html="<h2>2PL Two Phases</h2>">
+        
+    </a><figcaption class="image-caption">2PL Two Phases</figcaption>
+    </figure>
+<ul>
+<li>2PL的问题: <strong>cascading aborts</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-4.png" title="/img/CMU 15-445 Database Systems/chapter17-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-4.png" data-sub-html="<h2>Shrinking阶段如果Rollback，会造成其他事务读到了你上面修改过但未commit的数据</h2>">
+        
+    </a><figcaption class="image-caption">Shrinking阶段如果Rollback，会造成其他事务读到了你上面修改过但未commit的数据</figcaption>
+    </figure>
+<ul>
+<li>Solution: <strong>Strong Strict 2PL (aka Rigorous 2PL)</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-5.png" title="/img/CMU 15-445 Database Systems/chapter17-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-5.png" data-sub-html="<h2>Strong Strict 2PL解决了cascading aborts问题</h2>">
+        
+    </a><figcaption class="image-caption">Strong Strict 2PL解决了cascading aborts问题</figcaption>
+    </figure>
+<hr>
+<h3 id="deadlock-handling">Deadlock Handling</h3>
+<ul>
+<li>2PL的另一个问题: <strong>Dead-Locks</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-6.png" title="/img/CMU 15-445 Database Systems/chapter17-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-6.png" data-sub-html="<h2>Strong Strict 2PL解决不了Dead-Lock的问题，出来环锁基本就解不开了</h2>">
+        
+    </a><figcaption class="image-caption">Strong Strict 2PL解决不了Dead-Lock的问题，出来环锁基本就解不开了</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Two ways of dealing with deadlocks:</p>
+<ul>
+<li>
+<p>→ Approach #1: <strong>Deadlock Detection</strong>:DBMS会维护一个waits-for graph来描述所有并发的事务谁在等谁的锁</p>
+<ul>
+<li>Nodes are transactions</li>
+<li>Edge from $T_i$ to $T_j$ if $T_i$ is waiting for $T_j$ to release a lock.</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-7.png" title="/img/CMU 15-445 Database Systems/chapter17-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-7.png" data-sub-html="<h2>The system periodically checks for cycles in waits-for graph and then decides how to break it.</h2>">
+        
+    </a><figcaption class="image-caption">The system periodically checks for cycles in waits-for graph and then decides how to break it.</figcaption>
+    </figure></li>
+<li>When the DBMS detects a deadlock, it will <strong>select a “victim” transaction to rollback(rollback or restart) to break the cycle.</strong></li>
+<li>权衡: 检测周期和死锁解开时间反相关，和开销正相关，还有就是干掉那个事务(执行时间，young还是old，执行了几条SQL，加了几个锁)</li>
+<li><strong>Deadlock handling: rollback length</strong>
+<ul>
+<li>Approach #1: <strong>Completely</strong> → Rollback entire txn and tell the application it was aborted.</li>
+<li>Approach #2: <strong>Partial (Savepoints)</strong> → DBMS rolls back a portion of a txn (to break deadlock) and then attempts to re-execute the undone queries.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>→ Approach #2: <strong>Deadlock Prevention</strong></p>
+<ul>
+<li>
+<p>给每个事务加上时间戳，越靠前的事务越老，越靠后的事务越年轻</p>
+</li>
+<li>
+<p>Older Timestamp = Higher Priority (e.g., T1 &gt; T2)</p>
+</li>
+<li>
+<p><strong>Wait-Die (“Old Waits for Young”)</strong>:</p>
+<ul>
+<li>If requesting txn has higher priority than holding txn, then requesting txn waits for holding txn. (老事务碰到年轻的事务占有锁，就等到年轻的事务解锁)</li>
+<li>Otherwise requesting txn aborts.(反之年轻的事务等老事务的锁，直接rollback自杀)</li>
+</ul>
+</li>
+<li>
+<p><strong>Wound-Wait (“Young Waits for Old”)</strong></p>
+<ul>
+<li>If requesting txn has higher priority than holding txn, then holding txn aborts and releases lock(老的事务要锁，发现整个锁被年轻的事务持有，直接rollback年轻的事务然后抢锁)</li>
+<li>Otherwise requesting txn waits.(年轻的事务发现锁在老的事务哪里，那就等老的事务解锁)</li>
+</ul>
+</li>
+<li>
+<p>这个主要的思路就是解决了构成死锁条件里面“持有并等待”的条件，冲突了直接开抢</p>
+</li>
+<li>
+<p>注意: restart的txn的时间戳用上次的时间戳，不然可能会造成饥饿</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="lock-granularities">Lock Granularities</h3>
+<ul>
+<li>
+<p>获取锁的时候是获取属性锁，行锁，表锁，还是库锁？整个需要DBMS来负责，需要保证你加锁的数量尽可能小(10亿行锁 vs 一张表锁)，也需要考虑对并发度的影响</p>
+</li>
+<li>
+<p><strong>Intention Lock</strong>:高层级的锁会有标记来判断下面有没有加锁的（比如表锁会记录下面的行有没有加锁的），节省了向下检索的效率</p>
+<ul>
+<li>意向锁也有S锁和X锁</li>
+</ul>
+</li>
+<li>
+<p>分层的锁在实际工程中相当好用</p>
+</li>
+<li>
+<p><strong>LOCK ESCALATION</strong></p>
+<ul>
+<li>如果下层的锁过多了，那么DBMS就会自动升级成高层的锁（怎么和JVM的锁升级机制的思想很像？）</li>
+</ul>
+</li>
+<li>
+<p>一般加锁都是DBMS自动负责的，但是用户可以用SQL手动来加锁</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-mysql" data-lang="mysql"><span class="line"><span class="cl"><span class="k">LOCK</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="o">&lt;</span><span class="n">qualification</span><span class="o">&gt;</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">UPDATE</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">#这样告诉了MYSQL这个不加读锁，加写锁(后面要UPDATE)
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="conclusion">CONCLUSION</h3>
+<ul>
+<li>
+<p>2PL is used in almost every DBMS.</p>
+</li>
+<li>
+<p>Automatically generates correct interleaving:</p>
+<ul>
+<li>Locks + protocol (2PL, SS2PL &hellip;)</li>
+<li>Deadlock detection + handling</li>
+<li>Deadlock prevention</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #16: Concurrency Control Theory</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter16/</link>
     <pubDate>Mon, 15 Apr 2024 16:04:09 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter16/</guid>
@@ -1780,174 +1967,6 @@ prioritized as such.</li>
 </li>
 <li>
 <p>分家指针指向原来的槽末尾再扩容就会回到0，此时一轮的扩容已经完成</p>
-</li>
-</ul>
-</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #06: Buffer Pools</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter6/</link>
-    <pubDate>Mon, 08 Apr 2024 20:02:45 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter6/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-06-buffer-pools">Lecture #06: Buffer Pools</h2>
-<h3 id="introduction">Introduction</h3>
-<ul>
-<li>DBMS需要负责管理数据在内存和磁盘之间移动，大多数情况下数据不能在磁盘中被处理，而是需要加载到内存中，处理完成后再写回磁盘，这个过程就需要Buffer Pools来进行管理，使得DBMS的其他部分可以像在内存中处理所有数据那样进行操作</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter6-1.png" title="/img/CMU 15-445 Database Systems/chapter6-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter6-1.png" data-sub-html="<h2>Buffer Pool模型</h2>">
-        
-    </a><figcaption class="image-caption">Buffer Pool模型</figcaption>
-    </figure>
-<ul>
-<li>一个DBMS需要考虑下面的两个方面
-<ul>
-<li><strong>Spatial Control</strong>: refers to where pages are physically written on disk. The goal of spatial control is to keep pages
-that are used together often as physically close together as possible on disk to possibly help with prefetching and
-other optimizations.(写磁盘的时候把需要经常一起用的页尽量写到磁盘的一块地方，这样下次用也能够一把加载到Buffer Pool里面)</li>
-<li><strong>Temporal Control</strong>: is deciding when to read pages into memory and when to write them to disk. Temporal control
-aims to minimize the number of stalls from having to read data from disk.(何时写回磁盘，对于一些热点写数据没有必要写一次刷一次盘，完全可以写好多次刷一次磁盘，因为刷盘的代价太大了)</li>
-</ul>
-</li>
-</ul>
-<h3 id="locks-vs-latches">Locks vs. Latches</h3>
-<ul>
-<li>
-<p>英语和概念性的问题</p>
-</li>
-<li>
-<p><strong>Locks</strong>: A lock is a higher-level, logical primitive that protects the contents of a database (e.g., tuples, tables, databases)
-from other transactions. Database systems can expose to the user which locks are being held as queries are run. Locks
-need to be able to roll back changes.(逻辑上面的锁，比如行锁/表锁/库锁，不关心底层实现，用于理论上面的讨论，为了防止死锁，一般这种锁都可以回滚)</p>
-</li>
-<li>
-<p><strong>Latches</strong>: A latch is a low-level protection primitive that the DBMS uses for the critical sections in its internal data
-structures (e.g., hash tables, regions of memory). Latches are held for only the duration of the operation being made.
-Latches do not need to be able to roll back changes. This is often implemented by simple language primitives like
-mutexs and/or conditional variables.(Locks的具体实现，比如数据竞争的区域是哪，用互斥锁还是信号量，悲观锁还是乐观锁)</p>
-</li>
-</ul>
-<h3 id="buffer-pool">Buffer Pool</h3>
-<ul>
-<li>
-<p>It is organized as an array of fixed-size pages. Each array entry is called a frame. 缓存池的本质就是内存里面的一块固定的数组，这个里面的一个元素就叫frame了，但是其实和page是一个东西</p>
-</li>
-<li>
-<p><strong>page directory</strong>:在数据库的磁盘上还维护了一个page directory，这个东西存的就是页id到页在磁盘物理位置的映射，所以说这个如果修改了必须写回到磁盘上，这样DBMS重新启动的时候才能找到，他也通常回一直在内存里面，因为你找页必须要先通过page directory去找页的物理位置</p>
-</li>
-<li>
-<p><strong>Buffer Pool Meta-data</strong>:缓存池必须要存储一些meta-data，从而保证正确性和提高缓存池的效率，常见的一些meta-data</p>
-<ul>
-<li>
-<p><strong>page table</strong>:这个是内存中的一个hash表，它的映射是页面id $\rightarrow$ 这个页在缓存池中的帧位置，因为页在缓存池里面的顺序和磁盘中的顺序往往不一致，所以需要page table来做这个额外的间接层，除了页在缓存池中的位置，page table还维护了其他meta-data，比如一个脏标志（说明这个页是不是脏页），引用计数器（有哪几个事务在用它），这个和page directory的一个大的区别就是他不用记在磁盘上</p>
-</li>
-<li>
-<p><strong>dirty-flag</strong>:这个就是上面page table维护的一个页的meta-data之一，当有线程对buffer pool中的某个页面进行修改的时候这个标志会被设置，这提醒这个页在被踢出buffer pool的时候必须要刷盘</p>
-</li>
-<li>
-<p><strong>Pin/reference counter</strong>:这个也是上面page table维护的一个页的meta-data之一，主要是记录有几个线程正在访问该页，线程必须在访问该页之前增加counter，如果counter &gt; 0，那么该页就无法被驱逐，counter不会管理并发事务那些东西，如果当前缓冲池的所有页都无法被踢，而且已经满了，就会抛出OOM(out-of-memory)的错误</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Memory Allocation Policies</strong></p>
-<ul>
-<li>
-<p>Memory in the database is allocated for the buffer pool according to two policies</p>
-</li>
-<li>
-<p><strong>Global policies</strong>: 考虑所有事务，来找到分配内存的最佳决策</p>
-</li>
-<li>
-<p><strong>local policies</strong>:做出决策的时候只考虑单个事务，即使他不适合整个工作负载，本地策略将帧分配给特定的事务，而不考虑并发事务的行为。但是，它仍然支持事务之间共享帧</p>
-</li>
-<li>
-<p>Most systems use a combination of both global and local policies.</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="buffer-pool-optimizations">Buffer Pool Optimizations</h3>
-<ul>
-<li>
-<p><strong>Multiple Buffer Pools</strong></p>
-<ul>
-<li>DBMS可以开好多个缓冲池，比如按照类型分（索引缓冲池，数据缓冲池），同一类似使用hash再分到不同的区域，这样每个缓冲池都可以选择适合自己的存储策略，同时分成多个缓存池也避免了一个缓冲池频繁的锁竞争问题</li>
-<li>Object IDs and hashing are two approaches to mapping desired pages to a buffer pool.
-<ul>
-<li><strong>Object IDs</strong>:维护一个id到缓存池区域的映射，这样根据页的id就能分配到对应的缓存池中，而且这个映射自己维护，你可以把分配的策略做的更细更智能，代价就是这个映射也是额外的内存开销</li>
-<li><strong>hashing</strong>:对页的id做hash来确定到那块缓存池</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Pre-fetching</strong>: 根据查询计划来对预取页面进行优化，比如处理第一组页面的时候把第二组页面给预提取到缓冲池中（这个在顺序扫描的时候常用），在索引扫描的时候处理某个叶子页的时候可以把这个叶子页的下一页也预提取到缓冲池中，这都提高了效率（这个下一页都是逻辑上的，不是物理上的）</p>
-</li>
-<li>
-<p><strong>Scan Sharing (Synchronized Scans)</strong>:尽量复用缓冲池里面的数据，比如第一个事务是SELECT ALL FROM A，第二个事务也是SELECT ALL FROM A，这个时候第一个事务把页3~6加载到缓冲池里面了，那第二个事务可以从这个地方跟着第一个事务开始扫，等把后面那些跟着第一个事务扫完之后再去扫前面的表，或者说这个时候有SELECT ALL FROM A LIMIT 100这种事务，可以直接到缓冲池里面找一张表拿100条数据就走（这也是为什么每次查询结果不一样的原因）</p>
-</li>
-<li>
-<p><strong>Buffer Pool Bypass</strong>:全表扫描（可能加SORT），大型JOIN这种东西大概率这次查询完了之后近期不会再差，这种数据除了查询时加载到内存中查询完了就扔出去，来节约缓冲池的资源</p>
-</li>
-</ul>
-<h3 id="buffer-replacement-policies">Buffer Replacement Policies</h3>
-<ul>
-<li>
-<p>要求是准确+快+开销小</p>
-</li>
-<li>
-<p><strong>COLCK</strong>:时钟轮询，如果有frame被访问过给打上标记，时钟循环看每一帧，有标记的清空标记，没有标记证明最近没人访问你，给踢出</p>
-</li>
-<li>
-<p><strong>LRU/LRU-K</strong>:看这两篇就够了</p>
-<ul>
-<li>
-<p><a href="https://jungle430.github.io/posts/cmu-15-445-database-systems/lru_and_lru-k/" target="_blank" rel="noopener noreffer">《LRU and LRU-K》</a></p>
-</li>
-<li>
-<p><a href="https://zhuanlan.zhihu.com/p/622224538" target="_blank" rel="noopener noreffer">《CMU 15-445 P1 LRU-K Replacement Policy》</a></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>localization per query</strong>:驱逐页只驱逐自己事务相关的，防止把其他事务的页给驱逐</p>
-</li>
-<li>
-<p><strong>priority hints</strong>:给一些页上标记，告诉缓存池这页不要随便清理，比如索引的根节点，这种东西轻易不会清理</p>
-</li>
-<li>
-<p><strong>Dirty Pages</strong>:踢出页的时候页是否是脏页对于踢出页时候的处理不一样</p>
-<ul>
-<li>非脏页：直接删除就行</li>
-<li>脏页：要刷回磁盘，当然能写不回去就尽量先不写回去（后面会讲WAL，redo-log），一定要先写回再踢出</li>
-</ul>
-</li>
-</ul>
-<h3 id="disk-io-and-os-cache">Disk I/O and OS Cache</h3>
-<ul>
-<li>操作系统本身也有cache的管理，但是和DBMS要求的差的很多，所以DBMS的缓存管理都是定制化的，不依赖操作系统的调用</li>
-</ul>
-<h3 id="other-memory-pools">Other Memory Pools</h3>
-<ul>
-<li>
-<p>除了缓存页还会缓存别的数据（比如热点查询数据，这里有点像NoSQL的一些功能了）</p>
-<ul>
-<li>
-<p>Sorting + Join Buffers</p>
-</li>
-<li>
-<p>Query Caches</p>
-</li>
-<li>
-<p>Maintenance Buffers</p>
-</li>
-<li>
-<p>Log Buffers</p>
-</li>
-<li>
-<p>Dictionary Caches</p>
 </li>
 </ul>
 </li>

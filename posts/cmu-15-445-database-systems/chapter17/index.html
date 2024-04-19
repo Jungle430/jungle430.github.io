@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #17: Two-Phase Locking - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #17: Two-Phase Locking" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #17: Two-Phase Locking Transaction Locks 在操作数据的时候通过DBMS的锁管理器给数据上一把锁，这样就可以避免并发的数据竞争问题 但是这个锁怎么加怎么解的方案需要设" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-19T17:58:06+08:00" />
+<meta property="article:modified_time" content="2024-04-19T17:58:06+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #17: Two-Phase Locking"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #17: Two-Phase Locking Transaction Locks 在操作数据的时候通过DBMS的锁管理器给数据上一把锁，这样就可以避免并发的数据竞争问题 但是这个锁怎么加怎么解的方案需要设"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter16/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #17: Two-Phase Locking",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter17\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1358 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter17\/","datePublished": "2024-04-19T17:58:06+08:00","dateModified": "2024-04-19T17:58:06+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #17: Two-Phase Locking</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-19">2024-04-19</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1358 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-17-two-phase-locking">Lecture #17: Two-Phase Locking</a>
+      <ul>
+        <li><a href="#transaction-locks">Transaction Locks</a></li>
+        <li><a href="#two-phase-locking2pl">Two-Phase Locking(2PL)</a></li>
+        <li><a href="#deadlock-handling">Deadlock Handling</a></li>
+        <li><a href="#lock-granularities">Lock Granularities</a></li>
+        <li><a href="#conclusion">CONCLUSION</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-17-two-phase-locking">Lecture #17: Two-Phase Locking</h2>
+<h3 id="transaction-locks">Transaction Locks</h3>
+<ul>
+<li>
+<p>在操作数据的时候通过DBMS的锁管理器给数据上一把锁，这样就可以避免并发的数据竞争问题</p>
+</li>
+<li>
+<p>但是这个锁怎么加怎么解的方案需要设计</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-1.png" title="/img/CMU 15-445 Database Systems/chapter17-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-1.png" data-sub-html="<h2>利用锁保证数据安全</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter17-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter17-1.png, /img/CMU%2015-445%20Database%20Systems/chapter17-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter17-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter17-1.png" />
+    </a><figcaption class="image-caption">利用锁保证数据安全</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>Lock Types</strong></p>
+<ul>
+<li><strong>S-LOCK</strong>: Shared locks for reading(Reading Lock)</li>
+<li><strong>X-LOCK</strong>: Exclusive locks for writing(Writing Lock)</li>
+</ul>
+</li>
+<li>
+<p>仅仅W(R)的时候上锁，修改完了解锁是无法修复串行化带来的问题，因为这个操作在一个事务里面只是一段，没有锁这个事务</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-2.png" title="/img/CMU 15-445 Database Systems/chapter17-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-2.png" data-sub-html="<h2>lock -&gt; W(R) -&gt; unlock下的串行问题</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter17-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter17-2.png, /img/CMU%2015-445%20Database%20Systems/chapter17-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter17-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter17-2.png" />
+    </a><figcaption class="image-caption">lock -&gt; W(R) -&gt; unlock下的串行问题</figcaption>
+    </figure>
+<h3 id="two-phase-locking2pl">Two-Phase Locking(2PL)</h3>
+<ul>
+<li>这个就是后面的研究人员为了避免上面加锁还是没有解决并发问题提出来的一个理论，这个加锁的理论和上面最大的不同就是不用预先知道整个事务的全貌（前面的加锁方案好多都是事后诸葛亮，但是放在真实场景下你又不可能回滚去干这玩意）</li>
+<li>2PL分为两个阶段
+<ul>
+<li><strong>Phase #1– Growing</strong>: In the growing phase, each transaction requests the locks that it needs from the DBMS’s lock manager. The lock manager grants/denies these lock requests.</li>
+<li><strong>Phase #2– Shrinking</strong>: Transactions enter the shrinking phase immediately after they release their first
+lock. In the shrinking phase, transactions are only allowed to release locks. They are not allowed to acquire
+new ones.</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-3.png" title="/img/CMU 15-445 Database Systems/chapter17-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-3.png" data-sub-html="<h2>2PL Two Phases</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter17-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter17-3.png, /img/CMU%2015-445%20Database%20Systems/chapter17-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter17-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter17-3.png" />
+    </a><figcaption class="image-caption">2PL Two Phases</figcaption>
+    </figure>
+<ul>
+<li>2PL的问题: <strong>cascading aborts</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-4.png" title="/img/CMU 15-445 Database Systems/chapter17-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-4.png" data-sub-html="<h2>Shrinking阶段如果Rollback，会造成其他事务读到了你上面修改过但未commit的数据</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter17-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter17-4.png, /img/CMU%2015-445%20Database%20Systems/chapter17-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter17-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter17-4.png" />
+    </a><figcaption class="image-caption">Shrinking阶段如果Rollback，会造成其他事务读到了你上面修改过但未commit的数据</figcaption>
+    </figure>
+<ul>
+<li>Solution: <strong>Strong Strict 2PL (aka Rigorous 2PL)</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-5.png" title="/img/CMU 15-445 Database Systems/chapter17-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-5.png" data-sub-html="<h2>Strong Strict 2PL解决了cascading aborts问题</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter17-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter17-5.png, /img/CMU%2015-445%20Database%20Systems/chapter17-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter17-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter17-5.png" />
+    </a><figcaption class="image-caption">Strong Strict 2PL解决了cascading aborts问题</figcaption>
+    </figure>
+<hr>
+<h3 id="deadlock-handling">Deadlock Handling</h3>
+<ul>
+<li>2PL的另一个问题: <strong>Dead-Locks</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-6.png" title="/img/CMU 15-445 Database Systems/chapter17-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-6.png" data-sub-html="<h2>Strong Strict 2PL解决不了Dead-Lock的问题，出来环锁基本就解不开了</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter17-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter17-6.png, /img/CMU%2015-445%20Database%20Systems/chapter17-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter17-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter17-6.png" />
+    </a><figcaption class="image-caption">Strong Strict 2PL解决不了Dead-Lock的问题，出来环锁基本就解不开了</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Two ways of dealing with deadlocks:</p>
+<ul>
+<li>
+<p>→ Approach #1: <strong>Deadlock Detection</strong>:DBMS会维护一个waits-for graph来描述所有并发的事务谁在等谁的锁</p>
+<ul>
+<li>Nodes are transactions</li>
+<li>Edge from $T_i$ to $T_j$ if $T_i$ is waiting for $T_j$ to release a lock.</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter17-7.png" title="/img/CMU 15-445 Database Systems/chapter17-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter17-7.png" data-sub-html="<h2>The system periodically checks for cycles in waits-for graph and then decides how to break it.</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter17-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter17-7.png, /img/CMU%2015-445%20Database%20Systems/chapter17-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter17-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter17-7.png" />
+    </a><figcaption class="image-caption">The system periodically checks for cycles in waits-for graph and then decides how to break it.</figcaption>
+    </figure></li>
+<li>When the DBMS detects a deadlock, it will <strong>select a “victim” transaction to rollback(rollback or restart) to break the cycle.</strong></li>
+<li>权衡: 检测周期和死锁解开时间反相关，和开销正相关，还有就是干掉那个事务(执行时间，young还是old，执行了几条SQL，加了几个锁)</li>
+<li><strong>Deadlock handling: rollback length</strong>
+<ul>
+<li>Approach #1: <strong>Completely</strong> → Rollback entire txn and tell the application it was aborted.</li>
+<li>Approach #2: <strong>Partial (Savepoints)</strong> → DBMS rolls back a portion of a txn (to break deadlock) and then attempts to re-execute the undone queries.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>→ Approach #2: <strong>Deadlock Prevention</strong></p>
+<ul>
+<li>
+<p>给每个事务加上时间戳，越靠前的事务越老，越靠后的事务越年轻</p>
+</li>
+<li>
+<p>Older Timestamp = Higher Priority (e.g., T1 &gt; T2)</p>
+</li>
+<li>
+<p><strong>Wait-Die (“Old Waits for Young”)</strong>:</p>
+<ul>
+<li>If requesting txn has higher priority than holding txn, then requesting txn waits for holding txn. (老事务碰到年轻的事务占有锁，就等到年轻的事务解锁)</li>
+<li>Otherwise requesting txn aborts.(反之年轻的事务等老事务的锁，直接rollback自杀)</li>
+</ul>
+</li>
+<li>
+<p><strong>Wound-Wait (“Young Waits for Old”)</strong></p>
+<ul>
+<li>If requesting txn has higher priority than holding txn, then holding txn aborts and releases lock(老的事务要锁，发现整个锁被年轻的事务持有，直接rollback年轻的事务然后抢锁)</li>
+<li>Otherwise requesting txn waits.(年轻的事务发现锁在老的事务哪里，那就等老的事务解锁)</li>
+</ul>
+</li>
+<li>
+<p>这个主要的思路就是解决了构成死锁条件里面“持有并等待”的条件，冲突了直接开抢</p>
+</li>
+<li>
+<p>注意: restart的txn的时间戳用上次的时间戳，不然可能会造成饥饿</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="lock-granularities">Lock Granularities</h3>
+<ul>
+<li>
+<p>获取锁的时候是获取属性锁，行锁，表锁，还是库锁？整个需要DBMS来负责，需要保证你加锁的数量尽可能小(10亿行锁 vs 一张表锁)，也需要考虑对并发度的影响</p>
+</li>
+<li>
+<p><strong>Intention Lock</strong>:高层级的锁会有标记来判断下面有没有加锁的（比如表锁会记录下面的行有没有加锁的），节省了向下检索的效率</p>
+<ul>
+<li>意向锁也有S锁和X锁</li>
+</ul>
+</li>
+<li>
+<p>分层的锁在实际工程中相当好用</p>
+</li>
+<li>
+<p><strong>LOCK ESCALATION</strong></p>
+<ul>
+<li>如果下层的锁过多了，那么DBMS就会自动升级成高层的锁（怎么和JVM的锁升级机制的思想很像？）</li>
+</ul>
+</li>
+<li>
+<p>一般加锁都是DBMS自动负责的，但是用户可以用SQL手动来加锁</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-mysql" data-lang="mysql"><span class="line"><span class="cl"><span class="k">LOCK</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="o">&lt;</span><span class="n">qualification</span><span class="o">&gt;</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">UPDATE</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">#这样告诉了MYSQL这个不加读锁，加写锁(后面要UPDATE)
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="conclusion">CONCLUSION</h3>
+<ul>
+<li>
+<p>2PL is used in almost every DBMS.</p>
+</li>
+<li>
+<p>Automatically generates correct interleaving:</p>
+<ul>
+<li>Locks + protocol (2PL, SS2PL &hellip;)</li>
+<li>Deadlock detection + handling</li>
+<li>Deadlock prevention</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-19</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" data-title="CMU 15-445 Lecture #17: Two-Phase Locking"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter16/" class="prev" rel="prev" title="CMU 15-445 Lecture #16: Concurrency Control Theory"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
