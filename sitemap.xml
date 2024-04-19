@@ -32,9 +32,6 @@
             <loc>https://Jungle430.github.io/tags/go/</loc><lastmod>2023-06-04T19:46:20&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/categories/go/</loc><lastmod>2023-06-04T19:46:20&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/go/pdqsort/</loc><lastmod>2023-06-04T19:46:20&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/tags/kafka/</loc><lastmod>2023-06-03T16:04:20&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/tags/message-queue/</loc><lastmod>2023-06-03T16:04:20&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/go/message-queue/</loc><lastmod>2023-06-03T16:04:20&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/tags/go-module/</loc><lastmod>2023-05-14T21:51:22&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/go/module_and_test/</loc><lastmod>2023-05-14T21:51:22&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/tags/operating-system/</loc><lastmod>2023-05-05T13:35:01&#43;08:00</lastmod></url><url>
@@ -51,44 +48,13 @@
             <loc>https://Jungle430.github.io/posts/operating-system/operating-system-chapter5/</loc><lastmod>2023-03-08T17:23:11&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/operating-system/operating-system-chapter4/</loc><lastmod>2023-03-06T19:34:15&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/operating-system/support2/</loc><lastmod>2023-03-04T15:47:02&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/tags/java/</loc><lastmod>2023-02-28T23:59:46&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/categories/java/</loc><lastmod>2023-02-28T23:59:46&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/java/biginteger/</loc><lastmod>2023-02-28T23:59:46&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/operating-system/support1/</loc><lastmod>2023-02-26T21:02:57&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/cpp-primer/chapter3/</loc><lastmod>2023-02-22T22:31:49&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/tags/c&#43;&#43;-primer/</loc><lastmod>2023-02-22T22:31:49&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/categories/c&#43;&#43;-primer/</loc><lastmod>2023-02-22T22:31:49&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter1/</loc><lastmod>2023-02-22T15:23:14&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/tags/computer-organization-and-architecture/</loc><lastmod>2023-02-01T01:31:38&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/categories/computer-organization-and-architecture/</loc><lastmod>2023-02-01T01:31:38&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-parallel-process-multicore-computers/</loc><lastmod>2023-02-01T01:31:38&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-control-unit-operation-microprogrammed-control/</loc><lastmod>2023-01-31T15:20:52&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-level-parallelism-and-superscalar-processors/</loc><lastmod>2023-01-30T16:28:39&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-reduced-instruction-set-computers/</loc><lastmod>2023-01-29T16:34:59&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-processor-structure-and-function/</loc><lastmod>2023-01-28T14:20:25&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-addressing-modes-and-formats/</loc><lastmod>2023-01-26T16:30:34&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-instruction-sets-characteristics-and-functions/</loc><lastmod>2023-01-25T17:56:04&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-aritmetic/</loc><lastmod>2023-01-24T15:49:52&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-operating-system/</loc><lastmod>2023-01-22T17:47:46&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-input-output/</loc><lastmod>2023-01-19T15:45:36&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-external-memory/</loc><lastmod>2023-01-17T20:47:50&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-internal-memory/</loc><lastmod>2023-01-16T23:36:11&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-cache-memory/</loc><lastmod>2023-01-16T00:19:32&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-top-level-view-of-computer-function-and-interconnection/</loc><lastmod>2023-01-14T15:03:22&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-computer-evolution-and-performance/</loc><lastmod>2023-01-12T21:02:20&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/computer-organization-and-architecture/computer-organization-and-architecture-introduction/</loc><lastmod>2023-01-10T22:17:58&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/tags/opencv/</loc><lastmod>2023-01-09T14:20:53&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/categories/opencv/</loc><lastmod>2023-01-09T14:20:53&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/opencv/opencv-chapter7/</loc><lastmod>2023-01-09T14:20:53&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/tags/python/</loc><lastmod>2023-01-09T14:20:53&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/opencv/opencv-chapter6/</loc><lastmod>2023-01-07T13:43:02&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/opencv/opencv-chapter5/</loc><lastmod>2023-01-04T18:54:56&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/opencv/opencv-chapter4/</loc><lastmod>2023-01-03T20:33:51&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/opencv/opencv-chapter3/</loc><lastmod>2023-01-02T23:22:32&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/opencv/opencv-chapter2/</loc><lastmod>2023-01-02T15:42:13&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/operating-system/operating-system-chapter3/</loc><lastmod>2023-01-01T19:59:41&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/operating-system/operating-system-chapter2/</loc><lastmod>2022-12-31T19:30:30&#43;08:00</lastmod></url><url>
-            <loc>https://Jungle430.github.io/posts/opencv/opencv-chapter1/</loc><lastmod>2022-12-30T21:52:20&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/operating-system/operating-system-chapter1/</loc><lastmod>2022-12-30T16:27:09&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/categories/data-structure/</loc><lastmod>2022-11-18T22:05:21&#43;08:00</lastmod></url><url>
             <loc>https://Jungle430.github.io/posts/data-structures-and-algorithms/sorting/</loc><lastmod>2022-11-18T22:05:21&#43;08:00</lastmod></url><url>
