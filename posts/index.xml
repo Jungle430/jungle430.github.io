@@ -4,7 +4,307 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Fri, 19 Apr 2024 17:58:06 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sat, 20 Apr 2024 20:07:38 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/</link>
+    <pubDate>Sat, 20 Apr 2024 20:07:38 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-18-timestamp-ordering-concurrency-control">Lecture #18: Timestamp Ordering Concurrency Control</h2>
+<h3 id="timestamp-ordering-concurrency-control">Timestamp Ordering Concurrency Control</h3>
+<ul>
+<li>
+<p>纯用锁很影响性能，锁是一个悲观的方法</p>
+</li>
+<li>
+<p>乐观的方法：用时间戳</p>
+</li>
+<li>
+<p>If $TS(T_i) &lt; TS(T_j)$, then the DBMS must ensure that the execution schedule is equivalent to the serial schedule where $T_i$appears before $T_j$ .</p>
+</li>
+<li>
+<p>Multiple implementation strategies:</p>
+<ul>
+<li>→ System/Wall Clock.:不可能完全准确，一般不用</li>
+<li>→ Logical Counter.:单机系统一般用这个</li>
+<li>→ Hybrid.:分布式系统用这个</li>
+</ul>
+</li>
+</ul>
+<h3 id="basic-timestamp-ordering-basic-to">Basic Timestamp Ordering (BASIC T/O)</h3>
+<ul>
+<li>
+<p>Every object X is tagged with timestamp of the last txn that successfully did read/write:时间戳也分两种</p>
+<ul>
+<li>→ W-TS(X) – Write timestamp on X</li>
+<li>→ R-TS(X) – Read timestamp on X</li>
+</ul>
+</li>
+<li>
+<p>Check timestamps for every operation:</p>
+<ul>
+<li>→ If txn tries to access an object <strong>“from the future”</strong>, it aborts and restarts.(不能操作“未来”的数据)</li>
+</ul>
+</li>
+<li>
+<p><strong>BASIC T/O – READS</strong></p>
+<ul>
+<li>Don’t read stuff from the “future.”</li>
+<li>Action: Transaction Ti wants to read object X.</li>
+<li>If TS(Ti) &lt; W-TS(X), this violates the timestamp order of Ti with regard to the writer of X.
+<ul>
+<li>→ Abort Ti and restart it with a new TS.</li>
+</ul>
+</li>
+<li>Else:
+<ul>
+<li>→ Allow Ti to read X.</li>
+<li>→ Update R-TS(X) to max(R-TS(X), TS(Ti))</li>
+<li>→ Make a local copy of X to ensure repeatable reads for Ti.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>BASIC T/O – WRITES</strong></p>
+<ul>
+<li>Can’t write if a future transaction has read or written to the object.(不能写未来读过和写过的数据)</li>
+<li>Action: Transaction Ti wants to write object X.</li>
+<li>If TS(Ti) &lt; R-TS(X) or TS(Ti) &lt; W-TS(X)
+<ul>
+<li>→ Abort and restart Ti.</li>
+</ul>
+</li>
+<li>Else:
+<ul>
+<li>→ Allow Ti to write X and update W-TS(X)</li>
+<li>→ Also, make a local copy of X to ensure repeatable reads.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Thomas Write Rule</strong></p>
+<ul>
+<li>对上述理论进行优化</li>
+<li>If TS(Ti) &lt; R-TS(X) (未来有事务读了这个数据)
+<ul>
+<li>Abort and Restart Ti</li>
+</ul>
+</li>
+<li>If TS(Ti) &lt; R-WS(X) (未来有事务写了这个数据，等效成我写了然后未来被覆盖掉了)
+<ul>
+<li>The DBMS can instead ignore the write and allow the transaction to continue instead of aborting and restarting it. This is called the Thomas Write Rule.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>BASIC T/O总结</p>
+<ul>
+<li>优点：无锁，无死锁</li>
+<li>缺点：对于长的事务可能会饥饿（一直rollback），前面的事务一旦修改数据后回滚那么后面的事务会读到错误的数据，读数据的时候需要copy一份到本地，如果读的数据过多，那么开销会很大</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-1.png" title="/img/CMU 15-445 Database Systems/chapter18-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-1.png" data-sub-html="<h2>事务2的数据来源于事务1，事务1一旦回滚那么无法恢复事务2</h2>">
+        
+    </a><figcaption class="image-caption">事务2的数据来源于事务1，事务1一旦回滚那么无法恢复事务2</figcaption>
+    </figure>
+<h3 id="optimistic-concurrency-control-occ">Optimistic Concurrency Control (OCC)</h3>
+<ul>
+<li>Also based on timestamp</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><u>The DBMS creates a private workspace for each txn.</u></p>
+<ul>
+<li>→ Any object read is copied into workspace.</li>
+<li>Modifications are applied to workspace.(If data is wried, only applied to private workspace, no need to be wried to DBMS)</li>
+</ul>
+</li>
+<li>
+<p>When a txn commits, the DBMS compares workspace write set to see whether it conflicts with other txns.(提交的时候DBMS看你workspace里面写的数据，和其他事务对比看看有无冲突)</p>
+</li>
+<li>
+<p>If there are no conflicts, the write set is installed into the “global” database.(无冲突一把全部写回到数据库里面)</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>OCC PHASES</strong>
+<ul>
+<li><strong>#1 – Read Phase:</strong> Track the read/write sets of txns and store their writes in a private workspace.</li>
+<li><strong>#2 – Validation Phase:</strong> When a txn commits, check whether it conflicts with other txns.</li>
+<li><strong>#3 – Write Phase:</strong> If validation succeeds, apply private changes to database. Otherwise abort and restart the txn.</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-2.png" title="/img/CMU 15-445 Database Systems/chapter18-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-2.png" data-sub-html="<h2>OCC在提交的时候才会分配时间戳</h2>">
+        
+    </a><figcaption class="image-caption">OCC在提交的时候才会分配时间戳</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>OCC – READ PHASE</strong></p>
+<ul>
+<li>Track the read/write sets of txns and store their writes in a private workspace.</li>
+<li>The DBMS copies every tuple that the txn accesses from the shared database to its workspace ensure repeatable reads.</li>
+</ul>
+</li>
+<li>
+<p><strong>OCC – VALIDATION PHASE</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-3.png" title="/img/CMU 15-445 Database Systems/chapter18-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-3.png" data-sub-html="<h2>VALIDATION PHASE的决策图，不能提交的时候发现后面的事务读/写了自己写了的数据（因为按照串行的理论，应该是后面的事务要读自己提交后的数据，但是自己还没提交，后面的事务读的是自己之前的数据！）</h2>">
+        
+    </a><figcaption class="image-caption">VALIDATION PHASE的决策图，不能提交的时候发现后面的事务读/写了自己写了的数据（因为按照串行的理论，应该是后面的事务要读自己提交后的数据，但是自己还没提交，后面的事务读的是自己之前的数据！）</figcaption>
+    </figure>
+<ul>
+<li><strong>Approach #1: Backward Validation</strong>：和前面的历史数据做校验</li>
+<li><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-4.png" title="/img/CMU 15-445 Database Systems/chapter18-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-4.png">
+        
+    </a></li>
+<li><strong>Approach #2: Forward Validation</strong>：和未来的事务做校验</li>
+<li><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-5.png" title="/img/CMU 15-445 Database Systems/chapter18-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-5.png">
+        
+    </a></li>
+</ul>
+</li>
+<li>
+<p><strong>OCC – WRITE PHASE</strong></p>
+<ul>
+<li>Serial Commits: → Use a global latch to limit a single txn to be in the Validation/Write phases at a time.(直接锁全表写，一是为了解决并发问题，二来由于写的数据都准备好了，所以写耗费的时间很短，对并发度的影响不高)</li>
+</ul>
+</li>
+<li>
+<p>OCC works well when the # of conflicts is low:</p>
+<ul>
+<li>→ All txns are read-only (ideal).</li>
+<li>→ Txns access disjoint subsets of data.</li>
+</ul>
+</li>
+<li>
+<p>If the database is large and the workload is not skewed, then there is a low probability of conflict, so again locking is wasteful.</p>
+</li>
+<li>
+<p>OCC问题</p>
+<ul>
+<li>本地Copy带来的额外开销</li>
+<li>commit的时候校验的逻辑很麻烦，消耗性能</li>
+<li>写的步骤是锁表的，也可能会称为性能瓶颈</li>
+<li>一旦出了问题前面干的全部回退，这也是一种浪费，2PL能够执行到一半发现死锁直接让这个事务回退，损失就比OCC要小</li>
+</ul>
+</li>
+</ul>
+<h3 id="dynamic-databases-and-the-phantom-problem">Dynamic Databases and The Phantom Problem</h3>
+<ul>
+<li>2PL和OCC在完全串行化上面都有BUG。。。$\rightarrow$ 幻读</li>
+<li>前面讨论的问题都是read和update的问题，但是没有讨论insert和delete的问题</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-6.png" title="/img/CMU 15-445 Database Systems/chapter18-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-6.png" data-sub-html="<h2>幻读的情景</h2>">
+        
+    </a><figcaption class="image-caption">幻读的情景</figcaption>
+    </figure>
+<ul>
+<li>2PL和OCC有这个BUG的原因：我只能控制现存的数据，但是不管数据的插入/删除</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>THE PHANTOM PROBLEM</strong></p>
+</li>
+<li>
+<p><strong>Approach #1: Re-Execute Scans</strong></p>
+<ul>
+<li>对可能产生幻读的行为(SELECT … FROM … GROUP BY …/insert/delete)进行记录，然后在提交的时候再扫描一遍检测有无并发的问题</li>
+<li>缺点：这种扫描开销过大，性能上接受不了</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #2: Predicate Locking</strong></p>
+<ul>
+<li>
+<p>最早由System R发明</p>
+</li>
+<li>
+<p>Shared lock on the predicate in a WHERE clause of a SELECT query.</p>
+</li>
+<li>
+<p>Exclusive lock on the predicate in a WHERE clause of any UPDATE, INSERT, or DELETE query</p>
+</li>
+<li>
+<p>It is rarely implemented in systems; an example of a system that uses it is HyPer (precision locking).</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-7.jpg" title="/img/CMU 15-445 Database Systems/chapter18-7.jpg" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-7.jpg" data-sub-html="<h2>谓词锁控制数据竞争</h2>">
+        
+    </a><figcaption class="image-caption">谓词锁控制数据竞争</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #3: Index Locking</strong></p>
+<ul>
+<li>有索引给索引上锁，没索引就要加大的列锁/表锁了</li>
+</ul>
+</li>
+<li>
+<p>MySQL的解决方案：间隙锁</p>
+</li>
+</ul>
+<h3 id="isolation-levels">Isolation Levels</h3>
+<ul>
+<li>
+<p>数据库很难做到完全串行，而且很多业务也不需要完全串行，所以有不同的隔离级别</p>
+</li>
+<li>
+<p><strong>Isolation Levels (Strongest to Weakest):</strong></p>
+<ul>
+<li>
+<p><strong>SERIALIZABLE</strong>: No Phantoms, all reads repeatable, and no dirty reads.</p>
+<ul>
+<li>Possible implementation: Index locks + Strict 2PL.</li>
+</ul>
+</li>
+<li>
+<p><strong>REPEATABLE READS</strong>: Phantoms may happen.</p>
+<ul>
+<li>Possible implementation: Strict 2PL.</li>
+</ul>
+</li>
+<li>
+<p><strong>READ-COMMITTED</strong>: Phantoms and unrepeatable reads may happen.</p>
+<ul>
+<li>Possible implementation: Strict 2PL for exclusive locks, immediate release of the shared lock after a read.</li>
+</ul>
+</li>
+<li>
+<p><strong>READ-UNCOMMITTED</strong>: All anomalies may happen.</p>
+<ul>
+<li>Possible implementation: Strict 2PL for exclusive locks, no shared locks for reads.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-8.png" title="/img/CMU 15-445 Database Systems/chapter18-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-8.png">
+        
+    </a>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-9.png" title="/img/CMU 15-445 Database Systems/chapter18-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-9.png">
+        
+    </a>
+</li>
+<li>
+<p>如果显式声明一个表是READ ONLY的话，那么数据库会进行优化（不加锁），还有的数据库会自动检测，如果没有写的操作会自动优化</p>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #17: Two-Phase Locking</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/</link>
     <pubDate>Fri, 19 Apr 2024 17:58:06 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/</guid>
@@ -1773,201 +2073,6 @@ prioritized as such.</li>
 <li><strong>Bulk Insert</strong>
 <ul>
 <li>一次插入一批，减少树的分裂合并次数</li>
-</ul>
-</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #07: Hash Tables</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/</link>
-    <pubDate>Tue, 09 Apr 2024 21:11:32 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter7/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-07-hash-tables">Lecture #07: Hash Tables</h2>
-<h3 id="data-structures">Data Structures</h3>
-<ul>
-<li>
-<p>DBMS很多部分使用不同的数据结构</p>
-<ul>
-<li>Internal Meta-Data</li>
-<li>Core Data Storage</li>
-<li>Temporary Data Structures</li>
-<li>Table Indices</li>
-</ul>
-</li>
-<li>
-<p>DBMS设计数据结构需要考虑两个方面</p>
-<ul>
-<li><strong>Data organization</strong>:数据结构应该怎么设计，什么数据应该存到那，从而保证有效的访问</li>
-<li><strong>Concurrency</strong>:老话题，只要是DBMS上面的东西基本都要考虑并发安全</li>
-</ul>
-</li>
-</ul>
-<h3 id="hash-table">Hash Table</h3>
-<ul>
-<li>
-<p>哈希表实现了一个Key $\rightarrow$ Value的关联数组，它提供了平均$O(1)$的操作复杂度（当然最差会是$O(n)$）和$O(n)$的存储复杂度，这理要注意的是$O(1)$是理论上面的，在现实中实现这个数据结构的时候要考虑常数因子的优化</p>
-</li>
-<li>
-<p>哈希表的实现由两部分组成</p>
-<ul>
-<li>
-<p><strong>Hash Function</strong>:如何将较大的值映射到一个较小的空间内，这里要注意碰撞率和计算耗时的关系</p>
-<ul>
-<li>计算越复杂，耗时越高，碰撞率越低</li>
-<li>计算越简单，耗时越低，碰撞率越高</li>
-<li>Hash Function理想的情况就是在计算耗时和碰撞率之间取得平衡</li>
-</ul>
-</li>
-<li>
-<p><strong>Hashing Scheme</strong>:考虑哈希冲突的时候的处理办法，在扩大哈希表减少冲突和发生冲突时处理方案的复杂性中取得平衡</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="hash-functions">Hash Functions</h3>
-<ul>
-<li>
-<p><strong>Hash Function</strong>接收的参数应该可以是任意类型的，然后返回一个整数，该函数的输出要是确定性的（相同的参数输出的值要一样）</p>
-</li>
-<li>
-<p><strong>Hash Function</strong>一般不用网安那套加密安全哈希函数，因为不需要保护密钥的内容（这个东西只在DBMS内部使用，没有泄露的风险），我们只关心计算速度和碰撞率</p>
-</li>
-</ul>
-<blockquote>
-<p>The current state-of-the-art hash function is <a href="https://xxhash.com" target="_blank" rel="noopener noreffer">Facebook XXHash3</a>.</p>
-</blockquote>
-<h3 id="static-hashing-schemes">Static Hashing Schemes</h3>
-<ul>
-<li>
-<p>对于一个固定容量的Hash table来说，如果容量满了再次扩容代价很大</p>
-</li>
-<li>
-<p>一般扩容都是给扩容成原来的2倍</p>
-</li>
-<li>
-<p>避免hash冲突是很重要的，一般我们期望元素数=槽数$\times$2</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Linear Probe Hashing</strong></p>
-<ul>
-<li>
-<p>碰到Hash冲突就把K-V存到下一个槽里面</p>
-</li>
-<li>
-<p>如果下一个槽还碰撞就下下个槽，直到找到空位置</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-1.png" title="/img/CMU 15-445 Database Systems/chapter7-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-1.png" data-sub-html="<h2>碰撞的处理方法</h2>">
-        
-    </a><figcaption class="image-caption">碰撞的处理方法</figcaption>
-    </figure>
-</li>
-<li>
-<p>删除比较恶心</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-2.png" title="/img/CMU 15-445 Database Systems/chapter7-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-2.png" data-sub-html="<h2>D因为和C碰撞往下走，现在C被删了，结果查D发现D没有了，出现了错误</h2>">
-        
-    </a><figcaption class="image-caption">D因为和C碰撞往下走，现在C被删了，结果查D发现D没有了，出现了错误</figcaption>
-    </figure>
-</li>
-<li>
-<p>解决方案</p>
-<ul>
-<li>加上一个Tombstone标志，说明这个地方原来有数据，然后被删除了</li>
-<li>Movement：把下边的数据往上挪，但是不能傻瓜式的向上推，hash值是对的就不能动</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Non-unique Keys</strong>:同一个键可能与多个不同的值或元组关联的情况，两种解决方案
-<ul>
-<li><strong>Separate Linked List</strong>:存储Value的不再是一个值，而是List&lt;V&gt;，这样就可以存储多个值了</li>
-<li><strong>Redundant Keys</strong>:将Key和Value结合起来再做hash</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Optimizations</strong>
-<ul>
-<li><strong>Specialized hash table implementations based on the data type or size of keys</strong>:根据数据结构不同/键大小采取不同的措施，比如字符串，小的字符串我拷贝存一份，大的字符串我存指针或者哈希</li>
-<li><strong>Storing metadata in a separate array</strong>:将空槽/墓碑数据集中存在一个bitmap里面，作为哈希表的头文件或者作为一个单独的哈希表，这样避免查找已经删除的键</li>
-<li><strong>Maintaining versions for the hash table and its slots</strong>:在哈希表上面删除/分配内存代价很高，所以给哈希表的Value添加一个version字段，只要version不匹配就认为没有这个Value，删数据就不用释放内存了</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>Google’s absl::flat hash map is a state-of-the-art implementation of Linear Probe Hashing.</p>
-</blockquote>
-<hr>
-<ul>
-<li><strong>Cuckoo Hashing</strong>
-<ul>
-<li>使用多个哈希表，每个哈希表使用的哈希函数整体一样，但是参数不同（就是设定的种子）</li>
-<li>一旦发生哈希碰撞，就把原有的值使用别的哈希函数驱赶到别的哈希表中，如果被驱逐的值也发生哈希碰撞就重复上面的过程，直到没有哈希碰撞</li>
-<li>使用的很少，现实中这种实现问题很大</li>
-</ul>
-</li>
-</ul>
-<h3 id="dynamic-hashing-schemes">Dynamic Hashing Schemes</h3>
-<ul>
-<li>
-<p>如果不知道需要存储数据的量，那么就需要一个能够动态扩容的哈希表</p>
-</li>
-<li>
-<p><strong>Chained Hashing</strong></p>
-<ul>
-<li>
-<p>槽不再是单独的一个槽，而是变成了一个指针，指向一个“桶”，桶能存好多Value，一般也具备扩容的功能，有名的实现是Java的HashMap</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-3.png" title="/img/CMU 15-445 Database Systems/chapter7-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-3.png" data-sub-html="<h2>Chained Hashing模型</h2>">
-        
-    </a><figcaption class="image-caption"><strong>Chained Hashing</strong>模型</figcaption>
-    </figure>
-</li>
-<li>
-<p><strong>Bloom Filters</strong>:布隆过滤器，Redis有讲，用来先过滤一遍不存在的数据</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Extendible Hashing</strong>:这个也和Java的HashMap思想很像，2的幂次方扩容，每次扩容重排桶中的数据，计算hash的时候因为是2的幂次所以可以用位运算，每次扩容就是参与运算的二进制位变多了一位</p>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-4.png" title="/img/CMU 15-445 Database Systems/chapter7-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-4.png" data-sub-html="<h2>扩容前</h2>">
-          
-      </a><figcaption class="image-caption">扩容前</figcaption>
-      </figure>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-5.png" title="/img/CMU 15-445 Database Systems/chapter7-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-5.png" data-sub-html="<h2>扩容后</h2>">
-          
-      </a><figcaption class="image-caption">扩容后</figcaption>
-      </figure>
-</li>
-<li>
-<p><strong>Linear Hashing</strong></p>
-<ul>
-<li>
-<p>之前的扩容是按照2的幂次扩容，扩容一次需要的代价很大，需要用户等待很多时间</p>
-</li>
-<li>
-<p><strong>Linear Hashing</strong>希望扩容不要那么猛，一点一点慢慢扩容</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter7-6.png" title="/img/CMU 15-445 Database Systems/chapter7-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter7-6.png" data-sub-html="<h2>由size = 4扩容到size = 5，分家指针向下移动一位，分家指针上面的槽用旧哈希函数x%n，分家指针下面的槽用新哈希函数x%2n</h2>">
-        
-    </a><figcaption class="image-caption">由size = 4扩容到size = 5，分家指针向下移动一位，分家指针上面的槽用旧哈希函数x%n，分家指针下面的槽用新哈希函数x%2n</figcaption>
-    </figure>
-</li>
-<li>
-<p>分家指针指向原来的槽末尾再扩容就会回到0，此时一轮的扩容已经完成</p>
-</li>
 </ul>
 </li>
 </ul>

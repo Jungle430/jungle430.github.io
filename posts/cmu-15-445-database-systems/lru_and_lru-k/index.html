@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/lru_and_lru-k\/"
-        },"genre": "posts","keywords": "Database Systems, C\u002b\u002b","wordcount":  2611 ,
+        },"genre": "posts","keywords": "Database Systems, C\u002b\u002b","wordcount":  2643 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/lru_and_lru-k\/","datePublished": "2024-03-11T14:26:44+08:00","dateModified": "2024-03-11T14:26:44+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -69,7 +69,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">LRU and LRU-K</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-11">2024-03-11</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2611 字</span>&nbsp;
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-11">2024-03-11</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2643 字</span>&nbsp;
                     <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟</span>&nbsp;</div>
             </div>
             
@@ -192,6 +192,16 @@
 </span><span class="lnt">55
 </span><span class="lnt">56
 </span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#pragma once
@@ -214,13 +224,15 @@
 </span></span><span class="line"><span class="cl">  <span class="k">explicit</span> <span class="nf">_doubleLinkedListNode</span><span class="p">(</span><span class="n">K</span> <span class="n">key</span><span class="p">,</span> <span class="n">V</span> <span class="n">value</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">      <span class="o">:</span> <span class="n">key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">value</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">prev</span><span class="p">(</span><span class="k">nullptr</span><span class="p">),</span> <span class="n">next</span><span class="p">(</span><span class="k">nullptr</span><span class="p">)</span> <span class="p">{}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getKey</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getKey</span><span class="p">()</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">;</span> <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getValue</span><span class="p">()</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">;</span> <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setValue</span><span class="p">(</span><span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span> <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">remove</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setValue</span><span class="p">(</span><span class="n">V</span> <span class="o">&amp;&amp;</span><span class="n">v</span><span class="p">)</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">remove</span><span class="p">()</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
@@ -233,20 +245,28 @@
 </span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">newNode</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">addAfter</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">addAfter</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">node</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getNext</span><span class="p">()</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">_doubleLinkedListNode</span> <span class="o">*</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="na">[[nodiscard]]</span> <span class="k">auto</span> <span class="n">getNext</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="n">_doubleLinkedListNode</span> <span class="o">*</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setNext</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setNext</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">getPrev</span><span class="p">()</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">_doubleLinkedListNode</span> <span class="o">*</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="na">[[nodiscard]]</span> <span class="k">auto</span> <span class="n">getPrev</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="n">_doubleLinkedListNode</span> <span class="o">*</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setPrev</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="nf">setPrev</span><span class="p">(</span><span class="n">_doubleLinkedListNode</span> <span class="o">*</span><span class="n">node</span><span class="p">)</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">prev</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="o">~</span><span class="n">_doubleLinkedListNode</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
@@ -365,7 +385,7 @@
 </span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">-&gt;</span><span class="n">_tail</span><span class="o">-&gt;</span><span class="n">setPrev</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_head</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="na">[[nodiscard]]</span> <span class="k">auto</span> <span class="n">get</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="na">[[nodiscard]]</span> <span class="k">auto</span> <span class="n">get</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">)</span> <span class="k">noexcept</span> <span class="o">-&gt;</span> <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="n">selfDS</span><span class="o">::</span><span class="n">_doubleLinkedListNode</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">pointer</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_map</span><span class="p">[</span><span class="n">key</span><span class="p">];</span>
 </span></span><span class="line"><span class="cl">      <span class="n">pointer</span><span class="o">-&gt;</span><span class="n">remove</span><span class="p">();</span>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #18: Timestamp Ordering Concurrency Control Timestamp Ordering Concurrency Control 纯用锁很影响性能，锁是一个悲观的方法 乐观的方法：用时间戳 If $TS(T_i) &lt; TS(T_j)$, then the DBMS must ensure that the execution schedule is equivalent to the serial schedule where $T_i$appears before $T_j$ . Multiple implementation strategies: →" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-20T20:07:38+08:00" />
+<meta property="article:modified_time" content="2024-04-20T20:07:38+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #18: Timestamp Ordering Concurrency Control Timestamp Ordering Concurrency Control 纯用锁很影响性能，锁是一个悲观的方法 乐观的方法：用时间戳 If $TS(T_i) &lt; TS(T_j)$, then the DBMS must ensure that the execution schedule is equivalent to the serial schedule where $T_i$appears before $T_j$ . Multiple implementation strategies: →"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter17/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter18\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1787 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter18\/","datePublished": "2024-04-20T20:07:38+08:00","dateModified": "2024-04-20T20:07:38+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-20">2024-04-20</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1787 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-18-timestamp-ordering-concurrency-control">Lecture #18: Timestamp Ordering Concurrency Control</a>
+      <ul>
+        <li><a href="#timestamp-ordering-concurrency-control">Timestamp Ordering Concurrency Control</a></li>
+        <li><a href="#basic-timestamp-ordering-basic-to">Basic Timestamp Ordering (BASIC T/O)</a></li>
+        <li><a href="#optimistic-concurrency-control-occ">Optimistic Concurrency Control (OCC)</a></li>
+        <li><a href="#dynamic-databases-and-the-phantom-problem">Dynamic Databases and The Phantom Problem</a></li>
+        <li><a href="#isolation-levels">Isolation Levels</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-18-timestamp-ordering-concurrency-control">Lecture #18: Timestamp Ordering Concurrency Control</h2>
+<h3 id="timestamp-ordering-concurrency-control">Timestamp Ordering Concurrency Control</h3>
+<ul>
+<li>
+<p>纯用锁很影响性能，锁是一个悲观的方法</p>
+</li>
+<li>
+<p>乐观的方法：用时间戳</p>
+</li>
+<li>
+<p>If $TS(T_i) &lt; TS(T_j)$, then the DBMS must ensure that the execution schedule is equivalent to the serial schedule where $T_i$appears before $T_j$ .</p>
+</li>
+<li>
+<p>Multiple implementation strategies:</p>
+<ul>
+<li>→ System/Wall Clock.:不可能完全准确，一般不用</li>
+<li>→ Logical Counter.:单机系统一般用这个</li>
+<li>→ Hybrid.:分布式系统用这个</li>
+</ul>
+</li>
+</ul>
+<h3 id="basic-timestamp-ordering-basic-to">Basic Timestamp Ordering (BASIC T/O)</h3>
+<ul>
+<li>
+<p>Every object X is tagged with timestamp of the last txn that successfully did read/write:时间戳也分两种</p>
+<ul>
+<li>→ W-TS(X) – Write timestamp on X</li>
+<li>→ R-TS(X) – Read timestamp on X</li>
+</ul>
+</li>
+<li>
+<p>Check timestamps for every operation:</p>
+<ul>
+<li>→ If txn tries to access an object <strong>“from the future”</strong>, it aborts and restarts.(不能操作“未来”的数据)</li>
+</ul>
+</li>
+<li>
+<p><strong>BASIC T/O – READS</strong></p>
+<ul>
+<li>Don’t read stuff from the “future.”</li>
+<li>Action: Transaction Ti wants to read object X.</li>
+<li>If TS(Ti) &lt; W-TS(X), this violates the timestamp order of Ti with regard to the writer of X.
+<ul>
+<li>→ Abort Ti and restart it with a new TS.</li>
+</ul>
+</li>
+<li>Else:
+<ul>
+<li>→ Allow Ti to read X.</li>
+<li>→ Update R-TS(X) to max(R-TS(X), TS(Ti))</li>
+<li>→ Make a local copy of X to ensure repeatable reads for Ti.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>BASIC T/O – WRITES</strong></p>
+<ul>
+<li>Can’t write if a future transaction has read or written to the object.(不能写未来读过和写过的数据)</li>
+<li>Action: Transaction Ti wants to write object X.</li>
+<li>If TS(Ti) &lt; R-TS(X) or TS(Ti) &lt; W-TS(X)
+<ul>
+<li>→ Abort and restart Ti.</li>
+</ul>
+</li>
+<li>Else:
+<ul>
+<li>→ Allow Ti to write X and update W-TS(X)</li>
+<li>→ Also, make a local copy of X to ensure repeatable reads.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Thomas Write Rule</strong></p>
+<ul>
+<li>对上述理论进行优化</li>
+<li>If TS(Ti) &lt; R-TS(X) (未来有事务读了这个数据)
+<ul>
+<li>Abort and Restart Ti</li>
+</ul>
+</li>
+<li>If TS(Ti) &lt; R-WS(X) (未来有事务写了这个数据，等效成我写了然后未来被覆盖掉了)
+<ul>
+<li>The DBMS can instead ignore the write and allow the transaction to continue instead of aborting and restarting it. This is called the Thomas Write Rule.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>BASIC T/O总结</p>
+<ul>
+<li>优点：无锁，无死锁</li>
+<li>缺点：对于长的事务可能会饥饿（一直rollback），前面的事务一旦修改数据后回滚那么后面的事务会读到错误的数据，读数据的时候需要copy一份到本地，如果读的数据过多，那么开销会很大</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-1.png" title="/img/CMU 15-445 Database Systems/chapter18-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-1.png" data-sub-html="<h2>事务2的数据来源于事务1，事务1一旦回滚那么无法恢复事务2</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-1.png, /img/CMU%2015-445%20Database%20Systems/chapter18-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-1.png" />
+    </a><figcaption class="image-caption">事务2的数据来源于事务1，事务1一旦回滚那么无法恢复事务2</figcaption>
+    </figure>
+<h3 id="optimistic-concurrency-control-occ">Optimistic Concurrency Control (OCC)</h3>
+<ul>
+<li>Also based on timestamp</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><u>The DBMS creates a private workspace for each txn.</u></p>
+<ul>
+<li>→ Any object read is copied into workspace.</li>
+<li>Modifications are applied to workspace.(If data is wried, only applied to private workspace, no need to be wried to DBMS)</li>
+</ul>
+</li>
+<li>
+<p>When a txn commits, the DBMS compares workspace write set to see whether it conflicts with other txns.(提交的时候DBMS看你workspace里面写的数据，和其他事务对比看看有无冲突)</p>
+</li>
+<li>
+<p>If there are no conflicts, the write set is installed into the “global” database.(无冲突一把全部写回到数据库里面)</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>OCC PHASES</strong>
+<ul>
+<li><strong>#1 – Read Phase:</strong> Track the read/write sets of txns and store their writes in a private workspace.</li>
+<li><strong>#2 – Validation Phase:</strong> When a txn commits, check whether it conflicts with other txns.</li>
+<li><strong>#3 – Write Phase:</strong> If validation succeeds, apply private changes to database. Otherwise abort and restart the txn.</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-2.png" title="/img/CMU 15-445 Database Systems/chapter18-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-2.png" data-sub-html="<h2>OCC在提交的时候才会分配时间戳</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-2.png, /img/CMU%2015-445%20Database%20Systems/chapter18-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-2.png" />
+    </a><figcaption class="image-caption">OCC在提交的时候才会分配时间戳</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>OCC – READ PHASE</strong></p>
+<ul>
+<li>Track the read/write sets of txns and store their writes in a private workspace.</li>
+<li>The DBMS copies every tuple that the txn accesses from the shared database to its workspace ensure repeatable reads.</li>
+</ul>
+</li>
+<li>
+<p><strong>OCC – VALIDATION PHASE</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-3.png" title="/img/CMU 15-445 Database Systems/chapter18-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-3.png" data-sub-html="<h2>VALIDATION PHASE的决策图，不能提交的时候发现后面的事务读/写了自己写了的数据（因为按照串行的理论，应该是后面的事务要读自己提交后的数据，但是自己还没提交，后面的事务读的是自己之前的数据！）</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-3.png, /img/CMU%2015-445%20Database%20Systems/chapter18-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-3.png" />
+    </a><figcaption class="image-caption">VALIDATION PHASE的决策图，不能提交的时候发现后面的事务读/写了自己写了的数据（因为按照串行的理论，应该是后面的事务要读自己提交后的数据，但是自己还没提交，后面的事务读的是自己之前的数据！）</figcaption>
+    </figure>
+<ul>
+<li><strong>Approach #1: Backward Validation</strong>：和前面的历史数据做校验</li>
+<li><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-4.png" title="/img/CMU 15-445 Database Systems/chapter18-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-4.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-4.png, /img/CMU%2015-445%20Database%20Systems/chapter18-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-4.png" />
+    </a></li>
+<li><strong>Approach #2: Forward Validation</strong>：和未来的事务做校验</li>
+<li><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-5.png" title="/img/CMU 15-445 Database Systems/chapter18-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-5.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-5.png, /img/CMU%2015-445%20Database%20Systems/chapter18-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-5.png" />
+    </a></li>
+</ul>
+</li>
+<li>
+<p><strong>OCC – WRITE PHASE</strong></p>
+<ul>
+<li>Serial Commits: → Use a global latch to limit a single txn to be in the Validation/Write phases at a time.(直接锁全表写，一是为了解决并发问题，二来由于写的数据都准备好了，所以写耗费的时间很短，对并发度的影响不高)</li>
+</ul>
+</li>
+<li>
+<p>OCC works well when the # of conflicts is low:</p>
+<ul>
+<li>→ All txns are read-only (ideal).</li>
+<li>→ Txns access disjoint subsets of data.</li>
+</ul>
+</li>
+<li>
+<p>If the database is large and the workload is not skewed, then there is a low probability of conflict, so again locking is wasteful.</p>
+</li>
+<li>
+<p>OCC问题</p>
+<ul>
+<li>本地Copy带来的额外开销</li>
+<li>commit的时候校验的逻辑很麻烦，消耗性能</li>
+<li>写的步骤是锁表的，也可能会称为性能瓶颈</li>
+<li>一旦出了问题前面干的全部回退，这也是一种浪费，2PL能够执行到一半发现死锁直接让这个事务回退，损失就比OCC要小</li>
+</ul>
+</li>
+</ul>
+<h3 id="dynamic-databases-and-the-phantom-problem">Dynamic Databases and The Phantom Problem</h3>
+<ul>
+<li>2PL和OCC在完全串行化上面都有BUG。。。$\rightarrow$ 幻读</li>
+<li>前面讨论的问题都是read和update的问题，但是没有讨论insert和delete的问题</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-6.png" title="/img/CMU 15-445 Database Systems/chapter18-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-6.png" data-sub-html="<h2>幻读的情景</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-6.png, /img/CMU%2015-445%20Database%20Systems/chapter18-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-6.png" />
+    </a><figcaption class="image-caption">幻读的情景</figcaption>
+    </figure>
+<ul>
+<li>2PL和OCC有这个BUG的原因：我只能控制现存的数据，但是不管数据的插入/删除</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>THE PHANTOM PROBLEM</strong></p>
+</li>
+<li>
+<p><strong>Approach #1: Re-Execute Scans</strong></p>
+<ul>
+<li>对可能产生幻读的行为(SELECT … FROM … GROUP BY …/insert/delete)进行记录，然后在提交的时候再扫描一遍检测有无并发的问题</li>
+<li>缺点：这种扫描开销过大，性能上接受不了</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #2: Predicate Locking</strong></p>
+<ul>
+<li>
+<p>最早由System R发明</p>
+</li>
+<li>
+<p>Shared lock on the predicate in a WHERE clause of a SELECT query.</p>
+</li>
+<li>
+<p>Exclusive lock on the predicate in a WHERE clause of any UPDATE, INSERT, or DELETE query</p>
+</li>
+<li>
+<p>It is rarely implemented in systems; an example of a system that uses it is HyPer (precision locking).</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-7.jpg" title="/img/CMU 15-445 Database Systems/chapter18-7.jpg" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-7.jpg" data-sub-html="<h2>谓词锁控制数据竞争</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-7.jpg"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-7.jpg, /img/CMU%2015-445%20Database%20Systems/chapter18-7.jpg 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-7.jpg 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-7.jpg" />
+    </a><figcaption class="image-caption">谓词锁控制数据竞争</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #3: Index Locking</strong></p>
+<ul>
+<li>有索引给索引上锁，没索引就要加大的列锁/表锁了</li>
+</ul>
+</li>
+<li>
+<p>MySQL的解决方案：间隙锁</p>
+</li>
+</ul>
+<h3 id="isolation-levels">Isolation Levels</h3>
+<ul>
+<li>
+<p>数据库很难做到完全串行，而且很多业务也不需要完全串行，所以有不同的隔离级别</p>
+</li>
+<li>
+<p><strong>Isolation Levels (Strongest to Weakest):</strong></p>
+<ul>
+<li>
+<p><strong>SERIALIZABLE</strong>: No Phantoms, all reads repeatable, and no dirty reads.</p>
+<ul>
+<li>Possible implementation: Index locks + Strict 2PL.</li>
+</ul>
+</li>
+<li>
+<p><strong>REPEATABLE READS</strong>: Phantoms may happen.</p>
+<ul>
+<li>Possible implementation: Strict 2PL.</li>
+</ul>
+</li>
+<li>
+<p><strong>READ-COMMITTED</strong>: Phantoms and unrepeatable reads may happen.</p>
+<ul>
+<li>Possible implementation: Strict 2PL for exclusive locks, immediate release of the shared lock after a read.</li>
+</ul>
+</li>
+<li>
+<p><strong>READ-UNCOMMITTED</strong>: All anomalies may happen.</p>
+<ul>
+<li>Possible implementation: Strict 2PL for exclusive locks, no shared locks for reads.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-8.png" title="/img/CMU 15-445 Database Systems/chapter18-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-8.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-8.png, /img/CMU%2015-445%20Database%20Systems/chapter18-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-8.png" />
+    </a>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter18-9.png" title="/img/CMU 15-445 Database Systems/chapter18-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter18-9.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter18-9.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter18-9.png, /img/CMU%2015-445%20Database%20Systems/chapter18-9.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter18-9.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter18-9.png" />
+    </a>
+</li>
+<li>
+<p>如果显式声明一个表是READ ONLY的话，那么数据库会进行优化（不加锁），还有的数据库会自动检测，如果没有写的操作会自动优化</p>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-20</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/" data-title="CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter17/" class="prev" rel="prev" title="CMU 15-445 Lecture #17: Two-Phase Locking"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
