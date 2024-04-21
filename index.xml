@@ -93,9 +93,9 @@
 </li>
 </ul>
 <hr>
+<h3 id="design-consideration-version-storage">Design consideration: Version Storage</h3>
 <ul>
-<li>
-<p><strong>Version Storage</strong></p>
+<li><strong>Version Storage</strong>
 <ul>
 <li>
 <p>The DBMS uses the tuples’ pointer field to create a version chain per logical tuple</p>
@@ -139,6 +139,7 @@
 </li>
 </ul>
 <hr>
+<h3 id="design-consideration-garbage-collection">Design consideration: Garbage Collection</h3>
 <ul>
 <li>
 <p><strong>Garbage Collection</strong></p>
@@ -164,6 +165,92 @@
 </li>
 <li>
 <p><strong>Approach #1: Tuple-level</strong></p>
+<ul>
+<li>
+<p>Find old versions by examining tuples directly.</p>
+</li>
+<li>
+<p>Background Vacuuming vs. Cooperative Cleaning</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-8.png" title="/img/CMU 15-445 Database Systems/chapter19-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-8.png" data-sub-html="<h2>Background Vacuuming:后台清理</h2>">
+        
+    </a><figcaption class="image-caption">Background Vacuuming:后台清理</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png" title="/img/CMU 15-445 Database Systems/chapter19-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-9.png" data-sub-html="<h2>用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</h2>">
+        
+    </a><figcaption class="image-caption">用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-10.png" title="/img/CMU 15-445 Database Systems/chapter19-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-10.png" data-sub-html="<h2>Cooperative Cleaning:查询的时候顺便清理</h2>">
+        
+    </a><figcaption class="image-caption">Cooperative Cleaning:查询的时候顺便清理</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #2: Transaction-level</strong></p>
+<ul>
+<li>Txns keep track of their old versions so the DBMS does not have to scan tuples to determine visibility</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-11.png" title="/img/CMU 15-445 Database Systems/chapter19-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-11.png" data-sub-html="<h2>事务记录自己改了什么，GC定时间戳去扫描事务的操作记录然后清理无用数据</h2>">
+        
+    </a><figcaption class="image-caption">事务记录自己改了什么，GC定时间戳去扫描事务的操作记录然后清理无用数据</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<h3 id="design-consideration-index-management">Design consideration: Index Management</h3>
+<ul>
+<li>
+<p>Primary key indexes point to version chain head</p>
+</li>
+<li>
+<p>修改主键=先删除后插入</p>
+</li>
+<li>
+<p>Secondary indexes</p>
+<ul>
+<li>
+<p><strong>Approach #1: Logical Pointers:</strong> 记录数据的逻辑地址，比如主键的值</p>
+</li>
+<li>
+<p><strong>Approach #2: Physical Pointers:</strong> 记录物理地址</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-12.png" title="/img/CMU 15-445 Database Systems/chapter19-12.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-12.png" data-sub-html="<h2>指向物理地址带来的一个严重的后果是如果版本链需要更新，那么一大批二级索引指向版本链的pointer也要更新</h2>">
+        
+    </a><figcaption class="image-caption">指向物理地址带来的一个严重的后果是如果版本链需要更新，那么一大批二级索引指向版本链的pointer也要更新</figcaption>
+    </figure>
+</li>
+<li>
+<p>逻辑地址就没有上面的毛病，只需要改主键索引，辅助索引就不需要变</p>
+</li>
+<li>
+<p>还有一个折中的方案就是在物理地址索引和版本链之间加上一个表做索引到版本链的代理</p>
+</li>
+</ul>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-13.png" title="/img/CMU 15-445 Database Systems/chapter19-13.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-13.png" data-sub-html="<h2>删除后再插入也会出现问题</h2>">
+        
+    </a><figcaption class="image-caption">删除后再插入也会出现问题</figcaption>
+    </figure>
+</li>
+<li>
+<p>Delete</p>
+<ul>
+<li>Approach #1: Deleted Flag: Maintain a flag to indicate that the logical tuple has been deleted after the newest physical version. This can either be in the tuple header or a separate column.</li>
+<li>Approach #2: Tombstone Tuple: Create an empty physical version to indicate that a logical tuple is deleted. Use a separate pool for tombstone tuples with only a special bit pattern in version chain pointer to reduce storage overhead.</li>
+</ul>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-14.png" title="/img/CMU 15-445 Database Systems/chapter19-14.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-14.png">
+        
+    </a>
 </li>
 </ul>
 ]]></description>

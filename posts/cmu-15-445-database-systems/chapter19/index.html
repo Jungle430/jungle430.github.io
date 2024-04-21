@@ -26,7 +26,7 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter19\/"
-        },"genre": "posts","keywords": "Database Systems","wordcount":  789 ,
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1195 ,
         "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter19\/","datePublished": "2024-04-21T10:39:27+08:00","dateModified": "2024-04-21T10:39:27+08:00","publisher": {
             "@type": "Organization",
             "name": "Jungle"},"author": {
@@ -69,8 +69,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #19: Multi-Version Concurrency Control</h2><div class="post-meta">
                 <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
-                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-21">2024-04-21</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 789 字</span>&nbsp;
-                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟</span>&nbsp;</div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-21">2024-04-21</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1195 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
             </div>
             
             <hr><div class="details toc" id="toc-static"  data-kept="">
@@ -83,6 +83,9 @@
     <li><a href="#lecture-19-multi-version-concurrency-control">Lecture #19: Multi-Version Concurrency Control</a>
       <ul>
         <li><a href="#multi-version-concurrency-control">Multi-Version Concurrency Control</a></li>
+        <li><a href="#design-consideration-version-storage">Design consideration: Version Storage</a></li>
+        <li><a href="#design-consideration-garbage-collection">Design consideration: Garbage Collection</a></li>
+        <li><a href="#design-consideration-index-management">Design consideration: Index Management</a></li>
       </ul>
     </li>
   </ul>
@@ -188,9 +191,9 @@
 </li>
 </ul>
 <hr>
+<h3 id="design-consideration-version-storage">Design consideration: Version Storage</h3>
 <ul>
-<li>
-<p><strong>Version Storage</strong></p>
+<li><strong>Version Storage</strong>
 <ul>
 <li>
 <p>The DBMS uses the tuples’ pointer field to create a version chain per logical tuple</p>
@@ -252,6 +255,7 @@
 </li>
 </ul>
 <hr>
+<h3 id="design-consideration-garbage-collection">Design consideration: Garbage Collection</h3>
 <ul>
 <li>
 <p><strong>Garbage Collection</strong></p>
@@ -277,6 +281,134 @@
 </li>
 <li>
 <p><strong>Approach #1: Tuple-level</strong></p>
+<ul>
+<li>
+<p>Find old versions by examining tuples directly.</p>
+</li>
+<li>
+<p>Background Vacuuming vs. Cooperative Cleaning</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-8.png" title="/img/CMU 15-445 Database Systems/chapter19-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-8.png" data-sub-html="<h2>Background Vacuuming:后台清理</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter19-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter19-8.png, /img/CMU%2015-445%20Database%20Systems/chapter19-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter19-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter19-8.png" />
+    </a><figcaption class="image-caption">Background Vacuuming:后台清理</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png" title="/img/CMU 15-445 Database Systems/chapter19-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-9.png" data-sub-html="<h2>用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png, /img/CMU%2015-445%20Database%20Systems/chapter19-9.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter19-9.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter19-9.png" />
+    </a><figcaption class="image-caption">用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-10.png" title="/img/CMU 15-445 Database Systems/chapter19-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-10.png" data-sub-html="<h2>Cooperative Cleaning:查询的时候顺便清理</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter19-10.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter19-10.png, /img/CMU%2015-445%20Database%20Systems/chapter19-10.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter19-10.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter19-10.png" />
+    </a><figcaption class="image-caption">Cooperative Cleaning:查询的时候顺便清理</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #2: Transaction-level</strong></p>
+<ul>
+<li>Txns keep track of their old versions so the DBMS does not have to scan tuples to determine visibility</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-11.png" title="/img/CMU 15-445 Database Systems/chapter19-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-11.png" data-sub-html="<h2>事务记录自己改了什么，GC定时间戳去扫描事务的操作记录然后清理无用数据</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter19-11.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter19-11.png, /img/CMU%2015-445%20Database%20Systems/chapter19-11.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter19-11.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter19-11.png" />
+    </a><figcaption class="image-caption">事务记录自己改了什么，GC定时间戳去扫描事务的操作记录然后清理无用数据</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<h3 id="design-consideration-index-management">Design consideration: Index Management</h3>
+<ul>
+<li>
+<p>Primary key indexes point to version chain head</p>
+</li>
+<li>
+<p>修改主键=先删除后插入</p>
+</li>
+<li>
+<p>Secondary indexes</p>
+<ul>
+<li>
+<p><strong>Approach #1: Logical Pointers:</strong> 记录数据的逻辑地址，比如主键的值</p>
+</li>
+<li>
+<p><strong>Approach #2: Physical Pointers:</strong> 记录物理地址</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-12.png" title="/img/CMU 15-445 Database Systems/chapter19-12.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-12.png" data-sub-html="<h2>指向物理地址带来的一个严重的后果是如果版本链需要更新，那么一大批二级索引指向版本链的pointer也要更新</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter19-12.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter19-12.png, /img/CMU%2015-445%20Database%20Systems/chapter19-12.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter19-12.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter19-12.png" />
+    </a><figcaption class="image-caption">指向物理地址带来的一个严重的后果是如果版本链需要更新，那么一大批二级索引指向版本链的pointer也要更新</figcaption>
+    </figure>
+</li>
+<li>
+<p>逻辑地址就没有上面的毛病，只需要改主键索引，辅助索引就不需要变</p>
+</li>
+<li>
+<p>还有一个折中的方案就是在物理地址索引和版本链之间加上一个表做索引到版本链的代理</p>
+</li>
+</ul>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-13.png" title="/img/CMU 15-445 Database Systems/chapter19-13.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-13.png" data-sub-html="<h2>删除后再插入也会出现问题</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter19-13.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter19-13.png, /img/CMU%2015-445%20Database%20Systems/chapter19-13.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter19-13.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter19-13.png" />
+    </a><figcaption class="image-caption">删除后再插入也会出现问题</figcaption>
+    </figure>
+</li>
+<li>
+<p>Delete</p>
+<ul>
+<li>Approach #1: Deleted Flag: Maintain a flag to indicate that the logical tuple has been deleted after the newest physical version. This can either be in the tuple header or a separate column.</li>
+<li>Approach #2: Tombstone Tuple: Create an empty physical version to indicate that a logical tuple is deleted. Use a separate pool for tombstone tuples with only a special bit pattern in version chain pointer to reduce storage overhead.</li>
+</ul>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-14.png" title="/img/CMU 15-445 Database Systems/chapter19-14.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-14.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter19-14.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter19-14.png, /img/CMU%2015-445%20Database%20Systems/chapter19-14.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter19-14.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter19-14.png" />
+    </a>
 </li>
 </ul>
 </div><div class="post-footer" id="post-footer">
