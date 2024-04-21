@@ -4,7 +4,169 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sat, 20 Apr 2024 20:07:38 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 21 Apr 2024 10:39:27 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #19: Multi-Version Concurrency Control</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter19/</link>
+    <pubDate>Sun, 21 Apr 2024 10:39:27 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter19/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-19-multi-version-concurrency-control">Lecture #19: Multi-Version Concurrency Control</h2>
+<h3 id="multi-version-concurrency-control">Multi-Version Concurrency Control</h3>
+<ul>
+<li>
+<p>常常作为2PL和T/O的辅助手段</p>
+</li>
+<li>
+<p>The DBMS maintains multiple physical versions of a single logical object in the database（维护多个历史版本（像git））</p>
+<ul>
+<li>
+<p>When a txn writes to an object, the DBMS creates a new version of that object. 不改动，直接创建一个新的版本</p>
+</li>
+<li>
+<p>When a txn reads an object, it reads the newest version that existed when the txn started.</p>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>First implementations was Rdb/VMS and InterBase at DEC in early 1980s.</p>
+<p>→ Both were by Jim Starkey, co-founder of NuoDB.</p>
+<p>→ DEC Rdb/VMS is now “Oracle Rdb”.</p>
+<p>→ InterBase was open-sourced as Firebird.</p>
+</blockquote>
+<ul>
+<li>
+<p>解决的问题</p>
+<ul>
+<li>Writers do not block readers.</li>
+<li>Readers do not block writers.</li>
+<li>我去上面读历史版本就是了</li>
+</ul>
+</li>
+<li>
+<p>Read-only txns can read a consistent snapshot without acquiring locks. 好像在读静态数据</p>
+<ul>
+<li>Use timestamps to determine visibility.用时间戳来确定可见性</li>
+<li>MVCC naturally supports Snapshot Isolation (SI).天然支持快照隔离读</li>
+</ul>
+</li>
+<li>
+<p>Easily support time-travel queries.可以读取某一个时刻的历史版本，和IDE退到昨天的代码很像（其他方案很难做到，会把历史数据直接给写没）</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-1.png" title="/img/CMU 15-445 Database Systems/chapter19-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-1.png" data-sub-html="<h2>MVCC 写</h2>">
+        
+    </a><figcaption class="image-caption">MVCC 写</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-2.png" title="/img/CMU 15-445 Database Systems/chapter19-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-2.png" data-sub-html="<h2>MVCC 读</h2>">
+        
+    </a><figcaption class="image-caption">MVCC 读</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-3.png" title="/img/CMU 15-445 Database Systems/chapter19-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-3.png" data-sub-html="<h2>防止级联回滚，只读最新的commit数据</h2>">
+        
+    </a><figcaption class="image-caption">防止级联回滚，只读最新的commit数据</figcaption>
+    </figure>
+<ul>
+<li>从上面的一张图可以看到T1和T2没法做到完全串行化，T2没有读到T1commit上去的数据，所以说只靠MVCC做不到完全串行化，Oracle最高隔离级别就是上面的图，快照隔离</li>
+</ul>
+<hr>
+<ul>
+<li>There are five important MVCC design considerations:
+<ol>
+<li>Concurrency Control Protocol</li>
+<li>Version Storage</li>
+<li>Garbage Collection</li>
+<li>Index Management</li>
+<li>Deletes</li>
+</ol>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Concurrency Control Protocol</strong>
+<ul>
+<li><strong>Approach #1: Timestamp Ordering</strong>: Assign txns timestamps that determine serial order.</li>
+<li><strong>Approach #2: Optimistic Concurrency Control</strong>: Three-phase protocol from last class,Use private workspace for new versions.</li>
+<li><strong>Approach #3: Two-Phase Locking</strong>: Txns acquire appropriate lock on physical version before they can read/write a logical tuple.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Version Storage</strong></p>
+<ul>
+<li>
+<p>The DBMS uses the tuples’ pointer field to create a version chain per logical tuple</p>
+<ul>
+<li>This allows the DBMS to find the version that is visible to a particular txn at runtime.</li>
+<li>Indexes always point to the “head” of the chain.</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #1: Append-Only Storage</strong>: New versions are appended to the same table space.</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-4.png" title="/img/CMU 15-445 Database Systems/chapter19-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-4.png" data-sub-html="<h2>Append-Only Storage</h2>">
+        
+    </a><figcaption class="image-caption">Append-Only Storage</figcaption>
+    </figure>
+<ul>
+<li>两种插法：头插法和尾插法，头插法搜索效率高（大部分txn要最新的数据）</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #2: Time-Travel Storage</strong>: Old versions are copied to separate table space.</p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-5.png" title="/img/CMU 15-445 Database Systems/chapter19-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-5.png" data-sub-html="<h2>Time-Travel Storage</h2>">
+        
+    </a><figcaption class="image-caption">Time-Travel Storage</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #3: Delta Storage</strong>: The original values of the modified attributes are copied into a separate delta record space.</p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-6.png" title="/img/CMU 15-445 Database Systems/chapter19-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-6.png" data-sub-html="<h2>Delta Storage就是Time-Travel Storage的省空间版本，只存增量</h2>">
+        
+    </a><figcaption class="image-caption">Delta Storage就是Time-Travel Storage的省空间版本，只存增量</figcaption>
+    </figure></li>
+<li>MySQL用的就是这个方案</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Garbage Collection</strong></p>
+<ul>
+<li>
+<p>历史版本不能一直存着（那样存储空间就会被严重浪费），所以需要定期回收无用的历史版本</p>
+</li>
+<li>
+<p>怎么判断无用？</p>
+<ul>
+<li>现在运行的事务都看不到这个版本了(Snapshot Isolation)</li>
+<li>创建这个版本的事务回滚了</li>
+</ul>
+</li>
+<li>
+<p>两个问题</p>
+<ul>
+<li>怎么发现过期的版本?</li>
+<li>决定何时回收才能保证内存安全?</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #1: Tuple-level</strong></p>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #18: Timestamp Ordering Concurrency Control</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/</link>
     <pubDate>Sat, 20 Apr 2024 20:07:38 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter18/</guid>
@@ -1853,226 +2015,6 @@ prioritized as such.</li>
     </a><figcaption class="image-caption">方向相反造成死锁</figcaption>
     </figure></li>
 <li>解决方法：<strong>制定规则</strong>，比如数据只能从大往小走，比如MySQL，之前不支持倒序遍历就和这个有关，后面又加上了倒叙索引才解决了这个问题</li>
-</ul>
-</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #08: Tree Indexes</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter8/</link>
-    <pubDate>Wed, 10 Apr 2024 15:53:39 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter8/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-08-tree-indexes">Lecture #08: Tree Indexes</h2>
-<h3 id="table-indexes">Table Indexes</h3>
-<ul>
-<li>数据库中常常需要数据库的部分有序(这也是为什么哈希表做不成索引，因为无序)副本来提高查找的效率，这个副本一般称为索引</li>
-<li>DBMS要自己维护索引和数据的一致性，还有执行SQL的时候使用什么索引</li>
-</ul>
-<h3 id="b-tree">B+ Tree</h3>
-<ul>
-<li>B+ Tree是一种自平衡搜索树，它可以将查找的复杂度控制在$O(logn)$，同时它的设计也减小了查找时磁盘的$I/O$，这对于DBMS的效率来说是十分重要的</li>
-<li>几乎所有支持索引的现代DBMS都用了B+ Tree，B+ Tree和B Tree最大的区别在于B+ Tree之有叶子节点才存储了值，非叶子节点存储的是部分索引的值，而B Tree的每个节点都存储了值</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter8-1.png" title="/img/CMU 15-445 Database Systems/chapter8-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter8-1.png" data-sub-html="<h2>B&#43; Tree还借鉴了其他B Tree类数据结构的特性，比如从B-Link-Tree中学到的sibling pointers</h2>">
-        
-    </a><figcaption class="image-caption">B+ Tree还借鉴了其他B Tree类数据结构的特性，比如从B-Link-Tree中学到的sibling pointers</figcaption>
-    </figure>
-<ul>
-<li>
-<p>B+ Tree有以下特点</p>
-<ul>
-<li>它是完全平衡的（所有的叶子节点高度一致）</li>
-<li>除了根节点外，每个内部节点至少为半满($\frac{M}{2}-1 \le num\ of\ keys \le M -1$)</li>
-<li>每个有K个键的节点有K+1个非空子节点（指针是从两个key中间的“缝”出来的）</li>
-</ul>
-</li>
-<li>
-<p>B+ Tree的每个节点都包含一个Key-Value的数组&lt;索引值，下层的节点&gt;</p>
-</li>
-<li>
-<p>B+ Tree的叶子节点有两种存储模式</p>
-<ul>
-<li>一种是存储Tuple的指针，通过这个指针去拿Tuple的数据</li>
-<li>另一种是存储Tuple的数据，这样就可以直接获取，不用再去找一次Tuple的数据</li>
-</ul>
-</li>
-<li>
-<p>根据NULL在不同类型中的意义，NULL节点一般会在第一个或最后一个叶子节点里面（要看对NULL认为是无穷大的还是无穷小的）</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Insertion</strong>
-<ul>
-<li>向下遍历树，找到插入的位置</li>
-<li>如果索引有足够的空间，则直接插入</li>
-<li>否则最下面的索引分裂，然后重新整合B+ Tree的结构后再插入</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Deletion</strong>
-<ul>
-<li>如果删除后的节点少于半满，需要合并树</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Composite Index</strong>
-<ul>
-<li>多个属性组成的联合索引</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">abc_index</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>我们可以使用联合索引来加快查询速度</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">table</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p><strong>Selection Conditions</strong></p>
-<ul>
-<li>要看联合索引的结构，是前面的字段先有序之后再排下一个字段，要想高效利用联合索引就要会最左匹配</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Duplicate Keys</strong>:重复索引的处理方法
-<ul>
-<li><strong>append record IDs</strong>:后面加上唯一标识符。比如主键或者(page,slot)的元组，这样就保证绝对唯一</li>
-<li><strong>overflow nodes</strong>:给叶子节点再挂一个溢出节点，专门放碰撞的Key，但是增加了维护树结构的成本</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Clustered Indexes</strong>
-<ul>
-<li>主键B+ Tree的叶子节点对应的数据就是实际数据，这样遍历到主键的话直接就拿到数据</li>
-<li>但是如果不是主键的B+ Tree的话，只能先拿到主键再去主键的B+ Tree上面找</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Index Scan Page Sorting</strong>
-<ul>
-<li>先扫描统计要那些主键对应的数据，再把数据做一次排序 ,然后进主键的B+ Tree一把搜出来</li>
-</ul>
-</li>
-</ul>
-<h3 id="btree-design-choices">B+Tree Design Choices</h3>
-<ul>
-<li><strong>Node size</strong>
-<ul>
-<li>磁盘越慢，B+ Tree的节点越大，这样减少I/O的压力，如果是内存，节点应该变小，因为这个时候筛选无用数据的成本已经高过磁盘中的I/O了
-<ul>
-<li>HDD: ~1MB</li>
-<li>SSD: ~10KB</li>
-<li>In-Memory: ~512B</li>
-</ul>
-</li>
-<li>还有就是业务类型，OTAP喜欢点查询，节点小一点好，OLAP喜欢动不动扫描全表，节点大一点好</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Merge Threshold</strong>
-<ul>
-<li>一般来说合并拆分这种操作DBMS都是尽量拖一拖，因为这个过程开销太大了，所以不是到了阈值就马上合并</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Variable Length Keys</strong>
-<ul>
-<li>pointers:节点存指针</li>
-<li>Variable Length Nodes:节点本身就是变长的，维护更加困难</li>
-<li>Padding:数据不到规定大小，填充字节补偿(像字节对齐)</li>
-<li>Key Map/Indirection:和slot很像，里面的结构加上slot-array来适应不同长度的数据</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Intra-Node Search</strong>
-<ul>
-<li>节点内部的数据怎么搜索
-<ul>
-<li><strong>Linear</strong>:线性遍历，看似低效，但是和I/O的时间比起来不算什么</li>
-<li><strong>Binary</strong>:二分，复杂度降为$O(log(n))$</li>
-<li><strong>Interpolation</strong>:利用数学规律/机器学习等其他方式进行推断查找</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="optimizations">Optimizations</h3>
-<ul>
-<li>
-<p><strong>Prefix Compression</strong></p>
-<ul>
-<li>
-<p>找前缀一样的统一存一下前缀，剩下的空间存后缀</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter8-2.png" title="/img/CMU 15-445 Database Systems/chapter8-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter8-2.png" data-sub-html="<h2>前缀压缩的例子</h2>">
-        
-    </a><figcaption class="image-caption">前缀压缩的例子</figcaption>
-    </figure>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Deduplication</strong>
-<ul>
-<li>一个K，后面根据所有的V，防止K冗余</li>
-<li>$(K_1,V_1),(K_1,V_2),(K_1,V_3),(K_2,V_4),(K_2,V_5) \rightarrow\ (K_1,V_1,V_2,V_3),(K_2,V_4,V_5)$</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Suffix Truncation</strong>
-<ul>
-<li>如果搜索的时候不要要全部数据往下走，只需要部分数据，那我存个前缀也行
-<ul>
-<li>比如string的like”x%”这种操作，存前缀就够了</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Bulk Insert</strong>
-<ul>
-<li>一次插入一批，减少树的分裂合并次数</li>
 </ul>
 </li>
 </ul>
