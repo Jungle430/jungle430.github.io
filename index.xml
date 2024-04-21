@@ -4,9 +4,266 @@
         <link>https://Jungle430.github.io/</link>
         <description>Welcome to Jungle&#39;s blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 21 Apr 2024 10:39:27 &#43;0800</lastBuildDate>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 21 Apr 2024 15:08:57 &#43;0800</lastBuildDate>
             <atom:link href="https://Jungle430.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
+    <title>CMU 15-445 Lecture #20: Database Logging</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/</link>
+    <pubDate>Sun, 21 Apr 2024 15:08:57 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-20-database-logging">Lecture #20: Database Logging</h2>
+<h3 id="crash-recovery">Crash Recovery</h3>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-1.png" title="/img/CMU 15-445 Database Systems/chapter20-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-1.png" data-sub-html="<h2>情景：数据库运行到一半没电了</h2>">
+        
+    </a><figcaption class="image-caption">情景：数据库运行到一半没电了</figcaption>
+    </figure>
+<ul>
+<li>Recovery algorithms are techniques to ensure <strong>database consistency(C), transaction atomicity(A), and durability(D)</strong> <strong>despite failures(example no power)</strong></li>
+<li>The key primitives that used in recovery algorithms are UNDO and REDO. Not all algorithms use both primitives.
+<ul>
+<li><strong>UNDO</strong>: The process of removing the effects of an incomplete or aborted transaction.</li>
+<li><strong>REDO</strong>: The process of re-applying the effects of a committed transaction for durability.</li>
+</ul>
+</li>
+</ul>
+<h3 id="failure-classification">FAILURE CLASSIFICATION</h3>
+<ul>
+<li>
+<p><strong>Type #1 – Transaction Failures</strong></p>
+<ul>
+<li>Logical Errors:→ Transaction cannot complete due to some internal error condition (e.g., integrity constraint violation).</li>
+<li>Internal State Errors:→ DBMS must terminate an active transaction due to an error condition (e.g., deadlock).</li>
+</ul>
+</li>
+<li>
+<p><strong>Type #2 – System Failures</strong></p>
+<ul>
+<li>
+<p>Software Failure:→ Problem with the OS or DBMS implementation (e.g., uncaught divide-by-zero exception).</p>
+</li>
+<li>
+<p>Hardware Failure:</p>
+<ul>
+<li>→ The computer hosting the DBMS crashes (e.g., power plug gets pulled).</li>
+<li>→ Fail-stop Assumption: Non-volatile storage contents are assumed to not be corrupted by system crash.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Type #3 – Storage Media Failures</strong></p>
+<ul>
+<li>Non-Repairable Hardware Failure:
+<ul>
+<li>→ A head crash or similar disk failure destroys all or part of non-volatile storage.</li>
+<li>→ Destruction is assumed to be detectable (e.g., disk controller use checksums to detect failures).</li>
+<li>The recovery protocol can’t recover from this! Database must be restored from an archived version.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>考虑：磁盘比内存慢的多，所以DBMS的模式是load到内存池后修改，最后刷盘</p>
+<ul>
+<li><strong>保证的点：只要commit成功，数据永远不会丢（除了硬盘爆炸），如果事务中间失败了，那么这个事务应该就和没发生一样</strong></li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-2.png" title="/img/CMU 15-445 Database Systems/chapter20-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-2.png" data-sub-html="<h2>方案选择：是否commit后要立即刷盘，刷盘的时候同一页其他未commit的事务修改的数据怎么处理(考虑回滚问题)</h2>">
+        
+    </a><figcaption class="image-caption">方案选择：是否commit后要立即刷盘，刷盘的时候同一页其他未commit的事务修改的数据怎么处理(考虑回滚问题)</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>STEAL POLICY</strong></p>
+<ul>
+<li>STEAL: Is allowed.(别人没提交的数据我也刷)</li>
+<li>NO-STEAL: Is not allowed.(别人没提交我就不能刷到磁盘)</li>
+</ul>
+</li>
+<li>
+<p><strong>FORCE POLICY</strong></p>
+<ul>
+<li>FORCE: Is required.(commit后立即刷)</li>
+<li>NO-FORCE: Is not required.(不强制要求)</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-3.png" title="/img/CMU 15-445 Database Systems/chapter20-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-3.png" data-sub-html="<h2>NO-STEAL FORCE</h2>">
+        
+    </a><figcaption class="image-caption">NO-STEAL FORCE</figcaption>
+    </figure>
+<ul>
+<li>NO-STEAL FORCE
+<ul>
+<li>优点：好实现，不需要undo和redo的操作</li>
+<li>缺点：效率低，刷盘频率太高，没有undo和redo那所有的东西都要load到内存池，也很伤害效率，能够修改数据的量收到缓存池大小的限制（缓存池就用来做的数据备份，没有写进磁盘的数据需要全部暂存在缓存池）</li>
+</ul>
+</li>
+</ul>
+<h3 id="shadow-paging">Shadow Paging</h3>
+<ul>
+<li>
+<p>具体实现：<strong>SHADOW PAGING</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-4.png" title="/img/CMU 15-445 Database Systems/chapter20-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-4.png" data-sub-html="<h2>把需要的数据Copy一份再改，改的时候也刷盘，commit之后改指针指向，最后清除原有页</h2>">
+        
+    </a><figcaption class="image-caption">把需要的数据Copy一份再改，改的时候也刷盘，commit之后改指针指向，最后清除原有页</figcaption>
+    </figure>
+<ul>
+<li>Undo: 把本地复制出来的页全部干掉</li>
+<li>Redo: 不需要，commit必须刷盘</li>
+</ul>
+</li>
+<li>
+<p>实际应用：SQLITE (PRE-2010)</p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-5.png" title="/img/CMU 15-445 Database Systems/chapter20-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-5.png" data-sub-html="<h2>在硬盘上面留原始版本(undo),commit的时候刷盘</h2>">
+        
+    </a><figcaption class="image-caption">在硬盘上面留原始版本(undo),commit的时候刷盘</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p>缺点：对磁盘有大量的随机读写，性能不好</p>
+</li>
+<li>
+<p>思路：随机写=&gt;顺序写：WAL</p>
+</li>
+</ul>
+<h3 id="write-ahead-loggingwal">Write-Ahead Logging（WAL）</h3>
+<ul>
+<li>
+<p><strong>With write-ahead logging, the DBMS records all the changes made to the database in a log file (on stable storage) before the change is made to a disk page</strong></p>
+</li>
+<li>
+<p><strong>The log contains sufficient information to perform the necessary undo and redo actions to restore the database after a crash.</strong></p>
+</li>
+<li>
+<p><strong>The DBMS must write to disk the log file records that correspond to changes made to a database object before it can flush that object to disk.</strong></p>
+</li>
+<li>
+<p>Buffer Pool Policy: STEAL + NO-FORCE</p>
+</li>
+<li>
+<p>一般是&lt;BEGIN&gt;打头，&lt;COMMIT&gt;结尾，COMMIT必须是要把所有数据都刷到磁盘里面</p>
+</li>
+<li>
+<p>日志格式</p>
+<ul>
+<li>
+<p>Transaction Id</p>
+</li>
+<li>
+<p>Object Id</p>
+</li>
+<li>
+<p>Before Value (UNDO)</p>
+</li>
+<li>
+<p>After Value (REDO)</p>
+</li>
+<li>
+<p>Not necessary for Before Value and After Value if using append-only MVCC</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-6.png" title="/img/CMU 15-445 Database Systems/chapter20-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-6.png" data-sub-html="<h2>先刷日志再刷盘，commit代表刷日志成功</h2>">
+        
+    </a><figcaption class="image-caption">先刷日志再刷盘，commit代表刷日志成功</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-7.png" title="/img/CMU 15-445 Database Systems/chapter20-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-7.png" data-sub-html="<h2>crash之后靠日志恢复</h2>">
+        
+    </a><figcaption class="image-caption">crash之后靠日志恢复</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+<li>
+<p>问题：用户commit你就要把日志刷到盘里面，但是刷盘频率高了又破坏效率</p>
+<ul>
+<li>优化： group commit: commit的时候卡住，凑够了几个事务再一起刷</li>
+</ul>
+</li>
+</ul>
+<h3 id="logging-schemes">Logging Schemes</h3>
+<ul>
+<li>
+<p><strong>Physical Logging:</strong></p>
+<ul>
+<li>
+<p>Record the byte-level changes made to a specific location in the database.</p>
+</li>
+<li>
+<p>Example: git diff</p>
+</li>
+<li>
+<p>缺点：会被写放大(UPDATE ALL FRO A TABLE =&gt; BIG Physical Log)</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Logical Logging:</strong></p>
+<ul>
+<li>SQL</li>
+<li>缺点：恢复的时候慢，还有SQL自己的缺陷(NOW()函数不能重放，LIMIT不保证次次相同，备库没有主库的索引)</li>
+</ul>
+</li>
+<li>
+<p><strong>Physiological Logging</strong></p>
+<ul>
+<li>基础是物理日志，混合SQL，偏移量换成槽</li>
+</ul>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-8.png" title="/img/CMU 15-445 Database Systems/chapter20-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-8.png" data-sub-html="<h2>三种日志</h2>">
+        
+    </a><figcaption class="image-caption">三种日志</figcaption>
+    </figure>
+</li>
+<li>
+<p>MYSQL为什么undo和redo分开：安全，还有就是undo log可以用来做mvcc</p>
+</li>
+</ul>
+<h3 id="checkpoints">Checkpoints</h3>
+<ul>
+<li>
+<p>Blocking / Consistent Checkpoint Protocol:</p>
+<ul>
+<li>→ Pause all queries.</li>
+<li>→ Flush all WAL records in memory to disk.</li>
+<li>→ Flush all modified pages in the buffer pool to disk.</li>
+<li>→ Write a &lt;CHECKPOINT&gt; entry to WAL and flush to disk.</li>
+<li>→ Resume queries</li>
+</ul>
+</li>
+<li>
+<p>日志不清理也会爆磁盘</p>
+</li>
+<li>
+<p>crash之后你要知道从哪恢复，类比游戏存档（坐佛/坐火）</p>
+</li>
+<li>
+<p>缓存点停住，把日志和脏页全刷回去，然后在日志里面记上一个&lt;CHECKPOINT&gt;，表示上面的数据都刷盘了</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-9.png" title="/img/CMU 15-445 Database Systems/chapter20-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-9.png" data-sub-html="<h2>注意CHECKPOINT上面有完全提交的和半提交的, T2用redo,T3用undo</h2>">
+        
+    </a><figcaption class="image-caption">注意CHECKPOINT上面有完全提交的和半提交的, T2用redo,T3用undo</figcaption>
+    </figure>
+</li>
+</ul>
+<h3 id="conclusion">CONCLUSION</h3>
+<ul>
+<li>Write-Ahead Logging is (almost) always the best approach to handle loss of volatile storage.</li>
+<li>Use incremental updates (STEAL + NO-FORCE) with checkpoints.</li>
+<li>On Recovery: undo uncommitted txns + redo committed txns.</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #19: Multi-Version Concurrency Control</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter19/</link>
     <pubDate>Sun, 21 Apr 2024 10:39:27 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter19/</guid>
@@ -1864,246 +2121,6 @@ prioritized as such.</li>
 <ul>
 <li>随机I/O尽量变成连续I/O:一次写入页的数量尽量多</li>
 <li>预加载:能先加载到内存中的数据都先加载到内存中</li>
-</ul>
-</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #09: Index Concurrency Control</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</link>
-    <pubDate>Thu, 11 Apr 2024 13:34:01 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter9/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-09-index-concurrency-control">Lecture #09: Index Concurrency Control</h2>
-<h3 id="index-concurrency-control">Index Concurrency Control</h3>
-<ul>
-<li>
-<p>前面讨论都默认是单线程条件下，但是对于DBMS这种主要问题在I/O上面的系统来说，肯定要上多线程，异步这些来提高效率，那么如何在这种条件下保证索引的线程安全很重要了</p>
-</li>
-<li>
-<p>其他数据库的一些处理方法</p>
-<ul>
-<li>内存型NoSQL:直接单线程模式运行，比如Redis</li>
-</ul>
-</li>
-<li>
-<p>本节课主要研究<strong>Physical Correctness</strong>，关注底层设计</p>
-</li>
-</ul>
-<h3 id="locks-vs-latches">Locks vs. Latches</h3>
-<ul>
-<li>和前面的课讨论的一样，一个逻辑锁，一个底层锁</li>
-<li>死锁和回滚都是建立在Locks上面的</li>
-<li>Latches这个锁要划分为读锁和写锁
-<ul>
-<li>多个线程可以同时去读一个变量，相应的读锁可以重入其他线程的读锁，但是其他线程不能写(也叫共享锁)</li>
-<li>一个线程写数据的时候，其他线程不能读和写这个数据，所以写锁一般不可重入其他线程的锁(也叫独占锁)</li>
-</ul>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png" title="/img/CMU 15-445 Database Systems/chapter9-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-1.png" data-sub-html="<h2>Locks和Latches的区别</h2>">
-        
-    </a><figcaption class="image-caption">Locks和Latches的区别</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-1.png" title="/img/CMU 15-445 Database Systems/chapter9-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-1.png" data-sub-html="<h2>兼容矩阵</h2>">
-        
-    </a><figcaption class="image-caption">兼容矩阵</figcaption>
-    </figure>
-<h3 id="latch-implementations">Latch Implementations</h3>
-<ul>
-<li><strong>Blocking OS Mutex</strong>
-<ul>
-<li>simple to use(操作系统自己支持)</li>
-<li>Non-scalable (about 25ns per lock/unlock invocation)，大规模使用不行，这东西效率太低</li>
-<li>Example: std::mutex$\rightarrow$pthread_mutex$\rightarrow$futex</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">m</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="c1">// ...
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">m</span><span class="p">.</span><span class="n">lock</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="c1">// Do something special...
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">m</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>底层实现:内存中分配出来一个变量来获取锁，要锁的程序就把这个变量设置值，如果发现锁被夺取，这个线程就直接进入内核态自己sleep，如果锁被释放操作系统会试着唤醒sleep的线程
-<ul>
-<li>好处：竞争的线程拿不到锁直接sleep，不会额外消耗系统的资源</li>
-<li>坏处：sleep和notify在操作系统层面上面很浪费资源（线程链表的调整）</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Test-and-Set Spin Latch (TAS)</strong></li>
-<li>也叫自旋锁</li>
-<li>Very efficient (single instruction to latch/unlatch)</li>
-<li>Non-scalable, not cache friendly, not OS friendly.大规模用效率上也不行，自旋也很笨</li>
-<li>Example: std::atomic&lt;T&gt;</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">atomic_flag</span> <span class="n">latch</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="c1">// ...
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">while</span> <span class="p">(</span><span class="n">latch</span><span class="p">.</span><span class="n">test_and_set</span><span class="p">(</span><span class="err">…</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl"> <span class="c1">// Retry? Yield? Abort?
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>检测和设置这一组操作必须要是原子的</p>
-</li>
-<li>
-<p>自旋锁对于CPU的开销很大（一直空转）</p>
-</li>
-<li>
-<p>很多语言会把TAS和Blocking结合，自旋一阵子不行就去睡一会</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Atomic Instruction Example: compare-and-swap (CAS)</strong>
-<ul>
-<li>
-<p>Atomic instruction that compares contents of a memory location M to a given value V</p>
-<ul>
-<li>If values are equal, installs new given value V’ in M</li>
-<li>Otherwise, operation fails</li>
-</ul>
-</li>
-<li>
-<p>这个东西是CPU的一条指令，由CPU来保证原子性</p>
-</li>
-<li>
-<p>经常作为自旋锁或者JUC的包里面的一些锁底层的实现</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Reader-Writer Latches</strong>
-<ul>
-<li>Allows for concurrent readers. Must manage read/write queues to avoid starvation.</li>
-<li>Can be implemented on top of spinlocks</li>
-<li>Example: std::shared_mutex $\rightarrow$ pthread_rwlock</li>
-</ul>
-</li>
-</ul>
-<h3 id="hash-table-latching">Hash Table Latching</h3>
-<ul>
-<li>
-<p>好加锁，无论是桶还是开放地址哈希，大家查找的方向是一致的，并且一次只能访问一个页/槽，这点上出不了死锁(当然HashMap的头插法可能会出，不过这个和链表的结构有关)，向其他搜索方向不一致的B+ Tree可能就会出死锁</p>
-</li>
-<li>
-<p>如果要调整容量，一般把整个哈希表都给加上全局的写锁</p>
-</li>
-<li>
-<p>其他情况下一般锁部分就可以了</p>
-<ul>
-<li>
-<p><strong>Page/Block-level Latches</strong></p>
-<ul>
-<li>Each page/block has its own reader-writer latch that protects its entire contents.</li>
-<li>Threads acquire either a read or write latch before they access a page/block</li>
-<li>按块划分，加锁</li>
-<li>Java的ConcurrentHashMap是这种处理方案，几个槽一个锁</li>
-<li>好处：不用维护太多锁，还保证了并发性</li>
-</ul>
-</li>
-<li>
-<p><strong>Slot Latches</strong></p>
-<ul>
-<li>一个槽加一个锁</li>
-<li>锁更细了，更能避免死锁和提高并发</li>
-<li>但是维护这么多锁开销太高了</li>
-</ul>
-</li>
-<li>
-<p>还有其他方法，比如读写分离（比如go的sync.Map）</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="btree-latching">B+Tree Latching</h3>
-<ul>
-<li>两方面的并发问题
-<ul>
-<li>节点内部的数据要做并发保护</li>
-<li>节点的分裂/合并过程中要做并发保护</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Latch Crabbing/Coupling</strong></p>
-<ul>
-<li>
-<p>Get latch for parent，给根节点上锁</p>
-</li>
-<li>
-<p>Get latch for child，给子节点上锁</p>
-</li>
-<li>
-<p>Release latch for parent if “safe”，判断子节点是否“安全”，安全的话放根节点的锁</p>
-</li>
-<li>
-<p>“safe”:A <strong>safe node</strong> is one that will not split or merge when updated.</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Find: Start at root and traverse down the tree</p>
-<ul>
-<li>Acquire R latch on child</li>
-<li>Then unlatch parent</li>
-<li>Repeat until we reach the leaf node</li>
-</ul>
-</li>
-<li>
-<p>Insert/Delete: Start at root and go down, obtaining W latches as needed. Once child is latched, check if it is safe:</p>
-<ul>
-<li>If child is safe, release all latches on ancestors</li>
-</ul>
-</li>
-<li>
-<p>问题：所有的操作都要先锁根节点，这是一个性能上面的瓶颈</p>
-<ul>
-<li>原因：上面的想法是悲观的，认为每次写操作都有可能会造成根节点的分裂/合并，但是实际上来说根节点变动的次数很少</li>
-<li>使用乐观的想法：我认为大部分操作不会改变根节点的结构，所以我给根节点加读锁，如果说发现根节点要变动结构，这个时候从根节点重新给加写锁</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Leaf Node Scans</strong>
-<ul>
-<li>一般来说是顺序扫描</li>
-<li>但是这样会带来一个风险:Find key &gt; 4和Find key &lt; 1扫描叶子节点的时候方向是相反的，会有死锁的风险</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter9-3.png" title="/img/CMU 15-445 Database Systems/chapter9-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter9-3.png" data-sub-html="<h2>方向相反造成死锁</h2>">
-        
-    </a><figcaption class="image-caption">方向相反造成死锁</figcaption>
-    </figure></li>
-<li>解决方法：<strong>制定规则</strong>，比如数据只能从大往小走，比如MySQL，之前不支持倒序遍历就和这个有关，后面又加上了倒叙索引才解决了这个问题</li>
 </ul>
 </li>
 </ul>

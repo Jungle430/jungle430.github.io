@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #20: Database Logging - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #20: Database Logging" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #20: Database Logging Crash Recovery 情景：数据库运行到一半没电了 Recovery algorithms are techniques to ensure database consistency(C), transaction atomicity(A), and durability(D) despite failures(example no power) The key primitives that used in recovery algorithms are UNDO and REDO. Not all algorithms use both primitives. UNDO: The process of removing the effects of an incomplete or aborted" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-21T15:08:57+08:00" />
+<meta property="article:modified_time" content="2024-04-21T15:08:57+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #20: Database Logging"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #20: Database Logging Crash Recovery 情景：数据库运行到一半没电了 Recovery algorithms are techniques to ensure database consistency(C), transaction atomicity(A), and durability(D) despite failures(example no power) The key primitives that used in recovery algorithms are UNDO and REDO. Not all algorithms use both primitives. UNDO: The process of removing the effects of an incomplete or aborted"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter19/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #20: Database Logging",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter20\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1447 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter20\/","datePublished": "2024-04-21T15:08:57+08:00","dateModified": "2024-04-21T15:08:57+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #20: Database Logging</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-21">2024-04-21</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1447 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-20-database-logging">Lecture #20: Database Logging</a>
+      <ul>
+        <li><a href="#crash-recovery">Crash Recovery</a></li>
+        <li><a href="#failure-classification">FAILURE CLASSIFICATION</a></li>
+        <li><a href="#shadow-paging">Shadow Paging</a></li>
+        <li><a href="#write-ahead-loggingwal">Write-Ahead Logging（WAL）</a></li>
+        <li><a href="#logging-schemes">Logging Schemes</a></li>
+        <li><a href="#checkpoints">Checkpoints</a></li>
+        <li><a href="#conclusion">CONCLUSION</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-20-database-logging">Lecture #20: Database Logging</h2>
+<h3 id="crash-recovery">Crash Recovery</h3>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-1.png" title="/img/CMU 15-445 Database Systems/chapter20-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-1.png" data-sub-html="<h2>情景：数据库运行到一半没电了</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-1.png, /img/CMU%2015-445%20Database%20Systems/chapter20-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-1.png" />
+    </a><figcaption class="image-caption">情景：数据库运行到一半没电了</figcaption>
+    </figure>
+<ul>
+<li>Recovery algorithms are techniques to ensure <strong>database consistency(C), transaction atomicity(A), and durability(D)</strong> <strong>despite failures(example no power)</strong></li>
+<li>The key primitives that used in recovery algorithms are UNDO and REDO. Not all algorithms use both primitives.
+<ul>
+<li><strong>UNDO</strong>: The process of removing the effects of an incomplete or aborted transaction.</li>
+<li><strong>REDO</strong>: The process of re-applying the effects of a committed transaction for durability.</li>
+</ul>
+</li>
+</ul>
+<h3 id="failure-classification">FAILURE CLASSIFICATION</h3>
+<ul>
+<li>
+<p><strong>Type #1 – Transaction Failures</strong></p>
+<ul>
+<li>Logical Errors:→ Transaction cannot complete due to some internal error condition (e.g., integrity constraint violation).</li>
+<li>Internal State Errors:→ DBMS must terminate an active transaction due to an error condition (e.g., deadlock).</li>
+</ul>
+</li>
+<li>
+<p><strong>Type #2 – System Failures</strong></p>
+<ul>
+<li>
+<p>Software Failure:→ Problem with the OS or DBMS implementation (e.g., uncaught divide-by-zero exception).</p>
+</li>
+<li>
+<p>Hardware Failure:</p>
+<ul>
+<li>→ The computer hosting the DBMS crashes (e.g., power plug gets pulled).</li>
+<li>→ Fail-stop Assumption: Non-volatile storage contents are assumed to not be corrupted by system crash.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Type #3 – Storage Media Failures</strong></p>
+<ul>
+<li>Non-Repairable Hardware Failure:
+<ul>
+<li>→ A head crash or similar disk failure destroys all or part of non-volatile storage.</li>
+<li>→ Destruction is assumed to be detectable (e.g., disk controller use checksums to detect failures).</li>
+<li>The recovery protocol can’t recover from this! Database must be restored from an archived version.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>考虑：磁盘比内存慢的多，所以DBMS的模式是load到内存池后修改，最后刷盘</p>
+<ul>
+<li><strong>保证的点：只要commit成功，数据永远不会丢（除了硬盘爆炸），如果事务中间失败了，那么这个事务应该就和没发生一样</strong></li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-2.png" title="/img/CMU 15-445 Database Systems/chapter20-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-2.png" data-sub-html="<h2>方案选择：是否commit后要立即刷盘，刷盘的时候同一页其他未commit的事务修改的数据怎么处理(考虑回滚问题)</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-2.png, /img/CMU%2015-445%20Database%20Systems/chapter20-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-2.png" />
+    </a><figcaption class="image-caption">方案选择：是否commit后要立即刷盘，刷盘的时候同一页其他未commit的事务修改的数据怎么处理(考虑回滚问题)</figcaption>
+    </figure>
+<ul>
+<li>
+<p><strong>STEAL POLICY</strong></p>
+<ul>
+<li>STEAL: Is allowed.(别人没提交的数据我也刷)</li>
+<li>NO-STEAL: Is not allowed.(别人没提交我就不能刷到磁盘)</li>
+</ul>
+</li>
+<li>
+<p><strong>FORCE POLICY</strong></p>
+<ul>
+<li>FORCE: Is required.(commit后立即刷)</li>
+<li>NO-FORCE: Is not required.(不强制要求)</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-3.png" title="/img/CMU 15-445 Database Systems/chapter20-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-3.png" data-sub-html="<h2>NO-STEAL FORCE</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-3.png, /img/CMU%2015-445%20Database%20Systems/chapter20-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-3.png" />
+    </a><figcaption class="image-caption">NO-STEAL FORCE</figcaption>
+    </figure>
+<ul>
+<li>NO-STEAL FORCE
+<ul>
+<li>优点：好实现，不需要undo和redo的操作</li>
+<li>缺点：效率低，刷盘频率太高，没有undo和redo那所有的东西都要load到内存池，也很伤害效率，能够修改数据的量收到缓存池大小的限制（缓存池就用来做的数据备份，没有写进磁盘的数据需要全部暂存在缓存池）</li>
+</ul>
+</li>
+</ul>
+<h3 id="shadow-paging">Shadow Paging</h3>
+<ul>
+<li>
+<p>具体实现：<strong>SHADOW PAGING</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-4.png" title="/img/CMU 15-445 Database Systems/chapter20-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-4.png" data-sub-html="<h2>把需要的数据Copy一份再改，改的时候也刷盘，commit之后改指针指向，最后清除原有页</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-4.png, /img/CMU%2015-445%20Database%20Systems/chapter20-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-4.png" />
+    </a><figcaption class="image-caption">把需要的数据Copy一份再改，改的时候也刷盘，commit之后改指针指向，最后清除原有页</figcaption>
+    </figure>
+<ul>
+<li>Undo: 把本地复制出来的页全部干掉</li>
+<li>Redo: 不需要，commit必须刷盘</li>
+</ul>
+</li>
+<li>
+<p>实际应用：SQLITE (PRE-2010)</p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-5.png" title="/img/CMU 15-445 Database Systems/chapter20-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-5.png" data-sub-html="<h2>在硬盘上面留原始版本(undo),commit的时候刷盘</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-5.png, /img/CMU%2015-445%20Database%20Systems/chapter20-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-5.png" />
+    </a><figcaption class="image-caption">在硬盘上面留原始版本(undo),commit的时候刷盘</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p>缺点：对磁盘有大量的随机读写，性能不好</p>
+</li>
+<li>
+<p>思路：随机写=&gt;顺序写：WAL</p>
+</li>
+</ul>
+<h3 id="write-ahead-loggingwal">Write-Ahead Logging（WAL）</h3>
+<ul>
+<li>
+<p><strong>With write-ahead logging, the DBMS records all the changes made to the database in a log file (on stable storage) before the change is made to a disk page</strong></p>
+</li>
+<li>
+<p><strong>The log contains sufficient information to perform the necessary undo and redo actions to restore the database after a crash.</strong></p>
+</li>
+<li>
+<p><strong>The DBMS must write to disk the log file records that correspond to changes made to a database object before it can flush that object to disk.</strong></p>
+</li>
+<li>
+<p>Buffer Pool Policy: STEAL + NO-FORCE</p>
+</li>
+<li>
+<p>一般是&lt;BEGIN&gt;打头，&lt;COMMIT&gt;结尾，COMMIT必须是要把所有数据都刷到磁盘里面</p>
+</li>
+<li>
+<p>日志格式</p>
+<ul>
+<li>
+<p>Transaction Id</p>
+</li>
+<li>
+<p>Object Id</p>
+</li>
+<li>
+<p>Before Value (UNDO)</p>
+</li>
+<li>
+<p>After Value (REDO)</p>
+</li>
+<li>
+<p>Not necessary for Before Value and After Value if using append-only MVCC</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-6.png" title="/img/CMU 15-445 Database Systems/chapter20-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-6.png" data-sub-html="<h2>先刷日志再刷盘，commit代表刷日志成功</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-6.png, /img/CMU%2015-445%20Database%20Systems/chapter20-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-6.png" />
+    </a><figcaption class="image-caption">先刷日志再刷盘，commit代表刷日志成功</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-7.png" title="/img/CMU 15-445 Database Systems/chapter20-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-7.png" data-sub-html="<h2>crash之后靠日志恢复</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-7.png, /img/CMU%2015-445%20Database%20Systems/chapter20-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-7.png" />
+    </a><figcaption class="image-caption">crash之后靠日志恢复</figcaption>
+    </figure>
+</li>
+</ul>
+</li>
+<li>
+<p>问题：用户commit你就要把日志刷到盘里面，但是刷盘频率高了又破坏效率</p>
+<ul>
+<li>优化： group commit: commit的时候卡住，凑够了几个事务再一起刷</li>
+</ul>
+</li>
+</ul>
+<h3 id="logging-schemes">Logging Schemes</h3>
+<ul>
+<li>
+<p><strong>Physical Logging:</strong></p>
+<ul>
+<li>
+<p>Record the byte-level changes made to a specific location in the database.</p>
+</li>
+<li>
+<p>Example: git diff</p>
+</li>
+<li>
+<p>缺点：会被写放大(UPDATE ALL FRO A TABLE =&gt; BIG Physical Log)</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Logical Logging:</strong></p>
+<ul>
+<li>SQL</li>
+<li>缺点：恢复的时候慢，还有SQL自己的缺陷(NOW()函数不能重放，LIMIT不保证次次相同，备库没有主库的索引)</li>
+</ul>
+</li>
+<li>
+<p><strong>Physiological Logging</strong></p>
+<ul>
+<li>基础是物理日志，混合SQL，偏移量换成槽</li>
+</ul>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-8.png" title="/img/CMU 15-445 Database Systems/chapter20-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-8.png" data-sub-html="<h2>三种日志</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-8.png, /img/CMU%2015-445%20Database%20Systems/chapter20-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-8.png" />
+    </a><figcaption class="image-caption">三种日志</figcaption>
+    </figure>
+</li>
+<li>
+<p>MYSQL为什么undo和redo分开：安全，还有就是undo log可以用来做mvcc</p>
+</li>
+</ul>
+<h3 id="checkpoints">Checkpoints</h3>
+<ul>
+<li>
+<p>Blocking / Consistent Checkpoint Protocol:</p>
+<ul>
+<li>→ Pause all queries.</li>
+<li>→ Flush all WAL records in memory to disk.</li>
+<li>→ Flush all modified pages in the buffer pool to disk.</li>
+<li>→ Write a &lt;CHECKPOINT&gt; entry to WAL and flush to disk.</li>
+<li>→ Resume queries</li>
+</ul>
+</li>
+<li>
+<p>日志不清理也会爆磁盘</p>
+</li>
+<li>
+<p>crash之后你要知道从哪恢复，类比游戏存档（坐佛/坐火）</p>
+</li>
+<li>
+<p>缓存点停住，把日志和脏页全刷回去，然后在日志里面记上一个&lt;CHECKPOINT&gt;，表示上面的数据都刷盘了</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter20-9.png" title="/img/CMU 15-445 Database Systems/chapter20-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter20-9.png" data-sub-html="<h2>注意CHECKPOINT上面有完全提交的和半提交的, T2用redo,T3用undo</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter20-9.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter20-9.png, /img/CMU%2015-445%20Database%20Systems/chapter20-9.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter20-9.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter20-9.png" />
+    </a><figcaption class="image-caption">注意CHECKPOINT上面有完全提交的和半提交的, T2用redo,T3用undo</figcaption>
+    </figure>
+</li>
+</ul>
+<h3 id="conclusion">CONCLUSION</h3>
+<ul>
+<li>Write-Ahead Logging is (almost) always the best approach to handle loss of volatile storage.</li>
+<li>Use incremental updates (STEAL + NO-FORCE) with checkpoints.</li>
+<li>On Recovery: undo uncommitted txns + redo committed txns.</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-21</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" data-title="CMU 15-445 Lecture #20: Database Logging"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter19/" class="prev" rel="prev" title="CMU 15-445 Lecture #19: Multi-Version Concurrency Control"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
