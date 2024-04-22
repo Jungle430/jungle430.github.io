@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #21: Database Crash Recovery - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #21: Database Crash Recovery" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #21: Database Crash Recovery Crash Recovery The DBMS relies on its recovery algorithms to ensure database consistency(C), transaction atomicity(A), and durability(D) despite failures. Each recovery algorithm is comprised of two parts: Actions during normal transaction processing to ensure that the DBMS can recover from a failure Actions after a failure to recover the database to a state that ensures the atomicity, consistency, and durability of" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-22T11:11:57+08:00" />
+<meta property="article:modified_time" content="2024-04-22T11:11:57+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #21: Database Crash Recovery"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #21: Database Crash Recovery Crash Recovery The DBMS relies on its recovery algorithms to ensure database consistency(C), transaction atomicity(A), and durability(D) despite failures. Each recovery algorithm is comprised of two parts: Actions during normal transaction processing to ensure that the DBMS can recover from a failure Actions after a failure to recover the database to a state that ensures the atomicity, consistency, and durability of"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter20/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #21: Database Crash Recovery",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter21\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1114 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter21\/","datePublished": "2024-04-22T11:11:57+08:00","dateModified": "2024-04-22T11:11:57+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #21: Database Crash Recovery</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-04-22">2024-04-22</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1114 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-21-database-crash-recovery">Lecture #21: Database Crash Recovery</a>
+      <ul>
+        <li><a href="#crash-recovery">Crash Recovery</a></li>
+        <li><a href="#wal-records">WAL Records</a></li>
+        <li><a href="#normal-execution">Normal Execution</a></li>
+        <li><a href="#checkpointing">Checkpointing</a></li>
+        <li><a href="#aries-recovery">ARIES Recovery</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-21-database-crash-recovery">Lecture #21: Database Crash Recovery</h2>
+<h3 id="crash-recovery">Crash Recovery</h3>
+<ul>
+<li>
+<p>The DBMS relies on its recovery algorithms to <strong>ensure database consistency(C), transaction atomicity(A), and durability(D)</strong> despite failures.</p>
+</li>
+<li>
+<p>Each recovery algorithm is comprised of two parts:</p>
+<ul>
+<li>Actions <strong>during normal</strong> transaction processing to ensure that the DBMS can recover from a failure</li>
+<li>Actions <strong>after a failure</strong> to recover the database to a state that ensures the atomicity, consistency, and durability of transactions.</li>
+</ul>
+</li>
+<li>
+<p>Check Point的问题</p>
+<ul>
+<li>性能问题：刷盘的时候整个DBMS都停住了</li>
+<li>扫描的时候Check Point前后都要看，也很浪费效率</li>
+<li>没有特别合适的刷盘频率，高了频繁小卡，低了定时大卡</li>
+</ul>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Algorithms_for_Recovery_and_Isolation_Exploiting_Semantics" target="_blank" rel="noopener noreffer"><strong>Algorithms for Recovery and Isolation Exploiting Semantics(ARIES)</strong></a></p>
+<ul>
+<li>
+<p>Developed at IBM Research in early 1990s for the DB2 DBMS</p>
+</li>
+<li>
+<p>There are three key concepts in the ARIES recovery protocol:</p>
+<ul>
+<li>
+<p><strong>Write Ahead Logging(WAL)</strong>: Any change is recorded in log on stable storage before the database change is written to disk <strong>(STEAL + NO-FORCE).</strong> 写盘策略</p>
+</li>
+<li>
+<p><strong>Repeating History During Redo</strong>: On restart, retrace actions and restore database to exact state before crash.</p>
+</li>
+<li>
+<p><strong>Logging Changes During Undo</strong>: Record undo actions to log to ensure action is not repeated in the event of repeated failures.</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="wal-records">WAL Records</h3>
+<ul>
+<li>Every log record now includes a globally unique log sequence number (LSN).日志的序列号</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-1.png" title="/img/CMU 15-445 Database Systems/chapter21-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-1.png" data-sub-html="<h2>日志分类</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-1.png, /img/CMU%2015-445%20Database%20Systems/chapter21-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-1.png" />
+    </a><figcaption class="image-caption">日志分类</figcaption>
+    </figure>
+<ul>
+<li>
+<p>每个数据页会有一个<strong>pageLSN</strong>，记录这一页最新的修改</p>
+</li>
+<li>
+<p>每个系统会有一个<strong>flushedLSN</strong>，前面的进了磁盘，后面的都在内存没有刷盘</p>
+</li>
+<li>
+<p>脏页写回到磁盘的必要条件 $pageLST\le flushedLSN$，这个脏页之前所作的修改必须先要刷到磁盘里面去，它才能刷回到盘里面去</p>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-2.png" title="/img/CMU 15-445 Database Systems/chapter21-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-2.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-2.png, /img/CMU%2015-445%20Database%20Systems/chapter21-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-2.png" />
+    </a>
+</li>
+<li>
+<p>每次刷盘的时候要更新<strong>flushedLSN</strong></p>
+</li>
+</ul>
+<h3 id="normal-execution">Normal Execution</h3>
+<ul>
+<li>
+<p>情景：每个事务都会读和写数据，结果有commit和rollback</p>
+</li>
+<li>
+<p>假设</p>
+<ul>
+<li>所有的log都在一页里面</li>
+<li>写磁盘是原子操作</li>
+<li>使用严格2PL</li>
+<li>窃取式+非强制</li>
+</ul>
+</li>
+<li>
+<p>COMMIT</p>
+<ul>
+<li>log上面加一条COMMIT</li>
+<li>COMMIT之前有关这个事务的所有日志都要刷盘，刷盘是连续写+同步</li>
+<li>后面刷脏页的时候会追加一句TXN-END</li>
+<li>刷完盘之后的数据在内存里面就可以干掉了</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-3.png" title="/img/CMU 15-445 Database Systems/chapter21-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-3.png" data-sub-html="<h2>COMMIT证明提交成功，TXN-END代表脏页被刷回去了</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-3.png, /img/CMU%2015-445%20Database%20Systems/chapter21-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-3.png" />
+    </a><figcaption class="image-caption">COMMIT证明提交成功，TXN-END代表脏页被刷回去了</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p>ROLLBACK</p>
+<ul>
+<li>
+<p>加上prevLSN字段：记录这个事务的上一条日志的地点（类比双链表中的prev指针）</p>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-4.png" title="/img/CMU 15-445 Database Systems/chapter21-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-4.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-4.png, /img/CMU%2015-445%20Database%20Systems/chapter21-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-4.png" />
+    </a>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-5.png" title="/img/CMU 15-445 Database Systems/chapter21-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-5.png" data-sub-html="<h2>回滚就是记录相反的日志</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-5.png, /img/CMU%2015-445%20Database%20Systems/chapter21-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-5.png" />
+    </a><figcaption class="image-caption">回滚就是记录相反的日志</figcaption>
+    </figure>
+</li>
+<li>
+<p>具体操作：</p>
+<ul>
+<li>
+<p>加上ABORT</p>
+</li>
+<li>
+<p>撤销修改，同时追加对应的回滚日志</p>
+</li>
+<li>
+<p>清理做完了加上TXN-END的标志</p>
+</li>
+<li>
+<p>注意：清理的过程是不可能回滚的</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="checkpointing">Checkpointing</h3>
+<ul>
+<li>
+<p>检查点的问题</p>
+<ul>
+<li>要停止处理新事务，同时所有正在运行的事务都要做完才能刷盘，这个对效率的影响很大</li>
+<li>改进：让所有进行中的事务暂停/给所有需要刷盘的数据加锁，而不是等他们做完</li>
+</ul>
+</li>
+<li>
+<p><strong>Active Transaction Table (ATT)</strong></p>
+<ul>
+<li>Checkpointing的时候还在活动的事务的表</li>
+<li>One entry per currently active txn.
+<ul>
+<li>→ txnId: Unique txn identifier.</li>
+<li>→ status: The current “mode” of the txn.</li>
+<li>→ lastLSN: Most recent LSN created by txn</li>
+<li>Remove entry after the TXN-END record.(TXN-END才算不活动)</li>
+</ul>
+</li>
+<li>Txn Status Codes:
+<ul>
+<li>R → Running</li>
+<li>C → Committing</li>
+<li>U → Candidate for Undo</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Dirty Page Table (DPT)</strong></p>
+<ul>
+<li>Checkpointing的时候的脏页</li>
+<li>One entry per dirty page in the buffer pool:
+<ul>
+<li>→ recLSN: The LSN of the log record that first caused the page to be dirty.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-6.png" title="/img/CMU 15-445 Database Systems/chapter21-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-6.png" data-sub-html="<h2>记录的时候标注更多信息</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-6.png, /img/CMU%2015-445%20Database%20Systems/chapter21-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-6.png" />
+    </a><figcaption class="image-caption">记录的时候标注更多信息</figcaption>
+    </figure>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Fuzzy Checkpoints</strong>
+<ul>
+<li>Checkpointing的时候其他事务也继续运行</li>
+<li>把checkpoint从一个时间点变成一个时间段(POINT -&gt; BEGIN+END)</li>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-7.png" title="/img/CMU 15-445 Database Systems/chapter21-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-7.png" data-sub-html="<h2>BEGIN&#43;END</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-7.png, /img/CMU%2015-445%20Database%20Systems/chapter21-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-7.png" />
+    </a><figcaption class="image-caption">BEGIN+END</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<h3 id="aries-recovery">ARIES Recovery</h3>
+<ol>
+<li><strong>Analysis</strong>: Read the WAL to identify dirty pages in the buffer pool and active transactions at the time of the crash. At the end of the analysis phase the ATT tells the DBMS which transactions were active at the time of the crash. The DPT tells the DBMS which dirty pages might not have made it to disk.</li>
+<li><strong>Redo</strong>: Repeat all actions starting from an appropriate point in the log (even txns that will abort).</li>
+<li><strong>Undo</strong>: Reverse the actions of transactions that did not commit before the crash.</li>
+</ol>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter21-8.png" title="/img/CMU 15-445 Database Systems/chapter21-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter21-8.png" data-sub-html="<h2>恢复的过程</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter21-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter21-8.png, /img/CMU%2015-445%20Database%20Systems/chapter21-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter21-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter21-8.png" />
+    </a><figcaption class="image-caption">恢复的过程</figcaption>
+    </figure></li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-04-22</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" data-title="CMU 15-445 Lecture #21: Database Crash Recovery"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter20/" class="prev" rel="prev" title="CMU 15-445 Lecture #20: Database Logging"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
