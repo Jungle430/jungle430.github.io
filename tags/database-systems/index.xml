@@ -4,7 +4,232 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 17 Jun 2024 10:20:12 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 17 Jun 2024 17:09:19 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #23: Distributed OLTP Databases</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/</link>
+    <pubDate>Mon, 17 Jun 2024 17:09:19 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-23-distributed-oltp-databases">Lecture #23: Distributed OLTP Databases</h2>
+<ul>
+<li>We have not discussed how to ensure that all nodes agree to commit a txn and then to make sure it does commit if the DBMS decides it should.
+<ul>
+<li>→ What happens if a node fails?</li>
+<li>→ What happens if messages show up late?</li>
+<li>→ What happens if the system does not wait for every node to agree to commit?</li>
+</ul>
+</li>
+</ul>
+<h3 id="atomic-commit-protocols"><strong>Atomic Commit Protocols</strong></h3>
+<ul>
+<li>多个节点要进行原子提交</li>
+<li>解决方案
+<ul>
+<li>Two-Phase Commit (1970s)</li>
+<li>Three-Phase Commit (1983)</li>
+<li>Paxos (1989)</li>
+<li>Raft (2013)</li>
+<li>ZAB (2008? Zookeeper Atomic Broadcast protocol, <strong>Apache Zookeeper</strong>)</li>
+<li>Viewstamped Replication (1988)</li>
+</ul>
+</li>
+</ul>
+<h4 id="two-phase-commit">Two-Phase Commit</h4>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-1.png" title="/img/CMU 15-445 Database Systems/chapter23-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-1.png" data-sub-html="<h2>Two-Phase Commit，Phase1: Prepare：询问其他节点准备好了没</h2>">
+        
+    </a><figcaption class="image-caption">Two-Phase Commit，<strong>Phase1: Prepare</strong>：询问其他节点准备好了没</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-2.png" title="/img/CMU 15-445 Database Systems/chapter23-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-2.png" data-sub-html="<h2>Two-Phase Commit 其他节点认为可行，回复OK</h2>">
+        
+    </a><figcaption class="image-caption">Two-Phase Commit 其他节点认为可行，回复OK</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-3.png" title="/img/CMU 15-445 Database Systems/chapter23-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-3.png" data-sub-html="<h2>Two-Phase Commit Phase2: Commit：向其他节点发送commit请求</h2>">
+        
+    </a><figcaption class="image-caption">Two-Phase Commit <strong>Phase2: Commit</strong>：向其他节点发送commit请求</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-4.png" title="/img/CMU 15-445 Database Systems/chapter23-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-4.png" data-sub-html="<h2>Two-Phase Commit 本地提交完成后回复OK</h2>">
+        
+    </a><figcaption class="image-caption">Two-Phase Commit 本地提交完成后回复OK</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-5.png" title="/img/CMU 15-445 Database Systems/chapter23-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-5.png" data-sub-html="<h2>告诉应用提交成功</h2>">
+        
+    </a><figcaption class="image-caption">告诉应用提交成功</figcaption>
+    </figure>
+<ul>
+<li>
+<p>如果有节点发送了ABORT的请求，协调者会回复应用事务回滚，然后向所有节点发送ABORT指令</p>
+</li>
+<li>
+<p>2PC OPTIMIZATIONS</p>
+<ul>
+<li>
+<p><strong>Early Prepare Voting</strong> <em>(Rare)</em></p>
+<ul>
+<li>→ If you send a query to a remote node that you know will be the last one to execute in this txn, then that node will also return their vote for the prepare phase with the query result.(如果知道是事务的最后一句我自己自己投票，不用等用户指令)</li>
+</ul>
+</li>
+<li>
+<p><strong>Early Ack After Prepare</strong> <em>(Common)</em></p>
+<ul>
+<li>→ If all nodes vote to commit a txn, the coordinator can send the client an acknowledgement that their txn was successful before the commit phase finishes.(提交之前先后告诉应用本次txn成功了，也有一定数据安全的风险)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-6.png" title="/img/CMU 15-445 Database Systems/chapter23-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-6.png" data-sub-html="<h2>Early Ack After Prepare</h2>">
+        
+    </a><figcaption class="image-caption">Early Ack After Prepare</figcaption>
+    </figure>
+<h4 id="paxos">PAXOS</h4>
+<ul>
+<li>
+<p>Consensus protocol where a coordinator proposes an outcome (e.g., commit or abort) and then the participants vote on whether that outcome should succeed（协调员提出来一个请求，大家投票决定）</p>
+</li>
+<li>
+<p>Does not block if a majority of participants are available and has provably minimal message delays in the best case.（可用情况下少数服从多数）</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-7.png" title="/img/CMU 15-445 Database Systems/chapter23-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-7.png" data-sub-html="<h2>事务冲突时要进行舍弃</h2>">
+        
+    </a><figcaption class="image-caption">事务冲突时要进行舍弃</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>Two</strong> <strong>Phase Commit</strong>: Blocks if coordinator fails after the prepare message is sent, until coordinator recovers.</p>
+</li>
+<li>
+<p><strong>Paxos</strong>: Nonblocking if a majority participants are alive, provided there is a sufficiently long period without further failures.</p>
+</li>
+<li>
+<p><strong>Raft:</strong> Similar to Paxos but with fewer node types. Only nodes with most up-to-date log can become leaders.</p>
+</li>
+<li>
+<p><strong>Multi-Paxos</strong>: If the system elects a single leader that oversees proposing changes for some period, then it can skip the propose phase. The system periodically renews who the leader is using another Paxos round. When there is a failure, the DBMS can fall back to full Paxos.</p>
+</li>
+</ul>
+<h3 id="replication"><strong>Replication</strong></h3>
+<ul>
+<li>
+<p>副本，冗余存储保证稳定性</p>
+</li>
+<li>
+<p>Design Decisions:</p>
+<ul>
+<li>→ Replica Configuration</li>
+<li>→ Propagation Scheme</li>
+<li>→ Propagation Timing</li>
+<li>→ Update Method</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Replica Configuration</strong></p>
+</li>
+<li>
+<p><strong>Approach #1: Primary-Replica</strong></p>
+<ul>
+<li>→ All updates go to a designated primary for each object.</li>
+<li>→ The primary propagates updates to its replicas by shipping logs.</li>
+<li>→ Read-only txns may be allowed to access replicas.</li>
+<li>→ If the primary goes down, then hold an election to select a new primary.</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #2: Multi-Primary</strong></p>
+<ul>
+<li>→ Txns can update data objects at any replica.</li>
+<li>→ Replicas must synchronize with each other using an atomic commit protocol.</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-8.png" title="/img/CMU 15-445 Database Systems/chapter23-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-8.png">
+        
+    </a>
+<hr>
+<ul>
+<li><strong>K-Safety</strong>
+<ul>
+<li>确保线上至少有K个数据副本</li>
+<li>低于该阈值，数据库直接下线</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Propagation Scheme</strong></p>
+<ul>
+<li>
+<p><em>synchronous</em> scheme: 主库提交事务的时候要卡住去通知从节点，当从节点也提交成功后才告诉用户成功了</p>
+</li>
+<li>
+<p><em>asynchronous</em> scheme: 主库提交完了就拉到，不管后续</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-9.png" title="/img/CMU 15-445 Database Systems/chapter23-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-9.png" data-sub-html="<h2>synchronous, asynchronous</h2>">
+        
+    </a><figcaption class="image-caption"><em>synchronous</em>, <em>asynchronous</em></figcaption>
+    </figure>
+</li>
+<li>
+<p>折中解决方案：半同步：等日志传送到备库，不用等备库执行完（MySQL）</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Propagation Timing</strong>
+<ul>
+<li><strong>Continuous</strong>：持续不断向备库传播，难的就是回滚的问题，要主备一起回滚</li>
+<li><strong>On Commit</strong>：The DBMS only sends the log messages for a txn to the replicas once the txn is commits.（主库提交完了才给备库发日志），不用在回滚上面浪费时间</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Active vs Passive</strong></p>
+<ul>
+<li>
+<p><strong>Active-Active</strong>：主库给备库的是SQL语句，备库还要重新执行一遍</p>
+</li>
+<li>
+<p><strong>Active-Passive</strong>：主库给备库的物理日志，备库直接执行日志就行</p>
+</li>
+<li>
+<p>物理日志大，SQL执行慢，现实中往往是混合传播（MySQL）</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="cap-theorem"><strong>CAP Theorem</strong></h3>
+<ul>
+<li>
+<p>→ <strong>Consistent</strong></p>
+</li>
+<li>
+<p>→ <strong>Always Available</strong></p>
+</li>
+<li>
+<p>→ <strong>Network Partition Tolerant</strong>（断开网络，集群分裂还能用）</p>
+</li>
+<li>
+<p>上述的三点永远不可能同时实现</p>
+</li>
+<li>
+<p>拓展：联邦数据库：通过统一API来让不同种类的数据库合成一个集群，但是业界目前没有什么产品</p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-10.png" title="/img/CMU 15-445 Database Systems/chapter23-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-10.png">
+        
+    </a>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #22: Introduction to Distributed Databases</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/</link>
     <pubDate>Mon, 17 Jun 2024 10:20:12 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/</guid>
@@ -2007,186 +2232,6 @@ prioritized as such.</li>
 <li>
 <p>总结：并发能提示DBMS效率，但是理论简单实现难得多，要面对一大堆的问题</p>
 </li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #13: Query Processing I</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter13/</link>
-    <pubDate>Fri, 12 Apr 2024 14:56:21 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter13/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-13-query-processing-i">Lecture #13: Query Processing I</h2>
-<h3 id="query-plan">Query Plan</h3>
-<ul>
-<li>就是前面提到的执行树</li>
-<li>同一个SQL可以有很多执行计划</li>
-</ul>
-<h3 id="processing-models">Processing Models</h3>
-<ul>
-<li>Approach #1: <strong>Iterator Model</strong></li>
-<li>Approach #2: <strong>Materialization Model</strong></li>
-<li>Approach #3: <strong>Vectorized / Batch Model</strong></li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Iterator Model</strong></p>
-<ul>
-<li>
-<p>每一个算子需要提供一个Next()的方法，父算子调用一次就吐出来一些数据，如果返回null说明数据都吐出来了（很像Python的yield），我也可以调用我的子算子的Next()方法</p>
-</li>
-<li>
-<p>也叫“<strong>Volcano/Pipeline Model</strong>”</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter12-1.jpg" title="/img/CMU 15-445 Database Systems/chapter12-1.jpg" data-thumbnail="/img/CMU 15-445 Database Systems/chapter12-1.jpg" data-sub-html="<h2>Volcano Model计算的模型</h2>">
-        
-    </a><figcaption class="image-caption">Volcano Model计算的模型</figcaption>
-    </figure>
-</li>
-<li>
-<p>这个模型几乎在所有DBMS中都有使用</p>
-</li>
-<li>
-<p>这个模型会有Block的现象，比如Join的时候左边在hash，这个时候上层会被Block</p>
-</li>
-<li>
-<p>部分操作不适合这个模型，比如Sort，只能Block之后全吐出来</p>
-</li>
-<li>
-<p>优点：便于操作，比如LIMIT 100的话我Next() 100次就OK</p>
-</li>
-<li>
-<p>缺点：过多的函数调用（一次返回一个，要调用好多次）会影响性能</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Materialization Model</strong></p>
-<ul>
-<li>
-<p>符合直觉的模型，一把算出来给上面</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter12-2.png" title="/img/CMU 15-445 Database Systems/chapter12-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter12-2.png" data-sub-html="<h2>这里的返回值就是数组，是下面算子的最终结果</h2>">
-        
-    </a><figcaption class="image-caption">这里的返回值就是数组，是下面算子的最终结果</figcaption>
-    </figure>
-</li>
-<li>
-<p>OLTP的数据库喜欢这个模型(点查询)</p>
-</li>
-<li>
-<p>OLAP容易给表吐爆</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Vectorized / Batch Model</strong>
-<ul>
-<li>前两个模型折中，Next()每次吐出来一批</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter12-3.png" title="/img/CMU 15-445 Database Systems/chapter12-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter12-3.png" data-sub-html="<h2>每次吐出来一批数据</h2>">
-        
-    </a><figcaption class="image-caption">每次吐出来一批数据</figcaption>
-    </figure></li>
-<li>OLAP友好，函数调用不会过多，又不会像<strong>Materialization Model</strong>那样一次返回的东西太大</li>
-<li>还有个好处就是匹配硬件，现在部分CPU支持小规模并行处理事务（类似残废版CUDA），这种模型非常符合CPU的并行批处理指令</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>函数调用的方向可以根到叶子，也可以叶子到根</li>
-</ul>
-<h3 id="access-methods">Access Methods</h3>
-<ul>
-<li><strong>Sequential Scan</strong>
-<ul>
-<li>顺序扫描</li>
-<li>顺序把页读进来，然后顺序扫描叶中的元组</li>
-<li>优化
-<ul>
-<li>预加载</li>
-<li>不再读的东西扫完就扔</li>
-<li>并行化</li>
-<li>Zone Maps
-<ul>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter12-4.png" title="/img/CMU 15-445 Database Systems/chapter12-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter12-4.png" data-sub-html="<h2>给每个页做统计信息，这样算子可以不用加载到缓存池就对页做一次判断和过滤</h2>">
-        
-    </a><figcaption class="image-caption">给每个页做统计信息，这样算子可以不用加载到缓存池就对页做一次判断和过滤</figcaption>
-    </figure></li>
-<li>问题:数据冗余，而且不能存到页里面（那又该加载到缓存池了），要转门找地方存，还要同步数据</li>
-</ul>
-</li>
-<li>晚物化：只要需要的数据，不要整个Tuple，或者只存Record ID，利用回表拿数据</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Index Scan</strong>
-<ul>
-<li>考虑的条件后面会讲</li>
-<li>用什么索引要靠优化器分析</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Multi-Index Scan</strong>
-<ul>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter12-5.png" title="/img/CMU 15-445 Database Systems/chapter12-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter12-5.png" data-sub-html="<h2>多索引扫描每一个条件取集合，根据谓词做交/并的操作</h2>">
-        
-    </a><figcaption class="image-caption">多索引扫描每一个条件取集合，根据谓词做交/并的操作</figcaption>
-    </figure></li>
-</ul>
-</li>
-</ul>
-<h3 id="modification-queries">Modification Queries</h3>
-<ul>
-<li>
-<p>更改的操作，逻辑会不一样</p>
-<ul>
-<li>不能无脑修改，要检查当前表的约束</li>
-<li>索引等其他数据要同步进行维护</li>
-<li>HALLOWEEN PROBLEM
-<ul>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter12-6.png" title="/img/CMU 15-445 Database Systems/chapter12-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter12-6.png" data-sub-html="<h2>不记录之前操作过什么数据会导致部分数据被多次更新（更新完了之后没有达到预定条件被扫到再次被更新）</h2>">
-        
-    </a><figcaption class="image-caption">不记录之前操作过什么数据会导致部分数据被多次更新（更新完了之后没有达到预定条件被扫到再次被更新）</figcaption>
-    </figure></li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>expression tree</p>
-<ul>
-<li>给谓词表达式也用树的结构处理
-<ul>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter12-7.png" title="/img/CMU 15-445 Database Systems/chapter12-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter12-7.png" data-sub-html="<h2>expression tree</h2>">
-        
-    </a><figcaption class="image-caption">expression tree</figcaption>
-    </figure></li>
-</ul>
-</li>
-<li>缺点：可能会重复计算浪费时间</li>
-<li>解决方案：能先算出来的全算出来，像Java的JIT（比如经常跑的一段Java字节码，我直接转成二进制CPU指令，然后跑的时候直接跑CPU指令，省去JVM解析的过程）</li>
-</ul>
-</li>
-</ul>
-<h3 id="conclusion">CONCLUSION</h3>
-<ul>
-<li>The same query plan can be executed in multiple different ways.</li>
-<li>(Most) DBMSs will want to use index scans as much as possible.</li>
-<li>Expression trees are flexible but slow.JIT compilation can (sometimes) speed them up.</li>
 </ul>
 ]]></description>
 </item>

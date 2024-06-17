@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #23: Distributed OLTP Databases - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #23: Distributed OLTP Databases" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #23: Distributed OLTP Databases We have not discussed how to ensure that all nodes agree to commit a txn and then to make sure it does commit if the DBMS decides it should. → What happens if a node fails? → What happens if messages show up late? → What happens if the system does not wait for every node to agree to commit? Atomic" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-06-17T17:09:19+08:00" />
+<meta property="article:modified_time" content="2024-06-17T17:09:19+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #23: Distributed OLTP Databases"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #23: Distributed OLTP Databases We have not discussed how to ensure that all nodes agree to commit a txn and then to make sure it does commit if the DBMS decides it should. → What happens if a node fails? → What happens if messages show up late? → What happens if the system does not wait for every node to agree to commit? Atomic"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #23: Distributed OLTP Databases",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter23\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1124 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter23\/","datePublished": "2024-06-17T17:09:19+08:00","dateModified": "2024-06-17T17:09:19+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #23: Distributed OLTP Databases</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-06-17">2024-06-17</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1124 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-23-distributed-oltp-databases">Lecture #23: Distributed OLTP Databases</a>
+      <ul>
+        <li><a href="#atomic-commit-protocols"><strong>Atomic Commit Protocols</strong></a>
+          <ul>
+            <li><a href="#two-phase-commit">Two-Phase Commit</a></li>
+            <li><a href="#paxos">PAXOS</a></li>
+          </ul>
+        </li>
+        <li><a href="#replication"><strong>Replication</strong></a></li>
+        <li><a href="#cap-theorem"><strong>CAP Theorem</strong></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-23-distributed-oltp-databases">Lecture #23: Distributed OLTP Databases</h2>
+<ul>
+<li>We have not discussed how to ensure that all nodes agree to commit a txn and then to make sure it does commit if the DBMS decides it should.
+<ul>
+<li>→ What happens if a node fails?</li>
+<li>→ What happens if messages show up late?</li>
+<li>→ What happens if the system does not wait for every node to agree to commit?</li>
+</ul>
+</li>
+</ul>
+<h3 id="atomic-commit-protocols"><strong>Atomic Commit Protocols</strong></h3>
+<ul>
+<li>多个节点要进行原子提交</li>
+<li>解决方案
+<ul>
+<li>Two-Phase Commit (1970s)</li>
+<li>Three-Phase Commit (1983)</li>
+<li>Paxos (1989)</li>
+<li>Raft (2013)</li>
+<li>ZAB (2008? Zookeeper Atomic Broadcast protocol, <strong>Apache Zookeeper</strong>)</li>
+<li>Viewstamped Replication (1988)</li>
+</ul>
+</li>
+</ul>
+<h4 id="two-phase-commit">Two-Phase Commit</h4>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-1.png" title="/img/CMU 15-445 Database Systems/chapter23-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-1.png" data-sub-html="<h2>Two-Phase Commit，Phase1: Prepare：询问其他节点准备好了没</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-1.png, /img/CMU%2015-445%20Database%20Systems/chapter23-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-1.png" />
+    </a><figcaption class="image-caption">Two-Phase Commit，<strong>Phase1: Prepare</strong>：询问其他节点准备好了没</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-2.png" title="/img/CMU 15-445 Database Systems/chapter23-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-2.png" data-sub-html="<h2>Two-Phase Commit 其他节点认为可行，回复OK</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-2.png, /img/CMU%2015-445%20Database%20Systems/chapter23-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-2.png" />
+    </a><figcaption class="image-caption">Two-Phase Commit 其他节点认为可行，回复OK</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-3.png" title="/img/CMU 15-445 Database Systems/chapter23-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-3.png" data-sub-html="<h2>Two-Phase Commit Phase2: Commit：向其他节点发送commit请求</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-3.png, /img/CMU%2015-445%20Database%20Systems/chapter23-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-3.png" />
+    </a><figcaption class="image-caption">Two-Phase Commit <strong>Phase2: Commit</strong>：向其他节点发送commit请求</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-4.png" title="/img/CMU 15-445 Database Systems/chapter23-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-4.png" data-sub-html="<h2>Two-Phase Commit 本地提交完成后回复OK</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-4.png, /img/CMU%2015-445%20Database%20Systems/chapter23-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-4.png" />
+    </a><figcaption class="image-caption">Two-Phase Commit 本地提交完成后回复OK</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-5.png" title="/img/CMU 15-445 Database Systems/chapter23-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-5.png" data-sub-html="<h2>告诉应用提交成功</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-5.png, /img/CMU%2015-445%20Database%20Systems/chapter23-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-5.png" />
+    </a><figcaption class="image-caption">告诉应用提交成功</figcaption>
+    </figure>
+<ul>
+<li>
+<p>如果有节点发送了ABORT的请求，协调者会回复应用事务回滚，然后向所有节点发送ABORT指令</p>
+</li>
+<li>
+<p>2PC OPTIMIZATIONS</p>
+<ul>
+<li>
+<p><strong>Early Prepare Voting</strong> <em>(Rare)</em></p>
+<ul>
+<li>→ If you send a query to a remote node that you know will be the last one to execute in this txn, then that node will also return their vote for the prepare phase with the query result.(如果知道是事务的最后一句我自己自己投票，不用等用户指令)</li>
+</ul>
+</li>
+<li>
+<p><strong>Early Ack After Prepare</strong> <em>(Common)</em></p>
+<ul>
+<li>→ If all nodes vote to commit a txn, the coordinator can send the client an acknowledgement that their txn was successful before the commit phase finishes.(提交之前先后告诉应用本次txn成功了，也有一定数据安全的风险)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-6.png" title="/img/CMU 15-445 Database Systems/chapter23-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-6.png" data-sub-html="<h2>Early Ack After Prepare</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-6.png, /img/CMU%2015-445%20Database%20Systems/chapter23-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-6.png" />
+    </a><figcaption class="image-caption">Early Ack After Prepare</figcaption>
+    </figure>
+<h4 id="paxos">PAXOS</h4>
+<ul>
+<li>
+<p>Consensus protocol where a coordinator proposes an outcome (e.g., commit or abort) and then the participants vote on whether that outcome should succeed（协调员提出来一个请求，大家投票决定）</p>
+</li>
+<li>
+<p>Does not block if a majority of participants are available and has provably minimal message delays in the best case.（可用情况下少数服从多数）</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-7.png" title="/img/CMU 15-445 Database Systems/chapter23-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-7.png" data-sub-html="<h2>事务冲突时要进行舍弃</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-7.png, /img/CMU%2015-445%20Database%20Systems/chapter23-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-7.png" />
+    </a><figcaption class="image-caption">事务冲突时要进行舍弃</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>Two</strong> <strong>Phase Commit</strong>: Blocks if coordinator fails after the prepare message is sent, until coordinator recovers.</p>
+</li>
+<li>
+<p><strong>Paxos</strong>: Nonblocking if a majority participants are alive, provided there is a sufficiently long period without further failures.</p>
+</li>
+<li>
+<p><strong>Raft:</strong> Similar to Paxos but with fewer node types. Only nodes with most up-to-date log can become leaders.</p>
+</li>
+<li>
+<p><strong>Multi-Paxos</strong>: If the system elects a single leader that oversees proposing changes for some period, then it can skip the propose phase. The system periodically renews who the leader is using another Paxos round. When there is a failure, the DBMS can fall back to full Paxos.</p>
+</li>
+</ul>
+<h3 id="replication"><strong>Replication</strong></h3>
+<ul>
+<li>
+<p>副本，冗余存储保证稳定性</p>
+</li>
+<li>
+<p>Design Decisions:</p>
+<ul>
+<li>→ Replica Configuration</li>
+<li>→ Propagation Scheme</li>
+<li>→ Propagation Timing</li>
+<li>→ Update Method</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Replica Configuration</strong></p>
+</li>
+<li>
+<p><strong>Approach #1: Primary-Replica</strong></p>
+<ul>
+<li>→ All updates go to a designated primary for each object.</li>
+<li>→ The primary propagates updates to its replicas by shipping logs.</li>
+<li>→ Read-only txns may be allowed to access replicas.</li>
+<li>→ If the primary goes down, then hold an election to select a new primary.</li>
+</ul>
+</li>
+<li>
+<p><strong>Approach #2: Multi-Primary</strong></p>
+<ul>
+<li>→ Txns can update data objects at any replica.</li>
+<li>→ Replicas must synchronize with each other using an atomic commit protocol.</li>
+</ul>
+</li>
+</ul>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-8.png" title="/img/CMU 15-445 Database Systems/chapter23-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-8.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-8.png, /img/CMU%2015-445%20Database%20Systems/chapter23-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-8.png" />
+    </a>
+<hr>
+<ul>
+<li><strong>K-Safety</strong>
+<ul>
+<li>确保线上至少有K个数据副本</li>
+<li>低于该阈值，数据库直接下线</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Propagation Scheme</strong></p>
+<ul>
+<li>
+<p><em>synchronous</em> scheme: 主库提交事务的时候要卡住去通知从节点，当从节点也提交成功后才告诉用户成功了</p>
+</li>
+<li>
+<p><em>asynchronous</em> scheme: 主库提交完了就拉到，不管后续</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-9.png" title="/img/CMU 15-445 Database Systems/chapter23-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-9.png" data-sub-html="<h2>synchronous, asynchronous</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-9.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-9.png, /img/CMU%2015-445%20Database%20Systems/chapter23-9.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-9.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-9.png" />
+    </a><figcaption class="image-caption"><em>synchronous</em>, <em>asynchronous</em></figcaption>
+    </figure>
+</li>
+<li>
+<p>折中解决方案：半同步：等日志传送到备库，不用等备库执行完（MySQL）</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Propagation Timing</strong>
+<ul>
+<li><strong>Continuous</strong>：持续不断向备库传播，难的就是回滚的问题，要主备一起回滚</li>
+<li><strong>On Commit</strong>：The DBMS only sends the log messages for a txn to the replicas once the txn is commits.（主库提交完了才给备库发日志），不用在回滚上面浪费时间</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Active vs Passive</strong></p>
+<ul>
+<li>
+<p><strong>Active-Active</strong>：主库给备库的是SQL语句，备库还要重新执行一遍</p>
+</li>
+<li>
+<p><strong>Active-Passive</strong>：主库给备库的物理日志，备库直接执行日志就行</p>
+</li>
+<li>
+<p>物理日志大，SQL执行慢，现实中往往是混合传播（MySQL）</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="cap-theorem"><strong>CAP Theorem</strong></h3>
+<ul>
+<li>
+<p>→ <strong>Consistent</strong></p>
+</li>
+<li>
+<p>→ <strong>Always Available</strong></p>
+</li>
+<li>
+<p>→ <strong>Network Partition Tolerant</strong>（断开网络，集群分裂还能用）</p>
+</li>
+<li>
+<p>上述的三点永远不可能同时实现</p>
+</li>
+<li>
+<p>拓展：联邦数据库：通过统一API来让不同种类的数据库合成一个集群，但是业界目前没有什么产品</p>
+</li>
+</ul>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter23-10.png" title="/img/CMU 15-445 Database Systems/chapter23-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter23-10.png">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter23-10.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter23-10.png, /img/CMU%2015-445%20Database%20Systems/chapter23-10.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter23-10.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter23-10.png" />
+    </a>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-06-17</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/" data-title="CMU 15-445 Lecture #23: Distributed OLTP Databases"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter22/" class="prev" rel="prev" title="CMU 15-445 Lecture #22: Introduction to Distributed Databases"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>
