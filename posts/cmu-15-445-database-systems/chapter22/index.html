@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>CMU 15-445 Lecture #22: Introduction to Distributed Databases - Jungle&#39;s Blog</title><meta name="description" content="Welcome to Jungle&#39;s blog."><meta property="og:title" content="CMU 15-445 Lecture #22: Introduction to Distributed Databases" />
+<meta property="og:description" content="CMU 15-445 Database Systems Lecture #22: Introduction to Distributed Databases Introduction Distributed DBMSs 辨析概念：Parallel DBMSs vs Distributed DBMSs Parallel DBMSs: Nodes are physically close to each other. Nodes connected with high-speed LAN(Local Area Network). Communication cost is assumed to be small. Distributed DBMSs: Nodes can be far from each other. Nodes connected using public network. Communication cost and" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-06-17T10:20:12+08:00" />
+<meta property="article:modified_time" content="2024-06-17T10:20:12+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMU 15-445 Lecture #22: Introduction to Distributed Databases"/>
+<meta name="twitter:description" content="CMU 15-445 Database Systems Lecture #22: Introduction to Distributed Databases Introduction Distributed DBMSs 辨析概念：Parallel DBMSs vs Distributed DBMSs Parallel DBMSs: Nodes are physically close to each other. Nodes connected with high-speed LAN(Local Area Network). Communication cost is assumed to be small. Distributed DBMSs: Nodes can be far from each other. Nodes connected using public network. Communication cost and"/>
+<meta name="application-name" content="Jungle&#39;s blog">
+<meta name="apple-mobile-web-app-title" content="Jungle&#39;s blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" /><link rel="prev" href="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/" /><link rel="stylesheet" href="/css/page.min.css"><link rel="stylesheet" href="/css/home.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CMU 15-445 Lecture #22: Introduction to Distributed Databases",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter22\/"
+        },"genre": "posts","keywords": "Database Systems","wordcount":  1820 ,
+        "url": "https:\/\/Jungle430.github.io\/posts\/cmu-15-445-database-systems\/chapter22\/","datePublished": "2024-06-17T10:20:12+08:00","dateModified": "2024-06-17T10:20:12+08:00","publisher": {
+            "@type": "Organization",
+            "name": "Jungle"},"author": {
+                "@type": "Person",
+                "name": "Jungle"
+            },"description": ""
+    }
+    </script></head><body data-header-desktop="fixed" data-header-mobile="auto"><script>(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/">📚 文章 </a><a class="menu-item" href="/tags/">🏷️ 标签 </a><a class="menu-item" href="/categories/">🗃️ 分类 </a><a class="menu-item" href="/about/">👴 关于 </a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Jungle&#39;s Blog">Jungle&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">📚文章</a><a class="menu-item" href="/tags/" title="">🏷️标签</a><a class="menu-item" href="/categories/" title="">🗃️分类</a><a class="menu-item" href="/about/" title="">👴关于</a><a class="menu-item" href="https://github.com/Jungle430" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><div class="menu-item"><a href="javascript:void(0);" class="theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single" data-toc="enable"><div class="single-card" ><h2 class="single-title animated flipInX">CMU 15-445 Lecture #22: Introduction to Distributed Databases</h2><div class="post-meta">
+                <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Jungle430" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>Jungle</a></span>&nbsp;<span class="post-category">出版于  <a href="/categories/cmu-15-445-database-systems/"><i class="far fa-folder fa-fw"></i>CMU 15-445 Database Systems</a></span></div>
+                <div class="post-meta-line"><span><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-06-17">2024-06-17</time></span>&nbsp;<span><i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1820 字</span>&nbsp;
+                    <span><i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟</span>&nbsp;</div>
+            </div>
+            
+            <hr><div class="details toc" id="toc-static"  data-kept="">
+                    <div class="details-summary toc-title">
+                        <span>目录</span>
+                        <span><i class="details-icon fas fa-angle-right"></i></span>
+                    </div>
+                    <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#lecture-22-introduction-to-distributed-databases">Lecture #22: Introduction to Distributed Databases</a>
+      <ul>
+        <li><a href="#introduction-distributed-dbmss">Introduction Distributed DBMSs</a></li>
+        <li><a href="#system-architectures">System Architectures</a></li>
+        <li><a href="#design-issues"><strong>Design Issues</strong></a></li>
+        <li><a href="#distributed-concurrency-control"><strong>Distributed Concurrency Control</strong></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                </div><div class="content" id="content"><h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-22-introduction-to-distributed-databases">Lecture #22: Introduction to Distributed Databases</h2>
+<h3 id="introduction-distributed-dbmss">Introduction Distributed DBMSs</h3>
+<ul>
+<li>
+<p>辨析概念：Parallel DBMSs vs Distributed DBMSs</p>
+</li>
+<li>
+<p><strong>Parallel DBMSs:</strong></p>
+<ul>
+<li>Nodes are physically close to each other.</li>
+<li>Nodes connected with high-speed LAN(Local Area Network).</li>
+<li><strong>Communication cost is assumed to be small.</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Distributed DBMSs:</strong></p>
+<ul>
+<li>Nodes can be far from each other.</li>
+<li>Nodes connected using public network.</li>
+<li><strong>Communication cost and problems cannot be ignored</strong></li>
+</ul>
+</li>
+<li>
+<p>主要的差别是通信代价，前者可以忽略，后者无法忽略</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>Single node -&gt; Distributed DBMSs</li>
+<li>Questions to consider
+<ul>
+<li><strong>Optimization &amp; Planning</strong></li>
+<li><strong>Concurrency Control</strong></li>
+<li><strong>Logging &amp; Recovery</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="system-architectures">System Architectures</h3>
+<ul>
+<li>
+<p>A distributed DBMS&rsquo;s system architecture specifies <strong>what shared resources are directly accessible to CPUs.</strong></p>
+</li>
+<li>
+<p>This affects how CPUs coordinate with each other and where they retrieve/store objects in the database.</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-1.png" title="/img/CMU 15-445 Database Systems/chapter22-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-1.png" data-sub-html="<h2>Every database node are on the same machine(Extreme Situations), like parallel DBMSs, ignore it(</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-1.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-1.png, /img/CMU%2015-445%20Database%20Systems/chapter22-1.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-1.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-1.png" />
+    </a><figcaption class="image-caption">Every database node are on the same machine(Extreme Situations), like parallel DBMSs, ignore it(</figcaption>
+    </figure>
+<ul>
+<li>注意上面图片不是被许多XXX共享就证明其他的机器就那一个组件，为了跑起来基本的OS, CPU, memory和disk都要有，不过是那些部分参与到这个分布式的系统中</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>shared memory</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-2.png" title="/img/CMU 15-445 Database Systems/chapter22-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-2.png" data-sub-html="<h2>A large memory and a large disk, both of them are shared by many cpus by network</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-2.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-2.png, /img/CMU%2015-445%20Database%20Systems/chapter22-2.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-2.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-2.png" />
+    </a><figcaption class="image-caption">A large memory and a large disk, both of them are shared by many cpus by network</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Nodes access <strong>a common memory address space</strong> via a fast <strong>interconnect</strong>.</p>
+</li>
+<li>
+<p>Can still use local memory / disk for intermediate results</p>
+</li>
+</ul>
+</li>
+<li>
+<p>This looks a lot like shared everything. <strong>Nobody does this.</strong>(我认为原因是CPU要通过网络来访问内存，内存最大的优势”高速“直接没了)</p>
+</li>
+<li>
+<p>在单体架构上面有使用，多路服务器（多个CPU，每个CPU多核来提高并发能力，中间是通过高速总线相连的）</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>shared disk</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-3.png" title="/img/CMU 15-445 Database Systems/chapter22-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-3.png" data-sub-html="<h2>large disk, shared by many cpus and memories</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-3.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-3.png, /img/CMU%2015-445%20Database%20Systems/chapter22-3.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-3.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-3.png" />
+    </a><figcaption class="image-caption">large disk, shared by many cpus and memories</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Nodes <strong>access a single logical disk</strong> via an interconnect, but <strong>each have their own private memories.</strong></p>
+</li>
+<li>
+<p>Scale execution layer independently from the storage layer.（解耦了执行层和存储层，可以独立拓展来加强单个层的性能）</p>
+</li>
+<li>
+<p>This architecture facilitates <strong>data lakes</strong> and <strong>serverless</strong> systems.？？？没太懂</p>
+</li>
+</ul>
+</li>
+<li>
+<p>该架构在近年新的数据库产品中使用的及其广泛，原因就是近些年云技术的兴起，大多数公司都趋向于购买云数据库，而在云厂商的机房中很容易就能做到这种架构（云计算在设计的时候就把计算和存储分开了，所以机房往往是计算服务器和磁盘集群式分开的，每个部分取一些就是这个架构）</p>
+</li>
+<li>
+<p>国内该架构的代表：<a href="https://github.com/ApsaraDB/PolarDB-for-PostgreSQL" target="_blank" rel="noopener noreffer">PolarDB</a></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-5.png" title="/img/CMU 15-445 Database Systems/chapter22-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-5.png" data-sub-html="<h2>查询过程，可以看到执行层和存储层分开了，Node数量决定计算能力，存储大小决定存储能力</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-5.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-5.png, /img/CMU%2015-445%20Database%20Systems/chapter22-5.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-5.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-5.png" />
+    </a><figcaption class="image-caption">查询过程，可以看到执行层和存储层分开了，Node数量决定计算能力，存储大小决定存储能力</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-6.png" title="/img/CMU 15-445 Database Systems/chapter22-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-6.png" data-sub-html="<h2>这个架构面临的一个最大的问题就是缓存同步的问题，Node1进行了数据的更新，如果马上不刷盘（因为耗时太长），那么就需要将更新数据的信息同步到其他节点的缓存，其实无论解决那种方案，都要面临这类问题</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-6.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-6.png, /img/CMU%2015-445%20Database%20Systems/chapter22-6.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-6.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-6.png" />
+    </a><figcaption class="image-caption">这个架构面临的一个最大的问题就是缓存同步的问题，Node1进行了数据的更新，如果马上不刷盘（因为耗时太长），那么就需要将更新数据的信息同步到其他节点的缓存，其实无论解决那种方案，都要面临这类问题</figcaption>
+    </figure>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>shared nothing</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-4.png" title="/img/CMU 15-445 Database Systems/chapter22-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-4.png" data-sub-html="<h2>Most common situations</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-4.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-4.png, /img/CMU%2015-445%20Database%20Systems/chapter22-4.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-4.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-4.png" />
+    </a><figcaption class="image-caption"><strong>Most</strong> common situations</figcaption>
+    </figure>
+</li>
+<li>
+<p>Each DBMS node has its own CPU, memory, and local disk.</p>
+</li>
+<li>
+<p>Nodes only communicate with each other via network</p>
+<ul>
+<li>
+<p>Better performance &amp; efficiency.</p>
+</li>
+<li>
+<p><strong>Harder to scale capacity.</strong></p>
+</li>
+<li>
+<p><strong>Harder to ensure consistency.</strong></p>
+</li>
+<li>
+<p>单层扩容（加一台机器所有能力都上去了，其他性能提示的效果因为短板效应被浪费了）和保证一致性都做的不好（数据不在同一块盘上面）</p>
+</li>
+<li>
+<p>好处：和上面<strong>shared disk</strong>相比把盘肢解了并放在本地，提升了部分性能</p>
+</li>
+</ul>
+</li>
+<li>
+<p>这类架构也在现在的分布式数据库产品中大量使用，代表产品是Redis</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-7.png" title="/img/CMU 15-445 Database Systems/chapter22-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-7.png" data-sub-html="<h2>涉及数据分区的问题，扩容也带来了数据重新分区的问题</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-7.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-7.png, /img/CMU%2015-445%20Database%20Systems/chapter22-7.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-7.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-7.png" />
+    </a><figcaption class="image-caption">涉及数据分区的问题，扩容也带来了数据重新分区的问题</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-8.png" title="/img/CMU 15-445 Database Systems/chapter22-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-8.png" data-sub-html="<h2>不在本节点需要呼叫其他节点</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-8.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-8.png, /img/CMU%2015-445%20Database%20Systems/chapter22-8.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-8.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-8.png" />
+    </a><figcaption class="image-caption">不在本节点需要呼叫其他节点</figcaption>
+    </figure>
+<h3 id="design-issues"><strong>Design Issues</strong></h3>
+<p><strong>Homogeneous Nodes</strong> vs. <strong>Heterogeneous Nodes:</strong></p>
+<hr>
+<ul>
+<li>
+<p><strong>Homogeneous Nodes</strong></p>
+<ul>
+<li>
+<p>Every node in the cluster can perform the same set of tasks (albeit on potentially different partitions of data).</p>
+</li>
+<li>
+<p>Makes provisioning and failover &ldquo;easier&rdquo;.</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Heterogenous Nodes</strong>
+<ul>
+<li>Nodes are assigned specific tasks.</li>
+<li>Can allow a single physical node to host multiple &ldquo;virtual&rdquo; node types for dedicated tasks.</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-9.png" title="/img/CMU 15-445 Database Systems/chapter22-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-9.png" data-sub-html="<h2>Heterogenous Nodes on mongodb</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-9.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-9.png, /img/CMU%2015-445%20Database%20Systems/chapter22-9.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-9.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-9.png" />
+    </a><figcaption class="image-caption"><strong>Heterogenous Nodes</strong> on mongodb</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>DATA TRANSPARENCY</strong></p>
+<ul>
+<li>
+<p>Applications <strong>should not be required to know where data is physically located in a distributed DBMS</strong></p>
+</li>
+<li>
+<p>Any query that run on a single-node DBMS should produce <strong>the same result</strong> on a distributed DBMS.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>! In practice, developers need to be aware of the communication costs of queries to avoid excessively &ldquo;expensive&rdquo; data movement.</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>DATABASE PARTITIONING</strong></p>
+<ul>
+<li>
+<p>Split database across multiple resources:</p>
+<ul>
+<li>
+<p>Disks, nodes, processors.</p>
+</li>
+<li>
+<p>Often called &ldquo;sharding&rdquo; in NoSQL systems.</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>The DBMS executes query fragments on each partition and then combines the results to produce a single answer.</p>
+</li>
+<li>
+<p>The DBMS can partition a database <strong>physically</strong>(shared nothing) or <strong>logically</strong> (shared disk).</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>NAÏVE TABLE PARTITIONING</strong></p>
+<ul>
+<li>
+<p>Assign an entire table to a single node.</p>
+</li>
+<li>
+<p>Assumes that each node has enough storage space for an entire table.</p>
+</li>
+<li>
+<p>Ideal if queries never join data across tables stored on different nodes and access patterns are uniform.</p>
+</li>
+<li>
+<p>主要弱点是JOIN</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>HORIZONTAL PARTITIONING</strong></p>
+<ul>
+<li>Split a table&rsquo;s tuples into disjoint subsets based on some partitioning key and scheme.</li>
+<li>Choose column(s) that divides the database equally in terms of size, load, or usage.</li>
+</ul>
+</li>
+<li>
+<p>Partitioning Schemes:</p>
+<p>→ Hashing</p>
+<p>→ Ranges</p>
+<p>→ Predicates</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-10.png" title="/img/CMU 15-445 Database Systems/chapter22-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-10.png" data-sub-html="<h2>Hash分区，但是如果WHERE的属性不是Hash列就要所有节点都查一遍，这种查询就很不好，查询尽量要带上Hash那列的限制</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-10.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-10.png, /img/CMU%2015-445%20Database%20Systems/chapter22-10.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-10.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-10.png" />
+    </a><figcaption class="image-caption">Hash分区，但是如果WHERE的属性不是Hash列就要所有节点都查一遍，这种查询就很不好，查询尽量要带上Hash那列的限制</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-11.png" title="/img/CMU 15-445 Database Systems/chapter22-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-11.png" data-sub-html="<h2>扩容往往面临着新的Hash计算和分区</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-11.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-11.png, /img/CMU%2015-445%20Database%20Systems/chapter22-11.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-11.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-11.png" />
+    </a><figcaption class="image-caption">扩容往往面临着新的Hash计算和分区</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>CONSISTENT HASHING</strong></p>
+</li>
+<li>
+<p>分布式系统常见的问题</p>
+</li>
+<li>
+<p>八股：<a href="https://xiaolincoding.com/os/8_network_system/hash.html#%E5%A6%82%E4%BD%95%E5%88%86%E9%85%8D%E8%AF%B7%E6%B1%82" target="_blank" rel="noopener noreffer">什么是一致性哈希?</a></p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-12.png" title="/img/CMU 15-445 Database Systems/chapter22-12.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-12.png" data-sub-html="<h2>P4分割了P3的一部分数据，只需要P3把这部分数据传给P4就可以了，避免了之前大规模数据迁移的情况</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-12.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-12.png, /img/CMU%2015-445%20Database%20Systems/chapter22-12.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-12.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-12.png" />
+    </a><figcaption class="image-caption">P4分割了P3的一部分数据，只需要P3把这部分数据传给P4就可以了，避免了之前大规模数据迁移的情况</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-13.png" title="/img/CMU 15-445 Database Systems/chapter22-13.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-13.png" data-sub-html="<h2>P2和P6为P1的一部分数据存储副本</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-13.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-13.png, /img/CMU%2015-445%20Database%20Systems/chapter22-13.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-13.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-13.png" />
+    </a><figcaption class="image-caption">P2和P6为P1的一部分数据存储副本</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-14.png" title="/img/CMU 15-445 Database Systems/chapter22-14.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-14.png" data-sub-html="<h2>存储的过程也变得冗余了（多存几份）</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-14.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-14.png, /img/CMU%2015-445%20Database%20Systems/chapter22-14.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-14.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-14.png" />
+    </a><figcaption class="image-caption">存储的过程也变得冗余了（多存几份）</figcaption>
+    </figure>
+<ul>
+<li>物理分区和逻辑分区</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-15.png" title="/img/CMU 15-445 Database Systems/chapter22-15.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-15.png" data-sub-html="<h2>shared memory 架构下的分布式数据库不做物理分区，他的分区就是逻辑上把不同数据的查询分配给了不同的节点，物理分区常见于shared nothing架构</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-15.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-15.png, /img/CMU%2015-445%20Database%20Systems/chapter22-15.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-15.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-15.png" />
+    </a><figcaption class="image-caption">shared memory 架构下的分布式数据库不做物理分区，他的分区就是逻辑上把不同数据的查询分配给了不同的节点，物理分区常见于shared nothing架构</figcaption>
+    </figure>
+<h3 id="distributed-concurrency-control"><strong>Distributed Concurrency Control</strong></h3>
+<ul>
+<li>
+<p>If our DBMS supports multi-operation and distributed txns, we need a way to coordinate their execution in the system.</p>
+</li>
+<li>
+<p>Two different approaches:</p>
+<ul>
+<li>
+<p>→ <strong>Centralized</strong>: Global &ldquo;traffic cop&rdquo;(“交警”).</p>
+</li>
+<li>
+<p>→ <strong>Decentralized</strong>: Nodes organize themselves.</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>TP MONITORS</strong></p>
+</li>
+<li>
+<p>A <strong>TP Monitor</strong> is an example of a centralized coordinator for distributed DBMSs. Originally developed in the 1970-80s to provide txns between terminals and mainframe databases.</p>
+<ul>
+<li>
+<p>→ Examples: ATMs, Airline Reservations.</p>
+</li>
+<li>
+<p>Standardized protocol from 1990s: X/Open XA</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-16.png" title="/img/CMU 15-445 Database Systems/chapter22-16.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-16.png" data-sub-html="<h2>系统里面有一个节点专门管理每个节点的锁和事务的提交，数据库执行事务时需要申请</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-16.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-16.png, /img/CMU%2015-445%20Database%20Systems/chapter22-16.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-16.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-16.png" />
+    </a><figcaption class="image-caption">系统里面有一个节点专门管理每个节点的锁和事务的提交，数据库执行事务时需要申请</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-17.png" title="/img/CMU 15-445 Database Systems/chapter22-17.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-17.png" data-sub-html="<h2>改进：数据路由和事务管理器合二为一</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-17.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-17.png, /img/CMU%2015-445%20Database%20Systems/chapter22-17.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-17.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-17.png" />
+    </a><figcaption class="image-caption">改进：数据路由和事务管理器合二为一</figcaption>
+    </figure>
+<ul>
+<li>现在用的不多，单点很容易造成性能瓶颈</li>
+</ul>
+<hr>
+<ul>
+<li><strong>DECENTRALIZED COORDINATOR</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-18.png" title="/img/CMU 15-445 Database Systems/chapter22-18.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-18.png" data-sub-html="<h2>在节点中选出来一个Leader(老版本是master&#43;slave，后面因为政治原因不让用了，新版的数据库文档都没有这个词了)，选出来的Leader就担任了上面TP Monitor的事务职责</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-18.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-18.png, /img/CMU%2015-445%20Database%20Systems/chapter22-18.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-18.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-18.png" />
+    </a><figcaption class="image-caption">在节点中选出来一个Leader(老版本是master+slave，后面因为政治原因不让用了，新版的数据库文档都没有这个词了)，选出来的Leader就担任了上面TP Monitor的事务职责</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>DISTRIBUTED CONCURRENCY CONTROL</strong></p>
+<ul>
+<li>
+<p>Many of the same protocols from single-node DBMSs can be adapted.</p>
+</li>
+<li>
+<p>This is harder because of:</p>
+<ul>
+<li>→ Replication.</li>
+<li>→ Network Communication Overhead.</li>
+<li>→ Node Failures (Permanent + Ephemeral).</li>
+<li>→ Clock Skew.(时钟不同步)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-19.png" title="/img/CMU 15-445 Database Systems/chapter22-19.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-19.png" data-sub-html="<h2>分布式数据库的2PL很容易发生死锁，出现了死锁不容易解决，而且用网络去同步锁的开销也很大</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/img/CMU%2015-445%20Database%20Systems/chapter22-19.png"
+            data-srcset="/img/CMU%2015-445%20Database%20Systems/chapter22-19.png, /img/CMU%2015-445%20Database%20Systems/chapter22-19.png 1.5x, /img/CMU%2015-445%20Database%20Systems/chapter22-19.png 2x"
+            data-sizes="auto"
+            alt="/img/CMU 15-445 Database Systems/chapter22-19.png" />
+    </a><figcaption class="image-caption">分布式数据库的2PL很容易发生死锁，出现了死锁不容易解决，而且用网络去同步锁的开销也很大</figcaption>
+    </figure>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info"><div class="post-info-tag"><span><a href="/tags/database-systems/">Database Systems</a>
+                </span></div><div class="post-info-line"><div class="post-info-mod">
+                <span>更新于 2024-06-17</span>
+            </div><div class="post-info-mod"></div>
+        </div><div class="post-info-share">
+            <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases" data-hashtags="Database Systems"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-hashtag="Database Systems"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/"><i class="fab fa-linkedin fa-fw"></i></a><a href="javascript:void(0);" title="分享到 WhatsApp" data-sharer="whatsapp" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases"><i class="fab fa-line fa-fw"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Myspace" data-sharer="myspace" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Blogger" data-sharer="blogger" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg"></i></a><a href="javascript:void(0);" title="分享到 Evernote" data-sharer="evernote" data-url="https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/" data-title="CMU 15-445 Lecture #22: Introduction to Distributed Databases"><i class="fab fa-evernote fa-fw"></i></a></span>
+        </div></div><div class="post-nav"><a href="/posts/cmu-15-445-database-systems/chapter21/" class="prev" rel="prev" title="CMU 15-445 Lecture #21: Database Crash Recovery"><i class="fas fa-angle-left fa-fw"></i>Previous Post</a></div></div>
+</div></article></div>
+            </main>
+            <footer class="footer"><div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.105.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/khusika/FeelIt" target="_blank" rel="noopener noreffer" title="FeelIt 1.0.1"><i class="fas fa-hand-holding-heart fa-fw"></i> FeelIt</a>
+        </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://github.com/Jungle430">Jungle</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+</div>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/sw.min.js?version=0.0.1', { scope: '/' })
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Registered');
+        }, err => console.error('Jungle\u0027s Blog\u00A0Service Worker registration failed: ', err));
+
+    navigator.serviceWorker
+        .ready
+        .then(() => {
+            console.info('Jungle\u0027s Blog\u00A0Service Worker Ready');
+        });
+}
+</script>
+</footer>
+        </div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-chevron-up fa-fw"></i>
+            </a></div><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.fill%2CArray.prototype.find%2CArray.from%2CIntersectionObserver%2CMath.sign%2CObject.assign%2CPromise%2CObject.entries%2Chtml5shiv%2CObject.values%2Cfetch%2CElement.prototype.after"></script><script src="/lib/lazysizes/lazysizes.min.js"></script><script src="/lib/clipboard/clipboard.min.js"></script><script src="/lib/sharer/sharer.min.js"></script><script src="/lib/katex/katex.min.js"></script><script src="/lib/katex/auto-render.min.js"></script><script src="/lib/katex/copy-tex.min.js"></script><script src="/lib/katex/mhchem.min.js"></script><script>window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script src="/js/theme.min.js"></script></body></html>

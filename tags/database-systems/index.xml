@@ -4,7 +4,403 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 22 Apr 2024 11:11:57 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 17 Jun 2024 10:20:12 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #22: Introduction to Distributed Databases</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/</link>
+    <pubDate>Mon, 17 Jun 2024 10:20:12 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter22/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-22-introduction-to-distributed-databases">Lecture #22: Introduction to Distributed Databases</h2>
+<h3 id="introduction-distributed-dbmss">Introduction Distributed DBMSs</h3>
+<ul>
+<li>
+<p>辨析概念：Parallel DBMSs vs Distributed DBMSs</p>
+</li>
+<li>
+<p><strong>Parallel DBMSs:</strong></p>
+<ul>
+<li>Nodes are physically close to each other.</li>
+<li>Nodes connected with high-speed LAN(Local Area Network).</li>
+<li><strong>Communication cost is assumed to be small.</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Distributed DBMSs:</strong></p>
+<ul>
+<li>Nodes can be far from each other.</li>
+<li>Nodes connected using public network.</li>
+<li><strong>Communication cost and problems cannot be ignored</strong></li>
+</ul>
+</li>
+<li>
+<p>主要的差别是通信代价，前者可以忽略，后者无法忽略</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>Single node -&gt; Distributed DBMSs</li>
+<li>Questions to consider
+<ul>
+<li><strong>Optimization &amp; Planning</strong></li>
+<li><strong>Concurrency Control</strong></li>
+<li><strong>Logging &amp; Recovery</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="system-architectures">System Architectures</h3>
+<ul>
+<li>
+<p>A distributed DBMS&rsquo;s system architecture specifies <strong>what shared resources are directly accessible to CPUs.</strong></p>
+</li>
+<li>
+<p>This affects how CPUs coordinate with each other and where they retrieve/store objects in the database.</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-1.png" title="/img/CMU 15-445 Database Systems/chapter22-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-1.png" data-sub-html="<h2>Every database node are on the same machine(Extreme Situations), like parallel DBMSs, ignore it(</h2>">
+        
+    </a><figcaption class="image-caption">Every database node are on the same machine(Extreme Situations), like parallel DBMSs, ignore it(</figcaption>
+    </figure>
+<ul>
+<li>注意上面图片不是被许多XXX共享就证明其他的机器就那一个组件，为了跑起来基本的OS, CPU, memory和disk都要有，不过是那些部分参与到这个分布式的系统中</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>shared memory</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-2.png" title="/img/CMU 15-445 Database Systems/chapter22-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-2.png" data-sub-html="<h2>A large memory and a large disk, both of them are shared by many cpus by network</h2>">
+        
+    </a><figcaption class="image-caption">A large memory and a large disk, both of them are shared by many cpus by network</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Nodes access <strong>a common memory address space</strong> via a fast <strong>interconnect</strong>.</p>
+</li>
+<li>
+<p>Can still use local memory / disk for intermediate results</p>
+</li>
+</ul>
+</li>
+<li>
+<p>This looks a lot like shared everything. <strong>Nobody does this.</strong>(我认为原因是CPU要通过网络来访问内存，内存最大的优势”高速“直接没了)</p>
+</li>
+<li>
+<p>在单体架构上面有使用，多路服务器（多个CPU，每个CPU多核来提高并发能力，中间是通过高速总线相连的）</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>shared disk</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-3.png" title="/img/CMU 15-445 Database Systems/chapter22-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-3.png" data-sub-html="<h2>large disk, shared by many cpus and memories</h2>">
+        
+    </a><figcaption class="image-caption">large disk, shared by many cpus and memories</figcaption>
+    </figure>
+<ul>
+<li>
+<p>Nodes <strong>access a single logical disk</strong> via an interconnect, but <strong>each have their own private memories.</strong></p>
+</li>
+<li>
+<p>Scale execution layer independently from the storage layer.（解耦了执行层和存储层，可以独立拓展来加强单个层的性能）</p>
+</li>
+<li>
+<p>This architecture facilitates <strong>data lakes</strong> and <strong>serverless</strong> systems.？？？没太懂</p>
+</li>
+</ul>
+</li>
+<li>
+<p>该架构在近年新的数据库产品中使用的及其广泛，原因就是近些年云技术的兴起，大多数公司都趋向于购买云数据库，而在云厂商的机房中很容易就能做到这种架构（云计算在设计的时候就把计算和存储分开了，所以机房往往是计算服务器和磁盘集群式分开的，每个部分取一些就是这个架构）</p>
+</li>
+<li>
+<p>国内该架构的代表：<a href="https://github.com/ApsaraDB/PolarDB-for-PostgreSQL" target="_blank" rel="noopener noreffer">PolarDB</a></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-5.png" title="/img/CMU 15-445 Database Systems/chapter22-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-5.png" data-sub-html="<h2>查询过程，可以看到执行层和存储层分开了，Node数量决定计算能力，存储大小决定存储能力</h2>">
+        
+    </a><figcaption class="image-caption">查询过程，可以看到执行层和存储层分开了，Node数量决定计算能力，存储大小决定存储能力</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-6.png" title="/img/CMU 15-445 Database Systems/chapter22-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-6.png" data-sub-html="<h2>这个架构面临的一个最大的问题就是缓存同步的问题，Node1进行了数据的更新，如果马上不刷盘（因为耗时太长），那么就需要将更新数据的信息同步到其他节点的缓存，其实无论解决那种方案，都要面临这类问题</h2>">
+        
+    </a><figcaption class="image-caption">这个架构面临的一个最大的问题就是缓存同步的问题，Node1进行了数据的更新，如果马上不刷盘（因为耗时太长），那么就需要将更新数据的信息同步到其他节点的缓存，其实无论解决那种方案，都要面临这类问题</figcaption>
+    </figure>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>shared nothing</strong></p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-4.png" title="/img/CMU 15-445 Database Systems/chapter22-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-4.png" data-sub-html="<h2>Most common situations</h2>">
+        
+    </a><figcaption class="image-caption"><strong>Most</strong> common situations</figcaption>
+    </figure>
+</li>
+<li>
+<p>Each DBMS node has its own CPU, memory, and local disk.</p>
+</li>
+<li>
+<p>Nodes only communicate with each other via network</p>
+<ul>
+<li>
+<p>Better performance &amp; efficiency.</p>
+</li>
+<li>
+<p><strong>Harder to scale capacity.</strong></p>
+</li>
+<li>
+<p><strong>Harder to ensure consistency.</strong></p>
+</li>
+<li>
+<p>单层扩容（加一台机器所有能力都上去了，其他性能提示的效果因为短板效应被浪费了）和保证一致性都做的不好（数据不在同一块盘上面）</p>
+</li>
+<li>
+<p>好处：和上面<strong>shared disk</strong>相比把盘肢解了并放在本地，提升了部分性能</p>
+</li>
+</ul>
+</li>
+<li>
+<p>这类架构也在现在的分布式数据库产品中大量使用，代表产品是Redis</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-7.png" title="/img/CMU 15-445 Database Systems/chapter22-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-7.png" data-sub-html="<h2>涉及数据分区的问题，扩容也带来了数据重新分区的问题</h2>">
+        
+    </a><figcaption class="image-caption">涉及数据分区的问题，扩容也带来了数据重新分区的问题</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-8.png" title="/img/CMU 15-445 Database Systems/chapter22-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-8.png" data-sub-html="<h2>不在本节点需要呼叫其他节点</h2>">
+        
+    </a><figcaption class="image-caption">不在本节点需要呼叫其他节点</figcaption>
+    </figure>
+<h3 id="design-issues"><strong>Design Issues</strong></h3>
+<p><strong>Homogeneous Nodes</strong> vs. <strong>Heterogeneous Nodes:</strong></p>
+<hr>
+<ul>
+<li>
+<p><strong>Homogeneous Nodes</strong></p>
+<ul>
+<li>
+<p>Every node in the cluster can perform the same set of tasks (albeit on potentially different partitions of data).</p>
+</li>
+<li>
+<p>Makes provisioning and failover &ldquo;easier&rdquo;.</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Heterogenous Nodes</strong>
+<ul>
+<li>Nodes are assigned specific tasks.</li>
+<li>Can allow a single physical node to host multiple &ldquo;virtual&rdquo; node types for dedicated tasks.</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-9.png" title="/img/CMU 15-445 Database Systems/chapter22-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-9.png" data-sub-html="<h2>Heterogenous Nodes on mongodb</h2>">
+        
+    </a><figcaption class="image-caption"><strong>Heterogenous Nodes</strong> on mongodb</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>DATA TRANSPARENCY</strong></p>
+<ul>
+<li>
+<p>Applications <strong>should not be required to know where data is physically located in a distributed DBMS</strong></p>
+</li>
+<li>
+<p>Any query that run on a single-node DBMS should produce <strong>the same result</strong> on a distributed DBMS.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>! In practice, developers need to be aware of the communication costs of queries to avoid excessively &ldquo;expensive&rdquo; data movement.</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>DATABASE PARTITIONING</strong></p>
+<ul>
+<li>
+<p>Split database across multiple resources:</p>
+<ul>
+<li>
+<p>Disks, nodes, processors.</p>
+</li>
+<li>
+<p>Often called &ldquo;sharding&rdquo; in NoSQL systems.</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>The DBMS executes query fragments on each partition and then combines the results to produce a single answer.</p>
+</li>
+<li>
+<p>The DBMS can partition a database <strong>physically</strong>(shared nothing) or <strong>logically</strong> (shared disk).</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>NAÏVE TABLE PARTITIONING</strong></p>
+<ul>
+<li>
+<p>Assign an entire table to a single node.</p>
+</li>
+<li>
+<p>Assumes that each node has enough storage space for an entire table.</p>
+</li>
+<li>
+<p>Ideal if queries never join data across tables stored on different nodes and access patterns are uniform.</p>
+</li>
+<li>
+<p>主要弱点是JOIN</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>HORIZONTAL PARTITIONING</strong></p>
+<ul>
+<li>Split a table&rsquo;s tuples into disjoint subsets based on some partitioning key and scheme.</li>
+<li>Choose column(s) that divides the database equally in terms of size, load, or usage.</li>
+</ul>
+</li>
+<li>
+<p>Partitioning Schemes:</p>
+<p>→ Hashing</p>
+<p>→ Ranges</p>
+<p>→ Predicates</p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-10.png" title="/img/CMU 15-445 Database Systems/chapter22-10.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-10.png" data-sub-html="<h2>Hash分区，但是如果WHERE的属性不是Hash列就要所有节点都查一遍，这种查询就很不好，查询尽量要带上Hash那列的限制</h2>">
+        
+    </a><figcaption class="image-caption">Hash分区，但是如果WHERE的属性不是Hash列就要所有节点都查一遍，这种查询就很不好，查询尽量要带上Hash那列的限制</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-11.png" title="/img/CMU 15-445 Database Systems/chapter22-11.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-11.png" data-sub-html="<h2>扩容往往面临着新的Hash计算和分区</h2>">
+        
+    </a><figcaption class="image-caption">扩容往往面临着新的Hash计算和分区</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>CONSISTENT HASHING</strong></p>
+</li>
+<li>
+<p>分布式系统常见的问题</p>
+</li>
+<li>
+<p>八股：<a href="https://xiaolincoding.com/os/8_network_system/hash.html#%E5%A6%82%E4%BD%95%E5%88%86%E9%85%8D%E8%AF%B7%E6%B1%82" target="_blank" rel="noopener noreffer">什么是一致性哈希?</a></p>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-12.png" title="/img/CMU 15-445 Database Systems/chapter22-12.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-12.png" data-sub-html="<h2>P4分割了P3的一部分数据，只需要P3把这部分数据传给P4就可以了，避免了之前大规模数据迁移的情况</h2>">
+        
+    </a><figcaption class="image-caption">P4分割了P3的一部分数据，只需要P3把这部分数据传给P4就可以了，避免了之前大规模数据迁移的情况</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-13.png" title="/img/CMU 15-445 Database Systems/chapter22-13.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-13.png" data-sub-html="<h2>P2和P6为P1的一部分数据存储副本</h2>">
+        
+    </a><figcaption class="image-caption">P2和P6为P1的一部分数据存储副本</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-14.png" title="/img/CMU 15-445 Database Systems/chapter22-14.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-14.png" data-sub-html="<h2>存储的过程也变得冗余了（多存几份）</h2>">
+        
+    </a><figcaption class="image-caption">存储的过程也变得冗余了（多存几份）</figcaption>
+    </figure>
+<ul>
+<li>物理分区和逻辑分区</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-15.png" title="/img/CMU 15-445 Database Systems/chapter22-15.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-15.png" data-sub-html="<h2>shared memory 架构下的分布式数据库不做物理分区，他的分区就是逻辑上把不同数据的查询分配给了不同的节点，物理分区常见于shared nothing架构</h2>">
+        
+    </a><figcaption class="image-caption">shared memory 架构下的分布式数据库不做物理分区，他的分区就是逻辑上把不同数据的查询分配给了不同的节点，物理分区常见于shared nothing架构</figcaption>
+    </figure>
+<h3 id="distributed-concurrency-control"><strong>Distributed Concurrency Control</strong></h3>
+<ul>
+<li>
+<p>If our DBMS supports multi-operation and distributed txns, we need a way to coordinate their execution in the system.</p>
+</li>
+<li>
+<p>Two different approaches:</p>
+<ul>
+<li>
+<p>→ <strong>Centralized</strong>: Global &ldquo;traffic cop&rdquo;(“交警”).</p>
+</li>
+<li>
+<p>→ <strong>Decentralized</strong>: Nodes organize themselves.</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>TP MONITORS</strong></p>
+</li>
+<li>
+<p>A <strong>TP Monitor</strong> is an example of a centralized coordinator for distributed DBMSs. Originally developed in the 1970-80s to provide txns between terminals and mainframe databases.</p>
+<ul>
+<li>
+<p>→ Examples: ATMs, Airline Reservations.</p>
+</li>
+<li>
+<p>Standardized protocol from 1990s: X/Open XA</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-16.png" title="/img/CMU 15-445 Database Systems/chapter22-16.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-16.png" data-sub-html="<h2>系统里面有一个节点专门管理每个节点的锁和事务的提交，数据库执行事务时需要申请</h2>">
+        
+    </a><figcaption class="image-caption">系统里面有一个节点专门管理每个节点的锁和事务的提交，数据库执行事务时需要申请</figcaption>
+    </figure>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-17.png" title="/img/CMU 15-445 Database Systems/chapter22-17.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-17.png" data-sub-html="<h2>改进：数据路由和事务管理器合二为一</h2>">
+        
+    </a><figcaption class="image-caption">改进：数据路由和事务管理器合二为一</figcaption>
+    </figure>
+<ul>
+<li>现在用的不多，单点很容易造成性能瓶颈</li>
+</ul>
+<hr>
+<ul>
+<li><strong>DECENTRALIZED COORDINATOR</strong></li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-18.png" title="/img/CMU 15-445 Database Systems/chapter22-18.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-18.png" data-sub-html="<h2>在节点中选出来一个Leader(老版本是master&#43;slave，后面因为政治原因不让用了，新版的数据库文档都没有这个词了)，选出来的Leader就担任了上面TP Monitor的事务职责</h2>">
+        
+    </a><figcaption class="image-caption">在节点中选出来一个Leader(老版本是master+slave，后面因为政治原因不让用了，新版的数据库文档都没有这个词了)，选出来的Leader就担任了上面TP Monitor的事务职责</figcaption>
+    </figure>
+<hr>
+<ul>
+<li>
+<p><strong>DISTRIBUTED CONCURRENCY CONTROL</strong></p>
+<ul>
+<li>
+<p>Many of the same protocols from single-node DBMSs can be adapted.</p>
+</li>
+<li>
+<p>This is harder because of:</p>
+<ul>
+<li>→ Replication.</li>
+<li>→ Network Communication Overhead.</li>
+<li>→ Node Failures (Permanent + Ephemeral).</li>
+<li>→ Clock Skew.(时钟不同步)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter22-19.png" title="/img/CMU 15-445 Database Systems/chapter22-19.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter22-19.png" data-sub-html="<h2>分布式数据库的2PL很容易发生死锁，出现了死锁不容易解决，而且用网络去同步锁的开销也很大</h2>">
+        
+    </a><figcaption class="image-caption">分布式数据库的2PL很容易发生死锁，出现了死锁不容易解决，而且用网络去同步锁的开销也很大</figcaption>
+    </figure>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #21: Database Crash Recovery</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/</link>
     <pubDate>Mon, 22 Apr 2024 11:11:57 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter21/</guid>
@@ -1791,418 +2187,6 @@ prioritized as such.</li>
 <li>The same query plan can be executed in multiple different ways.</li>
 <li>(Most) DBMSs will want to use index scans as much as possible.</li>
 <li>Expression trees are flexible but slow.JIT compilation can (sometimes) speed them up.</li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #11: Joins Algorithms</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/</link>
-    <pubDate>Fri, 12 Apr 2024 00:56:12 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-11-joins-algorithms">Lecture #11: Joins Algorithms</h2>
-<h3 id="introduction">Introduction</h3>
-<ul>
-<li>
-<p>根据数据库的范式理论，设计数据库表的一个原则是不让数据冗余，所以在查找的时候JOIN的操作是少不了的</p>
-</li>
-<li>
-<p>For binary joins, we often prefer the left table (the ”outer table” ) to be the smaller one of the two.优化SQL的一个方法，左表尽量小(<strong>这个小指的是文件页数少</strong>)，后面会说明原因</p>
-</li>
-</ul>
-<h3 id="join-operators">Join Operators</h3>
-<ul>
-<li><strong>Operator Output</strong>
-<ul>
-<li>两个表满足JOIN条件的attributes可以组合成一个新的tuple</li>
-<li>输出取决于以下几个方面
-<ul>
-<li>processing model</li>
-<li>storage model</li>
-<li>data requirements in query</li>
-</ul>
-</li>
-<li><strong>Data</strong>
-<ul>
-<li><strong>Early materialization</strong>
-<ul>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-1.png" title="/img/CMU 15-445 Database Systems/chapter11-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-1.png" data-sub-html="<h2>JOIN的时候需要什么属性都加上，最后直接输出</h2>">
-        
-    </a><figcaption class="image-caption">JOIN的时候需要什么属性都加上，最后直接输出</figcaption>
-    </figure></li>
-<li>可以避免子操作回表</li>
-</ul>
-</li>
-<li><strong>Record Id</strong>
-<ul>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-2.png" title="/img/CMU 15-445 Database Systems/chapter11-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-2.png" data-sub-html="<h2>属性里面放的是行id或者地址，后面需要回表拿数据</h2>">
-        
-    </a><figcaption class="image-caption">属性里面放的是行id或者地址，后面需要回表拿数据</figcaption>
-    </figure></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Cost Analysis</strong></p>
-<ul>
-<li>
-<p>不同JOIN算法的开销</p>
-</li>
-<li>
-<p>Assume</p>
-<ul>
-<li>
-<p>M pages in table R, m tuples in R</p>
-</li>
-<li>
-<p>N pages in table S, n tuples in S</p>
-</li>
-<li>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">R</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">S</span><span class="p">.</span><span class="n">cdate</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">S</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ON</span><span class="w"> </span><span class="n">R</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">S</span><span class="p">.</span><span class="n">id</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">S</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-</li>
-<li>
-<p>Cost Metric: <strong>number of IOs</strong> to compute join</p>
-</li>
-<li>
-<p><strong>JOIN Algorithms</strong></p>
-<ul>
-<li>Next Loop Join</li>
-<li>Sort-Merge Join</li>
-<li>Hash Join</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="nested-loop-join">Nested Loop Join</h3>
-<ul>
-<li><strong>Native Nested Loop Join</strong></li>
-<li>伪代码</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">s</span> <span class="k">in</span> <span class="n">S</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">emit</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>“stupid nested loop join”</p>
-<ul>
-<li><strong>一个R中的tuple需要扫S表的所有数据，对于缓存池的利用率过低，这种方法开销太大</strong></li>
-<li>S每次都是先灌满缓存池，然后前面的页淘汰，如此反复</li>
-</ul>
-</li>
-<li>
-<p>Assume</p>
-<ul>
-<li>
-<p>M pages in table R, m tuples in R</p>
-</li>
-<li>
-<p>N pages in table S, n tuples in S</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Cost: $M+(m \times N)$</p>
-</li>
-<li>
-<p>优化：高效利用缓存池，一次多加载一些页，不要一页一页加载</p>
-</li>
-<li>
-<p><strong>Block Nested Loop Join</strong></p>
-</li>
-<li>
-<p>伪代码</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">block</span> <span class="n">B_R</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">block</span> <span class="n">B_S</span> <span class="k">in</span> <span class="n">S</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">B_R</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">s</span> <span class="k">in</span> <span class="n">B_S</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">emit</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">                <span class="p">}</span>
-</span></span><span class="line"><span class="cl">            <span class="p">}</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>每次不只读一页，每次R和S都读好多页进行匹配</p>
-</li>
-<li>
-<p>Cost: $M+(\frac{M}{M\ Block\ Size} \times N)$</p>
-</li>
-<li>
-<p>讨论block size</p>
-</li>
-<li>
-<p>B个页的内存，一个页做输出缓存，一个页给右表，多缓存左表(给B-2个)</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">B</span><span class="p">-</span><span class="m">2</span> <span class="n">blocks</span> <span class="n">B_R</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">block</span> <span class="n">B_S</span> <span class="k">in</span> <span class="n">S</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">B</span><span class="p">-</span><span class="m">2</span> <span class="n">blocks</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">s</span> <span class="k">in</span> <span class="n">B_S</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">emit</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">                <span class="p">}</span>
-</span></span><span class="line"><span class="cl">            <span class="p">}</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>Cost: $M+(\frac{M}{B-2}\times N)$</p>
-</li>
-<li>
-<p>if $B-2&gt;M$, then cost: $M+N$</p>
-</li>
-<li>
-<p>为啥nested loop join性能不行</p>
-<ul>
-<li>总要去遍历S表</li>
-<li>为啥要遍历：<strong>没有索引等其他方案来提高查找S中属性的效率，所以只能傻瓜式的遍历</strong></li>
-</ul>
-</li>
-<li>
-<p>优化思路：提高S中查找/范围查找的速度</p>
-</li>
-<li>
-<p><strong>Index Nested Loop Join</strong></p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c#" data-lang="c#"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="n">tuple</span> <span class="n">r</span> <span class="k">in</span> <span class="n">R</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">foreach</span> <span class="n">tuple</span> <span class="n">S</span> <span class="k">in</span> <span class="n">Index</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">==</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">r</span> <span class="n">and</span> <span class="n">s</span> <span class="n">match</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">emit</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>认为每次索引查询需要C次I/O</p>
-</li>
-<li>
-<p>Cost: $M+(m\times C)$</p>
-</li>
-</ul>
-<h3 id="sort-merge-join">Sort-Merge Join</h3>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-3.png" title="/img/CMU 15-445 Database Systems/chapter11-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-3.png" data-sub-html="<h2>先对Join的列进行排序，后面就是合并多个有序数组的思路</h2>">
-        
-    </a><figcaption class="image-caption">先对Join的列进行排序，后面就是合并多个有序数组的思路</figcaption>
-    </figure>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-4.png" title="/img/CMU 15-445 Database Systems/chapter11-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-4.png" data-sub-html="<h2>匹配中可能会漏掉匹配项，必须要加上回退的功能</h2>">
-        
-    </a><figcaption class="image-caption">匹配中可能会漏掉匹配项，必须要加上回退的功能</figcaption>
-    </figure>
-<ul>
-<li>
-<p>Cost</p>
-<ul>
-<li>
-<p>Sort R: $2M \times (1+\log_{B-1}\frac{M}{B})$</p>
-</li>
-<li>
-<p>Sort S: $2N\times (1+\log_{B-1}\frac{N}{B})$</p>
-</li>
-<li>
-<p>Merge Cost: $M+N$</p>
-</li>
-<li>
-<p>Total Cost: $Sort + Merge$</p>
-</li>
-</ul>
-</li>
-<li>
-<p>退化情况：两个连接列所有值一样，那么Merge Cost会因为回退增加到$M\times N$</p>
-</li>
-<li>
-<p>适合的场景</p>
-<ul>
-<li>数据本身就有序</li>
-<li>输出的结果需要排序</li>
-</ul>
-</li>
-</ul>
-<h3 id="hash-join">Hash Join</h3>
-<ul>
-<li>Hash table点查询比B+ Tree快
-<ul>
-<li>左表做hash，右表去匹配</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">build</span> <span class="nb">hash</span> <span class="n">table</span> <span class="n">HT_R</span> <span class="k">for</span> <span class="n">R</span>
-</span></span><span class="line"><span class="cl"><span class="n">foreach</span> <span class="nb">tuple</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">h1</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">in</span> <span class="n">HT_R</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">        <span class="n">output</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-5.png" title="/img/CMU 15-445 Database Systems/chapter11-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-5.png" data-sub-html="<h2>给左表做哈希表，右表的数据hash完成后去哈希表里面找匹配数据</h2>">
-        
-    </a><figcaption class="image-caption">给左表做哈希表，右表的数据hash完成后去哈希表里面找匹配数据</figcaption>
-    </figure>
-<ul>
-<li>
-<p>Hash</p>
-<ul>
-<li>Key:需要连接的列</li>
-<li>Value
-<ul>
-<li>Full Tuple:放上需要的数据，不需要回表</li>
-<li>Tuple Identifier:放索引，最后需要去回表拿数据</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>OPTIMIZATION</strong></p>
-<ul>
-<li>Create a probe filter (such as a Bloom Filter) during the build phase if the key is likely to not exist in the inner relation 加上一层过滤器先过滤掉部分没有匹配项的数据，防止在哈希表里面找半天发现没有，比如加一个布隆过滤器</li>
-</ul>
-</li>
-<li>
-<p>如果哈希表太大可能会面临内存池驱逐的问题，但是我们不想让内存池随机驱逐</p>
-</li>
-<li>
-<p><strong>Grace Hash Join</strong></p>
-<ul>
-<li>
-<p>1980’s东京大学搞数据库一体机的时候发明的（现在也有一体机，比如Oracle还在卖），银行和金融机构爱买</p>
-</li>
-<li>
-<p>左表和右表都做hash，把哈希表存在硬盘里面，把硬盘里面相对应的哈希桶拿出来做nested loop join</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-6.png" title="/img/CMU 15-445 Database Systems/chapter11-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-6.png" data-sub-html="<h2>能连接上的行都在一个桶号里面，所以每次都加载两个哈希表里面相同桶号的桶</h2>">
-        
-    </a><figcaption class="image-caption">能连接上的行都在一个桶号里面，所以每次都加载两个哈希表里面相同桶号的桶</figcaption>
-    </figure>
-</li>
-<li>
-<p>如果哈希桶还是太大怎么办，再换别的哈希函数继续哈希，直到哈希出来的块够小（这个叫<strong>RECURSIVE PARTITIONING</strong>）</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-7.png" title="/img/CMU 15-445 Database Systems/chapter11-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-7.png" data-sub-html="<h2>RECURSIVE PARTITIONING</h2>">
-        
-    </a><figcaption class="image-caption">RECURSIVE PARTITIONING</figcaption>
-    </figure>
-</li>
-</ul>
-</li>
-<li>
-<p>Cost</p>
-<ul>
-<li>Partition Phash:$2(M+N)$(读到内存hash后还要写回去)</li>
-<li>Probing Phash:$M+N$</li>
-<li>Total:$3(M+N)$</li>
-</ul>
-</li>
-</ul>
-<h3 id="conclusion">Conclusion</h3>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter11-8.png" title="/img/CMU 15-445 Database Systems/chapter11-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter11-8.png" data-sub-html="<h2>各方法开销</h2>">
-        
-    </a><figcaption class="image-caption">各方法开销</figcaption>
-    </figure>
-<ul>
-<li>Sorting和Hash没有最好，要看条件选择
-<ul>
-<li>哈希碰撞，输出是否有序都会影响开销</li>
-<li>优秀的数据库会有优化器来进行分析和选择</li>
-</ul>
-</li>
 </ul>
 ]]></description>
 </item>
