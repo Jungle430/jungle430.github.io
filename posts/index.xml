@@ -4,7 +4,152 @@
         <link>https://Jungle430.github.io/posts/</link>
         <description>所有文章 | Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Mon, 17 Jun 2024 17:09:19 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Tue, 18 Jun 2024 09:58:42 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>CMU 15-445 Lecture #24: Distributed OLAP Databases</title>
+    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter24/</link>
+    <pubDate>Tue, 18 Jun 2024 09:58:42 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter24/</guid>
+    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
+<h2 id="lecture-24-distributed-olap-databases">Lecture #24: Distributed OLAP Databases</h2>
+<h3 id="decision-support-systems"><strong>Decision Support Systems</strong></h3>
+<ul>
+<li>
+<p>OLAP其他称呼，就是分析数据进行公司的决策分析的</p>
+</li>
+<li>
+<p>两种“数据”架构</p>
+<ul>
+<li><strong>Star Schema</strong></li>
+<li><strong>Snowflake Schema</strong></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Star Schema</strong></p>
+<ul>
+<li>
+<p>一张核心表，通过外键连接到外面的表</p>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter24-1.png" title="/img/CMU 15-445 Database Systems/chapter24-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter24-1.png" data-sub-html="<h2>下面两个字段是核心字段，上面的用来连接其他表的</h2>">
+        
+    </a><figcaption class="image-caption">下面两个字段是核心字段，上面的用来连接其他表的</figcaption>
+    </figure>
+</li>
+<li>
+<p>一个中心，多个描述</p>
+</li>
+<li>
+<p>缺点：部分枚举本来可以用数字+映射表示，在这个架构里面必须写真实属性，造成了数据冗余</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Snowflake Schema</strong></p>
+<ul>
+<li>
+<p>外面的一层还可以向外拓展，解决了上面数据冗余的问题</p>
+</li>
+<li>
+<a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter24-2.png" title="/img/CMU 15-445 Database Systems/chapter24-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter24-2.png">
+        
+    </a>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>对比
+<ul>
+<li>雪花型更省空间，而且避免了规范化的问题（前面星型的枚举人们可能用不同的词汇描述，比如一个人记low，另一个记bad）</li>
+<li>雪花型的查询更复杂，跑的会更慢</li>
+</ul>
+</li>
+</ul>
+<h3 id="execution-models"><strong>Execution Models</strong></h3>
+<ul>
+<li>
+<p><strong>PUSH QUERY TO DATA</strong></p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter24-4.png" title="/img/CMU 15-445 Database Systems/chapter24-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter24-4.png" data-sub-html="<h2>将查询计划分给网关节点，网关节点根据查询内容和数据分布的情况向其他节点分配查询计划，每一个节点尽力执行查询计划然后将结果返回给应用</h2>">
+        
+    </a><figcaption class="image-caption">将查询计划分给网关节点，网关节点根据查询内容和数据分布的情况向其他节点分配查询计划，每一个节点尽力执行查询计划然后将结果返回给应用</figcaption>
+    </figure></li>
+</ul>
+</li>
+<li>
+<p><strong>PULL DATA TO QUERY</strong></p>
+<ul>
+<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter24-3.png" title="/img/CMU 15-445 Database Systems/chapter24-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter24-3.png" data-sub-html="<h2>数据不在本地，如果我需要执行查询的话必须要把数据加载到本地（放在shared disk架构里面就是把页拉到自己本地）</h2>">
+        
+    </a><figcaption class="image-caption">数据不在本地，如果我需要执行查询的话必须要把数据加载到本地（放在shared disk架构里面就是把页拉到自己本地）</figcaption>
+    </figure></li>
+</ul>
+</li>
+</ul>
+<h3 id="query-planning"><strong>Query Planning</strong></h3>
+<ul>
+<li>
+<p><strong>Physical Operators</strong></p>
+<ul>
+<li>把查询计划切成一个个得小块推送到对应的数据节点上面去，常用的方案</li>
+</ul>
+</li>
+<li>
+<p><strong>SQL</strong></p>
+<ul>
+<li>切的是SQL语句</li>
+<li><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter24-5.png" title="/img/CMU 15-445 Database Systems/chapter24-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter24-5.png">
+        
+    </a></li>
+</ul>
+</li>
+</ul>
+<h3 id="distributed-join-algorithms"><strong>Distributed Join Algorithms</strong></h3>
+<ul>
+<li>把可以JOIN的部分集中到一个节点JOIN</li>
+</ul>
+<h3 id="cloud-systems"><strong>Cloud Systems</strong></h3>
+<ul>
+<li>Newer systems are starting to blur the lines between shared-nothing and shared-disk.
+<ul>
+<li>Example: You can do simple filtering on Amazon S3 before copying data to compute nodes.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>Managed DBMSs</strong></p>
+<ul>
+<li>数据库软件还是那个软件，但实际上是虚拟机+软件（腾讯/阿里云的数据库就是这样，帮你托管数据库）</li>
+<li>便宜，易转型（从本地MySQL转到云数据库）</li>
+</ul>
+</li>
+<li>
+<p><strong>Cloud-Native DBMSs</strong></p>
+<ul>
+<li>就是为了在云上运行设计的</li>
+</ul>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter24-6.png" title="/img/CMU 15-445 Database Systems/chapter24-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter24-6.png" data-sub-html="<h2>shared disk可以动态分配计算资源</h2>">
+        
+    </a><figcaption class="image-caption">shared disk可以动态分配计算资源</figcaption>
+    </figure>
+</li>
+<li>
+<p>云数据库也有人希望把不同厂家的组件组装起来来一个新的，主要是希望统一文件格式，但是太难。。。</p>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>CMU 15-445 Lecture #23: Distributed OLTP Databases</title>
     <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/</link>
     <pubDate>Mon, 17 Jun 2024 17:09:19 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter23/</guid>
@@ -2005,234 +2150,6 @@ new ones.</li>
         
     </a><figcaption class="image-caption">强制立即更新统计信息的命令</figcaption>
     </figure>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #14: Query Execution II</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/</link>
-    <pubDate>Fri, 12 Apr 2024 21:01:51 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter14/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-14-query-execution-ii">Lecture #14: Query Execution II</h2>
-<h3 id="background">Background</h3>
-<ul>
-<li>上节课讨论了DBMS的执行过程</li>
-<li>这节课讨论DBMS在多线程下的执行过程</li>
-</ul>
-<h3 id="parallel-vs-distributed-databases">Parallel vs Distributed Databases</h3>
-<ul>
-<li>
-<p>并行和分布式数据库</p>
-</li>
-<li>
-<p><strong>Parallel DBMSs</strong></p>
-<ul>
-<li>资源都在一块，离得很近</li>
-<li>资源通信很高速，OS内通信</li>
-<li>线程间的通信高速又可靠</li>
-</ul>
-</li>
-<li>
-<p><strong>Distributed Databases</strong></p>
-<ul>
-<li>资源相互之间离得很远</li>
-<li>资源之间的通信很慢</li>
-<li>节点之间通信的代价很高且不可靠</li>
-</ul>
-</li>
-</ul>
-<h3 id="process-models">Process Models</h3>
-<ul>
-<li>模型：认为每个DBMS下面有多个worker，多个worker并行处理</li>
-<li>这个模型针对的是多个SQL并发执行的问题，不能做个单个SQL并发处理的问题</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Process per Worker</strong>
-<ul>
-<li>每一个worker给分配一个进程(OS级别的)</li>
-<li>依赖OS对进程的调度</li>
-<li>用共享内存来进行通信</li>
-<li>优点：一个进程崩了不至于让整个系统宕机</li>
-<li>例子：Oracle，Postgres(因为开发年代太古早)</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-1.png" title="/img/CMU 15-445 Database Systems/chapter14-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-1.png" data-sub-html="<h2>工作模型，因为进程太吃资源，后面基本都做了池化的技术</h2>">
-        
-    </a><figcaption class="image-caption">工作模型，因为进程太吃资源，后面基本都做了池化的技术</figcaption>
-    </figure></li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Thread per Worker</strong>
-<ul>
-<li>pthread统一出现后各大数据库也把模型换成了给worker分配线程</li>
-<li>优点：线程切换代价小，内存天然共享</li>
-<li>缺点：一个线程崩了整个进程跟着崩</li>
-<li>例子：MySQL，IBM DB2</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-2.png" title="/img/CMU 15-445 Database Systems/chapter14-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-2.png" data-sub-html="<h2>工作模型</h2>">
-        
-    </a><figcaption class="image-caption">工作模型</figcaption>
-    </figure></li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li>
-<p><strong>Scheduling</strong></p>
-<ul>
-<li>In conclusion, for each query plan, the DBMS has to decide where, when, and how to execute. Relevant
-questions include:
-<ul>
-<li>How many tasks should it use?</li>
-<li>How many CPU cores should it use?</li>
-<li>What CPU cores should the tasks execute on?</li>
-<li>Where should a task store its output?</li>
-</ul>
-</li>
-<li>When making decisions regarding query plans, <strong>the DBMS always knows more than the OS</strong> and should be
-prioritized as such.</li>
-</ul>
-</li>
-<li>
-<p>说白了就是让DBMS安排一个执行计划怎么执行，这个东西和缓存一样，不能完全依赖OS线程方面的系统调用，要定制化</p>
-</li>
-</ul>
-<h3 id="inter-query-parallelism">Inter-Query Parallelism</h3>
-<ul>
-<li>多个SQL之间怎么并发执行</li>
-<li>如果并发的查询都是只读的，那冲突很小</li>
-<li>如果并发的查询涉及更新数据，那冲突就很多且不可避免</li>
-</ul>
-<h3 id="intra-query-parallelism-horizontal">Intra-Query parallelism (Horizontal)</h3>
-<ul>
-<li>
-<p>水平切，把要处理的数据给切开，然后分给多个线程，这个切是靠Exchange算子的</p>
-</li>
-<li>
-<p>多个线程干的事情是一一样的</p>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-3.png" title="/img/CMU 15-445 Database Systems/chapter14-3.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-3.png" data-sub-html="<h2>Exchange算子工作模型，并发调用</h2>">
-        
-    </a><figcaption class="image-caption">Exchange算子工作模型，并发调用</figcaption>
-    </figure>
-</li>
-<li>
-<p>Exchange Type #1 – <strong>Gather</strong></p>
-<ul>
-<li>→ Combine the results from multiple workers into a single output stream.</li>
-</ul>
-</li>
-<li>
-<p>Exchange Type #2 – <strong>Distribute</strong></p>
-<ul>
-<li>→ Split a single input stream into multiple output streams.</li>
-</ul>
-</li>
-<li>
-<p>Exchange Type #3 – <strong>Repartition</strong></p>
-<ul>
-<li>→ Shuffle multiple input streams across multiple output streams.</li>
-</ul>
-</li>
-<li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-4.png" title="/img/CMU 15-445 Database Systems/chapter14-4.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-4.png" data-sub-html="<h2>三个类型的工作模型</h2>">
-        
-    </a><figcaption class="image-caption">三个类型的工作模型</figcaption>
-    </figure>
-</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-5.png" title="/img/CMU 15-445 Database Systems/chapter14-5.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-5.png" data-sub-html="<h2>Para Hash</h2>">
-        
-    </a><figcaption class="image-caption">Para Hash</figcaption>
-    </figure>
-<h3 id="inter-operator-parallelism--vertical">Inter-Operator parallelism  (Vertical)</h3>
-<ul>
-<li>垂直切，让多个算子并发执行，数据在每个算子之间流动</li>
-<li>Also called pipeline parallelism.</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-6.png" title="/img/CMU 15-445 Database Systems/chapter14-6.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-6.png" data-sub-html="<h2>多个算子并发</h2>">
-        
-    </a><figcaption class="image-caption">多个算子并发</figcaption>
-    </figure>
-<ul>
-<li>缺点：中间一个线程处理的速度慢，其他部分线程就要等，会浪费</li>
-</ul>
-<h3 id="bushy-parallelism">Bushy Parallelism</h3>
-<ul>
-<li>上面两种并发方式的结合</li>
-</ul>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-7.png" title="/img/CMU 15-445 Database Systems/chapter14-7.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-7.png" data-sub-html="<h2>水平并发&#43;垂直并发</h2>">
-        
-    </a><figcaption class="image-caption">水平并发+垂直并发</figcaption>
-    </figure>
-<h3 id="io-parallelism">I/O Parallelism</h3>
-<ul>
-<li>
-<p>上面的模型说的都是数据已经在内存中的并行，但是对于本课程的数据库，I/O带来的性能问题如何通过并行优化甚至比前面的并行优化还重要</p>
-</li>
-<li>
-<p>还有上面的内存并行带来的问题可能是两个算子并发读写磁盘的不同部分，那对于机械盘来说这种随机读写也会大大降低性能，这部分也要进行优化</p>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Split the DBMS across multiple storage devices to improve disk bandwidth latency.Many different options that have trade-offs</strong>:
-<ul>
-<li>→ Multiple Disks per Database</li>
-<li>→ One Database per Disk</li>
-<li>→ One Relation per Disk</li>
-<li>→ Split Relation across Multiple Disks</li>
-</ul>
-</li>
-<li>Some DBMSs support this natively. Others require admin to configure outside of DBMS.</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Multi-Disk Parallelism</strong>
-<ul>
-<li>在操作系统/硬件层面让不同的DBMS文件去不同的磁盘(e.g. RAID)，这个层面对DBMS是透明的（对于他来说就像操作一个盘一样）</li>
-<li>多盘并发</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-8.png" title="/img/CMU 15-445 Database Systems/chapter14-8.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-8.png" data-sub-html="<h2>RAID0(Striping)下面的多盘并发</h2>">
-        
-    </a><figcaption class="image-caption">RAID0(Striping)下面的多盘并发</figcaption>
-    </figure></li>
-</ul>
-</li>
-</ul>
-<hr>
-<ul>
-<li><strong>Database Partitioning</strong>
-<ul>
-<li>把数据库也进行切分</li>
-<li>不同的库存在不同的盘，如果有统一恢复用的log文件要记得做好共享问题</li>
-<li>把单个的表进行分区，物理存储上分成多个部分，注意，这个分区对应用程序来说要是透明的，不需要关心数据如何存储的</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter14-9.png" title="/img/CMU 15-445 Database Systems/chapter14-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter14-9.png" data-sub-html="<h2>某一个属性特别的大且不常用就可以垂直切开分两部分存</h2>">
-        
-    </a><figcaption class="image-caption">某一个属性特别的大且不常用就可以垂直切开分两部分存</figcaption>
-    </figure></li>
-</ul>
-</li>
-</ul>
-<h3 id="conclusion">CONCLUSION</h3>
-<ul>
-<li>
-<p>Parallel execution is important, which is why (almost) every major DBMS supports it.</p>
-</li>
-<li>
-<p>However, it is hard to get right.</p>
-<ul>
-<li>→ Coordination Overhead</li>
-<li>→ Scheduling</li>
-<li>→ Concurrency Issues</li>
-<li>→ Resource Contention</li>
-</ul>
-</li>
-<li>
-<p>总结：并发能提示DBMS效率，但是理论简单实现难得多，要面对一大堆的问题</p>
-</li>
-</ul>
 ]]></description>
 </item>
 </channel>
