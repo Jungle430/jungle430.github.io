@@ -1,0 +1,256 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Database - 分类 - Jungle&#39;s Blog</title>
+        <link>https://Jungle430.github.io/categories/database/</link>
+        <description>Database - 分类 - Jungle&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 21 Jul 2024 01:18:11 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/database/" rel="self" type="application/rss+xml" /><item>
+    <title>数据库SQL引擎基础(OceanBase-MiniOB)</title>
+    <link>https://Jungle430.github.io/posts/database/the_foundation_of_the_database_sql_engine/</link>
+    <pubDate>Sun, 21 Jul 2024 01:18:11 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/database/the_foundation_of_the_database_sql_engine/</guid>
+    <description><![CDATA[<h1 id="数据库sql引擎基础oceanbase-miniob">数据库SQL引擎基础$(OceanBase-MiniOB)$</h1>
+<h2 id="引擎架构概览">引擎架构概览</h2>
+<ul>
+<li>
+<figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img1.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img1.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img1.png" data-sub-html="<h2>MySQL的引擎架构（红框）</h2>">
+        
+    </a><figcaption class="image-caption">MySQL的引擎架构（红框）</figcaption>
+    </figure>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img2.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img2.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img2.png" data-sub-html="<h2>OceanBase引擎架构</h2>">
+        
+    </a><figcaption class="image-caption">OceanBase引擎架构</figcaption>
+    </figure>
+</li>
+<li>
+<p>一条SQL语句的常见结构</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">FROM</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">JOIN</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ON</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">WHERE</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">HAVING</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">LIMIT</span><span class="w"> </span><span class="n">XXX</span><span class="w"> </span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="解析--执行sql">解析 &amp; 执行SQL</h2>
+<h3 id="parser">Parser</h3>
+<ul>
+<li><figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img3.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img3.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img3.png" data-sub-html="<h2>将SQL转化为数据库能识别的数据结构</h2>">
+        
+    </a><figcaption class="image-caption">将SQL转化为数据库能识别的数据结构</figcaption>
+    </figure></li>
+</ul>
+<h3 id="resolver">Resolver</h3>
+<ul>
+<li><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img4.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img4.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img4.png">
+        
+    </a></li>
+<li><figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img5.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img5.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img5.png" data-sub-html="<h2>同时也会将SQL转化为一个新的数据工程性的数据结构</h2>">
+        
+    </a><figcaption class="image-caption">同时也会将SQL转化为一个新的数据工程性的数据结构</figcaption>
+    </figure></li>
+</ul>
+<h3 id="transformer--optimizer">Transformer &amp; Optimizer</h3>
+<ul>
+<li>在这两层主要是要把上一层的结构转化为火山模型中的“算子树（自己造的词，方便理解）”，同时对查询计划进行优化</li>
+<li><figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img6.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img6.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img6.png" data-sub-html="<h2>生成查询计划</h2>">
+        
+    </a><figcaption class="image-caption">生成查询计划</figcaption>
+    </figure></li>
+<li><figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img7.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img7.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img7.png" data-sub-html="<h2>优化查询计划</h2>">
+        
+    </a><figcaption class="image-caption">优化查询计划</figcaption>
+    </figure></li>
+<li><figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img8.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img8.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img8.png" data-sub-html="<h2>OceanBase的优化计划部分</h2>">
+        
+    </a><figcaption class="image-caption">OceanBase的优化计划部分</figcaption>
+    </figure></li>
+</ul>
+<h3 id="executor">Executor</h3>
+<ul>
+<li>
+<p>常见的就是火山模型</p>
+</li>
+<li>
+<p>所有的代数运算都被看成了operator（也就是图里面的一个节点）</p>
+</li>
+<li>
+<p>每一层的operator都将下一层的operator看成一张表，每次调用next()都是获取表中的一张数据</p>
+</li>
+<li>
+<p>优点：简单，让查询计划变得富有弹性，使其便于优化</p>
+</li>
+<li>
+<p>缺点：大量的虚函数调用，流水线模型的破坏，不能让CPU乱序执行带来的效率低下（但是这个模型在90年代诞生，当时I/O的问题远比CPU的问题要重要的多）</p>
+</li>
+<li>
+<p>关于火山模型的问题和向量化|类JIT代码动态编译/生成，比较好的两篇文章，读完收获很大</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/587568943" target="_blank" rel="noopener noreffer">为什么需要向量化执行引擎</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/100933389" target="_blank" rel="noopener noreffer">数据库计算引擎的优化技术：向量化执行与代码生成</a></li>
+</ul>
+</li>
+<li>
+<p>其他优化的点</p>
+<ul>
+<li>操作符融合：比如把Scan和Fillter融合在一块执行</li>
+<li>拉取模型和推送模型：火山模型中应该是上层的算子来进行推动，但是推送模型希望是下面的算子往上推，而不是从上面拉取</li>
+</ul>
+</li>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img9.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img9.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img9.png">
+        
+    </a>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img10.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img10.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img10.png" data-sub-html="<h2>下推引擎中，下层的operator拿到了上层的要求后直接带着要求返回结果，而不是想上拉引擎那样只是傻傻的返回tuple</h2>">
+        
+    </a><figcaption class="image-caption">下推引擎中，下层的operator拿到了上层的要求后直接带着要求返回结果，而不是想上拉引擎那样只是傻傻的返回tuple</figcaption>
+    </figure>
+</li>
+</ul>
+<h3 id="fast-parser--plan-cache">Fast Parser &amp; Plan Cache</h3>
+<ul>
+<li>
+<figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img11.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img11.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img11.png" data-sub-html="<h2>把之前SQL解析出来的Plan给进行缓存，这样就可以避免大的，频繁调用的SQL不停的被解析造成的效率低下</h2>">
+        
+    </a><figcaption class="image-caption">把之前SQL解析出来的Plan给进行缓存，这样就可以避免大的，频繁调用的SQL不停的被解析造成的效率低下</figcaption>
+    </figure>
+</li>
+<li>
+<p>OceanBase的优化：SQL可以先找到和自己相似的SQL进行数值上的替换，这样自己的查询计划也就出来了</p>
+</li>
+</ul>
+<h2 id="常见名词">常见名词</h2>
+<ul>
+<li>一个高效的SQL有很多考虑因素
+<ul>
+<li>disk</li>
+<li>memory</li>
+<li>cpu</li>
+<li>SQL计划是否更优，选择的算法是否合理</li>
+</ul>
+</li>
+</ul>
+<h2 id="基础关系代数符号--优化操作">基础关系代数符号 &amp; 优化操作</h2>
+<ul>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img12.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img12.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img12.png">
+        
+    </a>
+</li>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img13.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img13.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img13.png">
+        
+    </a>
+</li>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img14.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img14.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img14.png">
+        
+    </a>
+</li>
+<li>
+<p>相关文章</p>
+<ul>
+<li><a href="https://jungle430.github.io/posts/cmu-15-445-database-systems/chapter11/" target="_blank" rel="noopener noreffer">CMU 15-445 Lecture #11: Joins Algorithms</a></li>
+<li><a href="https://open.oceanbase.com/blog/10900347" target="_blank" rel="noopener noreffer">SQL 改写系列九：外连接转内连接的常见场景与错误</a></li>
+</ul>
+</li>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img15.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img15.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img15.png">
+        
+    </a>
+</li>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img16.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img16.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img16.png">
+        
+    </a>
+</li>
+</ul>
+<h2 id="关系表达式的等价规则转换当成工具字典就行">关系表达式的等价规则转换（当成工具字典就行）</h2>
+<ul>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img17.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img17.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img17.png">
+        
+    </a>
+</li>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img18.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img18.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img18.png">
+        
+    </a>
+</li>
+<li>
+<figure><a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img19.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img19.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img19.png" data-sub-html="<h2>运算律优化的例子，选择下推，连接变小</h2>">
+        
+    </a><figcaption class="image-caption">运算律优化的例子，选择下推，连接变小</figcaption>
+    </figure>
+</li>
+<li>
+<p>由于连接有交换律，根据排列组合，极少的连接就会造出来非常多的计划，但是实际上数据库不可能挨个去算每个计划的代价</p>
+</li>
+<li>
+<p>Interesting sort order(如果前面连接出来的结果有序，那么后面优先选择有序的表进行连接，这样可以使用sorted join来加快顺序)</p>
+</li>
+</ul>
+<h2 id="左深树">左深树</h2>
+<ul>
+<li>根据前面的优化，左深树比右深树更有优势</li>
+</ul>
+<h2 id="启发式规则">启发式规则</h2>
+<ul>
+<li>
+<p>多年经验和论文总结而成</p>
+</li>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img20.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img20.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img20.png">
+        
+    </a>
+</li>
+</ul>
+<h2 id="统计信息">统计信息</h2>
+<ul>
+<li>
+<a class="lightgallery" href="/img/DataBase/The_foundation_of_the_database_SQL_engine/img21.png" title="/img/DataBase/The_foundation_of_the_database_SQL_engine/img21.png" data-thumbnail="/img/DataBase/The_foundation_of_the_database_SQL_engine/img21.png">
+        
+    </a>
+</li>
+<li>
+<p>根据选择率和基数和基数来决定是否使用索引还是用全表（不一定索引比全表扫描强，比如sex这种列）</p>
+</li>
+</ul>
+<h2 id="尾巴">尾巴</h2>
+<ul>
+<li>
+<p>留两篇文章下周工位摸鱼读（又该申请权限力）</p>
+<ul>
+<li><a href="https://link.zhihu.com/?target=https%3A//cn.pingcap.com/blog/tidb-source-code-reading-7" target="_blank" rel="noopener noreffer">TiDB 源码阅读系列文章（七）基于规则的优化 | PingCAP</a></li>
+<li><a href="https://link.zhihu.com/?target=https%3A//cn.pingcap.com/blog/tidb-source-code-reading-7" target="_blank" rel="noopener noreffer">TiDB 源码阅读系列文章（七）基于规则的优化 | PingCAP</a></li>
+</ul>
+</li>
+<li>
+<p>写到445的Lab3感觉需要拓展的知识点开始变得异常的多（因为这部分本身的比较广泛，前面的bpm和hash index都比较窄和单一），实验指导书看了一半就附带被推动着看了好几篇有关火山模型和向量化处理的文章（主要是工位上只能看这些，知乎那两篇确实质量很高，看完收获很大），和之前在牛客上认识，现在在2012实验室做db的朋友摸鱼聊天，看他解决bug的同时发现指令流水线，内存对齐，编译链接，并行计算这些计算机架构|操作系统的知识其实在这种底层的领域会不停的碰到，有一个扎实的基础会加快你发现bug原因的速度，看来当时的量化方法，csapp的知识不能再吃灰了，有时间还是得补一下自己的基础</p>
+</li>
+</ul>
+]]></description>
+</item>
+</channel>
+</rss>
