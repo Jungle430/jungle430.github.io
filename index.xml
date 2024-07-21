@@ -241,16 +241,12 @@
 </ul>
 <h2 id="尾巴">尾巴</h2>
 <ul>
-<li>
-<p>留两篇文章下周工位摸鱼读（又该申请权限力）</p>
+<li>留一篇文章下周工位摸鱼读（又该申请权限力）
 <ul>
-<li><a href="https://link.zhihu.com/?target=https%3A//cn.pingcap.com/blog/tidb-source-code-reading-7" target="_blank" rel="noopener noreffer">TiDB 源码阅读系列文章（七）基于规则的优化 | PingCAP</a></li>
 <li><a href="https://link.zhihu.com/?target=https%3A//cn.pingcap.com/blog/tidb-source-code-reading-7" target="_blank" rel="noopener noreffer">TiDB 源码阅读系列文章（七）基于规则的优化 | PingCAP</a></li>
 </ul>
 </li>
-<li>
-<p>写到445的Lab3感觉需要拓展的知识点开始变得异常的多（因为这部分本身的比较广泛，前面的bpm和hash index都比较窄和单一），实验指导书看了一半就附带被推动着看了好几篇有关火山模型和向量化处理的文章（主要是工位上只能看这些，知乎那两篇确实质量很高，看完收获很大），和之前在牛客上认识，现在在2012实验室做db的朋友摸鱼聊天，看他解决bug的同时发现指令流水线，内存对齐，编译链接，并行计算这些计算机架构|操作系统的知识其实在这种底层的领域会不停的碰到，有一个扎实的基础会加快你发现bug原因的速度，看来当时的量化方法，csapp的知识不能再吃灰了，有时间还是得补一下自己的基础</p>
-</li>
+<li>写到445的Lab3感觉需要拓展的知识点开始变得异常的多（因为这部分本身的比较广泛，前面的bpm和hash index都比较窄和单一），实验指导书看了一半就附带被推动着看了好几篇有关火山模型和向量化处理的文章（主要是工位上只能看这些，知乎那两篇确实质量很高，看完收获很大），和之前在牛客上认识，现在在2012实验室做db的朋友摸鱼聊天，看他解决bug的同时发现指令流水线，内存对齐，编译链接，并行计算这些计算机架构|操作系统的知识其实在这种底层的领域会不停的碰到，有一个扎实的基础会加快你发现bug原因的速度，看来当时的量化方法，csapp的知识不能再吃灰了，有时间还是得补一下自己的基础</li>
 </ul>
 ]]></description>
 </item>
