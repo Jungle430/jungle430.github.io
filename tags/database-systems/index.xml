@@ -4,7 +4,110 @@
         <link>https://Jungle430.github.io/tags/database-systems/</link>
         <description>Database Systems - 标签 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 21 Jul 2024 01:18:11 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sat, 24 Aug 2024 21:18:50 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/tags/database-systems/" rel="self" type="application/rss+xml" /><item>
+    <title>What is LSM, and Why LSM?</title>
+    <link>https://Jungle430.github.io/posts/mini-lsm/introduction/</link>
+    <pubDate>Sat, 24 Aug 2024 21:18:50 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/mini-lsm/introduction/</guid>
+    <description><![CDATA[<h2 id="what-is-lsm-and-why-lsm">What is LSM, and Why LSM?</h2>
+<ul>
+<li>
+<p>本文章是对LSM的基本介绍</p>
+</li>
+<li>
+<p>LSM trees全称为Log-structured merge trees，是一种用于KV存储引擎的数据结构，它被广泛应用于分布式存储系统</p>
+</li>
+<li>
+<p>使用其的工业产品</p>
+<ul>
+<li><a href="https://www.pingcap.com/" target="_blank" rel="noopener noreffer">TiDB</a> and <a href="https://www.cockroachlabs.com/" target="_blank" rel="noopener noreffer">CockroachDB</a></li>
+<li><a href="http://rocksdb.org/" target="_blank" rel="noopener noreffer">RocksDB</a>, based on <a href="https://github.com/google/leveldb" target="_blank" rel="noopener noreffer">LevelDB</a></li>
+</ul>
+</li>
+<li>
+<p>LSM tree是一种append-friendly data structure，和其他的KV存储引擎底层的数据结构，比如RB-Tree and B-Tree最大的不同就是当更改数据的时候，RB-Tree and B-Tree需要在内存或者磁盘把原有数据进行修改，但是对于LSM tree来说上面的修改操作从之前的同步操作改成了lazily applied to the storage，引擎可以一次性批量将前面修改数据的操作处理成SST (sorted string table) files，然后再将其写入磁盘（这个处理的速度要比前面的RB-Tree and B-Tree快得多，顺序追加日志要比查找到值再改快得多），一旦写入磁盘，引擎将不再直接修改它们，只需要后台的任务定时将以进行compaction即可</p>
+</li>
+<li>
+<p>这种架构上的设计让LSM trees易于使用</p>
+<ul>
+<li>数据在持久存储里面是不可变的，并发控制的问题因为这个变得简单，而且compaction的任务可以交给远程的服务器去做，这样的架构也非常适合现在的云原生（存储和compaction完全可以派发给不同的机器）</li>
+<li>引擎的读和写的性能可以通过调整compaction算法/算法的参数来进行变化，这样可以让引擎适应多种不同的情境</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<figure><a class="lightgallery" href="/img/mini-lsm/lsm-structure.jpeg" title="/img/mini-lsm/lsm-structure.jpeg" data-thumbnail="/img/mini-lsm/lsm-structure.jpeg" data-sub-html="<h2>lsm-structure</h2>">
+        
+    </a><figcaption class="image-caption">lsm-structure</figcaption>
+    </figure>
+</li>
+<li>
+<p>一个LSM存储引擎大致可以分为下面三个部分</p>
+<ul>
+<li>Write-ahead log to persist temporary data for recovery.</li>
+<li>SSTs on the disk to maintain an LSM-tree structure.</li>
+<li>Mem-tables in memory for batching small writes.</li>
+</ul>
+</li>
+<li>
+<p>一个存储引擎应该提供下面四个接口</p>
+<ul>
+<li><code>Put(key, value)</code>: store a key-value pair in the LSM tree.</li>
+<li><code>Delete(key)</code>: remove a key and its corresponding value.</li>
+<li><code>Get(key)</code>: get the value corresponding to a key.</li>
+<li><code>Scan(range)</code>: get a range of key-value pairs.</li>
+</ul>
+</li>
+<li>
+<p>为了保证持久化还会有一个接口</p>
+<ul>
+<li><code>Sync()</code>: ensure all the operations before <code>sync</code> are persisted to the disk.</li>
+</ul>
+</li>
+<li>
+<p>一些引擎会将<code>Put</code>和<code>Write</code>的操作组合起来处理，称为<code>WriteBatch</code></p>
+</li>
+<li>
+<p>本教程中LSM的压缩算法选用leveled compaction algorithm，在工业界也很常用</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>Write Path
+<figure><a class="lightgallery" href="/img/mini-lsm/write-path.jpeg" title="/img/mini-lsm/write-path.jpeg" data-thumbnail="/img/mini-lsm/write-path.jpeg" data-sub-html="<h2>write-path</h2>">
+        
+    </a><figcaption class="image-caption">write-path</figcaption>
+    </figure></li>
+<li>The write path of LSM contains four steps:
+<ul>
+<li>Write the key-value pair to the write-ahead log so that it can be recovered after the storage engine crashes.</li>
+<li>Write the key-value pair to memtable. After (1) and (2) are completed, we can notify the user that the write operation is completed.</li>
+<li>(In the background) When a mem-table is full, we will freeze them into immutable mem-tables and flush them to the disk as SST files in the background.</li>
+<li>(In the background) The engine will compact some files in some levels into lower levels to maintain a good shape for the LSM tree so that the read amplification is low.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Read Path
+<figure><a class="lightgallery" href="/img/mini-lsm/read-path.jpeg" title="/img/mini-lsm/read-path.jpeg" data-thumbnail="/img/mini-lsm/read-path.jpeg" data-sub-html="<h2>read-path</h2>">
+        
+    </a><figcaption class="image-caption">read-path</figcaption>
+    </figure></p>
+</li>
+<li>
+<p>When we want to read a key</p>
+<ul>
+<li>We will first probe all the mem-tables from the latest to the oldest.</li>
+<li>If the key is not found, we will then search the entire LSM tree containing SSTs to find the data.</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>数据库SQL引擎基础(OceanBase-MiniOB)</title>
     <link>https://Jungle430.github.io/posts/database/the_foundation_of_the_database_sql_engine/</link>
     <pubDate>Sun, 21 Jul 2024 01:18:11 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/database/the_foundation_of_the_database_sql_engine/</guid>
@@ -1662,9 +1765,9 @@
     </figure>
 </li>
 <li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png" title="/img/CMU 15-445 Database Systems/chapter19-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-9.png" data-sub-html="<h2>用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</h2>">
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png" title="/img/CMU 15-445 Database Systems/chapter19-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-9.png" data-sub-html="<h2>用位图表明那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</h2>">
         
-    </a><figcaption class="image-caption">用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</figcaption>
+    </a><figcaption class="image-caption">用位图表明那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</figcaption>
     </figure>
 </li>
 <li>
@@ -2222,81 +2325,6 @@ new ones.</li>
 <li>Deadlock prevention</li>
 </ul>
 </li>
-</ul>
-]]></description>
-</item>
-<item>
-    <title>CMU 15-445 Lecture #16: Concurrency Control Theory</title>
-    <link>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter16/</link>
-    <pubDate>Mon, 15 Apr 2024 16:04:09 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/cmu-15-445-database-systems/chapter16/</guid>
-    <description><![CDATA[<h1 id="cmu-15-445-database-systems">CMU 15-445 Database Systems</h1>
-<h2 id="lecture-16-concurrency-control-theory">Lecture #16: Concurrency Control Theory</h2>
-<h3 id="motivation">Motivation</h3>
-<ul>
-<li>Lost Update Problem (Concurrency Control):数据竞争</li>
-<li>Durability Problem (Recovery):故障恢复</li>
-</ul>
-<h3 id="transactions">Transactions</h3>
-<ul>
-<li>
-<p>特点：ACID</p>
-</li>
-<li>
-<p>Atomicity: Atomicity ensures that either all actions in the transaction happen, or none happen.</p>
-</li>
-<li>
-<p>Consistency: If each transaction is consistent and the database is consistent at the beginning of the transaction, then the database is guaranteed to be consistent when the transaction completes. Data is consistent if it satisfies all validation rules such as constraints, cascades and triggers.</p>
-</li>
-<li>
-<p>Isolation: Isolation means that when a transaction executes, it should have the illusion that it is isolated from other transactions. Isolation ensures that concurrent execution of transactions should have the same resulting database state as a sequential execution of the transactions.</p>
-</li>
-<li>
-<p>Durability: If a transaction commits, then its effects on the database should persist.</p>
-</li>
-</ul>
-<h3 id="acid-atomicity">ACID: Atomicity</h3>
-<ul>
-<li>
-<p>Approach #1: Logging:常用的方法就是记日至，典型的就是undo log，日志也能提交性能（异步刷磁盘）</p>
-</li>
-<li>
-<p>Approach #2: Shadow Paging:备份自己改的那些页</p>
-</li>
-</ul>
-<h3 id="acid-consistency">ACID: Consistency</h3>
-<ul>
-<li>后面的事务能看见前面事务的变动</li>
-<li>业务的一致性是后端程序员保证的</li>
-</ul>
-<h3 id="acid-isolation">ACID: Isolation</h3>
-<ul>
-<li>好像就我一个人在用数据库</li>
-<li>但是实际上是好多txn在一起跑</li>
-<li>这边也是两大流派
-<ul>
-<li>悲观控制</li>
-<li>乐观控制+回滚</li>
-</ul>
-</li>
-<li>三种冲突
-<ul>
-<li>R-W</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter16-1.png" title="/img/CMU 15-445 Database Systems/chapter16-1.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter16-1.png" data-sub-html="<h2>R-W也叫不可重复读</h2>">
-        
-    </a><figcaption class="image-caption">R-W也叫不可重复读</figcaption>
-    </figure></li>
-<li>W-R</li>
-<li><figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter16-2.png" title="/img/CMU 15-445 Database Systems/chapter16-2.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter16-2.png" data-sub-html="<h2>W-R也叫脏读</h2>">
-        
-    </a><figcaption class="image-caption">W-R也叫脏读</figcaption>
-    </figure></li>
-<li>W-W</li>
-</ul>
-</li>
-</ul>
-<h3 id="acid-durability">ACID: Durability</h3>
-<ul>
-<li>一旦commit，必须保证持久化到磁盘上面</li>
 </ul>
 ]]></description>
 </item>

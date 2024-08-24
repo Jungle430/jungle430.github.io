@@ -4,7 +4,110 @@
         <link>https://Jungle430.github.io/categories/database/</link>
         <description>Database - 分类 - Jungle&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>junglece430@gmail.com (Jungle)</managingEditor>
-            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sun, 21 Jul 2024 01:18:11 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/database/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>junglece430@gmail.com (Jungle)</webMaster><lastBuildDate>Sat, 24 Aug 2024 21:18:50 &#43;0800</lastBuildDate><atom:link href="https://Jungle430.github.io/categories/database/" rel="self" type="application/rss+xml" /><item>
+    <title>What is LSM, and Why LSM?</title>
+    <link>https://Jungle430.github.io/posts/mini-lsm/introduction/</link>
+    <pubDate>Sat, 24 Aug 2024 21:18:50 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/mini-lsm/introduction/</guid>
+    <description><![CDATA[<h2 id="what-is-lsm-and-why-lsm">What is LSM, and Why LSM?</h2>
+<ul>
+<li>
+<p>本文章是对LSM的基本介绍</p>
+</li>
+<li>
+<p>LSM trees全称为Log-structured merge trees，是一种用于KV存储引擎的数据结构，它被广泛应用于分布式存储系统</p>
+</li>
+<li>
+<p>使用其的工业产品</p>
+<ul>
+<li><a href="https://www.pingcap.com/" target="_blank" rel="noopener noreffer">TiDB</a> and <a href="https://www.cockroachlabs.com/" target="_blank" rel="noopener noreffer">CockroachDB</a></li>
+<li><a href="http://rocksdb.org/" target="_blank" rel="noopener noreffer">RocksDB</a>, based on <a href="https://github.com/google/leveldb" target="_blank" rel="noopener noreffer">LevelDB</a></li>
+</ul>
+</li>
+<li>
+<p>LSM tree是一种append-friendly data structure，和其他的KV存储引擎底层的数据结构，比如RB-Tree and B-Tree最大的不同就是当更改数据的时候，RB-Tree and B-Tree需要在内存或者磁盘把原有数据进行修改，但是对于LSM tree来说上面的修改操作从之前的同步操作改成了lazily applied to the storage，引擎可以一次性批量将前面修改数据的操作处理成SST (sorted string table) files，然后再将其写入磁盘（这个处理的速度要比前面的RB-Tree and B-Tree快得多，顺序追加日志要比查找到值再改快得多），一旦写入磁盘，引擎将不再直接修改它们，只需要后台的任务定时将以进行compaction即可</p>
+</li>
+<li>
+<p>这种架构上的设计让LSM trees易于使用</p>
+<ul>
+<li>数据在持久存储里面是不可变的，并发控制的问题因为这个变得简单，而且compaction的任务可以交给远程的服务器去做，这样的架构也非常适合现在的云原生（存储和compaction完全可以派发给不同的机器）</li>
+<li>引擎的读和写的性能可以通过调整compaction算法/算法的参数来进行变化，这样可以让引擎适应多种不同的情境</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<figure><a class="lightgallery" href="/img/mini-lsm/lsm-structure.jpeg" title="/img/mini-lsm/lsm-structure.jpeg" data-thumbnail="/img/mini-lsm/lsm-structure.jpeg" data-sub-html="<h2>lsm-structure</h2>">
+        
+    </a><figcaption class="image-caption">lsm-structure</figcaption>
+    </figure>
+</li>
+<li>
+<p>一个LSM存储引擎大致可以分为下面三个部分</p>
+<ul>
+<li>Write-ahead log to persist temporary data for recovery.</li>
+<li>SSTs on the disk to maintain an LSM-tree structure.</li>
+<li>Mem-tables in memory for batching small writes.</li>
+</ul>
+</li>
+<li>
+<p>一个存储引擎应该提供下面四个接口</p>
+<ul>
+<li><code>Put(key, value)</code>: store a key-value pair in the LSM tree.</li>
+<li><code>Delete(key)</code>: remove a key and its corresponding value.</li>
+<li><code>Get(key)</code>: get the value corresponding to a key.</li>
+<li><code>Scan(range)</code>: get a range of key-value pairs.</li>
+</ul>
+</li>
+<li>
+<p>为了保证持久化还会有一个接口</p>
+<ul>
+<li><code>Sync()</code>: ensure all the operations before <code>sync</code> are persisted to the disk.</li>
+</ul>
+</li>
+<li>
+<p>一些引擎会将<code>Put</code>和<code>Write</code>的操作组合起来处理，称为<code>WriteBatch</code></p>
+</li>
+<li>
+<p>本教程中LSM的压缩算法选用leveled compaction algorithm，在工业界也很常用</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>Write Path
+<figure><a class="lightgallery" href="/img/mini-lsm/write-path.jpeg" title="/img/mini-lsm/write-path.jpeg" data-thumbnail="/img/mini-lsm/write-path.jpeg" data-sub-html="<h2>write-path</h2>">
+        
+    </a><figcaption class="image-caption">write-path</figcaption>
+    </figure></li>
+<li>The write path of LSM contains four steps:
+<ul>
+<li>Write the key-value pair to the write-ahead log so that it can be recovered after the storage engine crashes.</li>
+<li>Write the key-value pair to memtable. After (1) and (2) are completed, we can notify the user that the write operation is completed.</li>
+<li>(In the background) When a mem-table is full, we will freeze them into immutable mem-tables and flush them to the disk as SST files in the background.</li>
+<li>(In the background) The engine will compact some files in some levels into lower levels to maintain a good shape for the LSM tree so that the read amplification is low.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>Read Path
+<figure><a class="lightgallery" href="/img/mini-lsm/read-path.jpeg" title="/img/mini-lsm/read-path.jpeg" data-thumbnail="/img/mini-lsm/read-path.jpeg" data-sub-html="<h2>read-path</h2>">
+        
+    </a><figcaption class="image-caption">read-path</figcaption>
+    </figure></p>
+</li>
+<li>
+<p>When we want to read a key</p>
+<ul>
+<li>We will first probe all the mem-tables from the latest to the oldest.</li>
+<li>If the key is not found, we will then search the entire LSM tree containing SSTs to find the data.</li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
     <title>数据库SQL引擎基础(OceanBase-MiniOB)</title>
     <link>https://Jungle430.github.io/posts/database/the_foundation_of_the_database_sql_engine/</link>
     <pubDate>Sun, 21 Jul 2024 01:18:11 &#43;0800</pubDate><author>junglece430@gmail.com (Jungle)</author><guid>https://Jungle430.github.io/posts/database/the_foundation_of_the_database_sql_engine/</guid>

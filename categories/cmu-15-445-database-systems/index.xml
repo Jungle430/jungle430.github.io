@@ -1418,9 +1418,9 @@
     </figure>
 </li>
 <li>
-<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png" title="/img/CMU 15-445 Database Systems/chapter19-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-9.png" data-sub-html="<h2>用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</h2>">
+<figure><a class="lightgallery" href="/img/CMU%2015-445%20Database%20Systems/chapter19-9.png" title="/img/CMU 15-445 Database Systems/chapter19-9.png" data-thumbnail="/img/CMU 15-445 Database Systems/chapter19-9.png" data-sub-html="<h2>用位图表明那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</h2>">
         
-    </a><figcaption class="image-caption">用位图表面那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</figcaption>
+    </a><figcaption class="image-caption">用位图表明那些页被更新过，只扫被更新过的页，这样可以减少GC的压力</figcaption>
     </figure>
 </li>
 <li>
@@ -2013,7 +2013,7 @@ new ones.</li>
 <h3 id="acid-atomicity">ACID: Atomicity</h3>
 <ul>
 <li>
-<p>Approach #1: Logging:常用的方法就是记日至，典型的就是undo log，日志也能提交性能（异步刷磁盘）</p>
+<p>Approach #1: Logging:常用的方法就是记日志，典型的就是undo log，日志也能提交性能（异步刷磁盘）</p>
 </li>
 <li>
 <p>Approach #2: Shadow Paging:备份自己改的那些页</p>
